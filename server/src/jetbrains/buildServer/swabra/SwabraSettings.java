@@ -32,18 +32,25 @@ import jetbrains.buildServer.serverSide.ProjectManager;
  * Time: 15:20:43
  */
 public class SwabraSettings {
-  public SwabraSettings(@NotNull final PagePlaces pagePlaces, @NotNull final ProjectManager projectManager) {
-    List<String> supportedRunTypes = Arrays.asList("Ant", "simpleRunner", "rcodedup", "Duplicator", "FxCop",
-      "Inspection", "Ipr", "Maven2", "MSBuild", "NAnt", "rake-runner", "sln2003", "sln2005", "sln2008");
+  private List<String> mySupportedRunTypes = Arrays.asList("Ant", "simpleRunner");
+  private final PagePlaces myPagePlaces;
+  private final ProjectManager myProjectManager;
 
-    final EditBuildRunnerSettingsExtension editSettingsExtension =
-      new EditBuildRunnerSettingsExtension(pagePlaces, supportedRunTypes);
+  public SwabraSettings(@NotNull final PagePlaces pagePlaces, @NotNull final ProjectManager projectManager) {
+    myPagePlaces = pagePlaces;
+    myProjectManager = projectManager;
+  }
+
+  public void setSupportedRunTypes(final List<String> supportedRunTypes) {
+    mySupportedRunTypes = supportedRunTypes;
+  }
+
+  public void registerExtensions() {
+    final EditBuildRunnerSettingsExtension editSettingsExtension = new EditBuildRunnerSettingsExtension(myPagePlaces, mySupportedRunTypes);
     editSettingsExtension.setPluginName("swabra");
     editSettingsExtension.setIncludeUrl("swabraSettings.jsp");
     editSettingsExtension.register();
-
-    final ViewBuildRunnerSettingsExtension viewSettingsExtension =
-      new ViewBuildRunnerSettingsExtension(projectManager, pagePlaces, supportedRunTypes);
+    final ViewBuildRunnerSettingsExtension viewSettingsExtension = new ViewBuildRunnerSettingsExtension(myProjectManager, myPagePlaces, mySupportedRunTypes);
     viewSettingsExtension.setPluginName("swabra");
     viewSettingsExtension.setIncludeUrl("viewSwabraSettings.jsp");
     viewSettingsExtension.register();

@@ -3,5 +3,24 @@
 
 <beans default-autowire="constructor">
   <bean id="testReportParserPluginSettings"
-        class="jetbrains.buildServer.swabra.SwabraSettings"/>
+        class="jetbrains.buildServer.swabra.SwabraSettings" init-method="registerExtensions">
+     <property name="supportedRunTypes">
+       <list>
+         <value>simpleRunner</value>
+         <value>Ant</value>
+         <value>rcodedup</value>
+         <value>Duplicator</value>
+         <value>FxCop</value>
+         <value>Inspection</value>
+         <value>Ipr</value>
+         <value>Maven2</value>
+         <value>MSBuild</value>
+         <value>NAnt</value>
+         <value>rake-runner</value>
+         <value>sln2003</value>
+         <value>sln2005</value>
+         <value>sln2008</value>
+       </list>
+     </property>
+  </bean>
 </beans>
