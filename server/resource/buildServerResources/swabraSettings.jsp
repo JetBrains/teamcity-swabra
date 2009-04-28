@@ -7,7 +7,7 @@
 <jsp:useBean id="swabraModes" scope="request" class="jetbrains.buildServer.swabra.Modes"/>
 
 <c:set var="displaySwabraSettings"
-       value="${not empty propertiesBean.properties['swabra.mode'] ? true : false}"/>
+       value="${propertiesBean.properties['swabra.mode'] == 'swabra.before.build' ? true : false}"/>
 
 <l:settingsGroup title="Swabra">
 
@@ -16,12 +16,12 @@
     <td>
       <c:set var="onchange">
         var selectedValue = this.options[this.selectedIndex].value;
-        if (selectedValue == '') {
-        BS.Util.hide($('swabra.verbose.container'));
-        } else {
+        if (selectedValue == 'swabra.before.build') {
         BS.Util.show($('swabra.verbose.container'));
+        } else {
+        BS.Util.hide($('swabra.verbose.container'));
         }
-        $('swabra.verbose.container').disabled = (selectedValue == '');
+        $('swabra.verbose.container').disabled = (selectedValue != 'swabra.before.build');
         BS.MultilineProperties.updateVisible();
       </c:set>
       <props:selectProperty name="swabra.mode"

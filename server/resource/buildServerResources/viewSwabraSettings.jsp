@@ -5,7 +5,7 @@
 <div class="parameter">
   Swabra:
   <c:choose>
-    <c:when test="${empty propertiesBean.properties['swabra.enabled']}">
+    <c:when test="${empty propertiesBean.properties['swabra.mode']}">
       <strong>disabled</strong>
     </c:when>
     <c:otherwise>
@@ -13,3 +13,28 @@
     </c:otherwise>
   </c:choose>
 </div>
+
+<c:choose>
+  <c:when test="${not empty propertiesBean.properties['swabra.mode']}">
+    <div class="parameter">
+      Swabra mode: <props:displayValue name="swabra.mode"
+                                       emptyValue="none specified"/>
+    </div>
+  </c:when>
+</c:choose>
+
+<c:choose>
+  <c:when test="${propertiesBean.properties['swabra.mode'] == 'swabra.before.build'}">
+    <div class="parameter">
+      Verbose output:
+      <c:choose>
+        <c:when test="${propertiesBean.properties['swabra.verbose']}">
+          <strong>enabled</strong>
+        </c:when>
+        <c:otherwise>
+          <strong>disabled</strong>
+        </c:otherwise>
+      </c:choose>
+    </div>
+  </c:when>
+</c:choose>

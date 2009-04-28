@@ -65,6 +65,7 @@ public class Swabra extends AgentLifeCycleAdapter {
     final Map<String, String> runnerParams = runningBuild.getRunnerParameters();
     myLogger = runningBuild.getBuildLogger();
     myCheckoutDir = runningBuild.getCheckoutDirectory();
+    myVerbose = isVerbose(runnerParams);
     final String mode = getSwabraMode(runnerParams);
     try {
       if (!isEnabled(mode)) {
@@ -76,13 +77,13 @@ public class Swabra extends AgentLifeCycleAdapter {
       if (needFullCleanup(myMode) || runningBuild.isCleanBuild()) {
         // TODO: may be ask for clean build
         if (!FileUtil.delete(runningBuild.getCheckoutDirectory())) {
-          LOGGER.debug("Unable to remove checkout directory on swabra work start");
+          warning("Unable to remove checkout directory on swabra work start");
         }
         return;
       }
       if (BEFORE_BUILD.equals(mode) && !AFTER_BUILD.equals(myMode)) {
         message("Previous build garbage cleanup is performed before build");
-        collectGarbage(true); // TODO: pass verbose option
+        collectGarbage(myVerbose);
       } else if (AFTER_BUILD.equals(mode) && BEFORE_BUILD.equals(myMode)) {
         // mode setting changed from "before build" to "after build"
         collectGarbage(false);
@@ -96,7 +97,7 @@ public class Swabra extends AgentLifeCycleAdapter {
   public void buildFinished(@NotNull final BuildFinishedStatus buildStatus) {
     if (AFTER_BUILD.equals(myMode)) {
       message("Build garbage cleanup is performed after build");
-      collectGarbage(true); // TODO: pass verbose option
+      collectGarbage(myVerbose);
     }
   }
 
@@ -104,6 +105,14 @@ public class Swabra extends AgentLifeCycleAdapter {
     if (myCheckoutDir == null || !myCheckoutDir.isDirectory()) return;
     collectGarbage(myCheckoutDir);
     String target = null;
+    if (verbose) {
+      logTotals(target);
+    }
+    myAppeared.clear();
+    myModified.clear();
+  }
+
+  private void logTotals(String target) {
     if (myAppeared.size() > 0) {
       target = "Build garbage";
       myLogger.targetStarted(target);
@@ -124,8 +133,6 @@ public class Swabra extends AgentLifeCycleAdapter {
     if (target == null) {
       message("No garbage or modified files detected");
     }
-    myAppeared.clear();
-    myModified.clear();
   }
 
   private void collectGarbage(@NotNull final File dir) {
