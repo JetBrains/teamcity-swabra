@@ -17,6 +17,7 @@
 package jetbrains.buildServer.swabra;
 
 import jetbrains.buildServer.agent.SimpleBuildLogger;
+import jetbrains.buildServer.agent.BuildProgressLogger;
 import org.jetbrains.annotations.NotNull;
 
 /**

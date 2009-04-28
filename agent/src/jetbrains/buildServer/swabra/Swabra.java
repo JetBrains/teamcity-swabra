@@ -44,6 +44,7 @@ public class Swabra extends AgentLifeCycleAdapter {
   private BuildProgressLogger myLogger;
   private File myCheckoutDir;
   private String myMode;
+  private boolean myVerbose;
 
   private final List<File> myAppeared = new ArrayList<File>();
   private final List<File> myModified = new ArrayList<File>();
@@ -66,13 +67,20 @@ public class Swabra extends AgentLifeCycleAdapter {
     myCheckoutDir = runningBuild.getCheckoutDirectory();
     final String mode = getSwabraMode(runnerParams);
     try {
-      if (!isEnabled(mode)) return;
-      if (needFullCleanup(myMode) || runningBuild.isCleanBuild()) {
-        FileUtil.delete(runningBuild.getCheckoutDirectory()); // TODO: may be ask for clean build
-        myFiles.clear();
+      if (!isEnabled(mode)) {
+        if (myFiles.size() > 0) {
+          myFiles.clear();
+        }
         return;
       }
-      if (BEFORE_BUILD.equals(mode)) {
+      if (needFullCleanup(myMode) || runningBuild.isCleanBuild()) {
+        // TODO: may be ask for clean build
+        if (!FileUtil.delete(runningBuild.getCheckoutDirectory())) {
+          LOGGER.debug("Unable to remove checkout directory on swabra work start");
+        }
+        return;
+      }
+      if (BEFORE_BUILD.equals(mode) && !AFTER_BUILD.equals(myMode)) {
         message("Previous build garbage cleanup is performed before build");
         collectGarbage(true); // TODO: pass verbose option
       } else if (AFTER_BUILD.equals(mode) && BEFORE_BUILD.equals(myMode)) {
@@ -84,7 +92,8 @@ public class Swabra extends AgentLifeCycleAdapter {
     }
   }
 
-  public void beforeBuildFinished(@NotNull final BuildFinishedStatus buildStatus) {
+//  public void beforeBuildFinish(@NotNull final BuildFinishedStatus buildStatus) {
+  public void buildFinished(@NotNull final BuildFinishedStatus buildStatus) {
     if (AFTER_BUILD.equals(myMode)) {
       message("Build garbage cleanup is performed after build");
       collectGarbage(true); // TODO: pass verbose option
@@ -145,6 +154,7 @@ public class Swabra extends AgentLifeCycleAdapter {
 
   public void beforeRunnerStart(@NotNull final AgentRunningBuild runningBuild) {
     if (!isEnabled(myMode)) return;
+    myFiles.clear();
     saveState(myCheckoutDir);
   }
 
@@ -152,13 +162,14 @@ public class Swabra extends AgentLifeCycleAdapter {
     final File[] files = dir.listFiles();
     if (files == null || files.length == 0) return;
     for (File file : files) {
-      final FileInfo oldFileInfo = myFiles.get(file);
-      final long newLastModified = file.lastModified();
-      if (oldFileInfo == null) {
-        myFiles.put(file, new FileInfo(newLastModified));
-      } else if (newLastModified > oldFileInfo.getLastModified()) {
-        oldFileInfo.setLastModified(newLastModified);
-      }
+        myFiles.put(file, new FileInfo(file.lastModified()));
+//      final FileInfo oldFileInfo = myFiles.get(file);
+//      final long newLastModified = file.lastModified();
+//      if (oldFileInfo == null) {
+//        myFiles.put(file, new FileInfo(newLastModified));
+//      } else if (newLastModified > oldFileInfo.getLastModified()) {
+//        oldFileInfo.setLastModified(newLastModified);
+//      }
       if (file.isDirectory()) {
         saveState(file);
       }

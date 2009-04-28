@@ -371,6 +371,8 @@
     <pathelement location="${agent.testoutput.dir}"/>
     <path refid="library.jmock.classpath"/>
     <path refid="library.log4j.classpath"/>
+    <pathelement location="${common.output.dir}"/>
+    <pathelement location="${common.testoutput.dir}"/>
   </path>
   
   <path id="tests.runtime.module.classpath">
@@ -406,7 +408,7 @@
   
   <target name="compile.module.tests" depends="compile.module.tests.production,compile.module.tests.tests" description="Compile module tests"/>
   
-  <target name="compile.module.tests.production" depends="compile.module.agent" description="Compile module tests; production classes"/>
+  <target name="compile.module.tests.production" depends="compile.module.agent,compile.module.common" description="Compile module tests; production classes"/>
   
   <target name="compile.module.tests.tests" depends="compile.module.tests.production" description="compile module tests; test classes" unless="skip.tests">
     <mkdir dir="${tests.testoutput.dir}"/>

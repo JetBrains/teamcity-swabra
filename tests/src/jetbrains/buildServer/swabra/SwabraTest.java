@@ -32,6 +32,8 @@ import jetbrains.buildServer.agent.*;
 import jetbrains.buildServer.TempFiles;
 import jetbrains.buildServer.util.EventDispatcher;
 import jetbrains.buildServer.util.FileUtil;
+import static jetbrains.buildServer.swabra.SwabraUtil.*;
+
 
 /**
  * User: vbedrosova
@@ -39,6 +41,10 @@ import jetbrains.buildServer.util.FileUtil;
  * Time: 15:03:19
  */
 public class SwabraTest extends TestCase {
+  private static final String BEFORE_BUILD = "beforeBuild";
+  private static final String AFTER_CHECKOUT = "afterCheckout";
+  private static final String AFTER_BUILD = "afterBuild";
+
   private File myCheckoutDir;
   private TempFiles myTempFiles;
   private Mockery myContext;
@@ -76,14 +82,18 @@ public class SwabraTest extends TestCase {
   }
 
   private String getTestDataPath(final String fileName, final String folderName) throws Exception {
+    return getTestData(fileName, folderName).getAbsolutePath();
+  }
+
+  private File getTestData(final String fileName, final String folderName) throws Exception {
     final String relativeFileName = "tests/testData" + (folderName != null ? "/" + folderName : "") + (fileName != null ? "/" + fileName : "");
     final File file1 = new File(relativeFileName);
     if (file1.exists()) {
-      return file1.getAbsolutePath();
+      return file1;
     }
     final File file2 = new File("svnrepo/swabra/" + relativeFileName);
     if (file2.exists()) {
-      return file2.getAbsolutePath();
+      return file2;
     }
     throw new FileNotFoundException("Either " + file1.getAbsolutePath() + " or file " + file2.getAbsolutePath() + " should exist.");
   }
@@ -103,8 +113,8 @@ public class SwabraTest extends TestCase {
     }
   }
 
-  private void runTest(final String fileName) throws Exception {
-    final String goldFile = getTestDataPath(fileName + ".gold", null);
+  private void runTest(final String name) throws Exception {
+    final String goldFile = getTestDataPath(name + ".gold", null);
     final String resultsFile = goldFile.replace(".gold", ".tmp");
 
     new File(resultsFile).delete();
@@ -116,9 +126,14 @@ public class SwabraTest extends TestCase {
     final AgentRunningBuild build = createAgentRunningBuild(myRunParams, myCheckoutDir, logger);
     final Swabra swabra = new Swabra(dispatcher);
 
+    FileUtil.copyDir(getTestData(name + File.separator + BEFORE_BUILD, null), myCheckoutDir);
     dispatcher.getMulticaster().buildStarted(build);
+    cleanCheckoutDir();
+    FileUtil.copyDir(getTestData(name + File.separator + AFTER_CHECKOUT, null), myCheckoutDir);
     dispatcher.getMulticaster().beforeRunnerStart(build);
     dispatcher.getMulticaster().beforeBuildFinish(BuildFinishedStatus.FINISHED_SUCCESS);
+    cleanCheckoutDir();
+    FileUtil.copyDir(getTestData(name + File.separator + AFTER_BUILD, null), myCheckoutDir);
     dispatcher.getMulticaster().buildFinished(BuildFinishedStatus.FINISHED_SUCCESS);
 
     final File goldf = new File(goldFile);
@@ -134,7 +149,17 @@ public class SwabraTest extends TestCase {
     }
   }
 
+  private void cleanCheckoutDir() {
+    final File[] files = myCheckoutDir.listFiles();
+    if (files != null && files.length != 0) {
+      for (int i = 0; i < files.length; ++i) {
+        FileUtil.delete(files[i]);
+      }
+    }
+  }
+
   public void testEmptyCheckoutDir() throws Exception {
-    runTest("a");
+    myRunParams.put(SwabraUtil.MODE, SwabraUtil.BEFORE_BUILD);
+    runTest("emptyCheckoutDir");
   }  
 }
