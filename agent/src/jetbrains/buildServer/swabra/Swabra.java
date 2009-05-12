@@ -149,7 +149,7 @@ public class Swabra extends AgentLifeCycleAdapter {
         if (!file.delete()) {
           warning("Unable to delete previous build garbage " + file.getAbsolutePath());
         }
-      } else if (file.lastModified() > info.getLastModified()) {
+      } else if (file.lastModified() > info.getLastModified()) {  //TODO: may be some other checking such as size
         myModified.add(file);
         if (file.isDirectory()) {
           //directory's content is supposed to be modified
@@ -170,13 +170,6 @@ public class Swabra extends AgentLifeCycleAdapter {
     if (files == null || files.length == 0) return;
     for (File file : files) {
         myFiles.put(file, new FileInfo(file.lastModified()));
-//      final FileInfo oldFileInfo = myFiles.get(file);
-//      final long newLastModified = file.lastModified();
-//      if (oldFileInfo == null) {
-//        myFiles.put(file, new FileInfo(newLastModified));
-//      } else if (newLastModified > oldFileInfo.getLastModified()) {
-//        oldFileInfo.setLastModified(newLastModified);
-//      }
       if (file.isDirectory()) {
         saveState(file);
       }

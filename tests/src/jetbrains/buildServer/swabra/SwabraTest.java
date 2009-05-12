@@ -32,7 +32,6 @@ import jetbrains.buildServer.agent.*;
 import jetbrains.buildServer.TempFiles;
 import jetbrains.buildServer.util.EventDispatcher;
 import jetbrains.buildServer.util.FileUtil;
-import static jetbrains.buildServer.swabra.SwabraUtil.*;
 
 
 /**
@@ -113,27 +112,49 @@ public class SwabraTest extends TestCase {
     }
   }
 
-  private void runTest(final String name) throws Exception {
-    final String goldFile = getTestDataPath(name + ".gold", null);
+  private void runTest(final String dirName, final String resultsFileName) throws Exception {
+    final String goldFile = getTestDataPath(resultsFileName + ".gold", null);
     final String resultsFile = goldFile.replace(".gold", ".tmp");
 
     new File(resultsFile).delete();
 
     final StringBuilder results = new StringBuilder();
 
-    final SimpleBuildLogger logger = new SimpleBuildLoggerMock(results);
+    final SimpleBuildLogger logger = new BuildProgressLoggerMock(results);
     final EventDispatcher<AgentLifeCycleListener> dispatcher = EventDispatcher.create(AgentLifeCycleListener.class);
     final AgentRunningBuild build = createAgentRunningBuild(myRunParams, myCheckoutDir, logger);
     final Swabra swabra = new Swabra(dispatcher);
 
-    FileUtil.copyDir(getTestData(name + File.separator + BEFORE_BUILD, null), myCheckoutDir);
+    final String checkoutDirPath = myCheckoutDir.getAbsolutePath();
+
+    FileUtil.copyDir(getTestData(dirName + File.separator + BEFORE_BUILD, null), myCheckoutDir);
+    FileUtil.delete(new File(checkoutDirPath + File.separator + ".svn"));
     dispatcher.getMulticaster().buildStarted(build);
     cleanCheckoutDir();
-    FileUtil.copyDir(getTestData(name + File.separator + AFTER_CHECKOUT, null), myCheckoutDir);
+
+    FileUtil.copyDir(getTestData(dirName + File.separator + AFTER_CHECKOUT, null), myCheckoutDir);
+    FileUtil.delete(new File(checkoutDirPath + File.separator + ".svn"));
     dispatcher.getMulticaster().beforeRunnerStart(build);
     dispatcher.getMulticaster().beforeBuildFinish(BuildFinishedStatus.FINISHED_SUCCESS);
     cleanCheckoutDir();
-    FileUtil.copyDir(getTestData(name + File.separator + AFTER_BUILD, null), myCheckoutDir);
+
+    FileUtil.copyDir(getTestData(dirName + File.separator + AFTER_BUILD, null), myCheckoutDir);
+    FileUtil.delete(new File(checkoutDirPath + File.separator + ".svn"));
+    dispatcher.getMulticaster().buildFinished(BuildFinishedStatus.FINISHED_SUCCESS);
+
+    FileUtil.copyDir(getTestData(dirName + File.separator + BEFORE_BUILD, null), myCheckoutDir);
+    FileUtil.delete(new File(checkoutDirPath + File.separator + ".svn"));
+    dispatcher.getMulticaster().buildStarted(build);
+    cleanCheckoutDir();
+
+    FileUtil.copyDir(getTestData(dirName + File.separator + AFTER_CHECKOUT, null), myCheckoutDir);
+    FileUtil.delete(new File(checkoutDirPath + File.separator + ".svn"));
+    dispatcher.getMulticaster().beforeRunnerStart(build);
+    dispatcher.getMulticaster().beforeBuildFinish(BuildFinishedStatus.FINISHED_SUCCESS);
+    cleanCheckoutDir();
+
+    FileUtil.copyDir(getTestData(dirName + File.separator + AFTER_BUILD, null), myCheckoutDir);
+    FileUtil.delete(new File(checkoutDirPath + File.separator + ".svn"));
     dispatcher.getMulticaster().buildFinished(BuildFinishedStatus.FINISHED_SUCCESS);
 
     final File goldf = new File(goldFile);
@@ -158,8 +179,27 @@ public class SwabraTest extends TestCase {
     }
   }
 
-  public void testEmptyCheckoutDir() throws Exception {
+  public void testEmptyCheckoutDirBeforeBuild() throws Exception {
+    myRunParams.put(SwabraUtil.VERBOSE, SwabraUtil.TRUE);
     myRunParams.put(SwabraUtil.MODE, SwabraUtil.BEFORE_BUILD);
-    runTest("emptyCheckoutDir");
+    runTest("emptyCheckoutDir", "emptyCheckoutDir_b");
   }  
+
+  public void testEmptyCheckoutDirAfterBuild() throws Exception {
+    myRunParams.put(SwabraUtil.VERBOSE, SwabraUtil.TRUE);
+    myRunParams.put(SwabraUtil.MODE, SwabraUtil.AFTER_BUILD);
+    runTest("emptyCheckoutDir", "emptyCheckoutDir_a");
+  }
+
+  public void testOneFileCreatedBeforeBuild() throws Exception {
+    myRunParams.put(SwabraUtil.VERBOSE, SwabraUtil.TRUE);
+    myRunParams.put(SwabraUtil.MODE, SwabraUtil.BEFORE_BUILD);
+    runTest("oneFileCreated", "oneFileCreated_b");
+  }
+
+  public void testOneFileCreatedAfterBuild() throws Exception {
+    myRunParams.put(SwabraUtil.VERBOSE, SwabraUtil.TRUE);
+    myRunParams.put(SwabraUtil.MODE, SwabraUtil.AFTER_BUILD);
+    runTest("oneFileCreated", "oneFileCreated_a");
+  }
 }
