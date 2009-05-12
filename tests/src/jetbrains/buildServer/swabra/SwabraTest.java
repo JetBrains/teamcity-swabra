@@ -191,15 +191,15 @@ public class SwabraTest extends TestCase {
     runTest("emptyCheckoutDir", "emptyCheckoutDir_a");
   }
 
-  public void testOneFileCreatedBeforeBuild() throws Exception {
+  public void testOneCreatedOneModifiedOneNotChangedBeforeBuild() throws Exception {
     myRunParams.put(SwabraUtil.VERBOSE, SwabraUtil.TRUE);
     myRunParams.put(SwabraUtil.MODE, SwabraUtil.BEFORE_BUILD);
-    runTest("oneFileCreated", "oneFileCreated_b");
+    runTest("oneCreatedOneModifiedOneNotChanged", "oneCreatedOneModifiedOneNotChanged_b");
   }
 
-  public void testOneFileCreatedAfterBuild() throws Exception {
+  public void testOneCreatedOneModifiedOneNotChangedAfterBuild() throws Exception {
     myRunParams.put(SwabraUtil.VERBOSE, SwabraUtil.TRUE);
     myRunParams.put(SwabraUtil.MODE, SwabraUtil.AFTER_BUILD);
-    runTest("oneFileCreated", "oneFileCreated_a");
+    runTest("oneCreatedOneModifiedOneNotChanged", "oneCreatedOneModifiedOneNotChanged_a");
   }
 }
