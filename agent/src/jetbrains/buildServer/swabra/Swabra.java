@@ -149,7 +149,8 @@ public class Swabra extends AgentLifeCycleAdapter {
         if (!file.delete()) {
           warning("Unable to delete previous build garbage " + file.getAbsolutePath());
         }
-      } else if (file.lastModified() > info.getLastModified()) {  //TODO: may be some other checking such as size
+      } else if ((file.lastModified() != info.getLastModified()) ||
+                  file.length() != info.getLength()) {  //TODO: may be some other checking such as size
         myModified.add(file);
         if (file.isDirectory()) {
           //directory's content is supposed to be modified
@@ -169,7 +170,7 @@ public class Swabra extends AgentLifeCycleAdapter {
     final File[] files = dir.listFiles();
     if (files == null || files.length == 0) return;
     for (File file : files) {
-        myFiles.put(file, new FileInfo(file.lastModified()));
+        myFiles.put(file, new FileInfo(file));
       if (file.isDirectory()) {
         saveState(file);
       }
@@ -189,18 +190,20 @@ public class Swabra extends AgentLifeCycleAdapter {
   }
 
   private static final class FileInfo {
-    private long myLastModified;
+    private final long myLength;
+    private final long myLastModified;
 
-    public FileInfo(long lastModified) {
-      myLastModified = lastModified;
+    public FileInfo(File f) {
+      myLastModified = f.lastModified();
+      myLength = f.length();
     }
 
     public long getLastModified() {
       return myLastModified;
     }
 
-    public void setLastModified(long lastModified) {
-      myLastModified = lastModified;
+    public long getLength() {
+      return myLength;
     }
   }
 }
