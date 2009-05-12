@@ -1,0 +1,8 @@
+MESSAGE: Build garbage cleanup is performed after build
+TARGET STARTED: Build garbage
+MESSAGE: ##BASE_DIR##\createdFile
+TARGET FINISHED: Build garbage
+MESSAGE: Build garbage cleanup is performed after build
+TARGET STARTED: Build garbage
+MESSAGE: ##BASE_DIR##\createdFile
+TARGET FINISHED: Build garbage
