@@ -141,6 +141,7 @@ public class Swabra extends AgentLifeCycleAdapter {
     for (File file : files) {
       final FileInfo info = myFiles.get(file);
       if (info == null) {
+        System.out.println(file.getAbsolutePath() + " was added");
         myAppeared.add(file);
         if (file.isDirectory()) {
           //all directory content is supposed to be garbage
@@ -151,6 +152,10 @@ public class Swabra extends AgentLifeCycleAdapter {
         }
       } else if ((file.lastModified() != info.getLastModified()) ||
                   file.length() != info.getLength()) {  //TODO: may be some other checking such as size
+
+        System.out.println(file.getAbsolutePath() + " was modified");
+        System.out.println("prevLastMod: " + file.lastModified() + ", currLastmod: " + info.getLastModified());
+        System.out.println("prevLength: " + file.length() + ", currLength: " + info.getLength());
         myModified.add(file);
         if (file.isDirectory()) {
           //directory's content is supposed to be modified
