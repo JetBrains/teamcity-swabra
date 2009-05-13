@@ -76,7 +76,7 @@ public class Swabra extends AgentLifeCycleAdapter {
       }
       if (needFullCleanup(myMode) || runningBuild.isCleanBuild()) {
         // TODO: may be ask for clean build
-        if (!FileUtil.delete(runningBuild.getCheckoutDirectory())) {
+        if (!FileUtil.delete(myCheckoutDir)) {
           warning("Unable to remove checkout directory on swabra work start");
         }
         return;
