@@ -23,9 +23,9 @@ package jetbrains.buildServer.swabra;
  */
 import jetbrains.buildServer.agent.*;
 import jetbrains.buildServer.util.EventDispatcher;
-import jetbrains.buildServer.log.Loggers;
 import org.jetbrains.annotations.NotNull;
 import static jetbrains.buildServer.swabra.SwabraUtil.*;
+import org.apache.log4j.Logger;
 
 import java.io.File;
 import java.util.Map;
@@ -33,12 +33,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.ArrayList;
 
-import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.util.io.FileUtil;
 
 
 public class Swabra extends AgentLifeCycleAdapter {
-  public static final Logger LOGGER = Loggers.AGENT;
+  public static final Logger LOGGER = Logger.getLogger(Swabra.class);
 
   private Map<File, FileInfo> myFiles = new HashMap<File, FileInfo>();
   private BuildProgressLogger myLogger;
@@ -74,7 +73,10 @@ public class Swabra extends AgentLifeCycleAdapter {
         }
         return;
       }
-      if (needFullCleanup(myMode) || runningBuild.isCleanBuild()) {
+      if (runningBuild.isCleanBuild()) {
+        return;
+      }
+      if (needFullCleanup(myMode)) {
         // TODO: may be ask for clean build
         if (!FileUtil.delete(myCheckoutDir)) {
           warning("Unable to remove checkout directory on swabra work start");
@@ -93,7 +95,6 @@ public class Swabra extends AgentLifeCycleAdapter {
     }
   }
 
-//  public void beforeBuildFinish(@NotNull final BuildFinishedStatus buildStatus) {
   public void buildFinished(@NotNull final BuildFinishedStatus buildStatus) {
     if (AFTER_BUILD.equals(myMode)) {
       message("Build garbage cleanup is performed after build");
@@ -110,6 +111,7 @@ public class Swabra extends AgentLifeCycleAdapter {
     }
     myAppeared.clear();
     myModified.clear();
+    myFiles.clear();
   }
 
   private void logTotals(String target) {
