@@ -1,7 +1,6 @@
-MESSAGE: Build garbage cleanup is performed after build
-TARGET STARTED: Build garbage
-MESSAGE: ##BASE_DIR##\created
-TARGET FINISHED: Build garbage
-TARGET STARTED: Modified
-MESSAGE: ##BASE_DIR##\modified
-TARGET FINISHED: Modified
+ACTIVITY STARTED: Garbage clean
+ACTIVITY FINISHED: Garbage clean
+ACTIVITY STARTED: Garbage clean
+MESSAGE: Deleting ##BASE_DIR##\created
+MESSAGE: Detected modified ##BASE_DIR##\modified
+ACTIVITY FINISHED: Garbage clean

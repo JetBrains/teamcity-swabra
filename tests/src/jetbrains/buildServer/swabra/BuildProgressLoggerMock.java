@@ -70,9 +70,15 @@ public class BuildProgressLoggerMock implements BuildProgressLogger {
   }
 
   public void activityStarted(final String activityName, final String activityType) {
+    myText.append("ACTIVITY STARTED: ");
+    myText.append(activityName);
+    myText.append("\n");
   }
 
   public void activityFinished(final String activityName, final String activityType) {
+    myText.append("ACTIVITY FINISHED: ");
+    myText.append(activityName);
+    myText.append("\n");
   }
 
   public void targetStarted(final String targetName) {

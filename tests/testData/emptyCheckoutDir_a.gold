@@ -1,4 +1,6 @@
-MESSAGE: Build garbage cleanup is performed after build
+ACTIVITY STARTED: Garbage clean
 MESSAGE: No garbage or modified files detected
-MESSAGE: Build garbage cleanup is performed after build
+ACTIVITY FINISHED: Garbage clean
+ACTIVITY STARTED: Garbage clean
 MESSAGE: No garbage or modified files detected
+ACTIVITY FINISHED: Garbage clean

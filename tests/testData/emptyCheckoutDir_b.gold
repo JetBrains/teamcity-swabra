@@ -1,2 +1,3 @@
-MESSAGE: Previous build garbage cleanup is performed before build
+ACTIVITY STARTED: Garbage clean
 MESSAGE: No garbage or modified files detected
+ACTIVITY FINISHED: Garbage clean
