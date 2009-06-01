@@ -25,8 +25,8 @@ import java.io.File;
  * Date: 01.06.2009
  * Time: 15:58:12
  */
-public abstract class DirectorySnapshot {
-  public abstract void snapshot();
-  public abstract void compareAndLogChanges();
-  public abstract void drop();
+public interface DirectorySnapshot {
+  void snapshot(@NotNull final File dir, @NotNull final SwabraLogger logger, boolean verbose);
+  void collectGarbage(final File dir, @NotNull final SwabraLogger logger, boolean verbose);
+  void drop(@NotNull final File dir, @NotNull final SwabraLogger logger, boolean verbose);
 }
