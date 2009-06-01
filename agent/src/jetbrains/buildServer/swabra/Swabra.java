@@ -24,7 +24,6 @@ package jetbrains.buildServer.swabra;
 import jetbrains.buildServer.agent.*;
 import jetbrains.buildServer.util.EventDispatcher;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.NonNls;
 import static jetbrains.buildServer.swabra.SwabraUtil.*;
 import org.apache.log4j.Logger;
 
@@ -38,14 +37,8 @@ import com.intellij.openapi.util.io.FileUtil;
 
 
 public class Swabra extends AgentLifeCycleAdapter {
-  @NonNls
-  private static final String AGENT_BLOCK = "agent";
-  public static final Logger LOG = Logger.getLogger(Swabra.class);
-
-  public static final String ACTIVITY_NAME = "Garbage clean";
-
   private Map<File, FileInfo> myFiles = new HashMap<File, FileInfo>();
-  private BuildProgressLogger myLogger;
+  private SwabraLogger myLogger;
   private File myCheckoutDir;
   private String myMode;
   private boolean myVerbose;
@@ -61,25 +54,19 @@ public class Swabra extends AgentLifeCycleAdapter {
     return !isEnabled(prevMode);
   }
 
-  private static void logSettings(String mode, String checkoutDir, boolean verbose) {
-    LOG.debug("Swabra settings: mode = '" + mode +
-                "', checkoutDir = " + checkoutDir + 
-                "', verbose = '" + verbose + "'.");
-  }
-
   public Swabra(@NotNull final EventDispatcher<AgentLifeCycleListener> agentDispatcher) {
     agentDispatcher.addListener(this);
   }
 
   public void buildStarted(@NotNull final AgentRunningBuild runningBuild) {
     final Map<String, String> runnerParams = runningBuild.getRunnerParameters();
-    myLogger = runningBuild.getBuildLogger();
+    myLogger = new SwabraLogger(runningBuild.getBuildLogger(), Logger.getLogger(Swabra.class));
     myCheckoutDir = runningBuild.getCheckoutDirectory();
     myVerbose = isVerbose(runnerParams);
     final String mode = getSwabraMode(runnerParams);
     try {
       if (!isEnabled(mode)) {
-        LOG.debug("Swabra is disabled");
+        myLogger.log("Swabra is disabled", false);
         if (myFiles.size() > 0) {
           myFiles.clear();
         }
@@ -90,24 +77,24 @@ public class Swabra extends AgentLifeCycleAdapter {
         return;
       }
       if (needFullCleanup(myMode)) {
-        LOG.debug("It is the first build with Swabra turned on - need full cleanup");
+        myLogger.log("It is the first build with Swabra turned on - need full cleanup", false);
         // TODO: may be ask for clean build
         if (!FileUtil.delete(myCheckoutDir)) {
-          LOG.debug("Unable to remove checkout directory on swabra work start");
+          myLogger.log("Unable to remove checkout directory on swabra work start", false);
         }
         return;
       }
       if (BEFORE_BUILD.equals(mode)) {
         if (AFTER_BUILD.equals(myMode)) {
-          LOG.debug("Will not perform build garbage cleanup, as it occured on previous build finish");
+          myLogger.log("Will not perform build garbage cleanup, as it occured on previous build finish", false);
         } else {
-          LOG.debug("Previous build garbage cleanup is performed before build");
+          myLogger.log("Previous build garbage cleanup is performed before build", false);
           collectGarbage(myVerbose);
         }
       } else if (AFTER_BUILD.equals(mode) && BEFORE_BUILD.equals(myMode)) {
         // mode setting changed from "before build" to "after build"
-        LOG.debug("Swabra mode setting changed from \"before build\" to \"after build\", " +
-                    "need to perform build garbage clean up");
+        myLogger.log("Swabra mode setting changed from \"before build\" to \"after build\", " +
+                    "need to perform build garbage clean up", false);
         collectGarbage(false);
       }
     } finally {
@@ -118,29 +105,29 @@ public class Swabra extends AgentLifeCycleAdapter {
   public void beforeRunnerStart(@NotNull final AgentRunningBuild runningBuild) {
     if (!isEnabled(myMode)) return;
     myFiles.clear();
-    LOG.debug("Saving checkout directory state...");
+    myLogger.log("Saving checkout directory state...", false);
     saveState(myCheckoutDir);
-    LOG.debug("Finished saving checkout directory state");
+    myLogger.log("Finished saving checkout directory state", false);
   }
 
   public void buildFinished(@NotNull final BuildFinishedStatus buildStatus) {
     if (AFTER_BUILD.equals(myMode)) {
-      LOG.debug("Build garbage cleanup is performed after build");
+      myLogger.log("Build garbage cleanup is performed after build", false);
       collectGarbage(myVerbose);
     }
   }
 
   private void collectGarbage(boolean verbose) {
     if (myCheckoutDir == null || !myCheckoutDir.isDirectory()) {
-      LOG.debug("Will not collect build garbage, illegal checkout directory");
+      myLogger.log("Will not collect build garbage, illegal checkout directory", false);
       return;
     }
-    myLogger.activityStarted(ACTIVITY_NAME, AGENT_BLOCK);
+    myLogger.activityStarted();
     collectGarbage(myCheckoutDir);
     if (verbose) {
       logTotals();
     }
-    myLogger.activityFinished(ACTIVITY_NAME, AGENT_BLOCK);
+    myLogger.activityFinished();
     myAppeared.clear();
     myModified.clear();
     myFiles.clear();
@@ -158,7 +145,7 @@ public class Swabra extends AgentLifeCycleAdapter {
           collectGarbage(file);
         }
         if (!file.delete()) {
-          LOG.debug("Unable to delete previous build garbage " + file.getAbsolutePath());
+          myLogger.log("Unable to delete previous build garbage " + file.getAbsolutePath(), false);
         }
       } else if ((file.lastModified() != info.getLastModified()) ||
                   file.length() != info.getLength()) {
@@ -176,17 +163,17 @@ public class Swabra extends AgentLifeCycleAdapter {
     if (myAppeared.size() > 0) {
       prefix = "Deleting ";
       for (File file : myAppeared) {
-        message(prefix + file.getAbsolutePath());
+        myLogger.log(prefix + file.getAbsolutePath(), myVerbose);
       }
     }
     if (myModified.size() > 0) {
       prefix = "Detected modified ";
       for (File file : myModified) {
-        message(prefix + file.getAbsolutePath());
+        myLogger.log(prefix + file.getAbsolutePath(), myVerbose);
       }
     }
     if (prefix == null) {
-      message("No garbage or modified files detected");
+      myLogger.log("No garbage or modified files detected", myVerbose);
     }
   }
 
@@ -201,10 +188,10 @@ public class Swabra extends AgentLifeCycleAdapter {
     }
   }
 
-  private void message(@NotNull final String message) {
-    System.out.println(message);
-    LOG.debug(message);
-    myLogger.message(message);
+  private void logSettings(String mode, String checkoutDir, boolean verbose) {
+    myLogger.log("Swabra settings: mode = '" + mode +
+                "', checkoutDir = " + checkoutDir +
+                "', verbose = '" + verbose + "'.", false);
   }
 
   private static final class FileInfo {
