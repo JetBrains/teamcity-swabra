@@ -27,7 +27,7 @@ import org.jetbrains.annotations.NonNls;
  * Date: 01.06.2009
  * Time: 16:09:47
  */
-public class SwabraLogger {
+public final class SwabraLogger {
   @NonNls
   private static final String AGENT_BLOCK = "agent";
   public static final String ACTIVITY_NAME = "Garbage clean";

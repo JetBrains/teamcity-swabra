@@ -30,19 +30,20 @@ import java.util.ArrayList;
  * Time: 16:33:24
  */
 public class MapDirectorySnapshot implements DirectorySnapshot {
-  private Map<File, FileInfo> myFiles = new HashMap<File, FileInfo>();
+  private Map<File, FileInfo> myFiles = null;
 
   private final List<File> myAppeared = new ArrayList<File>();
   private final List<File> myModified = new ArrayList<File>();
  
   
   public void snapshot(@NotNull File dir, @NotNull SwabraLogger logger, boolean verbose) {
+    myFiles = new HashMap<File, FileInfo>();
     saveState(dir);
   }
 
   public void collectGarbage(final File dir, @NotNull final SwabraLogger logger, boolean verbose) {
-    if (dir == null || !dir.isDirectory()) {
-      logger.log("Will not collect build garbage, illegal checkout directory", false);
+    if (myFiles == null) {
+      logger.log("Unable to collect garbage, directory snapshot was not saved", false);
       return;
     }
     logger.activityStarted();
@@ -51,11 +52,18 @@ public class MapDirectorySnapshot implements DirectorySnapshot {
     logger.activityFinished();
     myAppeared.clear();
     myModified.clear();
-    myFiles.clear();
+    myFiles = null;
   }
 
-  public void drop(@NotNull File dir, @NotNull SwabraLogger logger, boolean verbose) {
-    myFiles.clear();
+  private void saveState(@NotNull final File dir) {
+    final File[] files = dir.listFiles();
+    if (files == null || files.length == 0) return;
+    for (File file : files) {
+        myFiles.put(file, new FileInfo(file));
+      if (file.isDirectory()) {
+        saveState(file);
+      }
+    }
   }
 
   private void collect(@NotNull final File dir, @NotNull SwabraLogger logger) {
@@ -82,17 +90,6 @@ public class MapDirectorySnapshot implements DirectorySnapshot {
       }
     }
   }  
-
-  private void saveState(@NotNull final File dir) {
-    final File[] files = dir.listFiles();
-    if (files == null || files.length == 0) return;
-    for (File file : files) {
-        myFiles.put(file, new FileInfo(file));
-      if (file.isDirectory()) {
-        saveState(file);
-      }
-    }
-  }
 
   private void logTotals(@NotNull SwabraLogger logger, boolean verbose) {
     String prefix = null;

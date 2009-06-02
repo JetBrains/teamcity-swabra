@@ -28,5 +28,4 @@ import java.io.File;
 public interface DirectorySnapshot {
   void snapshot(@NotNull final File dir, @NotNull final SwabraLogger logger, boolean verbose);
   void collectGarbage(final File dir, @NotNull final SwabraLogger logger, boolean verbose);
-  void drop(@NotNull final File dir, @NotNull final SwabraLogger logger, boolean verbose);
 }

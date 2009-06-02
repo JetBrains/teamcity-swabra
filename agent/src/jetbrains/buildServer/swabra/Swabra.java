@@ -29,11 +29,12 @@ import org.apache.log4j.Logger;
 
 import java.io.File;
 import java.util.Map;
+import java.util.Date;
 
 import com.intellij.openapi.util.io.FileUtil;
 
 
-public class Swabra extends AgentLifeCycleAdapter {
+public final class Swabra extends AgentLifeCycleAdapter {
   private final DirectorySnapshot myDirectorySnapshot;
   private SwabraLogger myLogger;
 
@@ -60,6 +61,7 @@ public class Swabra extends AgentLifeCycleAdapter {
     myCheckoutDir = runningBuild.getCheckoutDirectory();
     myVerbose = isVerbose(runnerParams);
     final String mode = getSwabraMode(runnerParams);
+
     try {
       if (!isEnabled(mode)) {
         myLogger.log("Swabra is disabled", false);
@@ -82,13 +84,13 @@ public class Swabra extends AgentLifeCycleAdapter {
           myLogger.log("Will not perform build garbage cleanup, as it occured on previous build finish", false);
         } else {
           myLogger.log("Previous build garbage cleanup is performed before build", false);
-          myDirectorySnapshot.collectGarbage(myCheckoutDir, myLogger, myVerbose);
+          collectGarbage(myCheckoutDir, myLogger, myVerbose);
         }
       } else if (AFTER_BUILD.equals(mode) && BEFORE_BUILD.equals(myMode)) {
         // mode setting changed from "before build" to "after build"
         myLogger.log("Swabra mode setting changed from \"before build\" to \"after build\", " +
-                    "need to perform build garbage clean up", false);
-        myDirectorySnapshot.collectGarbage(myCheckoutDir, myLogger, false);
+                    "need to perform build garbage clean up once before build", false);
+        collectGarbage(myCheckoutDir, myLogger, false);
       }
     } finally {
       myMode = mode;
@@ -97,21 +99,43 @@ public class Swabra extends AgentLifeCycleAdapter {
 
   public void beforeRunnerStart(@NotNull final AgentRunningBuild runningBuild) {
     if (!isEnabled(myMode)) return;
-    myLogger.log("Saving checkout directory state...", false);
-    myDirectorySnapshot.snapshot(myCheckoutDir, myLogger, myVerbose);
-    myLogger.log("Finished saving checkout directory state", false);
+    snapshot(myCheckoutDir, myLogger, myVerbose);
   }
 
   public void buildFinished(@NotNull final BuildFinishedStatus buildStatus) {
     if (AFTER_BUILD.equals(myMode)) {
       myLogger.log("Build garbage cleanup is performed after build", false);
-      myDirectorySnapshot.collectGarbage(myCheckoutDir, myLogger, myVerbose);
+      collectGarbage(myCheckoutDir, myLogger, myVerbose);
     }
+  }
+
+  private void snapshot(final File dir, @NotNull final SwabraLogger logger, boolean verbose) {
+    if (dir == null || !dir.isDirectory()) {
+      logger.log("Unable to save directory state, illegal checkout directory", false);
+      return;
+    }
+    myLogger.log(getTime() + ": Saving checkout directory state...", false);
+    myDirectorySnapshot.snapshot(dir, logger, verbose);
+    myLogger.log(getTime() + ": Finished saving checkout directory state", false);
+  }
+
+  private void collectGarbage(final File dir, @NotNull final SwabraLogger logger, boolean verbose) {
+    if (dir == null || !dir.isDirectory()) {
+      logger.log("Unable to collect garbage, illegal checkout directory", false);
+      return;
+    }
+    myLogger.log(getTime() + ": Collecting build garbage...", false);
+    myDirectorySnapshot.collectGarbage(dir, logger, verbose);
+    myLogger.log(getTime() + ": Finished collecting build garbage", false);
   }
 
   private void logSettings(String mode, String checkoutDir, boolean verbose) {
     myLogger.log("Swabra settings: mode = '" + mode +
                 "', checkoutDir = " + checkoutDir +
                 "', verbose = '" + verbose + "'.", false);
+  }
+
+  private long getTime() {
+    return new Date().getTime();
   }
 }
