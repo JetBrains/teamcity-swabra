@@ -44,6 +44,8 @@ public class SwabraTest extends TestCase {
   private static final String AFTER_CHECKOUT = "afterCheckout";
   private static final String AFTER_BUILD = "afterBuild";
 
+  private static final String TEST_DATA_PATH = "tests" + File.separator + "testData";
+
   private File myCheckoutDir;
   private TempFiles myTempFiles;
   private Mockery myContext;
@@ -87,6 +89,7 @@ public class SwabraTest extends TestCase {
     myContext = new JUnit4Mockery();
     myTempFiles = new TempFiles();
     myCheckoutDir = myTempFiles.createTempDir();
+    System.setProperty("agent.work.dir", myCheckoutDir.getParent());
   }
 
   @After
@@ -100,12 +103,12 @@ public class SwabraTest extends TestCase {
   }
 
   private File getTestData(final String fileName, final String folderName) throws Exception {
-    final String relativeFileName = "tests/testData" + (folderName != null ? "/" + folderName : "") + (fileName != null ? "/" + fileName : "");
+    final String relativeFileName = TEST_DATA_PATH + (folderName != null ? File.separator + folderName : "") + (fileName != null ? File.separator + fileName : "");
     final File file1 = new File(relativeFileName);
     if (file1.exists()) {
       return file1;
     }
-    final File file2 = new File("svnrepo/swabra/" + relativeFileName);
+    final File file2 = new File("svnrepo" + File.separator + "swabra" + File.separator + relativeFileName);
     if (file2.exists()) {
       return file2;
     }

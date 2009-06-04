@@ -50,50 +50,68 @@ public final class Swabra extends AgentLifeCycleAdapter {
     return !isEnabled(prevMode);
   }
 
+//  private static boolean needFullCleanup(final @NotNull File currCheckoutDir, final File prevCheckoutDir,
+//                                         final String currMode, final String prevMode) {
+//    return !isEnabled(prevMode)
+//            || AFTER_BUILD.equals(currMode) && checkoutDirChanged(currCheckoutDir, prevCheckoutDir);
+//  }
+
+  private static boolean checkoutDirChanged(final @NotNull File currCheckoutDir, final File prevCheckoutDir) {
+    return !currCheckoutDir.equals(prevCheckoutDir);
+  }
+
   public Swabra(@NotNull final EventDispatcher<AgentLifeCycleListener> agentDispatcher) {
     agentDispatcher.addListener(this);
-    myDirectorySnapshot = new MapDirectorySnapshot();
+//    myDirectorySnapshot = new MapDirectorySnapshot();
+    myDirectorySnapshot = new FileDirectorySnapshot(new File(System.getProperty("agent.work.dir")));
+//    myDirectorySnapshot = new FileDirectorySnapshot(new File("c:\\TeamCity\\buildAgent\\work\\"));
   }
 
   public void buildStarted(@NotNull final AgentRunningBuild runningBuild) {
     final Map<String, String> runnerParams = runningBuild.getRunnerParameters();
     myLogger = new SwabraLogger(runningBuild.getBuildLogger(), Logger.getLogger(Swabra.class));
-    myCheckoutDir = runningBuild.getCheckoutDirectory();
     myVerbose = isVerbose(runnerParams);
     final String mode = getSwabraMode(runnerParams);
+    final File checkoutDir =  runningBuild.getCheckoutDirectory();
 
     try {
       if (!isEnabled(mode)) {
         myLogger.log("Swabra is disabled", false);
         return;
       }
-      logSettings(mode, myCheckoutDir.getAbsolutePath(), myVerbose);
+      logSettings(mode, checkoutDir.getAbsolutePath(), myVerbose);
       if (runningBuild.isCleanBuild()) {
         return;
       }
       if (needFullCleanup(myMode)) {
+//      if (needFullCleanup(checkoutDir, myCheckoutDir, mode, myMode)) {
         myLogger.log("It is the first build with Swabra turned on - need full cleanup", false);
         // TODO: may be ask for clean build
-        if (!FileUtil.delete(myCheckoutDir)) {
+        if (!FileUtil.delete(checkoutDir)) {
           myLogger.log("Unable to remove checkout directory on swabra work start", false);
         }
         return;
       }
       if (BEFORE_BUILD.equals(mode)) {
-        if (AFTER_BUILD.equals(myMode)) {
+        if (AFTER_BUILD.equals(myMode) && !checkoutDirChanged(checkoutDir, myCheckoutDir)) {
           myLogger.log("Will not perform build garbage cleanup, as it occured on previous build finish", false);
         } else {
           myLogger.log("Previous build garbage cleanup is performed before build", false);
-          collectGarbage(myCheckoutDir, myLogger, myVerbose);
+          collectGarbage(checkoutDir, myLogger, myVerbose);
         }
       } else if (AFTER_BUILD.equals(mode) && BEFORE_BUILD.equals(myMode)) {
-        // mode setting changed from "before build" to "after build"
-        myLogger.log("Swabra mode setting changed from \"before build\" to \"after build\", " +
-                    "need to perform build garbage clean up once before build", false);
-        collectGarbage(myCheckoutDir, myLogger, false);
+        if (!checkoutDirChanged(checkoutDir, myCheckoutDir)) {
+          // mode setting changed from "before build" to "after build"
+          myLogger.log("Swabra mode setting changed from \"before build\" to \"after build\", " +
+                      "need to perform build garbage clean up once before build", false);
+          collectGarbage(checkoutDir, myLogger, false);          
+        } else {
+          myLogger.log("Swabra mode setting possibility changed from \"before build\" to \"after build\"", false);
+        }
       }
     } finally {
       myMode = mode;
+      myCheckoutDir = checkoutDir;
     }
   }
 
