@@ -37,6 +37,7 @@ import com.intellij.openapi.util.io.FileUtil;
 public final class Swabra extends AgentLifeCycleAdapter {
   private final DirectorySnapshot myDirectorySnapshot;
   private SwabraLogger myLogger;
+  private SmartDirectoryCleaner myDirectoryCleaner;
 
   private String myMode;
   private File myCheckoutDir;
@@ -60,8 +61,10 @@ public final class Swabra extends AgentLifeCycleAdapter {
     return !currCheckoutDir.equals(prevCheckoutDir);
   }
 
-  public Swabra(@NotNull final EventDispatcher<AgentLifeCycleListener> agentDispatcher) {
+  public Swabra(@NotNull final EventDispatcher<AgentLifeCycleListener> agentDispatcher,
+                @NotNull final SmartDirectoryCleaner directoryCleaner) {
     agentDispatcher.addListener(this);
+    myDirectoryCleaner = directoryCleaner;
 //    myDirectorySnapshot = new MapDirectorySnapshot();
     myDirectorySnapshot = new FileDirectorySnapshot(new File(System.getProperty("agent.work.dir")));
 //    myDirectorySnapshot = new FileDirectorySnapshot(new File("c:\\TeamCity\\buildAgent\\work\\"));
@@ -86,10 +89,28 @@ public final class Swabra extends AgentLifeCycleAdapter {
       if (needFullCleanup(myMode)) {
 //      if (needFullCleanup(checkoutDir, myCheckoutDir, mode, myMode)) {
         myLogger.log("It is the first build with Swabra turned on - need full cleanup", false);
-        // TODO: may be ask for clean build
-        if (!FileUtil.delete(checkoutDir)) {
-          myLogger.log("Unable to remove checkout directory on swabra work start", false);
-        }
+//        // TODO: may be ask for clean build
+//        if (!FileUtil.delete(checkoutDir)) {
+//          myLogger.log("Unable to remove checkout directory on swabra work start", false);
+//        }
+        myDirectoryCleaner.cleanFolder(checkoutDir, new SmartDirectoryCleanerCallback() {
+          public void logCleanStarted(File dir) {
+            myLogger.log("Swabra trigged checkout clean checkout", false);
+          }
+          public void logFailedToDeleteEmptyDirectory(File dir) {
+            myLogger.log("Failed to delete empty directory " + dir.getAbsolutePath(), false);            
+          }
+          public void logFailedToCleanFilesUnderDirectory(File dir) {
+            myLogger.log("Failed to delete files in directory " + dir.getAbsolutePath(), false);           
+
+          }
+          public void logFailedToCleanFile(File file) {
+            myLogger.log("Failed to delete file " + file.getAbsolutePath(), false);            
+          }
+          public void logFailedToCleanEntireFolder(File dir) {
+            myLogger.log("Failed to delete directory " + dir.getAbsolutePath(), false);           
+          }
+        });
         return;
       }
       if (BEFORE_BUILD.equals(mode)) {

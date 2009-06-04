@@ -66,7 +66,19 @@ public class SwabraTest extends TestCase {
       }
     });
     return runningBuild;
-  }  
+  }
+
+  private SmartDirectoryCleaner createSmartDirectoryCleaner() {
+    return new SmartDirectoryCleaner() {
+
+      public void cleanFolder(@NotNull File file, @NotNull SmartDirectoryCleanerCallback callback) {
+        callback.logCleanStarted(file);
+        if (!FileUtil.delete(file)) {
+          callback.logFailedToCleanEntireFolder(file);
+        }
+      }
+    };
+  }
 
   private void setAgentRunningBuildParams(final AgentRunningBuild runningBuild, final Map<String, String> runParams,
                                           final File checkoutDir, final SimpleBuildLogger logger) {
@@ -143,7 +155,7 @@ public class SwabraTest extends TestCase {
     final SimpleBuildLogger logger = new BuildProgressLoggerMock(results);
     final EventDispatcher<AgentLifeCycleListener> dispatcher = EventDispatcher.create(AgentLifeCycleListener.class);
     final AgentRunningBuild build = createAgentRunningBuild(firstCallParams, myCheckoutDir, logger);
-    final Swabra swabra = new Swabra(dispatcher);
+    final Swabra swabra = new Swabra(dispatcher, createSmartDirectoryCleaner());
 
     final String checkoutDirPath = myCheckoutDir.getAbsolutePath();
 
