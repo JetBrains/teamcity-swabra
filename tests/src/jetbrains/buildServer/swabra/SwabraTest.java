@@ -46,31 +46,48 @@ public class SwabraTest extends TestCase {
 
   private static final String TEST_DATA_PATH = "tests" + File.separator + "testData";
 
+  private BuildParametersMap myBuildParams;
   private File myCheckoutDir;
   private TempFiles myTempFiles;
   private Mockery myContext;
 
 
-  private AgentRunningBuild createAgentRunningBuild(final Map<String, String> runParams, final File checkoutDir, final SimpleBuildLogger logger) {
+  private AgentRunningBuild createAgentRunningBuild(final Map<String, String> runParams, final BuildParametersMap buildParams, final File checkoutDir, final SimpleBuildLogger logger) {
     final AgentRunningBuild runningBuild = myContext.mock(AgentRunningBuild.class);
+    setRunningBuildParams(runParams, buildParams, checkoutDir, logger, runningBuild);
+    return runningBuild;
+  }
+
+  private void setRunningBuildParams(final Map<String, String> runParams, final BuildParametersMap buildParams, final File checkoutDir, final SimpleBuildLogger logger, final AgentRunningBuild runningBuild) {
     myContext.checking(new Expectations() {
       {
         oneOf(runningBuild).getBuildLogger();
         will(returnValue(logger));
         oneOf(runningBuild).getRunnerParameters();
         will(returnValue(runParams));
+        allowing(runningBuild).getBuildParameters();
+        will(returnValue(buildParams));
         oneOf(runningBuild).getCheckoutDirectory();
         will(returnValue(checkoutDir));
         allowing(runningBuild).isCleanBuild();
         will(returnValue(false));
       }
     });
-    return runningBuild;
+  }
+
+  private BuildParametersMap createBuildParametersMap(final Map<String, String> buildParams) {
+    final BuildParametersMap params = myContext.mock(BuildParametersMap.class);
+    myContext.checking(new Expectations() {
+      {
+        allowing(params).getSystemProperties();
+        will(returnValue(buildParams));
+      }
+    });
+    return params;
   }
 
   private SmartDirectoryCleaner createSmartDirectoryCleaner() {
     return new SmartDirectoryCleaner() {
-
       public void cleanFolder(@NotNull File file, @NotNull SmartDirectoryCleanerCallback callback) {
         callback.logCleanStarted(file);
         if (!FileUtil.delete(file)) {
@@ -81,19 +98,9 @@ public class SwabraTest extends TestCase {
   }
 
   private void setAgentRunningBuildParams(final AgentRunningBuild runningBuild, final Map<String, String> runParams,
+                                          BuildParametersMap buildParams,
                                           final File checkoutDir, final SimpleBuildLogger logger) {
-    myContext.checking(new Expectations() {
-      {
-        oneOf(runningBuild).getBuildLogger();
-        will(returnValue(logger));
-        oneOf(runningBuild).getRunnerParameters();
-        will(returnValue(runParams));
-        oneOf(runningBuild).getCheckoutDirectory();
-        will(returnValue(checkoutDir));
-        allowing(runningBuild).isCleanBuild();
-        will(returnValue(false));
-      }
-    });
+    setRunningBuildParams(runParams, buildParams, checkoutDir, logger, runningBuild);
   }
 
   @Before
@@ -101,7 +108,9 @@ public class SwabraTest extends TestCase {
     myContext = new JUnit4Mockery();
     myTempFiles = new TempFiles();
     myCheckoutDir = myTempFiles.createTempDir();
-    System.setProperty("agent.work.dir", myCheckoutDir.getParent());
+    final Map<String, String> buildParams =  new HashMap<String, String>();
+    buildParams.put(Swabra.WORK_DIR_PROP, myCheckoutDir.getParent());
+    myBuildParams = createBuildParametersMap(buildParams);
   }
 
   @After
@@ -154,7 +163,7 @@ public class SwabraTest extends TestCase {
 
     final SimpleBuildLogger logger = new BuildProgressLoggerMock(results);
     final EventDispatcher<AgentLifeCycleListener> dispatcher = EventDispatcher.create(AgentLifeCycleListener.class);
-    final AgentRunningBuild build = createAgentRunningBuild(firstCallParams, myCheckoutDir, logger);
+    final AgentRunningBuild build = createAgentRunningBuild(firstCallParams, myBuildParams, myCheckoutDir, logger);
     final Swabra swabra = new Swabra(dispatcher, createSmartDirectoryCleaner());
 
     final String checkoutDirPath = myCheckoutDir.getAbsolutePath();
@@ -175,7 +184,7 @@ public class SwabraTest extends TestCase {
     dispatcher.getMulticaster().buildFinished(BuildFinishedStatus.FINISHED_SUCCESS);
 
     myContext.assertIsSatisfied();
-    setAgentRunningBuildParams(build, secondCallParams, myCheckoutDir, logger);
+    setAgentRunningBuildParams(build, secondCallParams, myBuildParams, myCheckoutDir, logger);
 
     FileUtil.copyDir(getTestData(dirName + File.separator + BEFORE_BUILD, null), myCheckoutDir);
     FileUtil.delete(new File(checkoutDirPath + File.separator + ".svn"));

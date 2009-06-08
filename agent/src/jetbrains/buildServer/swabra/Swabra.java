@@ -35,7 +35,9 @@ import com.intellij.openapi.util.io.FileUtil;
 
 
 public final class Swabra extends AgentLifeCycleAdapter {
-  private final DirectorySnapshot myDirectorySnapshot;
+  public static final String WORK_DIR_PROP = "agent.work.dir";
+
+  private DirectorySnapshot myDirectorySnapshot;
   private SwabraLogger myLogger;
   private SmartDirectoryCleaner myDirectoryCleaner;
 
@@ -65,8 +67,6 @@ public final class Swabra extends AgentLifeCycleAdapter {
                 @NotNull final SmartDirectoryCleaner directoryCleaner) {
     agentDispatcher.addListener(this);
     myDirectoryCleaner = directoryCleaner;
-//    myDirectorySnapshot = new MapDirectorySnapshot();
-    myDirectorySnapshot = new FileDirectorySnapshot(new File(System.getProperty("agent.work.dir")));
 //    myDirectorySnapshot = new FileDirectorySnapshot(new File("c:\\TeamCity\\buildAgent\\work\\"));
   }
 
@@ -76,7 +76,6 @@ public final class Swabra extends AgentLifeCycleAdapter {
     myVerbose = isVerbose(runnerParams);
     final String mode = getSwabraMode(runnerParams);
     final File checkoutDir =  runningBuild.getCheckoutDirectory();
-
     try {
       if (!isEnabled(mode)) {
         myLogger.log("Swabra is disabled", false);
@@ -89,10 +88,8 @@ public final class Swabra extends AgentLifeCycleAdapter {
       if (needFullCleanup(myMode)) {
 //      if (needFullCleanup(checkoutDir, myCheckoutDir, mode, myMode)) {
         myLogger.log("It is the first build with Swabra turned on - need full cleanup", false);
-//        // TODO: may be ask for clean build
-//        if (!FileUtil.delete(checkoutDir)) {
-//          myLogger.log("Unable to remove checkout directory on swabra work start", false);
-//        }
+//    myDirectorySnapshot = new MapDirectorySnapshot();
+        myDirectorySnapshot = new FileDirectorySnapshot(new File(runningBuild.getBuildParameters().getSystemProperties().get(WORK_DIR_PROP)));
         myDirectoryCleaner.cleanFolder(checkoutDir, new SmartDirectoryCleanerCallback() {
           public void logCleanStarted(File dir) {
             myLogger.log("Swabra trigged checkout clean checkout", false);
