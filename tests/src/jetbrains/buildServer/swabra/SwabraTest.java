@@ -156,6 +156,7 @@ public class SwabraTest extends TestCase {
                        final Map<String, String> secondCallParams) throws Exception {
     final String goldFile = getTestDataPath(resultsFileName + ".gold", null);
     final String resultsFile = goldFile.replace(".gold", ".tmp");
+//    final String snapshotFile = goldFile.replace(".gold", ".snapshot");
 
     new File(resultsFile).delete();
 
@@ -203,10 +204,11 @@ public class SwabraTest extends TestCase {
 
     myContext.assertIsSatisfied();
 
+    final String checkoutDir = myCheckoutDir.getCanonicalPath();
+
     final File goldf = new File(goldFile);
-    String checkoutDir = myCheckoutDir.getCanonicalPath();
-    String actual = results.toString().replace(checkoutDir, "##BASE_DIR##").trim();
-    String expected = readFile(goldf).trim();
+    final String actual = results.toString().replace(checkoutDir, "##BASE_DIR##").trim();
+    final String expected = readFile(goldf).trim();
     if (!actual.equals(expected)) {
       final FileWriter resultsWriter = new FileWriter(resultsFile);
       resultsWriter.write(results.toString());
@@ -214,6 +216,18 @@ public class SwabraTest extends TestCase {
 
       assertEquals(actual, expected, actual);
     }
+
+//    final File actualSnapshotf = new File(myCheckoutDir.getAbsolutePath() + ".snapshot");
+//    if (actualSnapshotf.exists()) {
+//      final File goldSnapshotf = new File(snapshotFile);
+//      String actualSnapshot = readFile(actualSnapshotf).replace(myCheckoutDir.getParent(), "##WORK_DIR##").replace(myCheckoutDir.getName(), "##CHECKOUT_DIR##").trim();
+//      String expectedSnapshot = readFile(goldSnapshotf).trim();
+//      if (!actualSnapshot.equals(expectedSnapshot)) {
+//        FileUtil.copy(actualSnapshotf, new File(goldSnapshotf.getAbsolutePath() + ".tmp"));
+//
+//        assertEquals(actualSnapshot, expectedSnapshot, actualSnapshot);
+//      }
+//    }
   }
 
   private void cleanCheckoutDir() {

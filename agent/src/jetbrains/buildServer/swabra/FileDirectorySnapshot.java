@@ -41,6 +41,9 @@ public class FileDirectorySnapshot extends DirectorySnapshot {
     try {
       mySnapshotWriter = new FileWriter(new File(myWorkingDir, dir.getName() + ".snapshot"));
       mySnapshotWriter.write("#Don't edit this file!\n");
+      mySnapshotWriter.write(dir.getParent() + File.separator + "\n");
+      mySnapshotWriter.write(dir.getName() + File.separator + SEPARATOR
+        + dir.length() +  SEPARATOR + dir.lastModified() + "\n");
       saveState(dir);
       mySnapshotWriter.close();
     } catch (Exception e) {
@@ -58,6 +61,8 @@ public class FileDirectorySnapshot extends DirectorySnapshot {
     try {
       mySnapshotReader = new BufferedReader(new FileReader(new File(myWorkingDir, dir.getName() + ".snapshot")));
       mySnapshotReader.readLine(); // read first comment
+      final String parentDir = mySnapshotReader.readLine();
+      String currentDir = "";
       String fileRecord = mySnapshotReader.readLine();
       while (fileRecord != null) {
         final int firstSeparator = fileRecord.indexOf(SEPARATOR);
@@ -65,7 +70,12 @@ public class FileDirectorySnapshot extends DirectorySnapshot {
         final String path = fileRecord.substring(0, firstSeparator);
         final String length = fileRecord.substring(firstSeparator + 1, secondSeparator);
         final String lastModified = fileRecord.substring(secondSeparator + 1);
-        myFiles.put(path, new FileInfo(Long.parseLong(length), Long.parseLong(lastModified)));
+        if (path.endsWith(File.separator)) {
+          currentDir = parentDir + path;
+          myFiles.put(currentDir.substring(0, currentDir.length() - 1), new FileInfo(Long.parseLong(length), Long.parseLong(lastModified)));          
+        } else {
+          myFiles.put(currentDir + path, new FileInfo(Long.parseLong(length), Long.parseLong(lastModified)));
+        }
         fileRecord = mySnapshotReader.readLine();
       }
     } catch (Exception e) {
@@ -85,6 +95,12 @@ public class FileDirectorySnapshot extends DirectorySnapshot {
   }
 
   void saveFileState(@NotNull final File file) throws Exception {
-    mySnapshotWriter.write(file.getAbsolutePath() + SEPARATOR + file.length() +  SEPARATOR + file.lastModified() + "\n");
+    final boolean isDir = file.isDirectory(); 
+    final String wdPath = myWorkingDir.getAbsolutePath();
+    String fPath = file.getAbsolutePath();
+    fPath = isDir ? fPath.substring(fPath.indexOf(wdPath) + wdPath.length() + 1) : file.getName(); //+1 for trailing slash
+    final String trailingSlash = isDir ? File.separator : "";
+    mySnapshotWriter.write(fPath + trailingSlash + SEPARATOR
+      + file.length() +  SEPARATOR + file.lastModified() + "\n");
   }
 }

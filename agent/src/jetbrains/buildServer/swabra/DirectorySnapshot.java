@@ -41,11 +41,17 @@ public abstract class DirectorySnapshot {
   protected void saveState(@NotNull final File dir)  throws Exception {
     final File[] files = dir.listFiles();
     if (files == null || files.length == 0) return;
+    final List<File> dirs = new ArrayList<File>();
     for (File file : files) {
-      saveFileState(file);
-      if (file.isDirectory()) {
-        saveState(file);
+      if (file.isFile()) {
+        saveFileState(file);
+      } else {
+        dirs.add(file);
       }
+    }
+    for (File d : dirs) {
+      saveFileState(d);
+      saveState(d);
     }
   }
 
