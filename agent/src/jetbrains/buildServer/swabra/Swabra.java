@@ -31,8 +31,6 @@ import java.io.File;
 import java.util.Map;
 import java.util.Date;
 
-import com.intellij.openapi.util.io.FileUtil;
-
 
 public final class Swabra extends AgentLifeCycleAdapter {
   public static final String WORK_DIR_PROP = "agent.work.dir";
@@ -78,7 +76,7 @@ public final class Swabra extends AgentLifeCycleAdapter {
     final File checkoutDir =  runningBuild.getCheckoutDirectory();
     try {
       if (!isEnabled(mode)) {
-        myLogger.log("Swabra is disabled", false);
+        myLogger.debug("Swabra is disabled", false);
         return;
       }
       logSettings(mode, checkoutDir.getAbsolutePath(), myVerbose);
@@ -87,44 +85,44 @@ public final class Swabra extends AgentLifeCycleAdapter {
       }
       if (needFullCleanup(myMode)) {
 //      if (needFullCleanup(checkoutDir, myCheckoutDir, mode, myMode)) {
-        myLogger.log("It is the first build with Swabra turned on - need full cleanup", false);
+        myLogger.debug("It is the first build with Swabra turned on - need full cleanup", false);
 //    myDirectorySnapshot = new MapDirectorySnapshot();
         myDirectorySnapshot = new FileDirectorySnapshot(new File(runningBuild.getBuildParameters().getSystemProperties().get(WORK_DIR_PROP)));
         myDirectoryCleaner.cleanFolder(checkoutDir, new SmartDirectoryCleanerCallback() {
           public void logCleanStarted(File dir) {
-            myLogger.log("Swabra trigged checkout clean checkout", false);
+            myLogger.debug("Swabra trigged checkout clean checkout", false);
           }
           public void logFailedToDeleteEmptyDirectory(File dir) {
-            myLogger.log("Failed to delete empty directory " + dir.getAbsolutePath(), false);            
+            myLogger.debug("Failed to delete empty directory " + dir.getAbsolutePath(), false);
           }
           public void logFailedToCleanFilesUnderDirectory(File dir) {
-            myLogger.log("Failed to delete files in directory " + dir.getAbsolutePath(), false);           
+            myLogger.debug("Failed to delete files in directory " + dir.getAbsolutePath(), false);
 
           }
           public void logFailedToCleanFile(File file) {
-            myLogger.log("Failed to delete file " + file.getAbsolutePath(), false);            
+            myLogger.debug("Failed to delete file " + file.getAbsolutePath(), false);
           }
           public void logFailedToCleanEntireFolder(File dir) {
-            myLogger.log("Failed to delete directory " + dir.getAbsolutePath(), false);           
+            myLogger.debug("Failed to delete directory " + dir.getAbsolutePath(), false);
           }
         });
         return;
       }
       if (BEFORE_BUILD.equals(mode)) {
         if (AFTER_BUILD.equals(myMode) && !checkoutDirChanged(checkoutDir, myCheckoutDir)) {
-          myLogger.log("Will not perform build garbage cleanup, as it occured on previous build finish", false);
+          myLogger.debug("Will not perform build garbage cleanup, as it occured on previous build finish", false);
         } else {
-          myLogger.log("Previous build garbage cleanup is performed before build", false);
+          myLogger.debug("Previous build garbage cleanup is performed before build", false);
           collectGarbage(checkoutDir, myLogger, myVerbose);
         }
       } else if (AFTER_BUILD.equals(mode) && BEFORE_BUILD.equals(myMode)) {
         if (!checkoutDirChanged(checkoutDir, myCheckoutDir)) {
           // mode setting changed from "before build" to "after build"
-          myLogger.log("Swabra mode setting changed from \"before build\" to \"after build\", " +
+          myLogger.debug("Swabra mode setting changed from \"before build\" to \"after build\", " +
                       "need to perform build garbage clean up once before build", false);
           collectGarbage(checkoutDir, myLogger, false);          
         } else {
-          myLogger.log("Swabra mode setting possibility changed from \"before build\" to \"after build\"", false);
+          myLogger.debug("Swabra mode setting possibility changed from \"before build\" to \"after build\"", false);
         }
       }
     } finally {
@@ -140,14 +138,14 @@ public final class Swabra extends AgentLifeCycleAdapter {
 
   public void buildFinished(@NotNull final BuildFinishedStatus buildStatus) {
     if (AFTER_BUILD.equals(myMode)) {
-      myLogger.log("Build garbage cleanup is performed after build", false);
+      myLogger.debug("Build garbage cleanup is performed after build", false);
       collectGarbage(myCheckoutDir, myLogger, myVerbose);
     }
   }
 
   private void snapshot(final File dir, @NotNull final SwabraLogger logger, boolean verbose) {
     if (dir == null || !dir.isDirectory()) {
-      logger.log("Unable to save directory state, illegal checkout directory", false);
+      logger.debug("Unable to save directory state, illegal checkout directory", false);
       return;
     }
     myLogger.log(getTime() + ": Saving checkout directory state...", false);
@@ -157,7 +155,7 @@ public final class Swabra extends AgentLifeCycleAdapter {
 
   private void collectGarbage(final File dir, @NotNull final SwabraLogger logger, boolean verbose) {
     if (dir == null || !dir.isDirectory()) {
-      logger.log("Unable to collect garbage, illegal checkout directory", false);
+      logger.debug("Unable to collect garbage, illegal checkout directory", false);
       return;
     }
     myLogger.log(getTime() + ": Collecting build garbage...", false);
@@ -166,7 +164,7 @@ public final class Swabra extends AgentLifeCycleAdapter {
   }
 
   private void logSettings(String mode, String checkoutDir, boolean verbose) {
-    myLogger.log("Swabra settings: mode = '" + mode +
+    myLogger.debug("Swabra settings: mode = '" + mode +
                 "', checkoutDir = " + checkoutDir +
                 "', verbose = '" + verbose + "'.", false);
   }

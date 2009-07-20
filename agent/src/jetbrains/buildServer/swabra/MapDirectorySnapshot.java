@@ -19,10 +19,7 @@ package jetbrains.buildServer.swabra;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
-import java.util.Map;
 import java.util.HashMap;
-import java.util.List;
-import java.util.ArrayList;
 
 /**
  * User: vbedrosova
@@ -35,7 +32,7 @@ public class MapDirectorySnapshot extends DirectorySnapshot {
     try {
       saveState(dir);
     } catch (Exception e) {
-      logger.log("Unable to save directory snapshot", false);
+      logger.debug("Unable to save directory snapshot", false);
     }
   }
 

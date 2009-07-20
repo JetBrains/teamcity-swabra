@@ -41,6 +41,13 @@ public final class SwabraLogger {
   }
 
   public void log(@NotNull final String message, boolean useBuildLog) {
+    myClassLogger.info(message);
+    if (useBuildLog) {
+      myBuildLogger.message(message);
+    }
+  }
+
+  public void debug(@NotNull final String message, boolean useBuildLog) {
     myClassLogger.debug(message);
     if (useBuildLog) {
       myBuildLogger.message(message);      

@@ -57,7 +57,7 @@ public abstract class DirectorySnapshot {
 
   public void collectGarbage(@NotNull final File dir, @NotNull final SwabraLogger logger, boolean verbose) {
     if (myFiles == null) {
-      logger.log("Unable to collect garbage, directory snapshot was not saved", false);
+      logger.debug("Unable to collect garbage, directory snapshot was not saved", false);
       return;
     }
     logger.activityStarted();
@@ -81,7 +81,7 @@ public abstract class DirectorySnapshot {
           collect(file, logger);
         }
         if (!file.delete()) {
-          logger.log("Unable to delete previous build garbage " + file.getAbsolutePath(), false);
+          logger.debug("Unable to delete previous build garbage " + file.getAbsolutePath(), false);
         }
       } else if ((file.lastModified() != info.getLastModified()) ||
                   file.length() != info.getLength()) {
@@ -99,17 +99,17 @@ public abstract class DirectorySnapshot {
     if (myAppeared.size() > 0) {
       prefix = "Deleting ";
       for (File file : myAppeared) {
-        logger.log(prefix + file.getAbsolutePath(), verbose);
+        logger.debug(prefix + file.getAbsolutePath(), verbose);
       }
     }
     if (myModified.size() > 0) {
       prefix = "Detected modified ";
       for (File file : myModified) {
-        logger.log(prefix + file.getAbsolutePath(), verbose);
+        logger.debug(prefix + file.getAbsolutePath(), verbose);
       }
     }
     if (prefix == null) {
-      logger.log("No garbage or modified files detected", verbose);
+      logger.debug("No garbage or modified files detected", verbose);
     }
   }
 

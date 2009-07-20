@@ -47,14 +47,14 @@ public class FileDirectorySnapshot extends DirectorySnapshot {
       saveState(dir);
       mySnapshotWriter.close();
     } catch (Exception e) {
-      logger.log("Unable to save working directory snapshot to file", false);
+      logger.debug("Unable to save working directory snapshot to file", false);
     }
   }
 
   public void collectGarbage(@NotNull File dir, @NotNull SwabraLogger logger, boolean verbose) {
     final File snapshot = new File(myWorkingDir, dir.getName() + ".snapshot");
     if (!snapshot.exists()) {
-      logger.log("Unable to read working directory snapshot from file, no file exists", false);
+      logger.debug("Unable to read working directory snapshot from file, no file exists", false);
       return;
     }
     myFiles = new HashMap<String, FileInfo>();
@@ -79,17 +79,17 @@ public class FileDirectorySnapshot extends DirectorySnapshot {
         fileRecord = mySnapshotReader.readLine();
       }
     } catch (Exception e) {
-      logger.log("Unable to read working directory snapshot from file", false);
+      logger.debug("Unable to read working directory snapshot from file", false);
       return;
     } finally {
       try {
         mySnapshotReader.close();
       } catch (IOException e) {
-        logger.log("Unable to read working directory snapshot from file", false);
+        logger.debug("Unable to read working directory snapshot from file", false);
       }
     }
     if (!snapshot.delete()) {
-      logger.log("Unable to delete file containig directory snapshot", false);      
+      logger.debug("Unable to delete file containig directory snapshot", false);
     }
     super.collectGarbage(dir, logger, verbose);
   }
