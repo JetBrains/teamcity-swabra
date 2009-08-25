@@ -149,9 +149,9 @@ public final class Swabra extends AgentLifeCycleAdapter {
                     + ((dir == null) ? "null" : dir.getAbsolutePath()), false);
       return;
     }
-    myLogger.log("Saving state of checkout directory " + dir.getAbsolutePath(), false);
+    myLogger.log("Saving state of checkout directory " + dir.getAbsolutePath(), true);
     myDirectorySnapshot.snapshot(dir, logger, verbose);
-    myLogger.log("Finished saving state of checkout directory " + dir.getAbsolutePath(), false);
+    myLogger.log("Finished saving state of checkout directory " + dir.getAbsolutePath(), true);
   }
 
   private void collectGarbage(final File dir, @NotNull final SwabraLogger logger, boolean verbose) {

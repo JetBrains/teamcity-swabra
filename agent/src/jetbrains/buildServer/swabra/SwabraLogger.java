@@ -30,7 +30,7 @@ import org.jetbrains.annotations.NonNls;
 public final class SwabraLogger {
   @NonNls
   private static final String AGENT_BLOCK = "agent";
-  public static final String ACTIVITY_NAME = "Garbage clean";
+  public static final String ACTIVITY_NAME = "Swabra";
 
   private final BuildProgressLogger myBuildLogger;
   private final Logger myClassLogger;
