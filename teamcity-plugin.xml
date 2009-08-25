@@ -3,7 +3,7 @@
 <info>
 <name>swabra</name>
 <display-name>checkout-plugin</display-name>
-<version>1</version>
+<version>@version@</version>
 </info>
 <deployment use-separate-classloader="false"/>
 </teamcity-plugin>
