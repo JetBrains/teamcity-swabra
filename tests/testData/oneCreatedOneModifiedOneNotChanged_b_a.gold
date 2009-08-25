@@ -1,6 +1,11 @@
-ACTIVITY STARTED: Garbage clean
-ACTIVITY FINISHED: Garbage clean
-ACTIVITY STARTED: Garbage clean
+MESSAGE: It is the first build with Swabra turned on - need full cleanup
+MESSAGE: Saving state of checkout directory ##BASE_DIR##
+MESSAGE: Finished saving state of checkout directory ##BASE_DIR##
+ACTIVITY STARTED: Swabra
+ACTIVITY FINISHED: Swabra
+MESSAGE: Saving state of checkout directory ##BASE_DIR##
+MESSAGE: Finished saving state of checkout directory ##BASE_DIR##
+ACTIVITY STARTED: Swabra
 MESSAGE: Deleting ##BASE_DIR##\created
 MESSAGE: Detected modified ##BASE_DIR##\modified
-ACTIVITY FINISHED: Garbage clean
+ACTIVITY FINISHED: Swabra

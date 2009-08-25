@@ -60,7 +60,6 @@ public class FileDirectorySnapshot extends DirectorySnapshot {
     myFiles = new HashMap<String, FileInfo>();
     try {
       mySnapshotReader = new BufferedReader(new FileReader(new File(myWorkingDir, dir.getName() + ".snapshot")));
-      mySnapshotReader.readLine(); // read first comment
       final String parentDir = mySnapshotReader.readLine();
       String currentDir = "";
       String fileRecord = mySnapshotReader.readLine();
