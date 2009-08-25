@@ -145,31 +145,29 @@ public final class Swabra extends AgentLifeCycleAdapter {
 
   private void snapshot(final File dir, @NotNull final SwabraLogger logger, boolean verbose) {
     if (dir == null || !dir.isDirectory()) {
-      logger.debug("Unable to save directory state, illegal checkout directory", false);
+      logger.debug("Unable to save directory state, illegal checkout directory - "
+                    + ((dir == null) ? "null" : dir.getAbsolutePath()), false);
       return;
     }
-    myLogger.log(getTime() + ": Saving checkout directory state...", false);
+    myLogger.log("Saving state of checkout directory " + dir.getAbsolutePath(), false);
     myDirectorySnapshot.snapshot(dir, logger, verbose);
-    myLogger.log(getTime() + ": Finished saving checkout directory state", false);
+    myLogger.log("Finished saving state of checkout directory " + dir.getAbsolutePath(), false);
   }
 
   private void collectGarbage(final File dir, @NotNull final SwabraLogger logger, boolean verbose) {
     if (dir == null || !dir.isDirectory()) {
-      logger.debug("Unable to collect garbage, illegal checkout directory", false);
+      logger.debug("Unable to collect garbage, illegal checkout directory - "
+                    + ((dir == null) ? "null" : dir.getAbsolutePath()), false);
       return;
     }
-    myLogger.log(getTime() + ": Collecting build garbage...", false);
+    myLogger.log("Collecting build garbage...", false);
     myDirectorySnapshot.collectGarbage(dir, logger, verbose);
-    myLogger.log(getTime() + ": Finished collecting build garbage", false);
+    myLogger.log("Finished collecting build garbage", false);
   }
 
   private void logSettings(String mode, String checkoutDir, boolean verbose) {
     myLogger.debug("Swabra settings: mode = '" + mode +
                 "', checkoutDir = " + checkoutDir +
                 "', verbose = '" + verbose + "'.", false);
-  }
-
-  private long getTime() {
-    return new Date().getTime();
   }
 }

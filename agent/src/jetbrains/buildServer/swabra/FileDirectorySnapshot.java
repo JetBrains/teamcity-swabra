@@ -40,7 +40,7 @@ public class FileDirectorySnapshot extends DirectorySnapshot {
   public void snapshot(@NotNull File dir, @NotNull SwabraLogger logger, boolean verbose) {
     try {
       mySnapshotWriter = new FileWriter(new File(myWorkingDir, dir.getName() + ".snapshot"));
-      mySnapshotWriter.write("#Don't edit this file!\n");
+//      mySnapshotWriter.write("#Don't edit this file!\n");
       mySnapshotWriter.write(dir.getParent() + File.separator + "\n");
       mySnapshotWriter.write(dir.getName() + File.separator + SEPARATOR
         + dir.length() +  SEPARATOR + dir.lastModified() + "\n");
