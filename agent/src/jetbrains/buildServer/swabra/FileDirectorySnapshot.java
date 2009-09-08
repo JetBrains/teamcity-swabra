@@ -51,7 +51,7 @@ public class FileDirectorySnapshot extends DirectorySnapshot {
     }
   }
 
-  public void collectGarbage(@NotNull File dir, @NotNull SwabraLogger logger, boolean verbose) {
+  public void collectFiles(@NotNull File dir, @NotNull SwabraLogger logger, boolean verbose) {
     final File snapshot = new File(myWorkingDir, dir.getName() + ".snapshot");
     if (!snapshot.exists()) {
       logger.debug("Unable to read working directory snapshot from file, no file exists", false);
@@ -90,7 +90,7 @@ public class FileDirectorySnapshot extends DirectorySnapshot {
     if (!snapshot.delete()) {
       logger.debug("Unable to delete file containig directory snapshot", false);
     }
-    super.collectGarbage(dir, logger, verbose);
+    super.collectFiles(dir, logger, verbose);
   }
 
   void saveFileState(@NotNull final File file) throws Exception {

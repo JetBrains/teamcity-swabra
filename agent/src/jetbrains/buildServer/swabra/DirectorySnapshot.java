@@ -55,7 +55,7 @@ public abstract class DirectorySnapshot {
     }
   }
 
-  public void collectGarbage(@NotNull final File dir, @NotNull final SwabraLogger logger, boolean verbose) {
+  public void collectFiles(@NotNull final File dir, @NotNull final SwabraLogger logger, boolean verbose) {
     if (myFiles == null) {
       logger.debug("Unable to collect garbage, directory snapshot was not saved", false);
       return;

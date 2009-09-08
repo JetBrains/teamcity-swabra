@@ -211,7 +211,7 @@ public class SwabraTest extends TestCase {
     final String expected = readFile(goldf).trim();
     if (!actual.equals(expected)) {
       final FileWriter resultsWriter = new FileWriter(resultsFile);
-      resultsWriter.write(results.toString());
+      resultsWriter.write(actual);
       resultsWriter.close();
 
       assertEquals(actual, expected, actual);

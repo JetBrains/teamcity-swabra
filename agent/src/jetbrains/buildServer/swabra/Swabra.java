@@ -79,7 +79,7 @@ public final class Swabra extends AgentLifeCycleAdapter {
         myDirectorySnapshot = new FileDirectorySnapshot(new File(runningBuild.getBuildParameters().getSystemProperties().get(WORK_DIR_PROP)));
         myDirectoryCleaner.cleanFolder(checkoutDir, new SmartDirectoryCleanerCallback() {
           public void logCleanStarted(File dir) {
-            myLogger.log("It is the first build with Swabra turned on - need full cleanup", true);
+            myLogger.log("It is the first build with Swabra turned on - forcing clean checkout", true);
           }
           public void logFailedToDeleteEmptyDirectory(File dir) {
             myLogger.debug("Failed to delete empty directory " + dir.getAbsolutePath(), false);
@@ -147,7 +147,7 @@ public final class Swabra extends AgentLifeCycleAdapter {
       return;
     }
     myLogger.log("Collecting build garbage...", false);
-    myDirectorySnapshot.collectGarbage(dir, logger, verbose);
+    myDirectorySnapshot.collectFiles(dir, logger, verbose);
     myLogger.log("Finished collecting build garbage", false);
   }
 
