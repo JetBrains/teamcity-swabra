@@ -1,11 +1,15 @@
-MESSAGE: It is the first build with Swabra turned on - forcing clean checkout
-MESSAGE: Saving state of checkout directory ##BASE_DIR##
-MESSAGE: Finished saving state of checkout directory ##BASE_DIR##
+MESSAGE: Swabra: It is the first build with Swabra turned on - forcing clean checkout for ##BASE_DIR##
+MESSAGE: Swabra: Saving state of checkout directory ##BASE_DIR##
+MESSAGE: Swabra: Finished saving state of checkout directory ##BASE_DIR##
+MESSAGE: Swabra: Scanning checkout directory for newly created and modified files...
 ACTIVITY STARTED: Swabra
 ACTIVITY FINISHED: Swabra
-MESSAGE: Saving state of checkout directory ##BASE_DIR##
-MESSAGE: Finished saving state of checkout directory ##BASE_DIR##
+MESSAGE: Swabra: Finished scanning checkout directory for newly created and modified files: 1 object(s) deleted, 1 object(s) detected modified
+MESSAGE: Swabra: Saving state of checkout directory ##BASE_DIR##
+MESSAGE: Swabra: Finished saving state of checkout directory ##BASE_DIR##
+MESSAGE: Swabra: Scanning checkout directory for newly created and modified files...
 ACTIVITY STARTED: Swabra
 MESSAGE: Deleting ##BASE_DIR##\created
 MESSAGE: Detected modified ##BASE_DIR##\modified
 ACTIVITY FINISHED: Swabra
+MESSAGE: Swabra: Finished scanning checkout directory for newly created and modified files: 1 object(s) deleted, 1 object(s) detected modified
