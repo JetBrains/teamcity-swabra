@@ -51,7 +51,16 @@ public final class Snapshot {
     }
   }
 
+  public File getCheckoutDir() {
+    return myCheckoutDir;
+  }
+
   public void snapshot(@NotNull SwabraLogger logger, boolean verbose) {
+    if (myCheckoutDir == null || !myCheckoutDir.isDirectory()) {
+      logger.debug("Swabra: Unable to save directory state, illegal checkout directory - "
+                    + ((myCheckoutDir == null) ? "null" : myCheckoutDir.getAbsolutePath()), false);
+      return;
+    }
     final File snapshot = new File(myTempDir, myCheckoutDir.getName() + ".snapshot");
     logger.log("Swabra: Saving state of checkout directory " + myCheckoutDir + " to snapshot file " + snapshot.getAbsolutePath(), true);
     BufferedWriter snapshotWriter = null;
@@ -103,11 +112,16 @@ public final class Snapshot {
       + file.length() +  SEPARATOR + file.lastModified() + "\n");
   }
 
-  public void collect(@NotNull SwabraLogger logger, boolean verbose) {
+  public boolean collect(@NotNull SwabraLogger logger, boolean verbose) {
+    if (myCheckoutDir == null || !myCheckoutDir.isDirectory()) {
+      logger.debug("Unable to collect garbage, illegal checkout directory - "
+                    + ((myCheckoutDir == null) ? "null" : myCheckoutDir.getAbsolutePath()), false);
+      return false;
+    }    
     final File snapshot = new File(myTempDir, myCheckoutDir.getName() + ".snapshot");
     if (!snapshot.exists() || (snapshot.length() == 0)) {
       logUnableCollect(logger, verbose, snapshot, null, "file doesn't exist");
-      return;
+      return false;
     }
     myFiles = new HashMap<String, FileInfo>();
     BufferedReader snapshotReader = null;
@@ -130,9 +144,10 @@ public final class Snapshot {
         }
         fileRecord = snapshotReader.readLine();
       }
+      collectFiles(myCheckoutDir, logger, verbose);
     } catch (Exception e) {
       logUnableCollect(logger, verbose, snapshot, e, "exception when reading from file");
-      return;
+      return false;
     } finally {
       try {
         if (snapshotReader != null) {
@@ -142,11 +157,15 @@ public final class Snapshot {
           logger.warn("Swabra: Unable to remove snapshot file " + snapshot.getAbsolutePath()
                     + " for directory " + myCheckoutDir.getAbsolutePath(), verbose);
         }
+        myAppeared.clear();
+        myModified.clear();
+        myFiles.clear();
       } catch (Exception e) {
         logUnableCollect(logger, verbose, snapshot, e, "exception when closing file");
+        return false;
       }
     }
-    collectFiles(myCheckoutDir, logger, verbose);
+    return true;
   }
 
   private void logUnableCollect(SwabraLogger logger, boolean verbose, File snapshot, Exception e, String message) {
@@ -167,8 +186,6 @@ public final class Snapshot {
     logger.log("Swabra: Finished scanning checkout directory " + myCheckoutDir + " for newly created and modified files: "
                 + myAppeared.size() + " object(s) deleted, " +
                 + myModified.size() + " object(s) detected modified", true);
-    myAppeared.clear();
-    myModified.clear();
   }
 
   private void collect(@NotNull final File dir, @NotNull SwabraLogger logger) {
