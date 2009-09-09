@@ -57,7 +57,7 @@ public final class SwabraLogger {
   public void debug(@NotNull final String message, boolean useBuildLog) {
     myClassLogger.debug(message);
     if (useBuildLog) {
-      myBuildLogger.message(message);      
+      myBuildLogger.message(message);
     }
   }
 

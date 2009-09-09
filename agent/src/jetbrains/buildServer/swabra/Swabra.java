@@ -21,6 +21,7 @@ package jetbrains.buildServer.swabra;
  * Date: 14.04.2009
  * Time: 14:10:58
  */
+
 import jetbrains.buildServer.agent.*;
 import jetbrains.buildServer.util.EventDispatcher;
 import org.jetbrains.annotations.NotNull;
@@ -39,7 +40,7 @@ public final class Swabra extends AgentLifeCycleAdapter {
 
   private String myMode;
   private boolean myVerbose;
-  private Snapshot mySnapshot; 
+  private Snapshot mySnapshot;
 
   Map<File, String> myPrevModes = new HashMap<File, String>();
 
@@ -62,7 +63,7 @@ public final class Swabra extends AgentLifeCycleAdapter {
     myLogger = new SwabraLogger(runningBuild.getBuildLogger(), Logger.getLogger(Swabra.class));
     myVerbose = isVerbose(runnerParams);
     String mode = getSwabraMode(runnerParams);
-    final File checkoutDir =  runningBuild.getCheckoutDirectory();
+    final File checkoutDir = runningBuild.getCheckoutDirectory();
     myMode = myPrevModes.get(checkoutDir);
     try {
       if (!isEnabled(mode)) {
@@ -78,18 +79,22 @@ public final class Swabra extends AgentLifeCycleAdapter {
         myDirectoryCleaner.cleanFolder(checkoutDir, new SmartDirectoryCleanerCallback() {
           public void logCleanStarted(File dir) {
             myLogger.log("Swabra: Need a valid checkout directory snapshot - forcing clean checkout for " +
-                          dir, true);
+              dir, true);
           }
+
           public void logFailedToDeleteEmptyDirectory(File dir) {
             myLogger.debug("Swabra: Failed to delete empty checkout directory " + dir.getAbsolutePath(), true);
           }
+
           public void logFailedToCleanFilesUnderDirectory(File dir) {
             myLogger.debug("Swabra: Failed to delete files in directory " + dir.getAbsolutePath(), true);
 
           }
+
           public void logFailedToCleanFile(File file) {
             myLogger.debug("Swabra: Failed to delete file " + file.getAbsolutePath(), true);
           }
+
           public void logFailedToCleanEntireFolder(File dir) {
             myLogger.debug("Swabra: Failed to delete directory " + dir.getAbsolutePath(), true);
           }
@@ -109,7 +114,7 @@ public final class Swabra extends AgentLifeCycleAdapter {
       } else if (AFTER_BUILD.equals(mode) && BEFORE_BUILD.equals(myMode)) {
         // mode setting changed from "before build" to "after build"
         myLogger.debug("Swabra: Swabra mode setting changed from \"before build\" to \"after build\", " +
-                    "need to perform build garbage clean up once before build", false);
+          "need to perform build garbage clean up once before build", false);
         if (!mySnapshot.collect(myLogger, false)) {
           logFailedCollect(checkoutDir);
           mode = null;
@@ -122,7 +127,8 @@ public final class Swabra extends AgentLifeCycleAdapter {
   }
 
   private void logFailedCollect(File checkoutDir) {
-    myLogger.warn("Swabra: Couldn't collect files for " + checkoutDir + " - will terminate till the end of the build and force clean checkout at next build start", true);
+    myLogger.warn("Swabra: Couldn't collect files for " + checkoutDir +
+      " - will terminate till the end of the build and force clean checkout at next build start", true);
   }
 
   public void beforeRunnerStart(@NotNull final AgentRunningBuild runningBuild) {
@@ -143,7 +149,7 @@ public final class Swabra extends AgentLifeCycleAdapter {
 
   private void logSettings(String mode, String checkoutDir, boolean verbose) {
     myLogger.debug("Swabra settings: mode = '" + mode +
-                "', checkoutDir = " + checkoutDir +
-                "', verbose = '" + verbose + "'.", false);
+      "', checkoutDir = " + checkoutDir +
+      "', verbose = '" + verbose + "'.", false);
   }
 }

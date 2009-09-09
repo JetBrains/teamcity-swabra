@@ -30,10 +30,11 @@ import java.util.ArrayList;
  * Time: 17:09:05
  */
 public final class Snapshot {
-  private static final String SEPARATOR = "\t"; 
+  private static final String SEPARATOR = "\t";
 
   private final File myTempDir;
   private final File myCheckoutDir;
+  private final File mySnapshot;
   private String myCheckoutDirParent;
 
   private Map<String, FileInfo> myFiles;
@@ -47,8 +48,9 @@ public final class Snapshot {
     myCheckoutDir = checkoutDir;
     myCheckoutDirParent = myCheckoutDir.getParent();
     if (myCheckoutDirParent.endsWith(File.separator)) {
-      myCheckoutDirParent = myCheckoutDirParent.substring(0, myCheckoutDirParent.length() - 1);      
+      myCheckoutDirParent = myCheckoutDirParent.substring(0, myCheckoutDirParent.length() - 1);
     }
+    mySnapshot = new File(myTempDir, myCheckoutDir.getName() + ".snapshot");
   }
 
   public File getCheckoutDir() {
@@ -58,22 +60,21 @@ public final class Snapshot {
   public void snapshot(@NotNull SwabraLogger logger, boolean verbose) {
     if (myCheckoutDir == null || !myCheckoutDir.isDirectory()) {
       logger.debug("Swabra: Unable to save directory state, illegal checkout directory - "
-                    + ((myCheckoutDir == null) ? "null" : myCheckoutDir.getAbsolutePath()), false);
+        + ((myCheckoutDir == null) ? "null" : myCheckoutDir.getAbsolutePath()), false);
       return;
     }
-    final File snapshot = new File(myTempDir, myCheckoutDir.getName() + ".snapshot");
-    logger.log("Swabra: Saving state of checkout directory " + myCheckoutDir + " to snapshot file " + snapshot.getAbsolutePath(), true);
+    logger.log("Swabra: Saving state of checkout directory " + myCheckoutDir + " to snapshot file " + mySnapshot.getAbsolutePath(), true);
     BufferedWriter snapshotWriter = null;
     try {
-      snapshotWriter = new BufferedWriter(new FileWriter(snapshot));
-      snapshotWriter.write(myCheckoutDirParent + File.separator + "\n");
+      snapshotWriter = new BufferedWriter(new FileWriter(mySnapshot));
+      snapshotWriter.write(myCheckoutDirParent + File.separator + "\r\n");
       snapshotWriter.write(myCheckoutDir.getName() + File.separator + SEPARATOR
-        + myCheckoutDir.length() +  SEPARATOR + myCheckoutDir.lastModified() + "\n");
+        + myCheckoutDir.length() + SEPARATOR + myCheckoutDir.lastModified() + "\r\n");
       saveState(myCheckoutDir, snapshotWriter);
-      logger.log("Swabra: Finished saving state of checkout directory " + myCheckoutDir + " to snapshot file " + snapshot.getAbsolutePath(), true);
+      logger.log("Swabra: Finished saving state of checkout directory " + myCheckoutDir + " to snapshot file " + mySnapshot.getAbsolutePath(), true);
     } catch (Exception e) {
       logger.warn("Swabra: Unable to save checkout directory " + myCheckoutDir.getAbsolutePath()
-                    + " snapshot to file " + snapshot.getAbsolutePath(), true);
+        + " snapshot to file " + mySnapshot.getAbsolutePath(), true);
       logger.exception(e);
     } finally {
       try {
@@ -86,7 +87,7 @@ public final class Snapshot {
     }
   }
 
-  private void saveState(@NotNull File dir, @NotNull BufferedWriter snapshotWriter)  throws Exception {
+  private void saveState(@NotNull File dir, @NotNull BufferedWriter snapshotWriter) throws Exception {
     final File[] files = dir.listFiles();
     if (files == null || files.length == 0) return;
     final List<File> dirs = new ArrayList<File>();
@@ -109,24 +110,23 @@ public final class Snapshot {
     fPath = isDir ? fPath.substring(fPath.indexOf(myCheckoutDirParent) + myCheckoutDirParent.length() + 1) : file.getName(); //+1 for trailing slash
     final String trailingSlash = isDir ? File.separator : "";
     snapshotWriter.write(fPath + trailingSlash + SEPARATOR
-      + file.length() +  SEPARATOR + file.lastModified() + "\n");
+      + file.length() + SEPARATOR + file.lastModified() + "\r\n");
   }
 
   public boolean collect(@NotNull SwabraLogger logger, boolean verbose) {
     if (myCheckoutDir == null || !myCheckoutDir.isDirectory()) {
       logger.debug("Unable to collect garbage, illegal checkout directory - "
-                    + ((myCheckoutDir == null) ? "null" : myCheckoutDir.getAbsolutePath()), false);
+        + ((myCheckoutDir == null) ? "null" : myCheckoutDir.getAbsolutePath()), false);
       return false;
-    }    
-    final File snapshot = new File(myTempDir, myCheckoutDir.getName() + ".snapshot");
-    if (!snapshot.exists() || (snapshot.length() == 0)) {
-      logUnableCollect(logger, verbose, snapshot, null, "file doesn't exist");
+    }
+    if (!mySnapshot.exists() || (mySnapshot.length() == 0)) {
+      logUnableCollect(logger, verbose, mySnapshot, null, "file doesn't exist");
       return false;
     }
     myFiles = new HashMap<String, FileInfo>();
     BufferedReader snapshotReader = null;
     try {
-      snapshotReader = new BufferedReader(new FileReader(snapshot));
+      snapshotReader = new BufferedReader(new FileReader(mySnapshot));
       final String parentDir = snapshotReader.readLine();
       String currentDir = "";
       String fileRecord = snapshotReader.readLine();
@@ -135,7 +135,7 @@ public final class Snapshot {
         final int secondSeparator = fileRecord.indexOf(SEPARATOR, firstSeparator + 1);
         final String path = fileRecord.substring(0, firstSeparator);
         final FileInfo fi = new FileInfo(Long.parseLong(fileRecord.substring(firstSeparator + 1, secondSeparator)),
-                                         Long.parseLong(fileRecord.substring(secondSeparator + 1)));
+          Long.parseLong(fileRecord.substring(secondSeparator + 1)));
         if (path.endsWith(File.separator)) {
           currentDir = parentDir + path;
           myFiles.put(currentDir.substring(0, currentDir.length() - 1), fi);
@@ -146,22 +146,22 @@ public final class Snapshot {
       }
       collectFiles(myCheckoutDir, logger, verbose);
     } catch (Exception e) {
-      logUnableCollect(logger, verbose, snapshot, e, "exception when reading from file");
+      logUnableCollect(logger, verbose, mySnapshot, e, "exception when reading from file");
       return false;
     } finally {
       try {
         if (snapshotReader != null) {
           snapshotReader.close();
         }
-        if (!snapshot.delete()) {
-          logger.warn("Swabra: Unable to remove snapshot file " + snapshot.getAbsolutePath()
-                    + " for directory " + myCheckoutDir.getAbsolutePath(), verbose);
+        if (!mySnapshot.delete()) {
+          logger.warn("Swabra: Unable to remove snapshot file " + mySnapshot.getAbsolutePath()
+            + " for directory " + myCheckoutDir.getAbsolutePath(), verbose);
         }
         myAppeared.clear();
         myModified.clear();
         myFiles.clear();
       } catch (Exception e) {
-        logUnableCollect(logger, verbose, snapshot, e, "exception when closing file");
+        logUnableCollect(logger, verbose, mySnapshot, e, "exception when closing file");
         return false;
       }
     }
@@ -170,8 +170,8 @@ public final class Snapshot {
 
   private void logUnableCollect(SwabraLogger logger, boolean verbose, File snapshot, Exception e, String message) {
     logger.warn("Swabra: Unable to collect files in checkout directory " + myCheckoutDir.getAbsolutePath()
-                  + " from snapshot file " + snapshot.getAbsolutePath() +
-                    ((message != null ? ", " + message : "")), verbose);
+      + " from snapshot file " + snapshot.getAbsolutePath() +
+      ((message != null ? ", " + message : "")), verbose);
     if (e != null) {
       logger.exception(e);
     }
@@ -184,8 +184,8 @@ public final class Snapshot {
     logTotals(logger, verbose);
     logger.activityFinished();
     logger.log("Swabra: Finished scanning checkout directory " + myCheckoutDir + " for newly created and modified files: "
-                + myAppeared.size() + " object(s) deleted, " +
-                + myModified.size() + " object(s) detected modified", true);
+      + myAppeared.size() + " object(s) deleted, " +
+      +myModified.size() + " object(s) detected modified", true);
   }
 
   private void collect(@NotNull final File dir, @NotNull SwabraLogger logger) {
@@ -203,7 +203,7 @@ public final class Snapshot {
           logger.debug("Swabra: Unable to delete previous build garbage " + file.getAbsolutePath(), false);
         }
       } else if ((file.lastModified() != info.getLastModified()) ||
-                  file.length() != info.getLength()) {
+        file.length() != info.getLength()) {
         myModified.add(file);
         if (file.isDirectory()) {
           //directory's content is supposed to be modified
@@ -252,5 +252,5 @@ public final class Snapshot {
     public long getLength() {
       return myLength;
     }
-  }  
+  }
 }
