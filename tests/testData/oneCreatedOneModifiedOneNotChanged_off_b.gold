@@ -1,3 +1,3 @@
 MESSAGE: Swabra: It is the first build with Swabra turned on - forcing clean checkout for ##BASE_DIR##
-MESSAGE: Swabra: Saving state of checkout directory ##BASE_DIR##
-MESSAGE: Swabra: Finished saving state of checkout directory ##BASE_DIR##
+MESSAGE: Swabra: Saving state of checkout directory ##BASE_DIR## to snapshot file ##BASE_DIR##.snapshot
+MESSAGE: Swabra: Finished saving state of checkout directory ##BASE_DIR## to snapshot file ##BASE_DIR##.snapshot

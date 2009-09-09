@@ -52,8 +52,8 @@ public final class Snapshot {
   }
 
   public void snapshot(@NotNull SwabraLogger logger, boolean verbose) {
-    logger.log("Swabra: Saving state of checkout directory " + myCheckoutDir, true);
     final File snapshot = new File(myTempDir, myCheckoutDir.getName() + ".snapshot");
+    logger.log("Swabra: Saving state of checkout directory " + myCheckoutDir + " to snapshot file " + snapshot.getAbsolutePath(), true);
     BufferedWriter snapshotWriter = null;
     try {
       snapshotWriter = new BufferedWriter(new FileWriter(snapshot));
@@ -61,7 +61,7 @@ public final class Snapshot {
       snapshotWriter.write(myCheckoutDir.getName() + File.separator + SEPARATOR
         + myCheckoutDir.length() +  SEPARATOR + myCheckoutDir.lastModified() + "\n");
       saveState(myCheckoutDir, snapshotWriter);
-      logger.log("Swabra: Finished saving state of checkout directory " + myCheckoutDir, true);
+      logger.log("Swabra: Finished saving state of checkout directory " + myCheckoutDir + " to snapshot file " + snapshot.getAbsolutePath(), true);
     } catch (Exception e) {
       logger.warn("Swabra: Unable to save checkout directory " + myCheckoutDir.getAbsolutePath()
                     + " snapshot to file " + snapshot.getAbsolutePath(), true);
@@ -159,12 +159,12 @@ public final class Snapshot {
   }
 
   private void collectFiles(@NotNull final File dir, @NotNull final SwabraLogger logger, boolean verbose) {
-    logger.log("Swabra: Scanning checkout directory for newly created and modified files...", true);
+    logger.log("Swabra: Scanning checkout directory " + myCheckoutDir + " for newly created and modified files...", true);
     logger.activityStarted();
     collect(dir, logger);
     logTotals(logger, verbose);
     logger.activityFinished();
-    logger.log("Swabra: Finished scanning checkout directory for newly created and modified files: "
+    logger.log("Swabra: Finished scanning checkout directory " + myCheckoutDir + " for newly created and modified files: "
                 + myAppeared.size() + " object(s) deleted, " +
                 + myModified.size() + " object(s) detected modified", true);
     myAppeared.clear();

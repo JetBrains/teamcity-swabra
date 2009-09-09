@@ -71,6 +71,8 @@ public class SwabraTest extends TestCase {
         will(returnValue(checkoutDir));
         allowing(runningBuild).isCleanBuild();
         will(returnValue(false));
+        allowing(runningBuild).getAgentTempDirectory();
+        will(returnValue(checkoutDir.getParentFile()));
       }
     });
   }

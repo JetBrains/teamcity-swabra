@@ -75,7 +75,8 @@ public final class Swabra extends AgentLifeCycleAdapter {
         return;
       }
       if (needFullCleanup(myMode)) {
-        mySnapshotDir = new File(runningBuild.getBuildParameters().getSystemProperties().get(WORK_DIR_PROP));
+//        mySnapshotDir = new File(runningBuild.getBuildParameters().getSystemProperties().get(WORK_DIR_PROP));
+        mySnapshotDir = runningBuild.getAgentTempDirectory();
         myDirectoryCleaner.cleanFolder(checkoutDir, new SmartDirectoryCleanerCallback() {
           public void logCleanStarted(File dir) {
             myLogger.log("Swabra: It is the first build with Swabra turned on - forcing clean checkout for " +
