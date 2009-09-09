@@ -3,7 +3,7 @@ MESSAGE: Swabra: Saving state of checkout directory ##BASE_DIR## to snapshot fil
 MESSAGE: Swabra: Finished saving state of checkout directory ##BASE_DIR## to snapshot file ##BASE_DIR##.snapshot
 MESSAGE: Swabra: Scanning checkout directory ##BASE_DIR## for newly created and modified files...
 ACTIVITY STARTED: Swabra
-MESSAGE: No garbage or modified files detected
+MESSAGE: No newly created or modified files detected
 ACTIVITY FINISHED: Swabra
 MESSAGE: Swabra: Finished scanning checkout directory ##BASE_DIR## for newly created and modified files: 0 object(s) deleted, 0 object(s) detected modified
 MESSAGE: Swabra: Saving state of checkout directory ##BASE_DIR## to snapshot file ##BASE_DIR##.snapshot

@@ -103,9 +103,9 @@ public final class Swabra extends AgentLifeCycleAdapter {
       }
       if (BEFORE_BUILD.equals(mode)) {
         if (AFTER_BUILD.equals(myMode)) {
-          myLogger.debug("Swabra: Will not perform build garbage cleanup, as it occured on previous build finish", false);
+          myLogger.debug("Swabra: Will not perform files cleanup, as it occured on previous build finish", false);
         } else {
-          myLogger.debug("Swabra: Previous build garbage cleanup is performed before build", false);
+          myLogger.debug("Swabra: Previous build files cleanup is performed before build", false);
           if (!mySnapshot.collect(myLogger, myVerbose)) {
             logFailedCollect(checkoutDir);
             mode = null;
@@ -114,7 +114,7 @@ public final class Swabra extends AgentLifeCycleAdapter {
       } else if (AFTER_BUILD.equals(mode) && BEFORE_BUILD.equals(myMode)) {
         // mode setting changed from "before build" to "after build"
         myLogger.debug("Swabra: Swabra mode setting changed from \"before build\" to \"after build\", " +
-          "need to perform build garbage clean up once before build", false);
+          "need to perform build files clean up once before build", false);
         if (!mySnapshot.collect(myLogger, false)) {
           logFailedCollect(checkoutDir);
           mode = null;
@@ -136,9 +136,15 @@ public final class Swabra extends AgentLifeCycleAdapter {
     mySnapshot.snapshot(myLogger, myVerbose);
   }
 
+  public void beforeBuildFinish(@NotNull final BuildFinishedStatus buildStatus) {
+    if (AFTER_BUILD.equals(myMode)) {
+      myLogger.debug("Swabra: Build files cleanup will be performed after build", true);
+    }
+  }
+  
   public void buildFinished(@NotNull final BuildFinishedStatus buildStatus) {
     if (AFTER_BUILD.equals(myMode)) {
-      myLogger.debug("Swabra: Build garbage cleanup is performed after build", false);
+      myLogger.debug("Swabra: Build files cleanup is performed after build", false);
       if (!mySnapshot.collect(myLogger, myVerbose)) {
         final File checkoutDir = mySnapshot.getCheckoutDir();
         logFailedCollect(checkoutDir);

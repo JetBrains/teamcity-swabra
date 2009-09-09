@@ -115,7 +115,7 @@ public final class Snapshot {
 
   public boolean collect(@NotNull SwabraLogger logger, boolean verbose) {
     if (myCheckoutDir == null || !myCheckoutDir.isDirectory()) {
-      logger.debug("Unable to collect garbage, illegal checkout directory - "
+      logger.debug("Unable to collect files, illegal checkout directory - "
         + ((myCheckoutDir == null) ? "null" : myCheckoutDir.getAbsolutePath()), false);
       return false;
     }
@@ -200,7 +200,7 @@ public final class Snapshot {
           collect(file, logger);
         }
         if (!file.delete()) {
-          logger.debug("Swabra: Unable to delete previous build garbage " + file.getAbsolutePath(), false);
+          logger.debug("Swabra: Unable to delete file created during previous build " + file.getAbsolutePath(), false);
         }
       } else if ((file.lastModified() != info.getLastModified()) ||
         file.length() != info.getLength()) {
@@ -228,7 +228,7 @@ public final class Snapshot {
       }
     }
     if (prefix == null) {
-      logger.debug("No garbage or modified files detected", verbose);
+      logger.debug("No newly created or modified files detected", verbose);
     }
   }
 
