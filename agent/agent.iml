@@ -2,13 +2,7 @@
 <module relativePaths="true" type="JAVA_MODULE" version="4">
   <component name="FacetManager">
     <facet type="Spring" name="Spring">
-      <configuration>
-        <options>
-          <option name="enableValidation" value="false" />
-          <option name="reportErrorsAsWarnings" value="true" />
-        </options>
-        <customNs />
-      </configuration>
+      <configuration />
     </facet>
   </component>
   <component name="NewModuleRootManager" inherit-compiler-output="true">
@@ -22,7 +16,8 @@
     <orderEntry type="library" name="TeamCity-utils" level="project" />
     <orderEntry type="library" name="TeamCity-common" level="project" />
     <orderEntry type="module" module-name="common" />
-    <orderEntryProperties />
+    <orderEntry type="library" name="Log4J" level="project" />
+    <orderEntry type="library" name="TeamCity-agent-non-openapi" level="project" />
   </component>
 </module>
 

@@ -40,9 +40,9 @@ public final class Swabra extends AgentLifeCycleAdapter {
 
   private String myMode;
   private boolean myVerbose;
-  private Snapshot mySnapshot;
+  private volatile Snapshot mySnapshot;
 
-  Map<File, String> myPrevModes = new HashMap<File, String>();
+  private volatile Map<File, PreviousCleanupInfo> myPrevModes = new HashMap<File, PreviousCleanupInfo>();
 
   private static boolean isEnabled(final String currMode) {
     return BEFORE_BUILD.equals(currMode) || AFTER_BUILD.equals(currMode);
@@ -64,7 +64,20 @@ public final class Swabra extends AgentLifeCycleAdapter {
     myVerbose = isVerbose(runnerParams);
     String mode = getSwabraMode(runnerParams);
     final File checkoutDir = runningBuild.getCheckoutDirectory();
-    myMode = myPrevModes.get(checkoutDir);
+    final PreviousCleanupInfo info = myPrevModes.get(checkoutDir);
+    if (info != null) {
+      final Thread t = info.getWorkingThread();
+      if ((t != null) && t.isAlive()) {
+        myLogger.log("Waiting for Swabra to cleanup previous build files", true);
+        try {
+          t.join();
+        } catch (InterruptedException e) {
+          myLogger.log("Swabra: Interrupted while waiting for previous build files cleanup", true);
+          myLogger.exception(e);
+        }
+      }
+      myMode = info.getMode();
+    }
     try {
       if (!isEnabled(mode)) {
         myLogger.debug("Swabra is disabled", false);
@@ -122,11 +135,11 @@ public final class Swabra extends AgentLifeCycleAdapter {
       }
     } finally {
       myMode = mode;
-      myPrevModes.put(checkoutDir, myMode);
+      myPrevModes.put(checkoutDir, new PreviousCleanupInfo(myMode));
     }
   }
 
-  private void logFailedCollect(File checkoutDir) {
+  private synchronized void logFailedCollect(File checkoutDir) {
     myLogger.warn("Swabra: Couldn't collect files for " + checkoutDir +
       " - will terminate till the end of the build and force clean checkout at next build start", true);
   }
@@ -145,11 +158,17 @@ public final class Swabra extends AgentLifeCycleAdapter {
   public void buildFinished(@NotNull final BuildFinishedStatus buildStatus) {
     if (AFTER_BUILD.equals(myMode)) {
       myLogger.debug("Swabra: Build files cleanup is performed after build", false);
-      if (!mySnapshot.collect(myLogger, myVerbose)) {
-        final File checkoutDir = mySnapshot.getCheckoutDir();
-        logFailedCollect(checkoutDir);
-        myPrevModes.put(checkoutDir, null);
-      }
+      final File checkoutDir = mySnapshot.getCheckoutDir();
+      final Thread t = new Thread(new Runnable() {
+        public void run() {
+          if (!mySnapshot.collect(myLogger, myVerbose)) {
+            logFailedCollect(checkoutDir);
+            myPrevModes.put(checkoutDir, null);
+          }
+        }
+      });
+      myPrevModes.get(checkoutDir).setWorkingThread(t);
+      t.start();
     }
   }
 
@@ -157,5 +176,26 @@ public final class Swabra extends AgentLifeCycleAdapter {
     myLogger.debug("Swabra settings: mode = '" + mode +
       "', checkoutDir = " + checkoutDir +
       "', verbose = '" + verbose + "'.", false);
+  }
+
+  private static class PreviousCleanupInfo {
+    private final String myMode;
+    private Thread myWorkingThread;
+
+    public PreviousCleanupInfo(String mode) {
+      myMode = mode;
+    }
+
+    public void setWorkingThread(@NotNull Thread workingThread) {
+      myWorkingThread = workingThread;
+    }
+
+    public String getMode() {
+      return myMode;
+    }
+
+    public Thread getWorkingThread() {
+      return myWorkingThread;
+    }
   }
 }

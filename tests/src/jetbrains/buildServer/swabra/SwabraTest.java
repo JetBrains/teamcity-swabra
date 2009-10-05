@@ -91,7 +91,7 @@ public class SwabraTest extends TestCase {
   private SmartDirectoryCleaner createSmartDirectoryCleaner() {
     return new SmartDirectoryCleaner() {
       public void cleanFolder(@NotNull File file, @NotNull SmartDirectoryCleanerCallback callback) {
-        callback.logCleanStarted(file);
+        callback.logCleanStarted(file);                                
         if (!FileUtil.delete(file)) {
           callback.logFailedToCleanEntireFolder(file);
         }
@@ -174,17 +174,20 @@ public class SwabraTest extends TestCase {
     FileUtil.copyDir(getTestData(dirName + File.separator + BEFORE_BUILD, null), myCheckoutDir);
     FileUtil.delete(new File(checkoutDirPath + File.separator + ".svn"));
     dispatcher.getMulticaster().buildStarted(build);
+    Thread.sleep(5000);
     cleanCheckoutDir();
 
     FileUtil.copyDir(getTestData(dirName + File.separator + AFTER_CHECKOUT, null), myCheckoutDir);
     FileUtil.delete(new File(checkoutDirPath + File.separator + ".svn"));
     dispatcher.getMulticaster().beforeRunnerStart(build);
     dispatcher.getMulticaster().beforeBuildFinish(BuildFinishedStatus.FINISHED_SUCCESS);
+    Thread.sleep(5000);
     cleanCheckoutDir();
 
     FileUtil.copyDir(getTestData(dirName + File.separator + AFTER_BUILD, null), myCheckoutDir);
     FileUtil.delete(new File(checkoutDirPath + File.separator + ".svn"));
     dispatcher.getMulticaster().buildFinished(BuildFinishedStatus.FINISHED_SUCCESS);
+    Thread.sleep(5000);
 
     myContext.assertIsSatisfied();
     setAgentRunningBuildParams(build, secondCallParams, myBuildParams, myCheckoutDir, logger);
@@ -192,17 +195,20 @@ public class SwabraTest extends TestCase {
     FileUtil.copyDir(getTestData(dirName + File.separator + BEFORE_BUILD, null), myCheckoutDir);
     FileUtil.delete(new File(checkoutDirPath + File.separator + ".svn"));
     dispatcher.getMulticaster().buildStarted(build);
+    Thread.sleep(5000);
     cleanCheckoutDir();
 
     FileUtil.copyDir(getTestData(dirName + File.separator + AFTER_CHECKOUT, null), myCheckoutDir);
     FileUtil.delete(new File(checkoutDirPath + File.separator + ".svn"));
     dispatcher.getMulticaster().beforeRunnerStart(build);
     dispatcher.getMulticaster().beforeBuildFinish(BuildFinishedStatus.FINISHED_SUCCESS);
+    Thread.sleep(5000);
     cleanCheckoutDir();
 
     FileUtil.copyDir(getTestData(dirName + File.separator + AFTER_BUILD, null), myCheckoutDir);
     FileUtil.delete(new File(checkoutDirPath + File.separator + ".svn"));
     dispatcher.getMulticaster().buildFinished(BuildFinishedStatus.FINISHED_SUCCESS);
+    Thread.sleep(5000);
 
     myContext.assertIsSatisfied();
 
@@ -235,8 +241,8 @@ public class SwabraTest extends TestCase {
   private void cleanCheckoutDir() {
     final File[] files = myCheckoutDir.listFiles();
     if (files != null && files.length != 0) {
-      for (int i = 0; i < files.length; ++i) {
-        FileUtil.delete(files[i]);
+      for (File file : files) {
+        FileUtil.delete(file);
       }
     }
   }
