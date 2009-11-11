@@ -210,6 +210,10 @@ public final class Snapshot {
           collect(file, logger);
         }
       }
+      if (file.isDirectory()) {
+        //yet no nothing about directory's content, so dig into
+        collect(file, logger);
+      }
     }
   }
 
