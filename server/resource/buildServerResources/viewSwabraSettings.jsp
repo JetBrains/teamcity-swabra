@@ -37,7 +37,9 @@
         </c:choose>
       </div>
     </c:when>
+</c:choose>
 
+<c:choose>
   <c:when test="${propertiesBean.properties['swabra.mode'] == 'swabra.before.build'}">
     <div class="parameter">
       Verbose output:
