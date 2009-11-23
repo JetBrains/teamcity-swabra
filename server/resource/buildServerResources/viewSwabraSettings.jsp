@@ -24,6 +24,20 @@
 </c:choose>
 
 <c:choose>
+    <c:when test="${not empty propertiesBean.properties['swabra.mode']}">
+      <div class="parameter">
+        Strict mode:
+        <c:choose>
+          <c:when test="${propertiesBean.properties['swabra.strict']}">
+            <strong>enabled</strong>
+          </c:when>
+          <c:otherwise>
+            <strong>disabled</strong>
+          </c:otherwise>
+        </c:choose>
+      </div>
+    </c:when>
+
   <c:when test="${propertiesBean.properties['swabra.mode'] == 'swabra.before.build'}">
     <div class="parameter">
       Verbose output:

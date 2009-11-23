@@ -40,30 +40,32 @@ public final class SwabraLogger {
     myClassLogger = classLogger;
   }
 
-  public void log(@NotNull final String message, boolean useBuildLog) {
+  public void message(@NotNull final String message, boolean useBuildLog) {
     myClassLogger.info(message);
     if (useBuildLog) {
       myBuildLogger.message(message);
     }
   }
 
-  public void warn(@NotNull final String message, boolean useBuildLog) {
+  public void warn(@NotNull final String message) {
     myClassLogger.warn(message);
-    if (useBuildLog) {
-      myBuildLogger.warning(message);
-    }
+    myBuildLogger.warning(message);
   }
 
-  public void debug(@NotNull final String message, boolean useBuildLog) {
+  public void error(@NotNull final String message) {
+    myClassLogger.error(message);
+    myBuildLogger.error(message);
+  }
+
+  public void debug(@NotNull final String message) {
     myClassLogger.debug(message);
-    if (useBuildLog) {
-      myBuildLogger.message(message);
-    }
   }
 
-  public void exception(@NotNull Throwable e) {
-    myBuildLogger.exception(e);
+  public void exception(@NotNull Throwable e, boolean useBuildLog) {
     myClassLogger.warn(e.getMessage(), e);
+    if (useBuildLog) {
+      myBuildLogger.exception(e);
+    }
   }
 
   public void activityStarted() {

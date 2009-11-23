@@ -28,6 +28,7 @@ import java.util.*;
 public class SwabraUtil {
   public static final String MODE = "swabra.mode";
   public static final String VERBOSE = "swabra.verbose";
+  public static final String STRICT = "swabra.strict";
 
   public static final String AFTER_BUILD = "swabra.after.build";
   public static final String BEFORE_BUILD = "swabra.before.build";
@@ -54,5 +55,9 @@ public class SwabraUtil {
 
   public static boolean isVerbose(@NotNull final Map<String, String> params) {
     return params.containsKey(VERBOSE) && isSwabraEnabled(params);
+  }
+
+  public static boolean isStrict(@NotNull final Map<String, String> params) {
+    return params.containsKey(STRICT) && isSwabraEnabled(params);
   }
 }

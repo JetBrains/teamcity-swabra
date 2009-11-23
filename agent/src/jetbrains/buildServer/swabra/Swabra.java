@@ -28,28 +28,30 @@ import org.jetbrains.annotations.NotNull;
 import static jetbrains.buildServer.swabra.SwabraUtil.*;
 import org.apache.log4j.Logger;
 
-import java.io.File;
+import java.io.*;
 import java.util.*;
 
 
 public final class Swabra extends AgentLifeCycleAdapter {
+  public static final String CACHE_KEY = "swabra";
   public static final String WORK_DIR_PROP = "agent.work.dir";
 
   private SwabraLogger myLogger;
   private SmartDirectoryCleaner myDirectoryCleaner;
 
+  private SwabraPropertiesProcessor myPropertiesProcessor;
+  private Snapshot mySnapshot;
+
   private String myMode;
   private boolean myVerbose;
-  private volatile Snapshot mySnapshot;
+  private boolean myStrict;
 
-  private volatile Map<File, PreviousCleanupInfo> myPrevModes = new HashMap<File, PreviousCleanupInfo>();
+  private File myCheckoutDir;
 
-  private static boolean isEnabled(final String currMode) {
-    return BEFORE_BUILD.equals(currMode) || AFTER_BUILD.equals(currMode);
-  }
+  private Map<File, Thread> myPrevThreads = new HashMap<File, Thread>();
 
-  private static boolean needFullCleanup(final String prevMode) {
-    return !isEnabled(prevMode);
+  private static boolean isEnabled(final String mode) {
+    return BEFORE_BUILD.equals(mode) || AFTER_BUILD.equals(mode);
   }
 
   public Swabra(@NotNull final EventDispatcher<AgentLifeCycleListener> agentDispatcher,
@@ -59,115 +61,97 @@ public final class Swabra extends AgentLifeCycleAdapter {
   }
 
   public void buildStarted(@NotNull final AgentRunningBuild runningBuild) {
-    final Map<String, String> runnerParams = runningBuild.getRunnerParameters();
-    myLogger = new SwabraLogger(runningBuild.getBuildLogger(), Logger.getLogger(Swabra.class));
-    myVerbose = isVerbose(runnerParams);
-    String mode = getSwabraMode(runnerParams);
+    final SwabraLogger logger = new SwabraLogger(runningBuild.getBuildLogger(), Logger.getLogger(Swabra.class));
     final File checkoutDir = runningBuild.getCheckoutDirectory();
-    final PreviousCleanupInfo info = myPrevModes.get(checkoutDir);
-    if (info != null) {
-      final Thread t = info.getWorkingThread();
-      if ((t != null) && t.isAlive()) {
-        myLogger.log("Waiting for Swabra to cleanup previous build files", true);
-        try {
-          t.join();
-        } catch (InterruptedException e) {
-          myLogger.log("Swabra: Interrupted while waiting for previous build files cleanup", true);
-          myLogger.exception(e);
-        }
-      }
-      myMode = info.getMode();
+    waitForUnfinishedThreads(checkoutDir, logger);
+
+    myLogger = logger;
+    myCheckoutDir = checkoutDir;
+    final Map<String, String> runnerParams = runningBuild.getRunnerParameters();
+    myMode = getSwabraMode(runnerParams);
+    myVerbose = isVerbose(runnerParams);
+    myStrict = isStrict(runnerParams);
+    final File tempDir = runningBuild.getAgentConfiguration().getCacheDirectory(CACHE_KEY);
+
+    myPropertiesProcessor = new SwabraPropertiesProcessor(tempDir, myLogger);
+    myPropertiesProcessor.readProperties();
+
+    if (!isEnabled(myMode)) {
+      myLogger.debug("Swabra is disabled");
+      myPropertiesProcessor.markDirty(myCheckoutDir);
+      myPropertiesProcessor.writeProperties();
+      return;
     }
+
+    logSettings(myMode, myCheckoutDir.getAbsolutePath(), myVerbose);
+
+    mySnapshot = new Snapshot(tempDir, myCheckoutDir);
+
+    String snapshotName;
     try {
-      if (!isEnabled(mode)) {
-        myLogger.debug("Swabra is disabled", false);
-        return;
-      }
-      mySnapshot = new Snapshot(runningBuild.getAgentTempDirectory(), checkoutDir);
-      logSettings(mode, checkoutDir.getAbsolutePath(), myVerbose);
       if (runningBuild.isCleanBuild()) {
         return;
       }
-      if (needFullCleanup(myMode)) {
-        myDirectoryCleaner.cleanFolder(checkoutDir, new SmartDirectoryCleanerCallback() {
-          public void logCleanStarted(File dir) {
-            myLogger.log("Swabra: Need a valid checkout directory snapshot - forcing clean checkout for " +
-              dir, true);
-          }
-
-          public void logFailedToDeleteEmptyDirectory(File dir) {
-            myLogger.debug("Swabra: Failed to delete empty checkout directory " + dir.getAbsolutePath(), true);
-          }
-
-          public void logFailedToCleanFilesUnderDirectory(File dir) {
-            myLogger.debug("Swabra: Failed to delete files in directory " + dir.getAbsolutePath(), true);
-
-          }
-
-          public void logFailedToCleanFile(File file) {
-            myLogger.debug("Swabra: Failed to delete file " + file.getAbsolutePath(), true);
-          }
-
-          public void logFailedToCleanEntireFolder(File dir) {
-            myLogger.debug("Swabra: Failed to delete directory " + dir.getAbsolutePath(), true);
-          }
-        });
+      if (myPropertiesProcessor.isDirty(myCheckoutDir)) {
+        doCleanup(myCheckoutDir);
         return;
       }
-      if (BEFORE_BUILD.equals(mode)) {
-        if (AFTER_BUILD.equals(myMode)) {
-          myLogger.debug("Swabra: Will not perform files cleanup, as it occured on previous build finish", false);
-        } else {
-          myLogger.debug("Swabra: Previous build files cleanup is performed before build", false);
-          if (!mySnapshot.collect(myLogger, myVerbose)) {
-            logFailedCollect(checkoutDir);
-            mode = null;
-          }
+      if (myPropertiesProcessor.isClean(myCheckoutDir)) {
+        if (BEFORE_BUILD.equals(myMode)) {
+          myLogger.debug("Swabra: Will not perform files cleanup, directory is supposed to be clean from newly created and modified files");
         }
-      } else if (AFTER_BUILD.equals(mode) && BEFORE_BUILD.equals(myMode)) {
-        // mode setting changed from "before build" to "after build"
-        myLogger.debug("Swabra: Swabra mode setting changed from \"before build\" to \"after build\", " +
-          "need to perform build files clean up once before build", false);
-        if (!mySnapshot.collect(myLogger, false)) {
-          logFailedCollect(checkoutDir);
-          mode = null;
-        }
+        return;
       }
+      snapshotName = myPropertiesProcessor.getSnapshot(myCheckoutDir);
     } finally {
-      myMode = mode;
-      myPrevModes.put(checkoutDir, new PreviousCleanupInfo(myMode));
+      myPropertiesProcessor.deleteRecord(myCheckoutDir);
+      myPropertiesProcessor.writeProperties();      
     }
-  }
 
-  private synchronized void logFailedCollect(File checkoutDir) {
-    myLogger.warn("Swabra: Couldn't collect files for " + checkoutDir +
-      " - will terminate till the end of the build and force clean checkout at next build start", true);
+    myLogger.debug("Swabra: Previous build files cleanup is performed before build");
+    if (!mySnapshot.collect(snapshotName, myLogger, myVerbose)) {
+      myPropertiesProcessor.markDirty(myCheckoutDir);
+      myPropertiesProcessor.writeProperties();
+      myMode = null;
+      if (myStrict) {
+        fail(myCheckoutDir);
+      }
+    }
   }
 
   public void beforeRunnerStart(@NotNull final AgentRunningBuild runningBuild) {
     if (!isEnabled(myMode)) return;
-    mySnapshot.snapshot(myLogger, myVerbose);
+    final String snapshotName = "" + myCheckoutDir.hashCode();
+    if (!mySnapshot.snapshot(snapshotName, myLogger, myVerbose)) {
+      myPropertiesProcessor.markDirty(myCheckoutDir);
+      myPropertiesProcessor.writeProperties();
+      myMode = null;
+    } else {
+      myPropertiesProcessor.setSnapshot(myCheckoutDir, snapshotName);
+      myPropertiesProcessor.writeProperties();      
+    }
   }
 
   public void beforeBuildFinish(@NotNull final BuildFinishedStatus buildStatus) {
     if (AFTER_BUILD.equals(myMode)) {
-      myLogger.debug("Swabra: Build files cleanup will be performed after build", true);
+      myLogger.message("Swabra: Build files cleanup will be performed after build", true);
     }
   }
   
   public void buildFinished(@NotNull final BuildFinishedStatus buildStatus) {
     if (AFTER_BUILD.equals(myMode)) {
-      myLogger.debug("Swabra: Build files cleanup is performed after build", false);
-      final File checkoutDir = mySnapshot.getCheckoutDir();
+      myLogger.debug("Swabra: Build files cleanup is performed after build");
       final Thread t = new Thread(new Runnable() {
         public void run() {
-          if (!mySnapshot.collect(myLogger, myVerbose)) {
-            logFailedCollect(checkoutDir);
-            myPrevModes.put(checkoutDir, null);
+          if (!mySnapshot.collect(myPropertiesProcessor.getSnapshot(myCheckoutDir), myLogger, myVerbose)) {
+            myPrevThreads.remove(myCheckoutDir);
+          } else {
+            myPropertiesProcessor.markClean(myCheckoutDir);            
+            myPropertiesProcessor.writeProperties();
           }
         }
       });
-      myPrevModes.get(checkoutDir).setWorkingThread(t);
+      myPrevThreads.put(myCheckoutDir, t);
       t.start();
     }
   }
@@ -175,27 +159,52 @@ public final class Swabra extends AgentLifeCycleAdapter {
   private void logSettings(String mode, String checkoutDir, boolean verbose) {
     myLogger.debug("Swabra settings: mode = '" + mode +
       "', checkoutDir = " + checkoutDir +
-      "', verbose = '" + verbose + "'.", false);
+      "', verbose = '" + verbose + "'.");
   }
 
-  private static class PreviousCleanupInfo {
-    private final String myMode;
-    private Thread myWorkingThread;
-
-    public PreviousCleanupInfo(String mode) {
-      myMode = mode;
+  private void waitForUnfinishedThreads(@NotNull File checkoutDir, @NotNull SwabraLogger logger) {
+    final Thread t = myPrevThreads.get(checkoutDir);
+    if ((t != null) && t.isAlive()) {
+      logger.message("Waiting for Swabra to cleanup previous build files", true);
+      try {
+        t.join();
+      } catch (InterruptedException e) {
+        logger.error("Swabra: Interrupted while waiting for previous build files cleanup");
+        logger.exception(e, true);
+      }
     }
+    myPrevThreads.remove(checkoutDir);
+  }
 
-    public void setWorkingThread(@NotNull Thread workingThread) {
-      myWorkingThread = workingThread;
-    }
+  private void doCleanup(@NotNull File checkoutDir) {
+    myDirectoryCleaner.cleanFolder(checkoutDir, new SmartDirectoryCleanerCallback() {
+      public void logCleanStarted(File dir) {
+        myLogger.warn("Swabra: Need a valid checkout directory snapshot - forcing clean checkout for " + dir);
+      }
 
-    public String getMode() {
-      return myMode;
-    }
+      public void logFailedToDeleteEmptyDirectory(File dir) {
+        myLogger.warn("Swabra: Failed to delete empty checkout directory " + dir.getAbsolutePath());
+      }
 
-    public Thread getWorkingThread() {
-      return myWorkingThread;
-    }
+      public void logFailedToCleanFilesUnderDirectory(File dir) {
+        myLogger.warn("Swabra: Failed to delete files in directory " + dir.getAbsolutePath());
+
+      }
+
+      public void logFailedToCleanFile(File file) {
+        myLogger.warn("Swabra: Failed to delete file " + file.getAbsolutePath());
+      }
+
+      public void logFailedToCleanEntireFolder(File dir) {
+        myLogger.warn("Swabra: Failed to delete directory " + dir.getAbsolutePath());
+        myPropertiesProcessor.markDirty(myCheckoutDir);
+        myPropertiesProcessor.writeProperties();
+        myMode = null;        
+      }
+    });
+  }
+
+  private void fail(@NotNull File checkoutDir) {
+    myLogger.message("##teamcity[buildStatus status='FAILURE' text='Swabra failed collecting']", true);
   }
 }
