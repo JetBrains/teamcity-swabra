@@ -85,10 +85,10 @@ public final class SwabraPropertiesProcessor {
     myProperties.remove(unifyPath(dir));
   }
 
-  public void readProperties() {
+  public void readProperties() throws Exception {
     myProperties = new HashMap<String, String>();
     if (!myPropertiesFile.isFile()) {
-      return;
+      throw new Exception("Swabra: Error reading checkout directories states from " + myPropertiesFile.getAbsolutePath() + ", no file found");
     }
     BufferedReader reader = null;
     try {
@@ -97,26 +97,23 @@ public final class SwabraPropertiesProcessor {
       while (fileRecord != null) {
         final String[] mapElem = fileRecord.split(KEY_VAL_SEPARATOR);
         if (mapElem.length != 2) {
-          myLogger.error("Swabra: Error reading checkout directories states from " + myPropertiesFile.getAbsolutePath() + ", came across illegal record");
-          return;
+          throw new Exception("Swabra: Error reading checkout directories states from " + myPropertiesFile.getAbsolutePath() + ", came across illegal record");
         }
         myProperties.put(mapElem[0], mapElem[1]);
         fileRecord = reader.readLine();
       }
     } catch (IOException e) {
-      myLogger.error("Swabra: Error reading checkout directories states from " + myPropertiesFile.getAbsolutePath());
-      myLogger.exception(e, true);
+      throw new Exception("Swabra: Error reading checkout directories states from " + myPropertiesFile.getAbsolutePath());
     } finally {
       if (reader != null) {
         try {
           reader.close();
         } catch (IOException e) {
-          myLogger.error("Swabra: Error closing checkout directories states file " + myPropertiesFile.getAbsolutePath());
-          myLogger.exception(e, true);
+          throw new Exception("Swabra: Error closing checkout directories states file " + myPropertiesFile.getAbsolutePath());
         }
       }
       if (!FileUtil.delete(myPropertiesFile)) {
-        myLogger.error("Swabra: Error deleting checkout directories states file " + myPropertiesFile.getAbsolutePath());
+        throw new Exception("Swabra: Error deleting checkout directories states file " + myPropertiesFile.getAbsolutePath());
       }
     }
   }

@@ -74,7 +74,15 @@ public final class Swabra extends AgentLifeCycleAdapter {
     final File tempDir = runningBuild.getAgentConfiguration().getCacheDirectory(CACHE_KEY);
 
     myPropertiesProcessor = new SwabraPropertiesProcessor(tempDir, myLogger);
-    myPropertiesProcessor.readProperties();
+    try {
+      myPropertiesProcessor.readProperties();
+    } catch (Exception e) {
+      myLogger.error(e.getMessage());
+      myLogger.exception(e, false);
+      myPropertiesProcessor.markDirty(myCheckoutDir);
+      myPropertiesProcessor.writeProperties();
+      return;
+    }
 
     if (!isEnabled(myMode)) {
       myLogger.debug("Swabra is disabled");
@@ -114,7 +122,7 @@ public final class Swabra extends AgentLifeCycleAdapter {
       myPropertiesProcessor.writeProperties();
       myMode = null;
       if (myStrict) {
-        fail(myCheckoutDir);
+        fail();
       }
     }
   }
@@ -204,7 +212,7 @@ public final class Swabra extends AgentLifeCycleAdapter {
     });
   }
 
-  private void fail(@NotNull File checkoutDir) {
-    myLogger.message("##teamcity[buildStatus status='FAILURE' text='Swabra failed collecting']", true);
+  private void fail() {
+    myLogger.message("##teamcity[buildStatus status='FAILURE' text='Swabra failed cleanup']", true);
   }
 }
