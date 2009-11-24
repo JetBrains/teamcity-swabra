@@ -74,15 +74,7 @@ public final class Swabra extends AgentLifeCycleAdapter {
     final File tempDir = runningBuild.getAgentConfiguration().getCacheDirectory(CACHE_KEY);
 
     myPropertiesProcessor = new SwabraPropertiesProcessor(tempDir, myLogger);
-    try {
-      myPropertiesProcessor.readProperties();
-    } catch (Exception e) {
-      myLogger.error(e.getMessage());
-      myLogger.exception(e, false);
-      myPropertiesProcessor.markDirty(myCheckoutDir);
-      myPropertiesProcessor.writeProperties();
-      return;
-    }
+    myPropertiesProcessor.readProperties();
 
     if (!isEnabled(myMode)) {
       myLogger.debug("Swabra is disabled");
