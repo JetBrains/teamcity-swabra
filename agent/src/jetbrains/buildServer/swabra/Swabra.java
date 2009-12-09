@@ -26,15 +26,19 @@ import jetbrains.buildServer.agent.*;
 import jetbrains.buildServer.util.EventDispatcher;
 import org.jetbrains.annotations.NotNull;
 import static jetbrains.buildServer.swabra.SwabraUtil.*;
+import jetbrains.buildServer.swabra.processes.HandlePidsProvider;
+import jetbrains.buildServer.swabra.processes.LockedFileResolver;
+import jetbrains.buildServer.swabra.processes.ProcessExecutor;
 import org.apache.log4j.Logger;
 
 import java.io.*;
 import java.util.*;
 
 
-public final class Swabra extends AgentLifeCycleAdapter {
+public final class  Swabra extends AgentLifeCycleAdapter {
   public static final String CACHE_KEY = "swabra";
   public static final String WORK_DIR_PROP = "agent.work.dir";
+  public static final String HANDLE_EXE = "handle.exe";
 
   private SwabraLogger myLogger;
   private SmartDirectoryCleaner myDirectoryCleaner;
@@ -44,11 +48,11 @@ public final class Swabra extends AgentLifeCycleAdapter {
 
   private String myMode;
   private boolean myVerbose;
-  private boolean myStrict;
 
   private File myCheckoutDir;
 
   private Map<File, Thread> myPrevThreads = new HashMap<File, Thread>();
+  private String myHandlePath;
 
   private static boolean isEnabled(final String mode) {
     return BEFORE_BUILD.equals(mode) || AFTER_BUILD.equals(mode);
@@ -61,7 +65,8 @@ public final class Swabra extends AgentLifeCycleAdapter {
   }
 
   public void buildStarted(@NotNull final AgentRunningBuild runningBuild) {
-    final SwabraLogger logger = new SwabraLogger(runningBuild.getBuildLogger(), Logger.getLogger(Swabra.class));
+    final BuildProgressLogger buildLogger = runningBuild.getBuildLogger();
+    final SwabraLogger logger = new SwabraLogger(buildLogger, Logger.getLogger(Swabra.class));
     final File checkoutDir = runningBuild.getCheckoutDirectory();
     waitForUnfinishedThreads(checkoutDir, logger);
 
@@ -70,22 +75,26 @@ public final class Swabra extends AgentLifeCycleAdapter {
     final Map<String, String> runnerParams = runningBuild.getRunnerParameters();
     myMode = getSwabraMode(runnerParams);
     myVerbose = isVerbose(runnerParams);
-    myStrict = isStrict(runnerParams);
+    final boolean strict = isStrict(runnerParams);
     final File tempDir = runningBuild.getAgentConfiguration().getCacheDirectory(CACHE_KEY);
 
     myPropertiesProcessor = new SwabraPropertiesProcessor(tempDir, myLogger);
     myPropertiesProcessor.readProperties();
 
+    myHandlePath = getHandlePath(runnerParams);
+    logSettings(myMode, myCheckoutDir.getAbsolutePath(), strict, myHandlePath, myVerbose);
+
     if (!isEnabled(myMode)) {
-      myLogger.debug("Swabra is disabled");
+      myLogger.message("Swabra is disabled", false);
       myPropertiesProcessor.markDirty(myCheckoutDir);
       myPropertiesProcessor.writeProperties();
       return;
     }
 
-    logSettings(myMode, myCheckoutDir.getAbsolutePath(), myVerbose);
-
-    mySnapshot = new Snapshot(tempDir, myCheckoutDir);
+    final LockedFileResolver lockedFileResolver =
+      ((myHandlePath == null) || (!unifyPath(myHandlePath).endsWith(File.separator + HANDLE_EXE))) ?
+        null : new LockedFileResolver(new HandlePidsProvider(myHandlePath, buildLogger), buildLogger);
+    mySnapshot = new Snapshot(tempDir, myCheckoutDir, lockedFileResolver, strict);
 
     String snapshotName;
     try {
@@ -113,7 +122,7 @@ public final class Swabra extends AgentLifeCycleAdapter {
       myPropertiesProcessor.markDirty(myCheckoutDir);
       myPropertiesProcessor.writeProperties();
       myMode = null;
-      if (myStrict) {
+      if (strict) {
         fail();
       }
     }
@@ -133,6 +142,10 @@ public final class Swabra extends AgentLifeCycleAdapter {
   }
 
   public void beforeBuildFinish(@NotNull final BuildFinishedStatus buildStatus) {
+    if (myHandlePath != null) {
+      final String params[] = {myCheckoutDir.getAbsolutePath()};
+      ProcessExecutor.run(myHandlePath, params, myLogger.getBuildLogger());
+    }
     if (AFTER_BUILD.equals(myMode)) {
       myLogger.message("Swabra: Build files cleanup will be performed after build", true);
     }
@@ -156,9 +169,11 @@ public final class Swabra extends AgentLifeCycleAdapter {
     }
   }
 
-  private void logSettings(String mode, String checkoutDir, boolean verbose) {
+  private void logSettings(String mode, String checkoutDir, boolean strict, String handlePath, boolean verbose) {
     myLogger.debug("Swabra settings: mode = '" + mode +
       "', checkoutDir = " + checkoutDir +
+      "', strict = " + strict +
+      "', handle path = " + handlePath +
       "', verbose = '" + verbose + "'.");
   }
 
@@ -206,5 +221,9 @@ public final class Swabra extends AgentLifeCycleAdapter {
 
   private void fail() {
     myLogger.message("##teamcity[buildStatus status='FAILURE' text='Swabra failed cleanup']", true);
+  }
+
+  private String unifyPath(String path) {
+    return path.replace("/", File.separator).replace("\\", File.separator);   
   }
 }

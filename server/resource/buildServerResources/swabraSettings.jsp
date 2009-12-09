@@ -18,7 +18,7 @@
 <l:settingsGroup title="Swabra">
 
     <tr class="noBorder" id="swabra.mode.container">
-        <th><label for="swabra.mode">Perform build garbage cleanup:</label></th>
+        <th><label for="swabra.mode">Perform build files cleanup:</label></th>
         <td>
             <c:set var="onchange">
                 var selectedValue = this.options[this.selectedIndex].value;
@@ -86,9 +86,22 @@
         <td>
             <props:checkboxProperty name="swabra.strict"/>
             <span class="smallNote">
-                  Fail build if at build start in the checkout directory there are any files newly created during previous build which Swabra couldn't remove. 
+                  Fail build if at build start in the checkout directory there are any files newly created during previous build which Swabra couldn't delete.
             </span>
         </td>
+    </tr>
+
+    <tr class="noBorder" id="swabra.process.analizer.container">
+        <th><label for="swabra.process.analizer">Handle.exe path:</label>
+        </th>
+        <td><props:textProperty name="swabra.process.analizer" className="longField"/>
+            <span class="smallNote">
+                Path to
+                <a showdiscardchangesmessage="false"
+                   target="_blank"
+                   href="http://technet.microsoft.com/en-us/sysinternals/bb896655.aspx">Handle</a>
+                excutable on Windows agent. If specified will be used to determine processes which hold files in the ckeckout directory.
+            </span>
     </tr>
 
     <tr class="noBorder" id="swabra.verbose.container"

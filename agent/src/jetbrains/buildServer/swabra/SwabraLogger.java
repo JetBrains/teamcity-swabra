@@ -75,4 +75,8 @@ public final class SwabraLogger {
   public void activityFinished() {
     myBuildLogger.activityFinished(ACTIVITY_NAME, AGENT_BLOCK);
   }
+
+  public BuildProgressLogger getBuildLogger() {
+    return myBuildLogger;
+  }
 }

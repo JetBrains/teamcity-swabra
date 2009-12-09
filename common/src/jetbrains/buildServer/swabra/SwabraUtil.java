@@ -33,6 +33,8 @@ public class SwabraUtil {
   public static final String AFTER_BUILD = "swabra.after.build";
   public static final String BEFORE_BUILD = "swabra.before.build";
 
+  public static final String PROCESS_ANALIZER = "swabra.process.analizer";
+
   public static final String TRUE = "true";
 
   public static final Map<String, String> SWABRA_MODES = new HashMap<String, String>();
@@ -59,5 +61,9 @@ public class SwabraUtil {
 
   public static boolean isStrict(@NotNull final Map<String, String> params) {
     return params.containsKey(STRICT) && isSwabraEnabled(params);
+  }
+
+  public static String getHandlePath(@NotNull final Map<String, String> runParams) {
+    return System.getProperty("os.name").toLowerCase().contains("windows") ? runParams.get(PROCESS_ANALIZER) : null;
   }
 }
