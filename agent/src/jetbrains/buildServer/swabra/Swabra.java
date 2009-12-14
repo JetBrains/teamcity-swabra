@@ -39,6 +39,7 @@ public final class  Swabra extends AgentLifeCycleAdapter {
   public static final String CACHE_KEY = "swabra";
   public static final String WORK_DIR_PROP = "agent.work.dir";
   public static final String HANDLE_EXE = "handle.exe";
+  public static final String HANDLE_EXE_SYSTEM_PROP = "handle.exe.path";
 
   private SwabraLogger myLogger;
   private SmartDirectoryCleaner myDirectoryCleaner;
@@ -82,6 +83,10 @@ public final class  Swabra extends AgentLifeCycleAdapter {
     myPropertiesProcessor.readProperties();
 
     myHandlePath = getHandlePath(runnerParams);
+    if (myHandlePath == null || "".equals(myHandlePath)) {
+      myHandlePath = System.getProperty(HANDLE_EXE_SYSTEM_PROP);
+      logger.debug("No Handle path passed in Swabra settings. Get from system property: " + myHandlePath);
+    }
     logSettings(myMode, myCheckoutDir.getAbsolutePath(), strict, myHandlePath, myVerbose);
 
     if (!isEnabled(myMode)) {
