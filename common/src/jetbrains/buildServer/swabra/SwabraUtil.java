@@ -20,6 +20,8 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
 
+import com.intellij.openapi.util.SystemInfo;
+
 /**
  * User: vbedrosova
  * Date: 17.04.2009
@@ -63,7 +65,7 @@ public class SwabraUtil {
     return params.containsKey(STRICT) && isSwabraEnabled(params);
   }
 
-  public static String getHandlePath(@NotNull final Map<String, String> runParams) {
-    return System.getProperty("os.name").toLowerCase().contains("windows") ? runParams.get(PROCESS_ANALIZER) : null;
+  public static String getHandlePath(@NotNull final Map<String, String> runParams) {    
+    return SystemInfo.isWindows ? runParams.get(PROCESS_ANALIZER) : null;
   }
 }
