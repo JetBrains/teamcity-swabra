@@ -1,6 +1,8 @@
+WARNING: Swabra: no Handle executable prepared (swabra.handle.disable.download system property="True")
 WARNING: Swabra: Need a valid checkout directory snapshot - forcing clean checkout for ##CHECKOUT_DIR##
 MESSAGE: Swabra: Saving state of checkout directory ##CHECKOUT_DIR## to snapshot file ##SNAPSHOT##
 MESSAGE: Swabra: Finished saving state of checkout directory ##CHECKOUT_DIR## to snapshot file ##SNAPSHOT##
+WARNING: Swabra: no Handle executable prepared (swabra.handle.disable.download system property="True")
 MESSAGE: Swabra: Scanning checkout directory ##CHECKOUT_DIR## for newly created and modified files...
 ACTIVITY STARTED: Swabra
 MESSAGE: No newly created or modified files detected

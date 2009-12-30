@@ -22,8 +22,10 @@ package jetbrains.buildServer.swabra;
  * Time: 14:10:58
  */
 
+import com.intellij.util.io.ZipUtil;
 import jetbrains.buildServer.agent.*;
 import jetbrains.buildServer.util.EventDispatcher;
+import jetbrains.buildServer.util.FileUtil;
 import org.jetbrains.annotations.NotNull;
 import static jetbrains.buildServer.swabra.SwabraUtil.*;
 import jetbrains.buildServer.swabra.processes.HandlePidsProvider;
@@ -32,14 +34,17 @@ import jetbrains.buildServer.swabra.processes.ProcessExecutor;
 import org.apache.log4j.Logger;
 
 import java.io.*;
+import java.net.URL;
 import java.util.*;
 
 
 public final class  Swabra extends AgentLifeCycleAdapter {
   public static final String CACHE_KEY = "swabra";
-  public static final String WORK_DIR_PROP = "agent.work.dir";
+
   public static final String HANDLE_EXE = "handle.exe";
-  public static final String HANDLE_EXE_SYSTEM_PROP = "handle.exe.path";
+  public static final String HANDLE_EXE_SYSTEM_PROP = "swabra.handle.exe.path";
+  public static final String DISABLE_DOWNLOAD_HANDLE = "swabra.handle.disable.download";
+  public static final String HANDLE_URL = "http://download.sysinternals.com/Files/Handle.zip";
 
   private SwabraLogger myLogger;
   private SmartDirectoryCleaner myDirectoryCleaner;
@@ -51,6 +56,7 @@ public final class  Swabra extends AgentLifeCycleAdapter {
   private boolean myVerbose;
 
   private File myCheckoutDir;
+  private File myTempDir;
 
   private Map<File, Thread> myPrevThreads = new HashMap<File, Thread>();
   private String myHandlePath;
@@ -77,16 +83,19 @@ public final class  Swabra extends AgentLifeCycleAdapter {
     myMode = getSwabraMode(runnerParams);
     myVerbose = isVerbose(runnerParams);
     final boolean strict = isStrict(runnerParams);
-    final File tempDir = runningBuild.getAgentConfiguration().getCacheDirectory(CACHE_KEY);
+    myTempDir = runningBuild.getAgentConfiguration().getCacheDirectory(CACHE_KEY);
 
-    myPropertiesProcessor = new SwabraPropertiesProcessor(tempDir, myLogger);
+    myPropertiesProcessor = new SwabraPropertiesProcessor(myTempDir, myLogger);
     myPropertiesProcessor.readProperties();
 
     myHandlePath = getHandlePath(runnerParams);
-    if (myHandlePath == null || "".equals(myHandlePath)) {
-      myHandlePath = System.getProperty(HANDLE_EXE_SYSTEM_PROP);
-      logger.debug("No Handle path passed in Swabra settings. Get from system property: " + myHandlePath);
+    if ((System.getProperty(DISABLE_DOWNLOAD_HANDLE) != null) || !prepareHandle()) {
+      myHandlePath = null;
+      myLogger.warn("Swabra: no Handle executable prepared ("
+        + DISABLE_DOWNLOAD_HANDLE + " system property=\""
+        + System.getProperty(DISABLE_DOWNLOAD_HANDLE) + "\")");
     }
+
     logSettings(myMode, myCheckoutDir.getAbsolutePath(), strict, myHandlePath, myVerbose);
 
     if (!isEnabled(myMode)) {
@@ -99,7 +108,7 @@ public final class  Swabra extends AgentLifeCycleAdapter {
     final LockedFileResolver lockedFileResolver =
       ((myHandlePath == null) || (!unifyPath(myHandlePath).endsWith(File.separator + HANDLE_EXE))) ?
         null : new LockedFileResolver(new HandlePidsProvider(myHandlePath, buildLogger), buildLogger);
-    mySnapshot = new Snapshot(tempDir, myCheckoutDir, lockedFileResolver, strict);
+    mySnapshot = new Snapshot(myTempDir, myCheckoutDir, lockedFileResolver, strict);
 
     String snapshotName;
     try {
@@ -119,7 +128,7 @@ public final class  Swabra extends AgentLifeCycleAdapter {
       snapshotName = myPropertiesProcessor.getSnapshot(myCheckoutDir);
     } finally {
       myPropertiesProcessor.deleteRecord(myCheckoutDir);
-      myPropertiesProcessor.writeProperties();      
+      myPropertiesProcessor.writeProperties();
     }
 
     myLogger.debug("Swabra: Previous build files cleanup is performed before build");
@@ -142,7 +151,7 @@ public final class  Swabra extends AgentLifeCycleAdapter {
       myMode = null;
     } else {
       myPropertiesProcessor.setSnapshot(myCheckoutDir, snapshotName);
-      myPropertiesProcessor.writeProperties();      
+      myPropertiesProcessor.writeProperties();
     }
   }
 
@@ -155,7 +164,7 @@ public final class  Swabra extends AgentLifeCycleAdapter {
       myLogger.message("Swabra: Build files cleanup will be performed after build", true);
     }
   }
-  
+
   public void buildFinished(@NotNull final BuildFinishedStatus buildStatus) {
     if (AFTER_BUILD.equals(myMode)) {
       myLogger.debug("Swabra: Build files cleanup is performed after build");
@@ -164,7 +173,7 @@ public final class  Swabra extends AgentLifeCycleAdapter {
           if (!mySnapshot.collect(myPropertiesProcessor.getSnapshot(myCheckoutDir), myLogger, myVerbose)) {
             myPrevThreads.remove(myCheckoutDir);
           } else {
-            myPropertiesProcessor.markClean(myCheckoutDir);            
+            myPropertiesProcessor.markClean(myCheckoutDir);
             myPropertiesProcessor.writeProperties();
           }
         }
@@ -219,7 +228,7 @@ public final class  Swabra extends AgentLifeCycleAdapter {
         myLogger.warn("Swabra: Failed to delete directory " + dir.getAbsolutePath());
         myPropertiesProcessor.markDirty(myCheckoutDir);
         myPropertiesProcessor.writeProperties();
-        myMode = null;        
+        myMode = null;
       }
     });
   }
@@ -229,6 +238,41 @@ public final class  Swabra extends AgentLifeCycleAdapter {
   }
 
   private String unifyPath(String path) {
-    return path.replace("/", File.separator).replace("\\", File.separator);   
+    return path.replace("/", File.separator).replace("\\", File.separator);
+  }
+
+  private boolean notDefined(String value) {
+    return (value == null) || ("".equals(value));
+  }
+
+  private boolean prepareHandle() {
+    try {
+      if (notDefined(myHandlePath)) {
+        myHandlePath = System.getProperty(HANDLE_EXE_SYSTEM_PROP);
+        myLogger.warn("Swabra: No Handle path passed in Swabra settings. Getting from system property "
+          + HANDLE_EXE_SYSTEM_PROP);
+        if (notDefined(myHandlePath)) {
+          myHandlePath = myTempDir.getAbsolutePath() + File.separator + HANDLE_EXE;
+          myLogger.warn("Swabra: No Handle path passed in " + HANDLE_EXE_SYSTEM_PROP + " system property."
+            + " Setting Handle path to " + myHandlePath);
+        }
+      }
+      if (!new File(myHandlePath).isFile()) {
+        myLogger.warn("Swabra: No Handle executable found at " + myHandlePath + ". Downloading from " + HANDLE_URL);
+        final File tmpFile = FileUtil.createTempFile("", ".zip");
+        if (!URLDownloader.download(new URL(HANDLE_URL), tmpFile)) {
+          return false;
+        }
+        ZipUtil.extract(tmpFile, myTempDir, new FilenameFilter() {
+
+          public boolean accept(File dir, String name) {
+            return HANDLE_EXE.equals(name);
+          }
+        });
+      }
+      return true;
+    } catch (IOException e) {
+      return false;
+    }
   }
 }
