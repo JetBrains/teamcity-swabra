@@ -157,8 +157,7 @@ public final class  Swabra extends AgentLifeCycleAdapter {
 
   public void beforeBuildFinish(@NotNull final BuildFinishedStatus buildStatus) {
     if (myHandlePath != null) {
-      final String params[] = {myCheckoutDir.getAbsolutePath()};
-      ProcessExecutor.run(myHandlePath, params, myLogger.getBuildLogger());
+      ProcessExecutor.runHandleAcceptEula(myHandlePath, myCheckoutDir.getAbsolutePath(), myLogger.getBuildLogger());
     }
     if (AFTER_BUILD.equals(myMode)) {
       myLogger.message("Swabra: Build files cleanup will be performed after build", true);

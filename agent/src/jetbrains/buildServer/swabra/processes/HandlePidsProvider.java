@@ -55,8 +55,7 @@ public class HandlePidsProvider implements LockedFileResolver.LockingPidsProvide
 
   @NotNull
   public List<Long> getPids(@NotNull final File file) {
-    final String params[] = {"/accepteula", file.getAbsolutePath()};
-    final ExecResult result = ProcessExecutor.run(myHandleExePath, params, null);
+    final ExecResult result = ProcessExecutor.runHandleAcceptEula(myHandleExePath, file.getAbsolutePath(), null);
     if (result.getStdout().contains(NO_RESULT)) {
       return Collections.emptyList();
     }

@@ -35,12 +35,26 @@ public class ProcessExecutor {
   private static final Logger LOG = Logger.getLogger(ProcessExecutor.class);
 
   private static final int TIMEOUT = 1000;
+  private static final String ACCEPT_EULA_KEY = "/accepteula";
 
-  public static ExecResult run(@NotNull final String exePath, @NotNull String[] params, final SimpleBuildLogger logger) {
+  public static ExecResult runHandleAcceptEula(@NotNull final String handleExePath, @NotNull String file, final SimpleBuildLogger logger) {
+    final GeneralCommandLine commandLine = new GeneralCommandLine();
+    commandLine.setExePath(handleExePath);
+    commandLine.addParameter(ACCEPT_EULA_KEY);
+    commandLine.addParameter(file);
+
+    return run(commandLine, logger);
+  }
+
+  public static ExecResult run(@NotNull String exePath, @NotNull String[] params, SimpleBuildLogger logger) {
     final GeneralCommandLine commandLine = new GeneralCommandLine();
     commandLine.setExePath(exePath);
     commandLine.addParameters(params);
 
+    return run(commandLine, logger);
+  }
+
+  private static ExecResult run(final GeneralCommandLine commandLine, final SimpleBuildLogger logger) {
     final ExecResult result =
     SimpleCommandLineProcessRunner.runCommand(commandLine, null, new SimpleCommandLineProcessRunner.RunCommandEvents() {
 
