@@ -22,6 +22,7 @@ package jetbrains.buildServer.swabra;
  * Time: 14:10:58
  */
 
+import com.intellij.openapi.util.SystemInfo;
 import com.intellij.util.io.ZipUtil;
 import jetbrains.buildServer.agent.*;
 import jetbrains.buildServer.util.EventDispatcher;
@@ -88,12 +89,16 @@ public final class  Swabra extends AgentLifeCycleAdapter {
     myPropertiesProcessor = new SwabraPropertiesProcessor(myTempDir, myLogger);
     myPropertiesProcessor.readProperties();
 
-    myHandlePath = getHandlePath(runnerParams);
-    if ((System.getProperty(DISABLE_DOWNLOAD_HANDLE) != null) || !prepareHandle()) {
+    if (SystemInfo.isWindows) {
+      myHandlePath = getHandlePath(runnerParams);
+      if ((System.getProperty(DISABLE_DOWNLOAD_HANDLE) != null) || !prepareHandle()) {
+        myHandlePath = null;
+        myLogger.warn("Swabra: no Handle executable prepared ("
+          + DISABLE_DOWNLOAD_HANDLE + " system property=\""
+          + System.getProperty(DISABLE_DOWNLOAD_HANDLE) + "\")");
+      }
+    } else {
       myHandlePath = null;
-      myLogger.warn("Swabra: no Handle executable prepared ("
-        + DISABLE_DOWNLOAD_HANDLE + " system property=\""
-        + System.getProperty(DISABLE_DOWNLOAD_HANDLE) + "\")");
     }
 
     logSettings(myMode, myCheckoutDir.getAbsolutePath(), strict, myHandlePath, myVerbose);

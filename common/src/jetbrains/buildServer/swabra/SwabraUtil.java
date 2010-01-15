@@ -66,6 +66,6 @@ public class SwabraUtil {
   }
 
   public static String getHandlePath(@NotNull final Map<String, String> runParams) {    
-    return SystemInfo.isWindows ? runParams.get(PROCESS_ANALIZER) : null;
+    return runParams.get(PROCESS_ANALIZER);
   }
 }
