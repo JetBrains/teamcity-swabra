@@ -256,18 +256,18 @@ public final class  Swabra extends AgentLifeCycleAdapter {
         myLogger.warn("Swabra: No Handle path passed in Swabra settings. Getting from system property "
           + HANDLE_EXE_SYSTEM_PROP);
         if (notDefined(myHandlePath)) {
-          myHandlePath = myTempDir.getAbsolutePath() + File.separator + HANDLE_EXE;
-          myLogger.warn("Swabra: No Handle path passed in " + HANDLE_EXE_SYSTEM_PROP + " system property."
-            + " Setting Handle path to " + myHandlePath);
+          myLogger.warn("Swabra: No Handle path passed in " + HANDLE_EXE_SYSTEM_PROP + " system property. Will not use handle");
+          return false;
         }
       }
-      if (!new File(myHandlePath).isFile()) {
+      final File handleFile = new File(myHandlePath);
+      if (!handleFile.isFile()) {
         myLogger.warn("Swabra: No Handle executable found at " + myHandlePath + ". Downloading from " + HANDLE_URL);
         final File tmpFile = FileUtil.createTempFile("", ".zip");
         if (!URLDownloader.download(new URL(HANDLE_URL), tmpFile)) {
           return false;
         }
-        ZipUtil.extract(tmpFile, myTempDir, new FilenameFilter() {
+        ZipUtil.extract(tmpFile, handleFile.getParentFile(), new FilenameFilter() {
 
           public boolean accept(File dir, String name) {
             return HANDLE_EXE.equals(name);
