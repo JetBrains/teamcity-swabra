@@ -93,9 +93,9 @@ public final class  Swabra extends AgentLifeCycleAdapter {
       myHandlePath = getHandlePath(runnerParams);
       if ((System.getProperty(DISABLE_DOWNLOAD_HANDLE) != null) || !prepareHandle()) {
         myHandlePath = null;
-        myLogger.warn("Swabra: no Handle executable prepared ("
-          + DISABLE_DOWNLOAD_HANDLE + " system property=\""
-          + System.getProperty(DISABLE_DOWNLOAD_HANDLE) + "\")");
+        myLogger.message("Swabra: No Handle executable prepared ("
+          + DISABLE_DOWNLOAD_HANDLE + " = \""
+          + System.getProperty(DISABLE_DOWNLOAD_HANDLE) + "\")", false);
       }
     } else {
       myHandlePath = null;
@@ -256,7 +256,7 @@ public final class  Swabra extends AgentLifeCycleAdapter {
         myLogger.warn("Swabra: No Handle path passed in Swabra settings. Getting from system property "
           + HANDLE_EXE_SYSTEM_PROP);
         if (notDefined(myHandlePath)) {
-          myLogger.warn("Swabra: No Handle path passed in " + HANDLE_EXE_SYSTEM_PROP + " system property. Will not use handle");
+          myLogger.warn("Swabra: No Handle path passed in " + HANDLE_EXE_SYSTEM_PROP + " system property. Will not use Handle");
           return false;
         }
       }
