@@ -16,13 +16,12 @@
 
 package jetbrains.buildServer.swabra;
 
+import com.intellij.openapi.diagnostic.Logger;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.*;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.List;
-import java.util.ArrayList;
+import java.text.ParseException;
+import java.util.*;
 
 import jetbrains.buildServer.util.FileUtil;
 import jetbrains.buildServer.swabra.processes.LockedFileResolver;
@@ -33,6 +32,8 @@ import jetbrains.buildServer.swabra.processes.LockedFileResolver;
  * Time: 17:09:05
  */
 public final class Snapshot {
+  final Logger LOG = Logger.getInstance(Snapshot.class.getName());
+
   private static final String FILE_SUFFIX = ".snapshot";
   private static final String SEPARATOR = "\t";
 
@@ -85,12 +86,12 @@ public final class Snapshot {
       snapshotWriter = new BufferedWriter(new FileWriter(snapshot));
       snapshotWriter.write(myCheckoutDirParent + File.separator + "\r\n");
       snapshotWriter.write(myCheckoutDir.getName() + File.separator + SEPARATOR
-        + myCheckoutDir.length() + SEPARATOR + myCheckoutDir.lastModified() + "\r\n");
+        + myCheckoutDir.length() + SEPARATOR + encodeDate(myCheckoutDir.lastModified()) + "\r\n");
       saveState(myCheckoutDir, snapshotWriter);
       logger.message("Swabra: Finished saving state of checkout directory " + myCheckoutDir + " to snapshot file " + snapshot.getAbsolutePath(), true);
     } catch (Exception e) {
-      logger.error("Swabra: Unable to save checkout directory " + myCheckoutDir.getAbsolutePath()
-        + " snapshot to file " + snapshot.getAbsolutePath());
+      logger.error("Swabra: Unable to save snapshot of checkout directory '" + myCheckoutDir.getAbsolutePath()
+        + "' to file " + snapshot.getAbsolutePath());
       logger.exception(e, true);
       return false;
     } finally {
@@ -129,7 +130,15 @@ public final class Snapshot {
     fPath = isDir ? fPath.substring(fPath.indexOf(myCheckoutDirParent) + myCheckoutDirParent.length() + 1) : file.getName(); //+1 for trailing slash
     final String trailingSlash = isDir ? File.separator : "";
     snapshotWriter.write(fPath + trailingSlash + SEPARATOR
-      + file.length() + SEPARATOR + file.lastModified() + "\r\n");
+      + file.length() + SEPARATOR + encodeDate(file.lastModified()) + "\r\n");
+  }
+
+  private String encodeDate(long timestamp) {
+    return String.valueOf(timestamp);
+  }
+
+  private long decodeDate(String encodedDate) throws ParseException {
+    return Long.parseLong(encodedDate);
   }
 
   public boolean collect(@NotNull String snapshotName, @NotNull SwabraLogger logger, boolean verbose) {
@@ -154,8 +163,9 @@ public final class Snapshot {
         final int firstSeparator = fileRecord.indexOf(SEPARATOR);
         final int secondSeparator = fileRecord.indexOf(SEPARATOR, firstSeparator + 1);
         final String path = fileRecord.substring(0, firstSeparator);
-        final FileInfo fi = new FileInfo(Long.parseLong(fileRecord.substring(firstSeparator + 1, secondSeparator)),
-          Long.parseLong(fileRecord.substring(secondSeparator + 1)));
+        final long length = Long.parseLong(fileRecord.substring(firstSeparator + 1, secondSeparator));
+        final long lastModified = decodeDate(fileRecord.substring(secondSeparator + 1));
+        final FileInfo fi = new FileInfo(length, lastModified);
         if (path.endsWith(File.separator)) {
           currentDir = parentDir + path;
           myFiles.put(currentDir.substring(0, currentDir.length() - 1), fi);
@@ -235,7 +245,10 @@ public final class Snapshot {
         } else {
           myDeleted.add(file);
         }
-      } else if ((file.lastModified() != info.getLastModified()) || file.length() != info.getLength()) {
+      } else if (isModified(file, info)) {
+        LOG.debug("Different file found: '" + file.getAbsolutePath() +
+          "' timestamp (stored: " + info.getLastModified() + ", actual: " + file.lastModified() +
+          "), size (stored: " + info.getLength() + ", actual: " + file.length() + ")");
         myDetectedModified.add(file);
         if (file.isDirectory()) {
           //directory's content is supposed to be modified
@@ -248,6 +261,10 @@ public final class Snapshot {
         }
       }
     }
+  }
+
+  private boolean isModified(File file, FileInfo info) {
+    return (file.lastModified() != info.getLastModified()) || file.length() != info.getLength();
   }
 
   private void logTotals(@NotNull SwabraLogger logger, boolean verbose) {
