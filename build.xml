@@ -2,6 +2,7 @@
 <project name="swabra-custom" basedir="." default="all">
 
     <property file="build.properties"/>
+    <property name="javac2.home" value="${basedir}/lib-compile"/>  
     <import file="${basedir}/swabra.xml"/>
 
     <property name="plugin.name" value="swabra"/>

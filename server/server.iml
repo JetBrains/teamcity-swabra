@@ -16,6 +16,7 @@
     <orderEntry type="library" name="TeamCity-utils" level="project" />
     <orderEntry type="library" name="TeamCity-server" level="project" />
     <orderEntry type="module" module-name="common" />
+    <orderEntry type="library" name="IDEA annotations" level="project" />
   </component>
 </module>
 

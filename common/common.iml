@@ -8,6 +8,7 @@
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="library" name="TeamCity-utils" level="project" />
+    <orderEntry type="library" name="IDEA annotations" level="project" />
   </component>
 </module>
 

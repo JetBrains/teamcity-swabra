@@ -17,6 +17,8 @@
     <orderEntry type="library" name="TeamCity-common" level="project" />
     <orderEntry type="module" module-name="common" />
     <orderEntry type="library" name="Log4J" level="project" />
+    <orderEntry type="library" name="IntelliJ IDEA open API" level="project" />
+    <orderEntry type="library" name="IDEA annotations" level="project" />
     <orderEntry type="library" name="TeamCity-agent-non-openapi" level="project" />
   </component>
 </module>

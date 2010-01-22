@@ -30,7 +30,6 @@ import java.io.IOException;
 import jetbrains.buildServer.SimpleCommandLineProcessRunner;
 import jetbrains.buildServer.ExecResult;
 import jetbrains.buildServer.agent.SimpleBuildLogger;
-import com.intellij.execution.configurations.GeneralCommandLine;
 
 /**
  * User: vbedrosova
