@@ -175,20 +175,20 @@ public class SwabraTest extends TestCase {
     FileUtil.copyDir(getTestData(dirName + File.separator + BEFORE_BUILD, null), myCheckoutDir);
     FileUtil.delete(new File(checkoutDirPath + File.separator + ".svn"));
     dispatcher.getMulticaster().buildStarted(build);
-    Thread.sleep(5000);
+    Thread.sleep(100);
     cleanCheckoutDir();
 
     FileUtil.copyDir(getTestData(dirName + File.separator + AFTER_CHECKOUT, null), myCheckoutDir);
     FileUtil.delete(new File(checkoutDirPath + File.separator + ".svn"));
     dispatcher.getMulticaster().beforeRunnerStart(build);
     dispatcher.getMulticaster().beforeBuildFinish(BuildFinishedStatus.FINISHED_SUCCESS);
-    Thread.sleep(5000);
+    Thread.sleep(100);
     cleanCheckoutDir();
 
     FileUtil.copyDir(getTestData(dirName + File.separator + AFTER_BUILD, null), myCheckoutDir);
     FileUtil.delete(new File(checkoutDirPath + File.separator + ".svn"));
     dispatcher.getMulticaster().buildFinished(BuildFinishedStatus.FINISHED_SUCCESS);
-    Thread.sleep(5000);
+    Thread.sleep(100);
 
     myContext.assertIsSatisfied();
     setRunningBuildParams(secondCallParams, myBuildAgentConf, myCheckoutDir, logger, build);
@@ -196,20 +196,20 @@ public class SwabraTest extends TestCase {
     FileUtil.copyDir(getTestData(dirName + File.separator + BEFORE_BUILD, null), myCheckoutDir);
     FileUtil.delete(new File(checkoutDirPath + File.separator + ".svn"));
     dispatcher.getMulticaster().buildStarted(build);
-    Thread.sleep(5000);
+    Thread.sleep(100);
     cleanCheckoutDir();
 
     FileUtil.copyDir(getTestData(dirName + File.separator + AFTER_CHECKOUT, null), myCheckoutDir);
     FileUtil.delete(new File(checkoutDirPath + File.separator + ".svn"));
     dispatcher.getMulticaster().beforeRunnerStart(build);
     dispatcher.getMulticaster().beforeBuildFinish(BuildFinishedStatus.FINISHED_SUCCESS);
-    Thread.sleep(5000);
+    Thread.sleep(100);
     cleanCheckoutDir();
 
     FileUtil.copyDir(getTestData(dirName + File.separator + AFTER_BUILD, null), myCheckoutDir);
     FileUtil.delete(new File(checkoutDirPath + File.separator + ".svn"));
     dispatcher.getMulticaster().buildFinished(BuildFinishedStatus.FINISHED_SUCCESS);
-    Thread.sleep(5000);
+    Thread.sleep(100);
 
     myContext.assertIsSatisfied();
 
