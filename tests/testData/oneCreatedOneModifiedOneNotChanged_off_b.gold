@@ -1,2 +1,2 @@
-WARNING: Swabra: Need a valid checkout directory snapshot - forcing clean checkout for ##CHECKOUT_DIR##
+MESSAGE: Swabra: Need a clean snapshot of checkout directory - forcing clean checkout for ##CHECKOUT_DIR##
 MESSAGE: Swabra: Saving state of checkout directory ##CHECKOUT_DIR## to snapshot file ##SNAPSHOT##

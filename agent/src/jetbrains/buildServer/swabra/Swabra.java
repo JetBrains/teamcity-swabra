@@ -214,7 +214,7 @@ public final class  Swabra extends AgentLifeCycleAdapter {
   private void doCleanup(@NotNull File checkoutDir) {
     myDirectoryCleaner.cleanFolder(checkoutDir, new SmartDirectoryCleanerCallback() {
       public void logCleanStarted(File dir) {
-        myLogger.warn("Swabra: Need a valid checkout directory snapshot - forcing clean checkout for " + dir);
+        myLogger.message("Swabra: Need a clean snapshot of checkout directory - forcing clean checkout for " + dir, true);
       }
 
       public void logFailedToDeleteEmptyDirectory(File dir) {
