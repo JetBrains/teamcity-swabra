@@ -171,27 +171,20 @@ public class FilesCollector {
   }
 
   private void logTotals() {
-    String prefix = null;
     if (!myDeleted.isEmpty()) {
-      prefix = "Deleting ";
       for (File file : myDeleted) {
-        myLogger.message(prefix + file.getAbsolutePath(), myVerbose);
+        myLogger.message("Deleting " + file.getAbsolutePath(), myVerbose);
       }
     }
     if (!myUnableToDelete.isEmpty()) {
-      prefix = "Unable to delete ";
       for (File file : myUnableToDelete) {
-        myLogger.warn(prefix + file.getAbsolutePath());
+        myLogger.warn("Unable to delete " + file.getAbsolutePath());
       }
     }
     if (!myDetectedModified.isEmpty()) {
-      prefix = "Detected modified ";
       for (File file : myDetectedModified) {
-        myLogger.message(prefix + file.getAbsolutePath(), myVerbose);
+        myLogger.message("Detected modified " + file.getAbsolutePath(), myVerbose);
       }
-    }
-    if (prefix == null) {
-      myLogger.message("No newly created or modified files detected", myVerbose);
     }
   }
 
