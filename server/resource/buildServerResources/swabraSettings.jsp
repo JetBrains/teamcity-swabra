@@ -15,6 +15,9 @@
 <c:set var="displayAfterBuildSwabraSettings"
        value="${propertiesBean.properties['swabra.mode'] == 'swabra.after.build' ? true : false}"/>
 
+<c:set var="displayLockingProcessesSettings"
+       value="${not empty propertiesBean.properties['swabra.locking.processes'] ? true : false}"/>
+
 <l:settingsGroup title="Swabra">
 
     <tr class="noBorder" id="swabra.mode.container">
@@ -29,6 +32,7 @@
                 BS.Util.hide($('swabra.mode.note'));
                 BS.Util.show($('swabra.before.build.mode.note'));
                 BS.Util.hide($('swabra.after.build.mode.note'));
+
                 } else {
                 if (selectedValue == 'swabra.after.build') {
                 BS.Util.hide($('swabra.verbose.container'));
@@ -46,7 +50,6 @@
                 BS.Util.hide($('swabra.after.build.mode.note'));
                 }
                 }
-                $('swabra.verbose.container').disabled = (selectedValue != 'swabra.before.build');
                 BS.MultilineProperties.updateVisible();
             </c:set>
             <props:selectProperty name="swabra.mode"
@@ -91,7 +94,26 @@
         </td>
     </tr>
 
-    <tr class="noBorder" id="swabra.process.analizer.container">
+  <tr class="noBorder" id="swabra.locking.processes.container">
+      <th><label for="swabra.locking.processes">Locking processes detection:</label></th>
+      <td>
+        <c:set var="onclick">
+          if (this.checked) {
+          BS.Util.show($('swabra.process.analizer.container'));
+          } else {
+          BS.Util.hide($('swabra.process.analizer.container'));
+          }
+            BS.MultilineProperties.updateVisible();
+        </c:set>
+          <props:checkboxProperty name="swabra.locking.processes" onclick="${onclick}"/>
+          <span class="smallNote">
+                Determine file locking process on Windows agents.
+          </span>
+      </td>
+  </tr>
+
+    <tr class="noBorder" id="swabra.process.analizer.container"
+      style="${displayLockingProcessesSettings ? '' : 'display: none;'}">
         <th><label for="swabra.process.analizer">Handle.exe path:</label>
         </th>
         <td><props:textProperty name="swabra.process.analizer" className="longField"/>
@@ -100,7 +122,7 @@
                 <a showdiscardchangesmessage="false"
                    target="_blank"
                    href="http://technet.microsoft.com/en-us/sysinternals/bb896655.aspx">Handle</a>
-                excutable on Windows agent. If specified will be used to determine processes which hold files in the ckeckout directory.
+                excutable on Windows agent. Is used to determine processes which hold files in the ckeckout directory.
             </span>
     </tr>
 

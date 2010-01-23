@@ -22,11 +22,10 @@ package jetbrains.buildServer.swabra;
  * Time: 14:10:58
  */
 
-import com.intellij.openapi.util.SystemInfo;
 import com.intellij.util.io.ZipUtil;
 import jetbrains.buildServer.agent.*;
 import jetbrains.buildServer.swabra.snapshots.FilesCollector;
-import jetbrains.buildServer.swabra.snapshots.SnapshotMaker;
+import jetbrains.buildServer.swabra.snapshots.SnapshotGenerator;
 import jetbrains.buildServer.util.EventDispatcher;
 import jetbrains.buildServer.util.FileUtil;
 import org.jetbrains.annotations.NotNull;
@@ -91,7 +90,7 @@ public final class  Swabra extends AgentLifeCycleAdapter {
     myPropertiesProcessor = new SwabraPropertiesProcessor(myTempDir, myLogger);
     myPropertiesProcessor.readProperties();
 
-    if (SystemInfo.isWindows) {
+    if (isLockingProcessesDetectionEnabled(runnerParams)) {
       myHandlePath = getHandlePath(runnerParams);
       if ((System.getProperty(DISABLE_DOWNLOAD_HANDLE) != null) || !prepareHandle()) {
         myHandlePath = null;
@@ -152,7 +151,7 @@ public final class  Swabra extends AgentLifeCycleAdapter {
   public void beforeRunnerStart(@NotNull final AgentRunningBuild runningBuild) {
     if (!isEnabled(myMode)) return;
     final String snapshotName = "" + myCheckoutDir.hashCode();
-    if (!new SnapshotMaker(myCheckoutDir, myTempDir, myLogger).snapshot(snapshotName)) {
+    if (!new SnapshotGenerator(myCheckoutDir, myTempDir, myLogger).snapshot(snapshotName)) {
       myPropertiesProcessor.markDirty(myCheckoutDir);
       myPropertiesProcessor.writeProperties();
       myMode = null;

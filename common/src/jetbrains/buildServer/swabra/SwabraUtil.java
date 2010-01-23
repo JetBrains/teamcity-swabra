@@ -30,6 +30,8 @@ import com.intellij.openapi.util.SystemInfo;
 public class SwabraUtil {
   public static final String MODE = "swabra.mode";
   public static final String VERBOSE = "swabra.verbose";
+  public static final String LOCKING_PROCESS_DETECTION = "swabra.locking.processes";
+
   public static final String STRICT = "swabra.strict";
 
   public static final String AFTER_BUILD = "swabra.after.build";
@@ -65,7 +67,11 @@ public class SwabraUtil {
     return params.containsKey(STRICT) && isSwabraEnabled(params);
   }
 
-  public static String getHandlePath(@NotNull final Map<String, String> runParams) {    
+  public static boolean isLockingProcessesDetectionEnabled(@NotNull final Map<String, String> params) {
+    return SystemInfo.isWindows && params.containsKey(LOCKING_PROCESS_DETECTION);
+  }
+
+  public static String getHandlePath(@NotNull final Map<String, String> runParams) {
     return runParams.get(PROCESS_ANALIZER);
   }
 }

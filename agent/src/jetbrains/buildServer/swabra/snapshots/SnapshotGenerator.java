@@ -17,14 +17,14 @@ import java.util.List;
  * Date: 23.01.2010
  * Time: 14:04:16
  */
-public class SnapshotMaker {
+public class SnapshotGenerator {
   private final File myTempDir;
   private final File myCheckoutDir;
   private String myCheckoutDirParent;
 
   private final SwabraLogger myLogger;
 
-  public SnapshotMaker(@NotNull File checkoutDir,
+  public SnapshotGenerator(@NotNull File checkoutDir,
                        @NotNull File tempDir,
                        @NotNull SwabraLogger logger) {
     myTempDir = tempDir;
