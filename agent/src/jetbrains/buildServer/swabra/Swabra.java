@@ -25,6 +25,8 @@ package jetbrains.buildServer.swabra;
 import com.intellij.openapi.util.SystemInfo;
 import com.intellij.util.io.ZipUtil;
 import jetbrains.buildServer.agent.*;
+import jetbrains.buildServer.swabra.snapshots.FilesCollector;
+import jetbrains.buildServer.swabra.snapshots.SnapshotMaker;
 import jetbrains.buildServer.util.EventDispatcher;
 import jetbrains.buildServer.util.FileUtil;
 import org.jetbrains.annotations.NotNull;
@@ -51,7 +53,7 @@ public final class  Swabra extends AgentLifeCycleAdapter {
   private SmartDirectoryCleaner myDirectoryCleaner;
 
   private SwabraPropertiesProcessor myPropertiesProcessor;
-  private Snapshot mySnapshot;
+  private FilesCollector myFilesCollector;
 
   private String myMode;
   private boolean myVerbose;
@@ -113,7 +115,7 @@ public final class  Swabra extends AgentLifeCycleAdapter {
     final LockedFileResolver lockedFileResolver =
       ((myHandlePath == null) || (!unifyPath(myHandlePath).endsWith(File.separator + HANDLE_EXE))) ?
         null : new LockedFileResolver(new HandlePidsProvider(myHandlePath, buildLogger), buildLogger);
-    mySnapshot = new Snapshot(myTempDir, myCheckoutDir, lockedFileResolver, strict);
+    myFilesCollector = new FilesCollector(myCheckoutDir, myTempDir, lockedFileResolver, myLogger, myVerbose, strict);
 
     String snapshotName;
     try {
@@ -137,7 +139,7 @@ public final class  Swabra extends AgentLifeCycleAdapter {
     }
 
     myLogger.debug("Swabra: Previous build files cleanup is performed before build");
-    if (!mySnapshot.collect(snapshotName, myLogger, myVerbose)) {
+    if (!myFilesCollector.collect(snapshotName)) {
       myPropertiesProcessor.markDirty(myCheckoutDir);
       myPropertiesProcessor.writeProperties();
       myMode = null;
@@ -150,7 +152,7 @@ public final class  Swabra extends AgentLifeCycleAdapter {
   public void beforeRunnerStart(@NotNull final AgentRunningBuild runningBuild) {
     if (!isEnabled(myMode)) return;
     final String snapshotName = "" + myCheckoutDir.hashCode();
-    if (!mySnapshot.snapshot(snapshotName, myLogger, myVerbose)) {
+    if (!new SnapshotMaker(myCheckoutDir, myTempDir, myLogger).snapshot(snapshotName)) {
       myPropertiesProcessor.markDirty(myCheckoutDir);
       myPropertiesProcessor.writeProperties();
       myMode = null;
@@ -174,7 +176,7 @@ public final class  Swabra extends AgentLifeCycleAdapter {
       myLogger.debug("Swabra: Build files cleanup is performed after build");
       final Thread t = new Thread(new Runnable() {
         public void run() {
-          if (!mySnapshot.collect(myPropertiesProcessor.getSnapshot(myCheckoutDir), myLogger, myVerbose)) {
+          if (!myFilesCollector.collect(myPropertiesProcessor.getSnapshot(myCheckoutDir))) {
             myPrevThreads.remove(myCheckoutDir);
           } else {
             myPropertiesProcessor.markClean(myCheckoutDir);

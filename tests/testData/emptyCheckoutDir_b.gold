@@ -1,10 +1,8 @@
 WARNING: Swabra: Need a valid checkout directory snapshot - forcing clean checkout for ##CHECKOUT_DIR##
 MESSAGE: Swabra: Saving state of checkout directory ##CHECKOUT_DIR## to snapshot file ##SNAPSHOT##
-MESSAGE: Swabra: Finished saving state of checkout directory ##CHECKOUT_DIR## to snapshot file ##SNAPSHOT##
 MESSAGE: Swabra: Scanning checkout directory ##CHECKOUT_DIR## for newly created and modified files...
 ACTIVITY STARTED: Swabra
 MESSAGE: No newly created or modified files detected
 ACTIVITY FINISHED: Swabra
 MESSAGE: Swabra: Finished scanning checkout directory ##CHECKOUT_DIR## for newly created and modified files: 0 object(s) deleted, 0 object(s) detected modified
 MESSAGE: Swabra: Saving state of checkout directory ##CHECKOUT_DIR## to snapshot file ##SNAPSHOT##
-MESSAGE: Swabra: Finished saving state of checkout directory ##CHECKOUT_DIR## to snapshot file ##SNAPSHOT##
