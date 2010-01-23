@@ -51,9 +51,8 @@ public class SnapshotMaker {
     BufferedWriter snapshotWriter = null;
     try {
       snapshotWriter = new BufferedWriter(new FileWriter(snapshot));
-      snapshotWriter.write(myCheckoutDirParent + File.separator + "\r\n");
-      snapshotWriter.write(myCheckoutDir.getName() + File.separator + SEPARATOR
-        + myCheckoutDir.length() + SEPARATOR + encodeDate(myCheckoutDir.lastModified()) + "\r\n");
+      snapshotWriter.write(getSnapshotHeader(myCheckoutDirParent));
+      snapshotWriter.write(getSnapshotEntry(myCheckoutDir, myCheckoutDirParent));
       saveState(myCheckoutDir, snapshotWriter);
       myLogger.message("Swabra: Finished saving state of checkout directory " + myCheckoutDir + " to snapshot file " + snapshot.getAbsolutePath(), false);
     } catch (Exception e) {
@@ -80,23 +79,14 @@ public class SnapshotMaker {
     final List<File> dirs = new ArrayList<File>();
     for (File file : files) {
       if (file.isFile()) {
-        saveFileState(file, snapshotWriter);
+        snapshotWriter.write(getSnapshotEntry(file, myCheckoutDirParent));
       } else {
         dirs.add(file);
       }
     }
     for (File d : dirs) {
-      saveFileState(d, snapshotWriter);
+      snapshotWriter.write(getSnapshotEntry(d, myCheckoutDirParent));
       saveState(d, snapshotWriter);
     }
-  }
-
-  private void saveFileState(@NotNull final File file, @NotNull BufferedWriter snapshotWriter) throws Exception {
-    final boolean isDir = file.isDirectory();
-    String fPath = file.getAbsolutePath();
-    fPath = isDir ? fPath.substring(fPath.indexOf(myCheckoutDirParent) + myCheckoutDirParent.length() + 1) : file.getName(); //+1 for trailing slash
-    final String trailingSlash = isDir ? File.separator : "";
-    snapshotWriter.write(fPath + trailingSlash + SEPARATOR
-      + file.length() + SEPARATOR + encodeDate(file.lastModified()) + "\r\n");
   }
 }

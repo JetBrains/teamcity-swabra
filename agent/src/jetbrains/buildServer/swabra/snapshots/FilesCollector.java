@@ -63,12 +63,8 @@ public class FilesCollector {
       String currentDir = "";
       String fileRecord = snapshotReader.readLine();
       while (fileRecord != null) {
-        final int firstSeparator = fileRecord.indexOf(SEPARATOR);
-        final int secondSeparator = fileRecord.indexOf(SEPARATOR, firstSeparator + 1);
-        final String path = fileRecord.substring(0, firstSeparator);
-        final long length = Long.parseLong(fileRecord.substring(firstSeparator + 1, secondSeparator));
-        final long lastModified = decodeDate(fileRecord.substring(secondSeparator + 1));
-        final FileInfo fi = new FileInfo(length, lastModified);
+        final String path = getFilePath(fileRecord);
+        final FileInfo fi = new FileInfo(getFileLength(fileRecord), getFileLastModified(fileRecord));
         if (path.endsWith(File.separator)) {
           currentDir = parentDir + path;
           myFiles.put(currentDir.substring(0, currentDir.length() - 1), fi);
@@ -206,23 +202,5 @@ public class FilesCollector {
       }
     }
     return false;
-  }
-
-  private static final class FileInfo {
-    private final long myLength;
-    private final long myLastModified;
-
-    public FileInfo(long length, long lastModified) {
-      myLength = length;
-      myLastModified = lastModified;
-    }
-
-    public long getLastModified() {
-      return myLastModified;
-    }
-
-    public long getLength() {
-      return myLength;
-    }
   }
 }
