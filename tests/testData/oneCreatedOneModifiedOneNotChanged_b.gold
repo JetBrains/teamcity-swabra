@@ -5,5 +5,5 @@ ACTIVITY STARTED: Swabra
 MESSAGE: Detected new and deleted ##CHECKOUT_DIR##\created
 MESSAGE: Detected modified ##CHECKOUT_DIR##\modified
 ACTIVITY FINISHED: Swabra
-MESSAGE: Swabra: Finished scanning checkout directory ##CHECKOUT_DIR## for newly created and modified files: 1 object(s) deleted, 1 object(s) detected modified
+MESSAGE: Swabra: Finished scanning checkout directory ##CHECKOUT_DIR## for newly created and modified files: 1 object(s) deleted, 1 object(s) detected modified, 0 object(s) detected deleted
 MESSAGE: Swabra: Saving state of checkout directory ##CHECKOUT_DIR## to snapshot file ##SNAPSHOT##

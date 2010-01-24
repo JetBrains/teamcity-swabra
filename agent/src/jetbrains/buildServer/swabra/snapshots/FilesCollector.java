@@ -120,7 +120,8 @@ public class FilesCollector {
                           + " for newly created and modified files: "
                           + myDeleted.size() + " object(s) deleted, "
                           + (myUnableToDelete.isEmpty() ? "" : "unable to delete " + myUnableToDelete.size() + " object(s), ")
-                          +  myDetectedModified.size() + " object(s) detected modified";
+                          +  myDetectedModified.size() + " object(s) detected modified, "
+                          + myFiles.size() + " object(s) detected deleted";
     if (myUnableToDelete.isEmpty()) {
       myLogger.message(message, true);
       return true;

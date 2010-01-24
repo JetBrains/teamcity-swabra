@@ -83,7 +83,10 @@ public class LockedFileResolver {
           return pids.contains(processNode.getPid());
         }
       });
-      
+//      for (final long pid : pids) {
+//        ProcessTreeTerminator.kill(pid, ProcessFilter.MATCH_ALL);
+//      }
+
       final List<Long> alivePids = myPidsProvider.getPids(f);
 
       if (alivePids.isEmpty()) {
@@ -136,7 +139,7 @@ public class LockedFileResolver {
   private void warn(String message) {
     LOG.warn(message);
     if (myLogger != null) {
-      myLogger.warning(message);      
+      myLogger.warning(message);
     }
   }
 
