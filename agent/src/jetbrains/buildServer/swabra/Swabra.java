@@ -90,7 +90,8 @@ public final class  Swabra extends AgentLifeCycleAdapter {
     myPropertiesProcessor = new SwabraPropertiesProcessor(myTempDir, myLogger);
     myPropertiesProcessor.readProperties();
 
-    if (isLockingProcessesDetectionEnabled(runnerParams)) {
+    final boolean lockingProcessesDetectionEnabled = isLockingProcessesDetectionEnabled(runnerParams);
+    if (lockingProcessesDetectionEnabled) {
       myHandlePath = getHandlePath(runnerParams);
       if ((System.getProperty(DISABLE_DOWNLOAD_HANDLE) != null) || !prepareHandle()) {
         myHandlePath = null;
@@ -102,7 +103,7 @@ public final class  Swabra extends AgentLifeCycleAdapter {
       myHandlePath = null;
     }
 
-    logSettings(myMode, myCheckoutDir.getAbsolutePath(), strict, myHandlePath, myVerbose);
+    logSettings(myMode, myCheckoutDir.getAbsolutePath(), strict, lockingProcessesDetectionEnabled, myHandlePath, myVerbose);
 
     if (!isEnabled(myMode)) {
       myLogger.message("Swabra is disabled", false);
@@ -188,10 +189,11 @@ public final class  Swabra extends AgentLifeCycleAdapter {
     }
   }
 
-  private void logSettings(String mode, String checkoutDir, boolean strict, String handlePath, boolean verbose) {
+  private void logSettings(String mode, String checkoutDir, boolean strict, boolean lockingProcessesDetectionEnabled, String handlePath, boolean verbose) {
     myLogger.debug("Swabra settings: mode = '" + mode +
       "', checkoutDir = " + checkoutDir +
       "', strict = " + strict +
+      "', locking processes detection = " + lockingProcessesDetectionEnabled +
       "', handle path = " + handlePath +
       "', verbose = '" + verbose + "'.");
   }

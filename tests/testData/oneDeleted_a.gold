@@ -3,8 +3,6 @@ MESSAGE: Swabra: Saving state of checkout directory ##CHECKOUT_DIR## to snapshot
 MESSAGE: Swabra: Build files cleanup will be performed after build
 MESSAGE: Swabra: Scanning checkout directory ##CHECKOUT_DIR## for newly created and modified files...
 ACTIVITY STARTED: Swabra
-MESSAGE: Detected new and deleted ##CHECKOUT_DIR##\created
-MESSAGE: Detected modified ##CHECKOUT_DIR##\modified
+MESSAGE: Detected deleted ##CHECKOUT_DIR##\deleted
 ACTIVITY FINISHED: Swabra
-MESSAGE: Swabra: Finished scanning checkout directory ##CHECKOUT_DIR## for newly created and modified files: 1 object(s) deleted, 1 object(s) detected modified
-MESSAGE: Swabra: Saving state of checkout directory ##CHECKOUT_DIR## to snapshot file ##SNAPSHOT##
+MESSAGE: Swabra: Finished scanning checkout directory ##CHECKOUT_DIR## for newly created and modified files: 0 object(s) deleted, 0 object(s) detected modified

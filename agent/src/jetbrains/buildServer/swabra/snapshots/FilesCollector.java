@@ -113,6 +113,7 @@ public class FilesCollector {
     myLogger.message("Swabra: Scanning checkout directory " + myCheckoutDir + " for newly created and modified files...", true);
     myLogger.activityStarted();
     collectInt(dir);
+    myFiles.remove(myCheckoutDir.getAbsolutePath());
     logTotals();
     myLogger.activityFinished();
     final String message = "Swabra: Finished scanning checkout directory " + myCheckoutDir
@@ -159,6 +160,7 @@ public class FilesCollector {
           collectInt(file);
         }
       }
+      myFiles.remove(file.getAbsolutePath());
     }
   }
 
@@ -167,20 +169,17 @@ public class FilesCollector {
   }
 
   private void logTotals() {
-    if (!myDeleted.isEmpty()) {
-      for (File file : myDeleted) {
-        myLogger.message("Deleting " + file.getAbsolutePath(), myVerbose);
-      }
+    for (File file : myDeleted) {
+      myLogger.message("Detected new and deleted " + file.getAbsolutePath(), myVerbose);
     }
-    if (!myUnableToDelete.isEmpty()) {
-      for (File file : myUnableToDelete) {
-        myLogger.warn("Unable to delete " + file.getAbsolutePath());
-      }
+    for (File file : myUnableToDelete) {
+      myLogger.warn("Detected new, unable to delete " + file.getAbsolutePath());
     }
-    if (!myDetectedModified.isEmpty()) {
-      for (File file : myDetectedModified) {
-        myLogger.message("Detected modified " + file.getAbsolutePath(), myVerbose);
-      }
+    for (File file : myDetectedModified) {
+      myLogger.message("Detected modified " + file.getAbsolutePath(), myVerbose);
+    }
+    for (String file : myFiles.keySet()) {
+      myLogger.message("Detected deleted " + file, myVerbose);
     }
   }
 

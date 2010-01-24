@@ -346,4 +346,16 @@ public class SwabraTest extends TestCase {
     runTest("oneCreatedOneModifiedOneNotChanged", "oneCreatedOneModifiedOneNotChanged_off_a",
             firstCallParams, secondCallParams);
   }
+
+  public void testOneDeletedAfterBuild() throws Exception {
+    final Map<String, String> firstCallParams = new HashMap<String, String>();
+    firstCallParams.put(SwabraUtil.VERBOSE, SwabraUtil.TRUE);
+
+    final Map<String, String> secondCallParams = new HashMap<String, String>();
+    secondCallParams.put(SwabraUtil.VERBOSE, SwabraUtil.TRUE);
+    secondCallParams.put(SwabraUtil.MODE, SwabraUtil.AFTER_BUILD);
+
+    runTest("oneDeleted", "oneDeleted_a",
+            firstCallParams, secondCallParams);
+  }
 }
