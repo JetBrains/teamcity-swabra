@@ -139,13 +139,20 @@ public final class  Swabra extends AgentLifeCycleAdapter {
     }
 
     myLogger.debug("Swabra: Previous build files cleanup is performed before build");
-    if (FilesCollector.CollectionResult.SUCCESS != myFilesCollector.collect(snapshotName)) {
-      myPropertiesProcessor.markDirty(myCheckoutDir);
-      myPropertiesProcessor.writeProperties();
-      myMode = null;
-      if (strict) {
-        fail();
-      }
+    final FilesCollector.CollectionResult result = myFilesCollector.collect(snapshotName);
+
+    switch (result) {
+      case FAILURE:
+        doCleanup(myCheckoutDir);
+        return;
+
+      case RETRY:
+        myPropertiesProcessor.markDirty(myCheckoutDir);
+        myPropertiesProcessor.writeProperties();
+        myMode = null;
+        if (strict) {
+          fail();
+        }
     }
   }
 
@@ -224,7 +231,7 @@ public final class  Swabra extends AgentLifeCycleAdapter {
     myPrevThreads.remove(checkoutDir);
   }
 
-  private void doCleanup(@NotNull File checkoutDir) {
+  private void doCleanup(File checkoutDir) {
     myDirectoryCleaner.cleanFolder(checkoutDir, new SmartDirectoryCleanerCallback() {
       public void logCleanStarted(File dir) {
         myLogger.message("Swabra: Need a clean snapshot of checkout directory - forcing clean checkout for " + dir, true);
