@@ -22,6 +22,10 @@ import java.util.Map;
  * Time: 14:32:04
  */
 public class FilesCollector {
+  public static enum CollectionResult {
+    SUCCESS, FAILURE, RETRY    
+  }
+
   private final File myCheckoutDir;
   private final File myTempDir;  
   private final LockedFileResolver myLockedFileResolver;
@@ -49,11 +53,11 @@ public class FilesCollector {
     myVerbose = verbose;
   }
 
-  public boolean collect(@NotNull String snapshotName) {
+  public CollectionResult collect(@NotNull String snapshotName) {
     final File snapshot = new File(myTempDir, snapshotName + FILE_SUFFIX);
     if (!snapshot.exists() || (snapshot.length() == 0)) {
       logUnableCollect(snapshot, null, "file doesn't exist");
-      return false;
+      return CollectionResult.FAILURE;
     }
     myFiles = new HashMap<String, FileInfo>();
     BufferedReader snapshotReader = null;
@@ -76,7 +80,7 @@ public class FilesCollector {
       return collectFiles(myCheckoutDir);
     } catch (Exception e) {
       logUnableCollect(snapshot, e, "exception when reading from file");
-      return false;
+      return CollectionResult.FAILURE;
     } finally {
       try {
         if (snapshotReader != null) {
@@ -95,7 +99,7 @@ public class FilesCollector {
         myFiles.clear();
       } catch (Exception e) {
         logUnableCollect(snapshot, e, "exception when closing file");
-        return false;
+        return CollectionResult.FAILURE;
       }
     }
   }
@@ -109,7 +113,7 @@ public class FilesCollector {
     }
   }
 
-  private boolean collectFiles(@NotNull final File dir) {
+  private CollectionResult collectFiles(@NotNull final File dir) {
     myLogger.message("Swabra: Scanning checkout directory " + myCheckoutDir + " for newly created and modified files...", true);
     myLogger.activityStarted();
     collectInt(dir);
@@ -122,13 +126,16 @@ public class FilesCollector {
                           + (myUnableToDelete.isEmpty() ? "" : "unable to delete " + myUnableToDelete.size() + " object(s), ")
                           +  myDetectedModified.size() + " object(s) detected modified, "
                           + myFiles.size() + " object(s) detected deleted";
-    if (myUnableToDelete.isEmpty()) {
-      myLogger.message(message, true);
-      return true;
-    } else {
+    if (!myFiles.isEmpty()) {
       myLogger.warn(message);
-      return false;
+      return CollectionResult.FAILURE;
     }
+    if (!myUnableToDelete.isEmpty()) {
+      myLogger.warn(message);
+      return CollectionResult.RETRY;
+    }
+    myLogger.message(message, true);
+    return CollectionResult.SUCCESS;
   }
 
   private void collectInt(@NotNull final File dir) {

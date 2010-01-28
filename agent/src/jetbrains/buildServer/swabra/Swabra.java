@@ -139,7 +139,7 @@ public final class  Swabra extends AgentLifeCycleAdapter {
     }
 
     myLogger.debug("Swabra: Previous build files cleanup is performed before build");
-    if (!myFilesCollector.collect(snapshotName)) {
+    if (FilesCollector.CollectionResult.SUCCESS != myFilesCollector.collect(snapshotName)) {
       myPropertiesProcessor.markDirty(myCheckoutDir);
       myPropertiesProcessor.writeProperties();
       myMode = null;
@@ -174,13 +174,25 @@ public final class  Swabra extends AgentLifeCycleAdapter {
   public void buildFinished(@NotNull final BuildFinishedStatus buildStatus) {
     if (AFTER_BUILD.equals(myMode)) {
       myLogger.debug("Swabra: Build files cleanup is performed after build");
+
       final Thread t = new Thread(new Runnable() {
         public void run() {
-          if (!myFilesCollector.collect(myPropertiesProcessor.getSnapshot(myCheckoutDir))) {
-            myPrevThreads.remove(myCheckoutDir);
-          } else {
-            myPropertiesProcessor.markClean(myCheckoutDir);
-            myPropertiesProcessor.writeProperties();
+          final FilesCollector.CollectionResult result = myFilesCollector.collect(myPropertiesProcessor.getSnapshot(myCheckoutDir));
+
+          switch (result) {
+            case FAILURE:
+              myPropertiesProcessor.markDirty(myCheckoutDir);
+              myPropertiesProcessor.writeProperties();
+              break;
+
+            case RETRY:
+              myPrevThreads.remove(myCheckoutDir);
+              break;
+
+            case SUCCESS:
+              myPropertiesProcessor.markClean(myCheckoutDir);
+              myPropertiesProcessor.writeProperties();
+              break;
           }
         }
       });
