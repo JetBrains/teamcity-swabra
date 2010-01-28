@@ -35,9 +35,12 @@ public class FilesCollector {
 
   private Map<String, FileInfo> myFiles;
 
-  private final List<File> myDeleted = new ArrayList<File>();
-  private final List<File> myDetectedModified = new ArrayList<File>();
-  private final List<File> myUnableToDelete = new ArrayList<File>();
+//  private final List<File> myDeleted = new ArrayList<File>();
+//  private final List<File> myDetectedModified = new ArrayList<File>();
+//  private final List<File> myUnableToDelete = new ArrayList<File>();
+  private int myDeletedNum = 0;
+  private int myDetectedModifiedNum = 0;
+  private int myUnableToDeleteNum = 0;
 
   public FilesCollector(@NotNull File checkoutDir,
                         @NotNull File tempDir,
@@ -59,6 +62,9 @@ public class FilesCollector {
       logUnableCollect(snapshot, null, "file doesn't exist");
       return CollectionResult.FAILURE;
     }
+    myDeletedNum = 0;
+    myDetectedModifiedNum = 0;
+    myUnableToDeleteNum = 0;
     myFiles = new HashMap<String, FileInfo>();
     BufferedReader snapshotReader = null;
     try {
@@ -77,7 +83,7 @@ public class FilesCollector {
         }
         fileRecord = snapshotReader.readLine();
       }
-      return collectFiles(myCheckoutDir);
+      return collectInternal(myCheckoutDir);
     } catch (Exception e) {
       logUnableCollect(snapshot, e, "exception when reading from file");
       return CollectionResult.FAILURE;
@@ -86,16 +92,12 @@ public class FilesCollector {
         if (snapshotReader != null) {
           snapshotReader.close();
         }
-        if (myUnableToDelete.isEmpty()) {
+        if (myUnableToDeleteNum == 0) {
           if (!FileUtil.delete(snapshot)) {
             myLogger.error("Swabra: Unable to remove snapshot file " + snapshot.getAbsolutePath()
               + " for directory " + myCheckoutDir.getAbsolutePath());
           }
-        } else {
-          myUnableToDelete.clear();
         }
-        myDeleted.clear();
-        myDetectedModified.clear();
         myFiles.clear();
       } catch (Exception e) {
         logUnableCollect(snapshot, e, "exception when closing file");
@@ -113,24 +115,26 @@ public class FilesCollector {
     }
   }
 
-  private CollectionResult collectFiles(@NotNull final File dir) {
+  private CollectionResult collectInternal(@NotNull final File dir) {
     myLogger.message("Swabra: Scanning checkout directory " + myCheckoutDir + " for newly created and modified files...", true);
     myLogger.activityStarted();
-    collectInt(dir);
+    collectRec(dir);
     myFiles.remove(myCheckoutDir.getAbsolutePath());
-    logTotals();
+    for (String file : myFiles.keySet()) {
+      myLogger.message("Detected deleted " + file, myVerbose);
+    }
     myLogger.activityFinished();
     final String message = "Swabra: Finished scanning checkout directory " + myCheckoutDir
                           + " for newly created and modified files: "
-                          + myDeleted.size() + " object(s) deleted, "
-                          + (myUnableToDelete.isEmpty() ? "" : "unable to delete " + myUnableToDelete.size() + " object(s), ")
-                          +  myDetectedModified.size() + " object(s) detected modified, "
+                          + myDeletedNum + " object(s) deleted, "
+                          + (myUnableToDeleteNum == 0 ? "" : "unable to delete " + myUnableToDeleteNum + " object(s), ")
+                          +  myDetectedModifiedNum + " object(s) detected modified, "
                           + myFiles.size() + " object(s) detected deleted";
     if (!myFiles.isEmpty()) {
       myLogger.warn(message);
       return CollectionResult.FAILURE;
     }
-    if (!myUnableToDelete.isEmpty()) {
+    if (myUnableToDeleteNum > 0) {
       myLogger.warn(message);
       return CollectionResult.RETRY;
     }
@@ -138,7 +142,7 @@ public class FilesCollector {
     return CollectionResult.SUCCESS;
   }
 
-  private void collectInt(@NotNull final File dir) {
+  private void collectRec(@NotNull final File dir) {
     final File[] files = dir.listFiles();
     if (files == null || files.length == 0) return;
     for (File file : files) {
@@ -146,26 +150,29 @@ public class FilesCollector {
       if (info == null) {
         if (file.isDirectory()) {
           //all directory content is supposed to be garbage
-          collectInt(file);
+          collectRec(file);
         }
-        if (!FileUtil.delete(file) && (unableToDeleteDescendant(file.getAbsolutePath()) || !resolve(file))) {
-          myUnableToDelete.add(file);
+        if (!FileUtil.delete(file) && !resolve(file)) {
+          ++myUnableToDeleteNum;
+          myLogger.warn("Detected new, unable to delete " + file.getAbsolutePath());
         } else {
-          myDeleted.add(file);
+          ++myDeletedNum;
+          myLogger.message("Detected new and deleted " + file.getAbsolutePath(), myVerbose);
         }
       } else if (isModified(file, info)) {
-        myLogger.message("Different file found: '" + file.getAbsolutePath() +
-          "' timestamp (stored: " + info.getLastModified() + ", actual: " + file.lastModified() +
-          "), size (stored: " + info.getLength() + ", actual: " + file.length() + ")", false);
-        myDetectedModified.add(file);
+//        myLogger.message("Different file found: '" + file.getAbsolutePath() +
+//          "' timestamp (stored: " + info.getLastModified() + ", actual: " + file.lastModified() +
+//          "), size (stored: " + info.getLength() + ", actual: " + file.length() + ")", false);
+        ++myDetectedModifiedNum;
+        myLogger.message("Detected modified " + file.getAbsolutePath(), myVerbose);
         if (file.isDirectory()) {
           //directory's content is supposed to be modified
-          collectInt(file);
+          collectRec(file);
         }
       } else {
         if (file.isDirectory()) {
           //yet know nothing about directory's content, so dig into
-          collectInt(file);
+          collectRec(file);
         }
       }
       myFiles.remove(file.getAbsolutePath());
@@ -176,36 +183,12 @@ public class FilesCollector {
     return (file.lastModified() != info.getLastModified()) || file.length() != info.getLength();
   }
 
-  private void logTotals() {
-    for (File file : myDeleted) {
-      myLogger.message("Detected new and deleted " + file.getAbsolutePath(), myVerbose);
-    }
-    for (File file : myUnableToDelete) {
-      myLogger.warn("Detected new, unable to delete " + file.getAbsolutePath());
-    }
-    for (File file : myDetectedModified) {
-      myLogger.message("Detected modified " + file.getAbsolutePath(), myVerbose);
-    }
-    for (String file : myFiles.keySet()) {
-      myLogger.message("Detected deleted " + file, myVerbose);
-    }
-  }
-
   private boolean resolve(File f) {
     if (myLockedFileResolver != null) {
       if (myStrictDeletion) {
         return myLockedFileResolver.resolveDelete(f);
       } else {
         return myLockedFileResolver.resolve(f, false);
-      }
-    }
-    return false;
-  }
-
-  private boolean unableToDeleteDescendant(String path) {
-    for (final File f : myUnableToDelete) {
-      if (f.getAbsolutePath().startsWith(path)) {
-        return true;
       }
     }
     return false;
