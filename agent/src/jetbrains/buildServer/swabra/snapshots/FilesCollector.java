@@ -163,11 +163,12 @@ public class FilesCollector {
 //        myLogger.message("Different file found: '" + file.getAbsolutePath() +
 //          "' timestamp (stored: " + info.getLastModified() + ", actual: " + file.lastModified() +
 //          "), size (stored: " + info.getLength() + ", actual: " + file.length() + ")", false);
-        ++myDetectedModifiedNum;
-        myLogger.message("Detected modified " + file.getAbsolutePath(), myVerbose);
         if (file.isDirectory()) {
           //directory's content is supposed to be modified
           collectRec(file);
+        } else {
+          ++myDetectedModifiedNum;
+          myLogger.message("Detected modified " + file.getAbsolutePath(), myVerbose);          
         }
       } else {
         if (file.isDirectory()) {
