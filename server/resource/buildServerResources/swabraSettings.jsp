@@ -107,7 +107,7 @@
         </c:set>
           <props:checkboxProperty name="swabra.locking.processes" onclick="${onclick}"/>
           <span class="smallNote">
-                Determine file locking process on Windows agents.
+                Determine file locking processes on Windows agents.
           </span>
       </td>
   </tr>
