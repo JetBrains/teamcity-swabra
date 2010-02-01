@@ -32,6 +32,7 @@ import jetbrains.buildServer.agent.*;
 import jetbrains.buildServer.TempFiles;
 import jetbrains.buildServer.util.EventDispatcher;
 import jetbrains.buildServer.util.FileUtil;
+import static jetbrains.buildServer.swabra.TestUtil.*;
 
 
 /**
@@ -43,8 +44,6 @@ public class SwabraTest extends TestCase {
   private static final String BEFORE_BUILD = "beforeBuild";
   private static final String AFTER_CHECKOUT = "afterCheckout";
   private static final String AFTER_BUILD = "afterBuild";
-
-  private static final String TEST_DATA_PATH = "tests" + File.separator + "testData";
 
   private File myCheckoutDir;
   private TempFiles myTempFiles;
@@ -117,38 +116,6 @@ public class SwabraTest extends TestCase {
   public void tearDown() throws Exception {
     myTempFiles.cleanup();
     super.tearDown();
-  }
-
-  private String getTestDataPath(final String fileName, final String folderName) throws Exception {
-    return getTestData(fileName, folderName).getAbsolutePath();
-  }
-
-  private File getTestData(final String fileName, final String folderName) throws Exception {
-    final String relativeFileName = TEST_DATA_PATH + (folderName != null ? File.separator + folderName : "") + (fileName != null ? File.separator + fileName : "");
-    final File file1 = new File(relativeFileName);
-    if (file1.exists()) {
-      return file1;
-    }
-    final File file2 = new File("svnrepo" + File.separator + "swabra" + File.separator + relativeFileName);
-    if (file2.exists()) {
-      return file2;
-    }
-    throw new FileNotFoundException("Either " + file1.getAbsolutePath() + " or file " + file2.getAbsolutePath() + " should exist.");
-  }
-
-  static private String readFile(@NotNull final File file) throws IOException {
-    final FileInputStream inputStream = new FileInputStream(file);
-    try {
-      final BufferedInputStream bis = new BufferedInputStream(inputStream);
-      final byte[] bytes = new byte[(int)file.length()];
-      bis.read(bytes);
-      bis.close();
-
-      return new String(bytes);
-    }
-    finally {
-      inputStream.close();
-    }
   }
 
   private void runTest(final String dirName, final String resultsFileName,
