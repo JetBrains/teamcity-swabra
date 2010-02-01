@@ -69,7 +69,7 @@
                 </c:forEach>
             </props:selectProperty>
       <span class="smallNote" id="swabra.mode.note" style="${displaySwabraSettings ? 'display: none;' : ''}">
-        Choose build garbage cleanup mode.
+        Choose cleanup mode.
       </span>
     <span class="smallNote" id="swabra.before.build.mode.note"
           style="${displayBeforeBuildSwabraSettings ? '' : 'display: none;'}">
