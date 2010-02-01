@@ -32,6 +32,7 @@
             <option name="LABEL_INDENT_ABSOLUTE" value="false" />
           </value>
         </option>
+        <option name="FIELD_NAME_PREFIX" value="my" />
         <option name="RIGHT_MARGIN" value="140" />
         <ADDITIONAL_INDENT_OPTIONS fileType="groovy">
           <option name="INDENT_SIZE" value="2" />
