@@ -159,7 +159,7 @@ public final class  Swabra extends AgentLifeCycleAdapter {
   public void beforeRunnerStart(@NotNull final AgentRunningBuild runningBuild) {
     if (!isEnabled(myMode)) return;
     final String snapshotName = "" + myCheckoutDir.hashCode();
-    if (!new SnapshotGenerator(myCheckoutDir, myTempDir, myLogger).snapshot(snapshotName)) {
+    if (!new SnapshotGenerator(myCheckoutDir, myTempDir, myLogger).generateSnapshot(snapshotName)) {
       myPropertiesProcessor.markDirty(myCheckoutDir);
       myPropertiesProcessor.writeProperties();
       myMode = null;
