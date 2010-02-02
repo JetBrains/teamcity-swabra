@@ -48,6 +48,8 @@ public final class  Swabra extends AgentLifeCycleAdapter {
   public static final String DISABLE_DOWNLOAD_HANDLE = "swabra.handle.disable.download";
   public static final String HANDLE_URL = "http://download.sysinternals.com/Files/Handle.zip";
 
+  public static final String TEST_LOG = "swabra.test.log";
+
   private SwabraLogger myLogger;
   private SmartDirectoryCleaner myDirectoryCleaner;
 
@@ -55,7 +57,6 @@ public final class  Swabra extends AgentLifeCycleAdapter {
   private FilesCollector myFilesCollector;
 
   private String myMode;
-  private boolean myVerbose;
 
   private File myCheckoutDir;
   private File myTempDir;
@@ -83,7 +84,7 @@ public final class  Swabra extends AgentLifeCycleAdapter {
     myCheckoutDir = checkoutDir;
     final Map<String, String> runnerParams = runningBuild.getRunnerParameters();
     myMode = getSwabraMode(runnerParams);
-    myVerbose = isVerbose(runnerParams);
+    final boolean verbose = isVerbose(runnerParams);
     final boolean strict = isStrict(runnerParams);
     myTempDir = runningBuild.getAgentConfiguration().getCacheDirectory(CACHE_KEY);
 
@@ -103,19 +104,18 @@ public final class  Swabra extends AgentLifeCycleAdapter {
       myHandlePath = null;
     }
 
-    logSettings(myMode, myCheckoutDir.getAbsolutePath(), strict, lockingProcessesDetectionEnabled, myHandlePath, myVerbose);
+    logSettings(myMode, myCheckoutDir.getAbsolutePath(), strict, lockingProcessesDetectionEnabled, myHandlePath, verbose);
 
     if (!isEnabled(myMode)) {
       myLogger.message("Swabra is disabled", false);
       myPropertiesProcessor.markDirty(myCheckoutDir);
-      myPropertiesProcessor.writeProperties();
       return;
     }
 
     final LockedFileResolver lockedFileResolver =
       ((myHandlePath == null) || (!unifyPath(myHandlePath).endsWith(File.separator + HANDLE_EXE))) ?
         null : new LockedFileResolver(new HandlePidsProvider(myHandlePath, buildLogger), buildLogger);
-    myFilesCollector = new FilesCollector(myCheckoutDir, myTempDir, lockedFileResolver, myLogger, myVerbose, strict);
+    myFilesCollector = new FilesCollector(myCheckoutDir, myTempDir, lockedFileResolver, myLogger, verbose, strict);
 
     String snapshotName;
     try {
@@ -135,7 +135,6 @@ public final class  Swabra extends AgentLifeCycleAdapter {
       snapshotName = myPropertiesProcessor.getSnapshot(myCheckoutDir);
     } finally {
       myPropertiesProcessor.deleteRecord(myCheckoutDir);
-      myPropertiesProcessor.writeProperties();
     }
 
     myLogger.debug("Swabra: Previous build files cleanup is performed before build");
@@ -148,7 +147,6 @@ public final class  Swabra extends AgentLifeCycleAdapter {
 
       case RETRY:
         myPropertiesProcessor.markDirty(myCheckoutDir);
-        myPropertiesProcessor.writeProperties();
         myMode = null;
         if (strict) {
           fail();
@@ -161,11 +159,9 @@ public final class  Swabra extends AgentLifeCycleAdapter {
     final String snapshotName = "" + myCheckoutDir.hashCode();
     if (!new SnapshotGenerator(myCheckoutDir, myTempDir, myLogger).generateSnapshot(snapshotName)) {
       myPropertiesProcessor.markDirty(myCheckoutDir);
-      myPropertiesProcessor.writeProperties();
       myMode = null;
     } else {
       myPropertiesProcessor.setSnapshot(myCheckoutDir, snapshotName);
-      myPropertiesProcessor.writeProperties();
     }
   }
 
@@ -189,7 +185,6 @@ public final class  Swabra extends AgentLifeCycleAdapter {
           switch (result) {
             case FAILURE:
               myPropertiesProcessor.markDirty(myCheckoutDir);
-              myPropertiesProcessor.writeProperties();
               break;
 
             case RETRY:
@@ -198,7 +193,6 @@ public final class  Swabra extends AgentLifeCycleAdapter {
 
             case SUCCESS:
               myPropertiesProcessor.markClean(myCheckoutDir);
-              myPropertiesProcessor.writeProperties();
               break;
           }
         }
@@ -253,7 +247,6 @@ public final class  Swabra extends AgentLifeCycleAdapter {
       public void logFailedToCleanEntireFolder(File dir) {
         myLogger.warn("Swabra: Failed to delete directory " + dir.getAbsolutePath());
         myPropertiesProcessor.markDirty(myCheckoutDir);
-        myPropertiesProcessor.writeProperties();
         myMode = null;
       }
     });

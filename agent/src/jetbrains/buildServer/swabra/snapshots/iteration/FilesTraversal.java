@@ -13,6 +13,8 @@ public class FilesTraversal {
   }
 
   public static interface ComparisonProcessor {
+    void comparisonStarted();
+    void comparisonFinished();
     void processModified(FileInfo info1, FileInfo info2);
     void processDeleted(FileInfo info);
     void processAdded(FileInfo info);
@@ -29,6 +31,8 @@ public class FilesTraversal {
   public void traverseCompare(@NotNull FilesIterator it1,
                               @NotNull FilesIterator it2,
                               @NotNull ComparisonProcessor processor) throws Exception {
+    processor.comparisonStarted();
+
     FileInfo info1 = it1.getNext();
     FileInfo info2 = it2.getNext();
 
@@ -57,6 +61,7 @@ public class FilesTraversal {
       processor.processAdded(info2);
       info2 = it2.getNext();
     }    
+    processor.comparisonFinished();
   }
 
   private static boolean fileAdded(int comparisonResult) {

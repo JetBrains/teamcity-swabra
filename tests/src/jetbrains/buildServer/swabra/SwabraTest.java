@@ -126,6 +126,7 @@ public class SwabraTest extends TestCase {
 
     final String goldFile = getTestDataPath(resultsFileName + ".gold", null);
     final String resultsFile = goldFile.replace(".gold", ".tmp");
+    System.setProperty(Swabra.TEST_LOG, resultsFile);
 //    final String snapshotFile = goldFile.replace(".gold", ".snapshot");
 
     new File(resultsFile).delete();
@@ -180,10 +181,10 @@ public class SwabraTest extends TestCase {
 
     myContext.assertIsSatisfied();
 
-    final File goldf = new File(goldFile);
-    final String checkoutDirParent = myCheckoutDir.getParentFile().getAbsolutePath(); 
-    final String actual = results.toString().replace(myCheckoutDir.getAbsolutePath(), "##CHECKOUT_DIR##").replace(checkoutDirParent + File.separator + myCheckoutDir.hashCode() + ".snapshot", "##SNAPSHOT##").trim();
-    final String expected = readFile(goldf).trim();
+    System.out.println(results.toString().trim());
+    //final String actual = results.toString().replace(myCheckoutDir.getAbsolutePath(), "##CHECKOUT_DIR##").replace(checkoutDirParent + File.separator + myCheckoutDir.hashCode() + ".snapshot", "##SNAPSHOT##").trim();
+    final String actual = readFile(new File(resultsFile)).replace(myCheckoutDir.getAbsolutePath(), "##CHECKOUT_DIR##").trim();
+    final String expected = readFile(new File(goldFile)).trim();
     if (!actual.equals(expected)) {
       final FileWriter resultsWriter = new FileWriter(resultsFile);
       resultsWriter.write(actual);

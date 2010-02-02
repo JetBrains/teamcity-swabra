@@ -30,6 +30,9 @@ public class TestUtil {
   }
 
    public static String readFile(@NotNull final File file) throws IOException {
+    if (!file.exists()) {
+      return "";      
+    }
     final FileInputStream inputStream = new FileInputStream(file);
     try {
       final BufferedInputStream bis = new BufferedInputStream(inputStream);

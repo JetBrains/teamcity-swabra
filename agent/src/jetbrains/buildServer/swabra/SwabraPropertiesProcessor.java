@@ -56,16 +56,19 @@ public final class SwabraPropertiesProcessor {
   public void markDirty(@NotNull File dir) {
     myLogger.debug("Swabra: Marking " + dir.getAbsolutePath() + " as dirty");
     myProperties.put(unifyPath(dir), DIRTY);
+    writeProperties();
   }
 
   public void markClean(@NotNull File dir) {
     myLogger.debug("Swabra: Marking " + dir.getAbsolutePath() + " as clean");
     myProperties.put(unifyPath(dir), CLEAN);
+    writeProperties();
   }
 
   public void setSnapshot(@NotNull File dir, @NotNull String snapshot) {
     myLogger.debug("Swabra: Setting snapshot " + snapshot + " for " + dir.getAbsolutePath());
     myProperties.put(unifyPath(dir), snapshot);
+    writeProperties();
   }
 
   public boolean isDirty(@NotNull File dir) {
@@ -83,6 +86,7 @@ public final class SwabraPropertiesProcessor {
 
   public void deleteRecord(@NotNull File dir) {
     myProperties.remove(unifyPath(dir));
+    writeProperties();
   }
 
   public void readProperties() {

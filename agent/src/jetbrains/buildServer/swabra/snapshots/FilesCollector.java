@@ -9,11 +9,15 @@ import jetbrains.buildServer.swabra.snapshots.iteration.FileInfo;
 import jetbrains.buildServer.swabra.snapshots.iteration.FileSystemFilesIterator;
 import jetbrains.buildServer.swabra.snapshots.iteration.FilesTraversal;
 import jetbrains.buildServer.swabra.snapshots.iteration.SnapshotFilesIterator;
+import static jetbrains.buildServer.swabra.Swabra.TEST_LOG;
 import jetbrains.buildServer.util.FileUtil;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -42,6 +46,8 @@ public class FilesCollector {
   private File myCurrentNewDir;
   private final List<File> myUnableToDeleteFiles;
 
+  private final FilesCollectionProcessor myProcessor;
+
   public FilesCollector(@NotNull File checkoutDir,
                         @NotNull File tempDir,
                         @Nullable LockedFileResolver lockedFileResolver,
@@ -55,6 +61,7 @@ public class FilesCollector {
     myStrictDeletion = strictDeletion;
     myVerbose = verbose;
     myUnableToDeleteFiles = new ArrayList<File>();
+    myProcessor = (System.getProperty(TEST_LOG) == null) ? new FilesCollectionProcessor() : new FilesCollectionProcessorForTests(System.getProperty(TEST_LOG)); 
   }
 
   public CollectionResult collect(@NotNull String snapshotName) {
@@ -114,7 +121,7 @@ public class FilesCollector {
     final FilesTraversal traversal = new FilesTraversal();
     traversal.traverseCompare(new SnapshotFilesIterator(mySnapshot),
                               new FileSystemFilesIterator(myCheckoutDir),
-                              new FilesCollectionProcessor());
+                              myProcessor);
   }
 
   private void logUnableCollect(File snapshot, Exception e, String message) {
@@ -201,6 +208,67 @@ public class FilesCollector {
           myCurrentNewDir = file;
         }
       }
+    }
+
+    public void comparisonStarted() {
+    }
+
+    public void comparisonFinished() {
+    }
+  }
+
+  private class FilesCollectionProcessorForTests extends FilesCollectionProcessor {
+    private String myLogPath;
+    private BufferedWriter myWriter;
+
+    private FilesCollectionProcessorForTests(String logPath) {
+      myLogPath = logPath;
+    }
+
+    private void log(String message) {
+      try {
+        myWriter.write(message);
+      } catch (IOException e) {
+        e.printStackTrace();
+      }
+    }
+
+    @Override
+    public void processModified(FileInfo info1, FileInfo info2) {
+      super.processModified(info1, info2);
+      log("MODIFIED " + info1.getPath() + "\n");
+    }
+
+    @Override
+    public void processDeleted(FileInfo info) {
+      super.processDeleted(info);
+      log("DELETED " + info.getPath() + "\n");
+    }
+
+    @Override
+    public void processAdded(FileInfo info) {
+      super.processAdded(info);
+      log("ADDED " + info.getPath() + "\n");
+    }
+
+    @Override
+    public void comparisonFinished() {
+      super.comparisonFinished();
+      try {
+        myWriter.close();
+      } catch (IOException e) {
+        e.printStackTrace();
+      }
+    }
+
+    @Override
+    public void comparisonStarted() {
+      super.comparisonStarted();
+      try {
+        myWriter = new BufferedWriter(new FileWriter(new File(myLogPath)));
+      } catch (IOException e) {
+        e.printStackTrace();
+      }      
     }
   }
 }
