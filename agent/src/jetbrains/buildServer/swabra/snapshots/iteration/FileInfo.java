@@ -1,4 +1,4 @@
-package jetbrains.buildServer.swabra.snapshots;
+package jetbrains.buildServer.swabra.snapshots.iteration;
 
 import org.jetbrains.annotations.NotNull;
 

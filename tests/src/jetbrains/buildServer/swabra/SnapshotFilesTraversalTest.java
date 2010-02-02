@@ -1,12 +1,11 @@
 package jetbrains.buildServer.swabra;
 
-import jetbrains.buildServer.swabra.snapshots.FileInfo;
-import jetbrains.buildServer.swabra.snapshots.FilesTraversal;
-import jetbrains.buildServer.swabra.snapshots.SnapshotFilesIterator;
+import jetbrains.buildServer.swabra.snapshots.iteration.FileInfo;
+import jetbrains.buildServer.swabra.snapshots.iteration.FilesTraversal;
+import jetbrains.buildServer.swabra.snapshots.iteration.SnapshotFilesIterator;
 import junit.framework.TestCase;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileWriter;
 
 import static jetbrains.buildServer.swabra.TestUtil.getTestData;
@@ -23,8 +22,8 @@ public class SnapshotFilesTraversalTest extends TestCase {
     final StringBuffer results = new StringBuffer();
 
     traversal.traverse(new SnapshotFilesIterator(getTestData("test.snapshot", null)),
-      new FilesTraversal.Visitor() {
-      public void visit(FileInfo file) {
+      new FilesTraversal.SimpleProcessor() {
+      public void process(FileInfo file) {
         results.append(file.getPath()).append(" ").append(file.getLength()).append(" ").append(file.getLastModified()).append("\n");
       }
     });

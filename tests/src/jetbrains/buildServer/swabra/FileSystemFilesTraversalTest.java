@@ -1,18 +1,16 @@
 package jetbrains.buildServer.swabra;
 
 import jetbrains.buildServer.TempFiles;
-import jetbrains.buildServer.swabra.snapshots.FileInfo;
-import jetbrains.buildServer.swabra.snapshots.FileSystemFilesIterator;
-import jetbrains.buildServer.swabra.snapshots.FilesTraversal;
+import jetbrains.buildServer.swabra.snapshots.iteration.FileInfo;
+import jetbrains.buildServer.swabra.snapshots.iteration.FileSystemFilesIterator;
+import jetbrains.buildServer.swabra.snapshots.iteration.FilesTraversal;
 import static jetbrains.buildServer.swabra.TestUtil.*;
 
 import jetbrains.buildServer.util.FileUtil;
 import junit.framework.TestCase;
 
 import java.io.File;
-import java.io.FileFilter;
 import java.io.FileWriter;
-import java.util.Collection;
 import java.util.List;
 
 /**
@@ -32,8 +30,8 @@ public class FileSystemFilesTraversalTest extends TestCase {
     deleteSvnFiles(root);
 
     traversal.traverse(new FileSystemFilesIterator(root),
-      new FilesTraversal.Visitor() {
-      public void visit(FileInfo file) {
+      new FilesTraversal.SimpleProcessor() {
+      public void process(FileInfo file) {
         results.append(file.getPath()).append("\n");
       }
     });

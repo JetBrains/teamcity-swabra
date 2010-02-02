@@ -1,6 +1,7 @@
-package jetbrains.buildServer.swabra.snapshots;
+package jetbrains.buildServer.swabra.snapshots.iteration;
 
-import jetbrains.buildServer.swabra.processes.LockedFileResolver;
+import jetbrains.buildServer.swabra.snapshots.iteration.FileInfo;
+import jetbrains.buildServer.swabra.snapshots.iteration.FilesIterator;
 import org.apache.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;

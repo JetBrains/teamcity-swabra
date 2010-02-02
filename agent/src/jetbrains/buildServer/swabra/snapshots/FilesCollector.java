@@ -114,7 +114,7 @@ public class FilesCollector {
     final FilesTraversal traversal = new FilesTraversal();
     traversal.traverseCompare(new SnapshotFilesIterator(mySnapshot),
                               new FileSystemFilesIterator(myCheckoutDir),
-                              new FilesCollectorProcessor());
+                              new FilesCollectionProcessor());
   }
 
   private void logUnableCollect(File snapshot, Exception e, String message) {
@@ -178,8 +178,7 @@ public class FilesCollector {
     return false;
   }
 
-  private class FilesCollectorProcessor implements FilesTraversal.ComparisonProcessor
-  {
+  private class FilesCollectionProcessor implements FilesTraversal.ComparisonProcessor {
     public void processModified(FileInfo info1, FileInfo info2) {
       ++myDetectedModified;
       myLogger.message("Detected modified " + info1.getPath(), myVerbose);

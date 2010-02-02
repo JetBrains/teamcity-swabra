@@ -1,6 +1,9 @@
 package jetbrains.buildServer.swabra.snapshots;
 
 import jetbrains.buildServer.swabra.SwabraLogger;
+import jetbrains.buildServer.swabra.snapshots.iteration.FileInfo;
+import jetbrains.buildServer.swabra.snapshots.iteration.FileSystemFilesIterator;
+import jetbrains.buildServer.swabra.snapshots.iteration.FilesTraversal;
 import jetbrains.buildServer.util.FileUtil;
 import org.jetbrains.annotations.NotNull;
 
@@ -75,8 +78,8 @@ public class SnapshotGenerator {
 
   private void iterateAndBuildSnapshot(final BufferedWriter writer) throws Exception {
     final FilesTraversal tr = new FilesTraversal();
-    tr.traverse(new FileSystemFilesIterator(myCheckoutDir), new FilesTraversal.Visitor() {
-      public void visit(FileInfo file) throws Exception {
+    tr.traverse(new FileSystemFilesIterator(myCheckoutDir), new FilesTraversal.SimpleProcessor() {
+      public void process(FileInfo file) throws Exception {
         writer.write(getSnapshotEntry(file, myCheckoutDirParent));
       }
     });

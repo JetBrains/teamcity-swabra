@@ -1,6 +1,8 @@
-package jetbrains.buildServer.swabra.snapshots;
+package jetbrains.buildServer.swabra.snapshots.iteration;
 
-import com.intellij.util.ArrayUtil;
+import jetbrains.buildServer.swabra.snapshots.iteration.FileInfo;
+import jetbrains.buildServer.swabra.snapshots.iteration.FilesComparator;
+import jetbrains.buildServer.swabra.snapshots.iteration.FilesIterator;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -50,7 +52,7 @@ public class FileSystemFilesIterator implements FilesIterator {
     final File[] files = folder.listFiles();
     if (files != null && files.length > 0) {
       final List<File> filesList = Arrays.asList(files);
-      Collections.sort(filesList, new SnapshotUtil.FilesComparator());
+      Collections.sort(filesList, new FilesComparator());
       myIterators.push(filesList.iterator());
     }
     return createFileInfo(folder);

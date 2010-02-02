@@ -1,5 +1,6 @@
-package jetbrains.buildServer.swabra.snapshots;
+package jetbrains.buildServer.swabra.snapshots.iteration;
 
+import jetbrains.buildServer.swabra.snapshots.iteration.FileInfo;
 import org.jetbrains.annotations.Nullable;
 
 /**
