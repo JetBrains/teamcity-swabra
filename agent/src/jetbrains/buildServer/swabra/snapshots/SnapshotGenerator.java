@@ -1,7 +1,6 @@
 package jetbrains.buildServer.swabra.snapshots;
 
 import jetbrains.buildServer.swabra.SwabraLogger;
-import static jetbrains.buildServer.swabra.snapshots.SnapshotUtil.*;
 import jetbrains.buildServer.util.FileUtil;
 import org.jetbrains.annotations.NotNull;
 
@@ -9,8 +8,8 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
+
+import static jetbrains.buildServer.swabra.snapshots.SnapshotUtil.*;
 
 /**
  * User: vbedrosova
@@ -25,8 +24,8 @@ public class SnapshotGenerator {
   private final SwabraLogger myLogger;
 
   public SnapshotGenerator(@NotNull File checkoutDir,
-                       @NotNull File tempDir,
-                       @NotNull SwabraLogger logger) {
+                           @NotNull File tempDir,
+                           @NotNull SwabraLogger logger) {
     myTempDir = tempDir;
     myCheckoutDir = checkoutDir;
     myCheckoutDirParent = checkoutDir.getParent();
@@ -36,7 +35,7 @@ public class SnapshotGenerator {
     myLogger = logger;
   }
 
-  public boolean snapshot(@NotNull String snapshotName) {
+  public boolean generateSnapshot(@NotNull String snapshotName) {
     final File snapshot = new File(myTempDir, snapshotName + FILE_SUFFIX);
     if (snapshot.exists()) {
       myLogger.debug("Swabra: Snapshot file " + snapshot.getAbsolutePath() + " exists, try deleting");
@@ -48,12 +47,13 @@ public class SnapshotGenerator {
     myLogger.message("Swabra: Saving state of checkout directory " + myCheckoutDir +
       " to snapshot file " + snapshot.getAbsolutePath(), true);
 
-    BufferedWriter snapshotWriter = null;
+    BufferedWriter writer = null;
     try {
-      snapshotWriter = new BufferedWriter(new FileWriter(snapshot));
-      snapshotWriter.write(getSnapshotHeader(myCheckoutDirParent));
-      snapshotWriter.write(getSnapshotEntry(myCheckoutDir, myCheckoutDirParent));
-      saveState(myCheckoutDir, snapshotWriter);
+      writer = new BufferedWriter(new FileWriter(snapshot));
+      writer.write(getSnapshotHeader(myCheckoutDirParent));
+
+      iterateAndBuildSnapshot(writer);
+
       myLogger.message("Swabra: Finished saving state of checkout directory " + myCheckoutDir + " to snapshot file " + snapshot.getAbsolutePath(), false);
     } catch (Exception e) {
       myLogger.error("Swabra: Unable to save snapshot of checkout directory '" + myCheckoutDir.getAbsolutePath()
@@ -62,8 +62,8 @@ public class SnapshotGenerator {
       return false;
     } finally {
       try {
-        if (snapshotWriter != null) {
-          snapshotWriter.close();
+        if (writer != null) {
+          writer.close();
         }
       } catch (IOException e) {
         myLogger.exception(e, true);
@@ -73,20 +73,12 @@ public class SnapshotGenerator {
     return true;
   }
 
-  private void saveState(@NotNull File dir, @NotNull BufferedWriter snapshotWriter) throws Exception {
-    final File[] files = dir.listFiles();
-    if (files == null || files.length == 0) return;
-    final List<File> dirs = new ArrayList<File>();
-    for (File file : files) {
-      if (file.isFile()) {
-        snapshotWriter.write(getSnapshotEntry(file, myCheckoutDirParent));
-      } else {
-        dirs.add(file);
+  private void iterateAndBuildSnapshot(final BufferedWriter writer) throws Exception {
+    final FilesTraversal tr = new FilesTraversal();
+    tr.traverse(new FileSystemFilesIterator(myCheckoutDir), new FilesTraversal.Visitor() {
+      public void visit(FileInfo file) throws Exception {
+        writer.write(getSnapshotEntry(file, myCheckoutDirParent));
       }
-    }
-    for (File d : dirs) {
-      snapshotWriter.write(getSnapshotEntry(d, myCheckoutDirParent));
-      saveState(d, snapshotWriter);
-    }
+    });
   }
 }

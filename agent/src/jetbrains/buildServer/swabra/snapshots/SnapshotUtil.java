@@ -3,7 +3,7 @@ package jetbrains.buildServer.swabra.snapshots;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
-import java.text.ParseException;
+import java.util.Comparator;
 
 /**
  * User: vbedrosova
@@ -28,10 +28,25 @@ public class SnapshotUtil {
   }
 
   public static String getSnapshotEntry(@NotNull File file, @NotNull String baseDirName) {
-    final boolean isDir = file.isDirectory();
+    final boolean isFile = file.isFile();
     String fPath = file.getAbsolutePath();
-    fPath = isDir ? fPath.substring(fPath.indexOf(baseDirName) + baseDirName.length() + 1) + File.separator : file.getName(); //+1 for trailing slash
-    return fPath + SEPARATOR + file.length() + SEPARATOR + encodeDate(file.lastModified()) + LINE_SEPARATOR;
+    fPath = isFile ? file.getName() : getDirPath(baseDirName, fPath); //+1 for trailing slash
+    return getSnapshoEntry(fPath, file.length(), file.lastModified());
+  }
+
+  public static String getSnapshotEntry(@NotNull FileInfo file, @NotNull String baseDirName) {
+    final boolean isFile = file.isFile();
+    String fPath = file.getPath();
+    fPath = isFile ? fPath.substring(fPath.lastIndexOf(File.separator) + 1): getDirPath(baseDirName, fPath); //+1 for trailing slash
+    return getSnapshoEntry(fPath, file.getLength(), file.getLastModified());
+  }
+
+  private static String getDirPath(String baseDirName, String fPath) {
+    return fPath.substring(fPath.indexOf(baseDirName) + baseDirName.length() + 1) + File.separator;  //+1 for trailing slash
+  }
+
+  private static String getSnapshoEntry(String path, long length, long lastModified) {
+    return path + SEPARATOR + length + SEPARATOR + encodeDate(lastModified) + LINE_SEPARATOR;
   }
 
   public static String getFilePath(@NotNull String snapshotEntry) {
@@ -51,21 +66,26 @@ public class SnapshotUtil {
     return decodeDate(snapshotEntry.substring(secondSeparator + 1));
   }
 
-  public static final class FileInfo {
-    private final long myLength;
-    private final long myLastModified;
-
-    public FileInfo(long length, long lastModified) {
-      myLength = length;
-      myLastModified = lastModified;
+  public static class FilesComparator implements Comparator<File> {
+    public int compare(File o1, File o2) {
+      return compare(o1.getAbsolutePath(), o1.isFile(), o2.getAbsolutePath(), o2.isFile());
     }
 
-    public long getLastModified() {
-      return myLastModified;
+    public static int compare(FileInfo o1, FileInfo o2) {
+      return compare(o1.getPath(), o1.isFile(), o2.getPath(), o2.isFile());
     }
 
-    public long getLength() {
-      return myLength;
+    private static int compare(String path1, boolean isFile1, String path2, boolean isFile2) {
+      if (isFile1) {
+        if (!isFile2) {
+           return -1;
+        }
+      } else {
+        if (isFile2) {
+           return 1;
+        }
+      }
+      return path1.compareTo(path2);
     }
   }
 }
