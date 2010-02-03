@@ -42,6 +42,8 @@ import static jetbrains.buildServer.swabra.snapshots.SnapshotUtil.FILE_SUFFIX;
  * Time: 14:32:04
  */
 public class FilesCollector {
+  private static final String NOT_DELETE_SNAPSHOT = "swabra.preserve.snapshot";
+
   public static enum CollectionResult {
     SUCCESS, FAILURE, RETRY
   }
@@ -108,6 +110,10 @@ public class FilesCollector {
     }
 
     if (myUnableToDeleteFiles.isEmpty()) {
+      if (System.getProperty(NOT_DELETE_SNAPSHOT) != null) {
+        myLogger.debug("Swabra: Will not delete " + mySnapshot.getAbsolutePath()
+          + " for directory " + myCheckoutDir.getAbsolutePath() + ", " + NOT_DELETE_SNAPSHOT + "property specified");
+      }
       if (!FileUtil.delete(mySnapshot)) {
         myLogger.error("Swabra: Unable to remove snapshot file " + mySnapshot.getAbsolutePath()
           + " for directory " + myCheckoutDir.getAbsolutePath());
