@@ -113,8 +113,7 @@ public class FilesCollector {
       if (System.getProperty(NOT_DELETE_SNAPSHOT) != null) {
         myLogger.debug("Swabra: Will not delete " + mySnapshot.getAbsolutePath()
           + " for directory " + myCheckoutDir.getAbsolutePath() + ", " + NOT_DELETE_SNAPSHOT + "property specified");
-      }
-      if (!FileUtil.delete(mySnapshot)) {
+      } else if (!FileUtil.delete(mySnapshot)) {
         myLogger.error("Swabra: Unable to remove snapshot file " + mySnapshot.getAbsolutePath()
           + " for directory " + myCheckoutDir.getAbsolutePath());
       }
