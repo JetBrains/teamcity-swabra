@@ -27,8 +27,8 @@ import java.io.File;
  * Time: 14:42:00
  */
 public class SnapshotUtil {
-  public static final String SEPARATOR = "\t";
-  public static final String LINE_SEPARATOR = "\r\n";
+  private static final String SEPARATOR = "\t";
+  private static final String LINE_SEPARATOR = "\r\n";
   public static final String FILE_SUFFIX = ".snapshot";
 
   public static String encodeDate(long timestamp) {
