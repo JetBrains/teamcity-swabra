@@ -1,8 +1,21 @@
+/*
+ * Copyright 2000-2010 JetBrains s.r.o.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package jetbrains.buildServer.swabra.snapshots.iteration;
 
-import jetbrains.buildServer.swabra.snapshots.iteration.FileInfo;
-import jetbrains.buildServer.swabra.snapshots.iteration.FilesComparator;
-import jetbrains.buildServer.swabra.snapshots.iteration.FilesIterator;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -15,7 +28,8 @@ import java.util.*;
  * Time: 14:27:18
  */
 public class FileSystemFilesIterator implements FilesIterator {
-  @NotNull private File myRootFolder;
+  @NotNull
+  private File myRootFolder;
   private Stack<Iterator<File>> myIterators;
 
   public FileSystemFilesIterator(@NotNull File rootFolder) {
@@ -29,11 +43,11 @@ public class FileSystemFilesIterator implements FilesIterator {
       return processFolder(myRootFolder);
     }
     if (myIterators.isEmpty()) {
-      return null;     
+      return null;
     }
-    final Iterator<File> it = myIterators.peek(); 
+    final Iterator<File> it = myIterators.peek();
     if (it.hasNext()) {
-      final File next = it.next(); 
+      final File next = it.next();
       if (next.isFile()) {
         return createFileInfo(next);
       } else {
@@ -59,6 +73,6 @@ public class FileSystemFilesIterator implements FilesIterator {
   }
 
   private static FileInfo createFileInfo(File file) {
-    return new FileInfo(file.getAbsolutePath(), file.length(), file.lastModified(), file.isFile());   
+    return new FileInfo(file.getAbsolutePath(), file.length(), file.lastModified(), file.isFile());
   }
 }

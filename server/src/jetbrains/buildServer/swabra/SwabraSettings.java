@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2009 JetBrains s.r.o.
+ * Copyright 2000-2010 JetBrains s.r.o.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,15 +16,14 @@
 
 package jetbrains.buildServer.swabra;
 
+import jetbrains.buildServer.serverSide.ProjectManager;
+import jetbrains.buildServer.web.openapi.PagePlaces;
+import jetbrains.buildServer.web.openapi.buildType.EditBuildRunnerSettingsExtension;
+import jetbrains.buildServer.web.openapi.buildType.ViewBuildRunnerSettingsExtension;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.List;
 import java.util.Arrays;
-
-import jetbrains.buildServer.web.openapi.PagePlaces;
-import jetbrains.buildServer.web.openapi.buildType.ViewBuildRunnerSettingsExtension;
-import jetbrains.buildServer.web.openapi.buildType.EditBuildRunnerSettingsExtension;
-import jetbrains.buildServer.serverSide.ProjectManager;
+import java.util.List;
 
 /**
  * User: vbedrosova

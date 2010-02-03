@@ -1,15 +1,27 @@
+/*
+ * Copyright 2000-2010 JetBrains s.r.o.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package jetbrains.buildServer.swabra.snapshots;
 
 import jetbrains.buildServer.swabra.SwabraLogger;
-
-import static jetbrains.buildServer.swabra.snapshots.SnapshotUtil.*;
-
 import jetbrains.buildServer.swabra.processes.LockedFileResolver;
 import jetbrains.buildServer.swabra.snapshots.iteration.FileInfo;
 import jetbrains.buildServer.swabra.snapshots.iteration.FileSystemFilesIterator;
 import jetbrains.buildServer.swabra.snapshots.iteration.FilesTraversal;
 import jetbrains.buildServer.swabra.snapshots.iteration.SnapshotFilesIterator;
-import static jetbrains.buildServer.swabra.Swabra.TEST_LOG;
 import jetbrains.buildServer.util.FileUtil;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -20,6 +32,9 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+
+import static jetbrains.buildServer.swabra.Swabra.TEST_LOG;
+import static jetbrains.buildServer.swabra.snapshots.SnapshotUtil.FILE_SUFFIX;
 
 /**
  * User: vbedrosova
@@ -61,7 +76,7 @@ public class FilesCollector {
     myStrictDeletion = strictDeletion;
     myVerbose = verbose;
     myUnableToDeleteFiles = new ArrayList<File>();
-    myProcessor = (System.getProperty(TEST_LOG) == null) ? new FilesCollectionProcessor() : new FilesCollectionProcessorForTests(System.getProperty(TEST_LOG)); 
+    myProcessor = (System.getProperty(TEST_LOG) == null) ? new FilesCollectionProcessor() : new FilesCollectionProcessorForTests(System.getProperty(TEST_LOG));
   }
 
   public CollectionResult collect(@NotNull String snapshotName) {
@@ -120,8 +135,8 @@ public class FilesCollector {
   private void iterateAndCollect() throws Exception {
     final FilesTraversal traversal = new FilesTraversal();
     traversal.traverseCompare(new SnapshotFilesIterator(mySnapshot),
-                              new FileSystemFilesIterator(myCheckoutDir),
-                              myProcessor);
+      new FileSystemFilesIterator(myCheckoutDir),
+      myProcessor);
   }
 
   private void logUnableCollect(File snapshot, Exception e, String message) {
@@ -268,7 +283,7 @@ public class FilesCollector {
         myWriter = new BufferedWriter(new FileWriter(new File(myLogPath)));
       } catch (IOException e) {
         e.printStackTrace();
-      }      
+      }
     }
   }
 }

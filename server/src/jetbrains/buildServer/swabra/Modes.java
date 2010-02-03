@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2009 JetBrains s.r.o.
+ * Copyright 2000-2010 JetBrains s.r.o.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,8 +18,8 @@ package jetbrains.buildServer.swabra;
 
 import jetbrains.buildServer.controllers.StateField;
 
-import java.util.List;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -34,7 +34,7 @@ public class Modes {
   public Modes() {
     myModes = new ArrayList<SwabraMode>(SwabraUtil.SWABRA_MODES.size());
     for (Map.Entry<String, String> e : SwabraUtil.SWABRA_MODES.entrySet()) {
-      myModes.add(new SwabraMode(e.getKey(), e.getValue()));            
+      myModes.add(new SwabraMode(e.getKey(), e.getValue()));
     }
   }
 

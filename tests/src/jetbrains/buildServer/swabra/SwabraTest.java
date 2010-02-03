@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2009 JetBrains s.r.o.
+ * Copyright 2000-2010 JetBrains s.r.o.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,22 +16,23 @@
 
 package jetbrains.buildServer.swabra;
 
+import jetbrains.buildServer.TempFiles;
+import jetbrains.buildServer.agent.*;
+import jetbrains.buildServer.util.EventDispatcher;
+import jetbrains.buildServer.util.FileUtil;
 import junit.framework.TestCase;
-
-import java.io.*;
-import java.util.Map;
-import java.util.HashMap;
-
 import org.jetbrains.annotations.NotNull;
-import org.junit.Before;
-import org.junit.After;
 import org.jmock.Expectations;
 import org.jmock.Mockery;
 import org.jmock.integration.junit4.JUnit4Mockery;
-import jetbrains.buildServer.agent.*;
-import jetbrains.buildServer.TempFiles;
-import jetbrains.buildServer.util.EventDispatcher;
-import jetbrains.buildServer.util.FileUtil;
+import org.junit.After;
+import org.junit.Before;
+
+import java.io.File;
+import java.io.FileWriter;
+import java.util.HashMap;
+import java.util.Map;
+
 import static jetbrains.buildServer.swabra.TestUtil.*;
 
 
@@ -95,7 +96,7 @@ public class SwabraTest extends TestCase {
   private SmartDirectoryCleaner createSmartDirectoryCleaner() {
     return new SmartDirectoryCleaner() {
       public void cleanFolder(@NotNull File file, @NotNull SmartDirectoryCleanerCallback callback) {
-        callback.logCleanStarted(file);                                
+        callback.logCleanStarted(file);
         if (!FileUtil.delete(file)) {
           callback.logFailedToCleanEntireFolder(file);
         }
@@ -225,7 +226,7 @@ public class SwabraTest extends TestCase {
     secondCallParams.put(SwabraUtil.MODE, SwabraUtil.BEFORE_BUILD);
 
     runTest("emptyCheckoutDir", "emptyCheckoutDir_b", firstCallParams, secondCallParams);
-  }  
+  }
 
   public void testEmptyCheckoutDirAfterBuild() throws Exception {
     final Map<String, String> firstCallParams = new HashMap<String, String>();
@@ -249,7 +250,7 @@ public class SwabraTest extends TestCase {
     secondCallParams.put(SwabraUtil.MODE, SwabraUtil.BEFORE_BUILD);
 
     runTest("oneCreatedOneModifiedOneNotChanged", "oneCreatedOneModifiedOneNotChanged_b",
-              firstCallParams, secondCallParams);
+      firstCallParams, secondCallParams);
   }
 
   public void testOneCreatedOneModifiedOneNotChangedAfterBuild() throws Exception {
@@ -262,7 +263,7 @@ public class SwabraTest extends TestCase {
     secondCallParams.put(SwabraUtil.MODE, SwabraUtil.AFTER_BUILD);
 
     runTest("oneCreatedOneModifiedOneNotChanged", "oneCreatedOneModifiedOneNotChanged_a",
-            firstCallParams, secondCallParams);
+      firstCallParams, secondCallParams);
   }
 
   public void testOneCreatedOneModifiedOneNotChangedBeforeAfter() throws Exception {
@@ -275,7 +276,7 @@ public class SwabraTest extends TestCase {
     secondCallParams.put(SwabraUtil.MODE, SwabraUtil.AFTER_BUILD);
 
     runTest("oneCreatedOneModifiedOneNotChanged", "oneCreatedOneModifiedOneNotChanged_b_a",
-            firstCallParams, secondCallParams);
+      firstCallParams, secondCallParams);
   }
 
   public void testOneCreatedOneModifiedOneNotChangedAfterBefore() throws Exception {
@@ -288,7 +289,7 @@ public class SwabraTest extends TestCase {
     secondCallParams.put(SwabraUtil.MODE, SwabraUtil.BEFORE_BUILD);
 
     runTest("oneCreatedOneModifiedOneNotChanged", "oneCreatedOneModifiedOneNotChanged_a_b",
-            firstCallParams, secondCallParams);
+      firstCallParams, secondCallParams);
   }
 
   public void testOneCreatedOneModifiedOneNotChangedTurnedOffBefore() throws Exception {
@@ -300,7 +301,7 @@ public class SwabraTest extends TestCase {
     secondCallParams.put(SwabraUtil.MODE, SwabraUtil.BEFORE_BUILD);
 
     runTest("oneCreatedOneModifiedOneNotChanged", "oneCreatedOneModifiedOneNotChanged_off_b",
-            firstCallParams, secondCallParams);
+      firstCallParams, secondCallParams);
   }
 
   public void testOneCreatedOneModifiedOneNotChangedTurnedOffAfter() throws Exception {
@@ -312,7 +313,7 @@ public class SwabraTest extends TestCase {
     secondCallParams.put(SwabraUtil.MODE, SwabraUtil.AFTER_BUILD);
 
     runTest("oneCreatedOneModifiedOneNotChanged", "oneCreatedOneModifiedOneNotChanged_off_a",
-            firstCallParams, secondCallParams);
+      firstCallParams, secondCallParams);
   }
 
   public void testOneDeletedAfterBuild() throws Exception {
@@ -324,6 +325,6 @@ public class SwabraTest extends TestCase {
     secondCallParams.put(SwabraUtil.MODE, SwabraUtil.AFTER_BUILD);
 
     runTest("oneDeleted", "oneDeleted_a",
-            firstCallParams, secondCallParams);
+      firstCallParams, secondCallParams);
   }
 }

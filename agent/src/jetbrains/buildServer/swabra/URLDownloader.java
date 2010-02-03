@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2009 JetBrains s.r.o.
+ * Copyright 2000-2010 JetBrains s.r.o.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -57,12 +57,12 @@ public class URLDownloader {
       if (result) {
         LOG.info(new StringBuilder("Successfully downloaded object from ").append(source).
           append(" to ").append(dest.getAbsolutePath()).toString());
-        
+
         return true;
       }
       --threshold;
     }
-    
+
     LOG.error(new StringBuilder("Unable to download object from ").append(source).
       append(" to ").append(dest.getAbsolutePath()).
       append(" from ").append(DOWNLOAD_TRY_NUMBER).append(" tries").toString());

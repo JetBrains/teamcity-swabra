@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2009 JetBrains s.r.o.
+ * Copyright 2000-2010 JetBrains s.r.o.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,23 +24,27 @@ package jetbrains.buildServer.swabra;
 
 import com.intellij.util.io.ZipUtil;
 import jetbrains.buildServer.agent.*;
+import jetbrains.buildServer.swabra.processes.HandlePidsProvider;
+import jetbrains.buildServer.swabra.processes.LockedFileResolver;
+import jetbrains.buildServer.swabra.processes.ProcessExecutor;
 import jetbrains.buildServer.swabra.snapshots.FilesCollector;
 import jetbrains.buildServer.swabra.snapshots.SnapshotGenerator;
 import jetbrains.buildServer.util.EventDispatcher;
 import jetbrains.buildServer.util.FileUtil;
-import org.jetbrains.annotations.NotNull;
-import static jetbrains.buildServer.swabra.SwabraUtil.*;
-import jetbrains.buildServer.swabra.processes.HandlePidsProvider;
-import jetbrains.buildServer.swabra.processes.LockedFileResolver;
-import jetbrains.buildServer.swabra.processes.ProcessExecutor;
 import org.apache.log4j.Logger;
+import org.jetbrains.annotations.NotNull;
 
-import java.io.*;
+import java.io.File;
+import java.io.FilenameFilter;
+import java.io.IOException;
 import java.net.URL;
-import java.util.*;
+import java.util.HashMap;
+import java.util.Map;
+
+import static jetbrains.buildServer.swabra.SwabraUtil.*;
 
 
-public final class  Swabra extends AgentLifeCycleAdapter {
+public final class Swabra extends AgentLifeCycleAdapter {
   public static final String CACHE_KEY = "swabra";
 
   public static final String HANDLE_EXE = "handle.exe";

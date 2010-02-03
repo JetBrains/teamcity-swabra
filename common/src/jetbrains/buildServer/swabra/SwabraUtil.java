@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2009 JetBrains s.r.o.
+ * Copyright 2000-2010 JetBrains s.r.o.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,11 +16,11 @@
 
 package jetbrains.buildServer.swabra;
 
+import com.intellij.openapi.util.SystemInfo;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.*;
-
-import com.intellij.openapi.util.SystemInfo;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * User: vbedrosova
@@ -42,6 +42,7 @@ public class SwabraUtil {
   public static final String TRUE = "true";
 
   public static final Map<String, String> SWABRA_MODES = new HashMap<String, String>();
+
   static {
     SWABRA_MODES.put(AFTER_BUILD, "After build");
     SWABRA_MODES.put(BEFORE_BUILD, "Before next build");

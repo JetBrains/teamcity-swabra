@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2009 JetBrains s.r.o.
+ * Copyright 2000-2010 JetBrains s.r.o.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,13 +16,12 @@
 
 package jetbrains.buildServer.swabra;
 
+import jetbrains.buildServer.util.FileUtil;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.*;
-import java.util.Map;
 import java.util.HashMap;
-
-import jetbrains.buildServer.util.FileUtil;
+import java.util.Map;
 
 /**
  * User: vbedrosova
@@ -45,7 +44,7 @@ public final class SwabraPropertiesProcessor {
   private final File myPropertiesFile;
 
   public static String unifyPath(@NotNull File dir) {
-    return dir.getAbsolutePath().replace("/", File.separator).replace("\\", File.separator);   
+    return dir.getAbsolutePath().replace("/", File.separator).replace("\\", File.separator);
   }
 
   public SwabraPropertiesProcessor(@NotNull File tempDir, @NotNull SwabraLogger logger) {
@@ -128,7 +127,7 @@ public final class SwabraPropertiesProcessor {
 
   public void writeProperties() {
     if (myProperties.isEmpty()) {
-      return;      
+      return;
     }
     BufferedWriter writer = null;
     try {

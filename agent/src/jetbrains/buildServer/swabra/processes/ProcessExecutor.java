@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2009 JetBrains s.r.o.
+ * Copyright 2000-2010 JetBrains s.r.o.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,15 +16,12 @@
 
 package jetbrains.buildServer.swabra.processes;
 
+import com.intellij.execution.configurations.GeneralCommandLine;
 import jetbrains.buildServer.ExecResult;
 import jetbrains.buildServer.SimpleCommandLineProcessRunner;
 import jetbrains.buildServer.agent.SimpleBuildLogger;
-import org.jetbrains.annotations.NotNull;
 import org.apache.log4j.Logger;
-
-import java.io.File;
-
-import com.intellij.execution.configurations.GeneralCommandLine;
+import org.jetbrains.annotations.NotNull;
 
 /**
  * User: vbedrosova
@@ -56,20 +53,20 @@ public class ProcessExecutor {
 
   private static ExecResult run(final GeneralCommandLine commandLine, final SimpleBuildLogger logger) {
     final ExecResult result =
-    SimpleCommandLineProcessRunner.runCommand(commandLine, null, new SimpleCommandLineProcessRunner.RunCommandEvents() {
+      SimpleCommandLineProcessRunner.runCommand(commandLine, null, new SimpleCommandLineProcessRunner.RunCommandEvents() {
 
-      public void onProcessStarted(Process ps) {
-        info("Started " + commandLine.getCommandLineString(), logger);
-      }
+        public void onProcessStarted(Process ps) {
+          info("Started " + commandLine.getCommandLineString(), logger);
+        }
 
-      public void onProcessFinished(Process ps) {
-        info("Finished " + commandLine.getCommandLineString(), logger);
-      }
+        public void onProcessFinished(Process ps) {
+          info("Finished " + commandLine.getCommandLineString(), logger);
+        }
 
-      public Integer getOutputIdleSecondsTimeout() {
-        return TIMEOUT;
-      }
-    });
+        public Integer getOutputIdleSecondsTimeout() {
+          return TIMEOUT;
+        }
+      });
 
     info("Stdout\n" + result.getStdout(), logger);
     final String stdErr = result.getStderr();

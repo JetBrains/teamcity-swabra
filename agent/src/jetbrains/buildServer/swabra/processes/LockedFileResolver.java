@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2009 JetBrains s.r.o.
+ * Copyright 2000-2010 JetBrains s.r.o.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,17 +16,16 @@
 
 package jetbrains.buildServer.swabra.processes;
 
+import jetbrains.buildServer.agent.SimpleBuildLogger;
+import jetbrains.buildServer.processes.ProcessFilter;
+import jetbrains.buildServer.processes.ProcessNode;
+import jetbrains.buildServer.processes.ProcessTreeTerminator;
+import jetbrains.buildServer.util.FileUtil;
 import org.apache.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.List;
 import java.io.File;
-
-import jetbrains.buildServer.processes.ProcessTreeTerminator;
-import jetbrains.buildServer.processes.ProcessFilter;
-import jetbrains.buildServer.processes.ProcessNode;
-import jetbrains.buildServer.util.FileUtil;
-import jetbrains.buildServer.agent.SimpleBuildLogger;
+import java.util.List;
 
 /**
  * User: vbedrosova
@@ -58,11 +57,10 @@ public class LockedFileResolver {
    * Resolves locked file f by collecting all it's locking processes and trying to kill them if kill
    * parameter is true
    *
-   * @param f file that needs resolving
+   * @param f    file that needs resolving
    * @param kill indicates whether locking processes should be killed
-   *
    * @return true if f was successfully resolved (locking processes were collected
-   * and all of them were killed if corresponding option was specified)
+   *         and all of them were killed if corresponding option was specified)
    */
   public boolean resolve(@NotNull File f, boolean kill) {
     final List<Long> pids = myPidsProvider.getPids(f);
@@ -106,7 +104,6 @@ public class LockedFileResolver {
    * Resolves locked file and tries to delete it
    *
    * @param f file that needs resolving and deletion
-   *
    * @return true if f was deleted
    */
   public boolean resolveDelete(@NotNull File f) {
