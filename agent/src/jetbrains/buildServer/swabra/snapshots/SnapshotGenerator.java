@@ -16,6 +16,7 @@
 
 package jetbrains.buildServer.swabra.snapshots;
 
+import jetbrains.buildServer.swabra.Swabra;
 import jetbrains.buildServer.swabra.SwabraLogger;
 import jetbrains.buildServer.swabra.snapshots.iteration.FileInfo;
 import jetbrains.buildServer.swabra.snapshots.iteration.FileSystemFilesIterator;
@@ -28,7 +29,8 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 
-import static jetbrains.buildServer.swabra.snapshots.SnapshotUtil.*;
+import static jetbrains.buildServer.swabra.snapshots.SnapshotUtil.getSnapshotEntry;
+import static jetbrains.buildServer.swabra.snapshots.SnapshotUtil.getSnapshotHeader;
 
 /**
  * User: vbedrosova
@@ -55,11 +57,11 @@ public class SnapshotGenerator {
   }
 
   public boolean generateSnapshot(@NotNull String snapshotName) {
-    final File snapshot = new File(myTempDir, snapshotName + FILE_SUFFIX);
+    final File snapshot = new File(myTempDir, snapshotName + Swabra.SNAPSHOT_SUFFIX);
     if (snapshot.exists()) {
       myLogger.debug("Swabra: Snapshot file " + snapshot.getAbsolutePath() + " exists, try deleting");
       if (!FileUtil.delete(snapshot)) {
-        myLogger.debug("Swabra: Unable to delete " + snapshot.getAbsolutePath());
+        myLogger.error("Swabra: Unable to delete " + snapshot.getAbsolutePath());
         return false;
       }
     }

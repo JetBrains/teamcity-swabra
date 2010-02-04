@@ -27,6 +27,8 @@ import jetbrains.buildServer.agent.*;
 import jetbrains.buildServer.swabra.processes.HandlePidsProvider;
 import jetbrains.buildServer.swabra.processes.LockedFileResolver;
 import jetbrains.buildServer.swabra.processes.ProcessExecutor;
+import jetbrains.buildServer.swabra.snapshots.FilesCollectionProcessor;
+import jetbrains.buildServer.swabra.snapshots.FilesCollectionProcessorForTests;
 import jetbrains.buildServer.swabra.snapshots.FilesCollector;
 import jetbrains.buildServer.swabra.snapshots.SnapshotGenerator;
 import jetbrains.buildServer.util.EventDispatcher;
@@ -46,6 +48,8 @@ import static jetbrains.buildServer.swabra.SwabraUtil.*;
 
 public final class Swabra extends AgentLifeCycleAdapter {
   public static final String CACHE_KEY = "swabra";
+
+  public static final String SNAPSHOT_SUFFIX = ".snapshot";
 
   public static final String HANDLE_EXE = "handle.exe";
   public static final String HANDLE_EXE_SYSTEM_PROP = "swabra.handle.exe.path";
@@ -82,18 +86,17 @@ public final class Swabra extends AgentLifeCycleAdapter {
     final BuildProgressLogger buildLogger = runningBuild.getBuildLogger();
     final SwabraLogger logger = new SwabraLogger(buildLogger, Logger.getLogger(Swabra.class));
     final File checkoutDir = runningBuild.getCheckoutDirectory();
+
     waitForUnfinishedThreads(checkoutDir, logger);
 
     myLogger = logger;
     myCheckoutDir = checkoutDir;
+
     final Map<String, String> runnerParams = runningBuild.getRunnerParameters();
     myMode = getSwabraMode(runnerParams);
     final boolean verbose = isVerbose(runnerParams);
     final boolean strict = isStrict(runnerParams);
     myTempDir = runningBuild.getAgentConfiguration().getCacheDirectory(CACHE_KEY);
-
-    myPropertiesProcessor = new SwabraPropertiesProcessor(myTempDir, myLogger);
-    myPropertiesProcessor.readProperties();
 
     final boolean lockingProcessesDetectionEnabled = isLockingProcessesDetectionEnabled(runnerParams);
     if (lockingProcessesDetectionEnabled) {
@@ -110,18 +113,18 @@ public final class Swabra extends AgentLifeCycleAdapter {
 
     logSettings(myMode, myCheckoutDir.getAbsolutePath(), strict, lockingProcessesDetectionEnabled, myHandlePath, verbose);
 
+    myPropertiesProcessor = new SwabraPropertiesProcessor(myTempDir, myLogger);
+    myPropertiesProcessor.readProperties();
+
     if (!isEnabled(myMode)) {
       myLogger.message("Swabra is disabled", false);
       myPropertiesProcessor.markDirty(myCheckoutDir);
       return;
     }
 
-    final LockedFileResolver lockedFileResolver =
-      ((myHandlePath == null) || (!unifyPath(myHandlePath).endsWith(File.separator + HANDLE_EXE))) ?
-        null : new LockedFileResolver(new HandlePidsProvider(myHandlePath, buildLogger), buildLogger);
-    myFilesCollector = new FilesCollector(myCheckoutDir, myTempDir, lockedFileResolver, myLogger, verbose, strict);
+    myFilesCollector = initFilesCollector(buildLogger, verbose, strict);
 
-    String snapshotName;
+    final File snapshot;
     try {
       if (runningBuild.isCleanBuild()) {
         return;
@@ -136,13 +139,13 @@ public final class Swabra extends AgentLifeCycleAdapter {
         }
         return;
       }
-      snapshotName = myPropertiesProcessor.getSnapshot(myCheckoutDir);
+      snapshot = getSnapshot();
     } finally {
       myPropertiesProcessor.deleteRecord(myCheckoutDir);
     }
 
     myLogger.debug("Swabra: Previous build files cleanup is performed before build");
-    final FilesCollector.CollectionResult result = myFilesCollector.collect(snapshotName);
+    final FilesCollector.CollectionResult result = myFilesCollector.collect(snapshot, myCheckoutDir);
 
     switch (result) {
       case FAILURE:
@@ -156,6 +159,18 @@ public final class Swabra extends AgentLifeCycleAdapter {
           fail();
         }
     }
+  }
+
+  private FilesCollector initFilesCollector(BuildProgressLogger buildLogger, boolean verbose, boolean strict) {
+    final LockedFileResolver lockedFileResolver =
+      ((myHandlePath == null) || (!unifyPath(myHandlePath).endsWith(File.separator + HANDLE_EXE))) ?
+        null : new LockedFileResolver(new HandlePidsProvider(myHandlePath, buildLogger), buildLogger);
+
+    final FilesCollectionProcessor processor = (System.getProperty(TEST_LOG) == null) ?
+      new FilesCollectionProcessor(myLogger, lockedFileResolver, verbose, strict) :
+      new FilesCollectionProcessorForTests(myLogger, lockedFileResolver, verbose, strict, System.getProperty(TEST_LOG));
+
+    return new FilesCollector(processor, myLogger);
   }
 
   public void beforeRunnerStart(@NotNull final AgentRunningBuild runningBuild) {
@@ -184,7 +199,8 @@ public final class Swabra extends AgentLifeCycleAdapter {
 
       final Thread t = new Thread(new Runnable() {
         public void run() {
-          final FilesCollector.CollectionResult result = myFilesCollector.collect(myPropertiesProcessor.getSnapshot(myCheckoutDir));
+          final FilesCollector.CollectionResult result =
+            myFilesCollector.collect(getSnapshot(), myCheckoutDir);
 
           switch (result) {
             case FAILURE:
@@ -204,6 +220,10 @@ public final class Swabra extends AgentLifeCycleAdapter {
       myPrevThreads.put(myCheckoutDir, t);
       t.start();
     }
+  }
+
+  private File getSnapshot() {
+    return new File(myTempDir, myPropertiesProcessor.getSnapshot(myCheckoutDir) + SNAPSHOT_SUFFIX);
   }
 
   private void logSettings(String mode, String checkoutDir, boolean strict, boolean lockingProcessesDetectionEnabled, String handlePath, boolean verbose) {
@@ -260,11 +280,11 @@ public final class Swabra extends AgentLifeCycleAdapter {
     myLogger.message("##teamcity[buildStatus status='FAILURE' text='Swabra failed cleanup']", true);
   }
 
-  private String unifyPath(String path) {
+  private static String unifyPath(String path) {
     return path.replace("/", File.separator).replace("\\", File.separator);
   }
 
-  private boolean notDefined(String value) {
+  private static boolean notDefined(String value) {
     return (value == null) || ("".equals(value));
   }
 
