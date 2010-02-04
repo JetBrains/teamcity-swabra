@@ -20,54 +20,54 @@
 
 <l:settingsGroup title="Swabra">
 
-    <tr class="noBorder" id="swabra.mode.container">
-        <th><label for="swabra.mode">Perform build files cleanup:</label></th>
-        <td>
-            <c:set var="onchange">
-                var selectedValue = this.options[this.selectedIndex].value;
-                if (selectedValue == 'swabra.before.build') {
-                BS.Util.show($('swabra.verbose.container'));
-                BS.Util.show($('swabra.strict.container'));
+  <tr class="noBorder" id="swabra.mode.container">
+    <th><label for="swabra.mode">Perform build files cleanup:</label></th>
+    <td>
+      <c:set var="onchange">
+        var selectedValue = this.options[this.selectedIndex].value;
+        if (selectedValue == 'swabra.before.build') {
+        BS.Util.show($('swabra.verbose.container'));
+        BS.Util.show($('swabra.strict.container'));
 
-                BS.Util.hide($('swabra.mode.note'));
-                BS.Util.show($('swabra.before.build.mode.note'));
-                BS.Util.hide($('swabra.after.build.mode.note'));
+        BS.Util.hide($('swabra.mode.note'));
+        BS.Util.show($('swabra.before.build.mode.note'));
+        BS.Util.hide($('swabra.after.build.mode.note'));
 
-                } else {
-                if (selectedValue == 'swabra.after.build') {
-                BS.Util.hide($('swabra.verbose.container'));
-                BS.Util.show($('swabra.strict.container'));
+        } else {
+        if (selectedValue == 'swabra.after.build') {
+        BS.Util.hide($('swabra.verbose.container'));
+        BS.Util.show($('swabra.strict.container'));
 
-                BS.Util.hide($('swabra.mode.note'));
-                BS.Util.hide($('swabra.before.build.mode.note'));
-                BS.Util.show($('swabra.after.build.mode.note'));
-                } else {
-                BS.Util.hide($('swabra.verbose.container'));
-                BS.Util.hide($('swabra.strict.container'));
+        BS.Util.hide($('swabra.mode.note'));
+        BS.Util.hide($('swabra.before.build.mode.note'));
+        BS.Util.show($('swabra.after.build.mode.note'));
+        } else {
+        BS.Util.hide($('swabra.verbose.container'));
+        BS.Util.hide($('swabra.strict.container'));
 
-                BS.Util.show($('swabra.mode.note'));
-                BS.Util.hide($('swabra.before.build.mode.note'));
-                BS.Util.hide($('swabra.after.build.mode.note'));
-                }
-                }
-                BS.MultilineProperties.updateVisible();
-            </c:set>
-            <props:selectProperty name="swabra.mode"
-                                  onchange="${onchange}">
-                <c:set var="selected" value="false"/>
-                <c:if test="${empty propertiesBean.properties['swabra.mode']}">
-                    <c:set var="selected" value="true"/>
-                </c:if>
-                <props:option value="" selected="${selected}">&lt;Do not cleanup&gt;</props:option>
-                <c:forEach var="mode" items="${swabraModes.modes}">
-                    <c:set var="selected" value="false"/>
-                    <c:if test="${mode.id == propertiesBean.properties['swabra.mode']}">
-                        <c:set var="selected" value="true"/>
-                    </c:if>
-                    <props:option value="${mode.id}"
-                                  selected="${selected}"><c:out value="${mode.displayName}"/></props:option>
-                </c:forEach>
-            </props:selectProperty>
+        BS.Util.show($('swabra.mode.note'));
+        BS.Util.hide($('swabra.before.build.mode.note'));
+        BS.Util.hide($('swabra.after.build.mode.note'));
+        }
+        }
+        BS.MultilineProperties.updateVisible();
+      </c:set>
+      <props:selectProperty name="swabra.mode"
+                            onchange="${onchange}">
+        <c:set var="selected" value="false"/>
+        <c:if test="${empty propertiesBean.properties['swabra.mode']}">
+          <c:set var="selected" value="true"/>
+        </c:if>
+        <props:option value="" selected="${selected}">&lt;Do not cleanup&gt;</props:option>
+        <c:forEach var="mode" items="${swabraModes.modes}">
+          <c:set var="selected" value="false"/>
+          <c:if test="${mode.id == propertiesBean.properties['swabra.mode']}">
+            <c:set var="selected" value="true"/>
+          </c:if>
+          <props:option value="${mode.id}"
+                        selected="${selected}"><c:out value="${mode.displayName}"/></props:option>
+        </c:forEach>
+      </props:selectProperty>
       <span class="smallNote" id="swabra.mode.note" style="${displaySwabraSettings ? 'display: none;' : ''}">
         Choose cleanup mode.
       </span>
@@ -80,43 +80,42 @@
           style="${displayAfterBuildSwabraSettings ? '' : 'display: none;'}">
         Build files cleanup will be performed after the build. Between builds there will be clean copy in the checkout directory.
     </span>
-        </td>
-    </tr>
+    </td>
+  </tr>
 
-    <tr class="noBorder" id="swabra.strict.container"
-        style="${displaySwabraSettings ? '' : 'display: none;'}">
-        <th><label for="swabra.strict">Strict mode:</label></th>
-        <td>
-            <props:checkboxProperty name="swabra.strict"/>
+  <tr class="noBorder" id="swabra.strict.container"
+      style="${displaySwabraSettings ? '' : 'display: none;'}">
+    <th>Strict mode:</th>
+    <td>
+      <props:checkboxProperty name="swabra.strict"/>
+      <label for="swabra.strict">Turn on strict mode</label>
             <span class="smallNote">
                   Fail build if at build start in the checkout directory there are any files newly created during previous build which Swabra couldn't delete.
             </span>
-        </td>
-    </tr>
-
-  <tr class="noBorder" id="swabra.locking.processes.container">
-      <th><label for="swabra.locking.processes">Locking processes detection:</label></th>
-      <td>
-        <c:set var="onclick">
-          if (this.checked) {
-          BS.Util.show($('swabra.process.analizer.container'));
-          } else {
-          BS.Util.hide($('swabra.process.analizer.container'));
-          }
-            BS.MultilineProperties.updateVisible();
-        </c:set>
-          <props:checkboxProperty name="swabra.locking.processes" onclick="${onclick}"/>
-          <span class="smallNote">
-                Determine file locking processes on Windows agents.
-          </span>
-      </td>
+    </td>
   </tr>
 
-    <tr class="noBorder" id="swabra.process.analizer.container"
+  <tr class="noBorder" id="swabra.locking.processes.container">
+    <th>Locking processes detection:</th>
+    <td>
+      <c:set var="onclick">
+        if (this.checked) {
+        BS.Util.show($('swabra.process.analizer.container'));
+        } else {
+        BS.Util.hide($('swabra.process.analizer.container'));
+        }
+        BS.MultilineProperties.updateVisible();
+      </c:set>
+      <props:checkboxProperty name="swabra.locking.processes" onclick="${onclick}"/>
+      <label for="swabra.locking.processes">Determine file locking processes on Windows agents</label>
+    </td>
+  </tr>
+
+  <tr class="noBorder" id="swabra.process.analizer.container"
       style="${displayLockingProcessesSettings ? '' : 'display: none;'}">
-        <th><label for="swabra.process.analizer">Handle.exe path:</label>
-        </th>
-        <td><props:textProperty name="swabra.process.analizer" className="longField"/>
+    <th><label for="swabra.process.analizer">Handle.exe path:</label>
+    </th>
+    <td><props:textProperty name="swabra.process.analizer" className="longField"/>
             <span class="smallNote">
                 Path to
                 <a showdiscardchangesmessage="false"
@@ -124,13 +123,13 @@
                    href="http://technet.microsoft.com/en-us/sysinternals/bb896655.aspx">Handle</a>
                 excutable on Windows agent. Is used to determine processes which hold files in the ckeckout directory.
             </span>
-    </tr>
-
-    <tr class="noBorder" id="swabra.verbose.container"
-        style="${displayBeforeBuildSwabraSettings ? '' : 'display: none;'}">
-        <th><label for="swabra.verbose">Verbose output:</label></th>
-        <td>
-            <props:checkboxProperty name="swabra.verbose"/>
-        </td>
-    </tr>
+    </td>
+  </tr>
+  <tr class="noBorder" id="swabra.verbose.container"
+      style="${displayBeforeBuildSwabraSettings ? '' : 'display: none;'}">
+    <th><label for="swabra.verbose">Verbose output:</label></th>
+    <td>
+      <props:checkboxProperty name="swabra.verbose"/>
+    </td>
+  </tr>
 </l:settingsGroup>
