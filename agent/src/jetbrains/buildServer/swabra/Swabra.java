@@ -101,11 +101,9 @@ public final class Swabra extends AgentLifeCycleAdapter {
     final boolean lockingProcessesDetectionEnabled = isLockingProcessesDetectionEnabled(runnerParams);
     if (lockingProcessesDetectionEnabled) {
       myHandlePath = getHandlePath(runnerParams);
-      if ((System.getProperty(DISABLE_DOWNLOAD_HANDLE) != null) || !prepareHandle()) {
+      if (!prepareHandle()) {
         myHandlePath = null;
-        myLogger.message("Swabra: No Handle executable prepared ("
-          + DISABLE_DOWNLOAD_HANDLE + " = \""
-          + System.getProperty(DISABLE_DOWNLOAD_HANDLE) + "\")", false);
+        myLogger.message("Swabra: No Handle executable prepared", false);
       }
     } else {
       myHandlePath = null;
@@ -301,13 +299,18 @@ public final class Swabra extends AgentLifeCycleAdapter {
       }
       final File handleFile = new File(myHandlePath);
       if (!handleFile.isFile()) {
-        myLogger.warn("Swabra: No Handle executable found at " + myHandlePath + ". Downloading from " + HANDLE_URL);
+        myLogger.warn("Swabra: No Handle executable found at " + myHandlePath);
+        if (System.getProperty(DISABLE_DOWNLOAD_HANDLE) != null) {
+          myLogger.warn("Swabra: Will not download Handle executable from " + HANDLE_URL + ", (DISABLE_DOWNLOAD_HANDLE = \""
+            + System.getProperty(DISABLE_DOWNLOAD_HANDLE) + "\")");
+          return false;
+        }
+        myLogger.warn("Swabra: Downloading Handle executable from " + HANDLE_URL);
         final File tmpFile = FileUtil.createTempFile("", ".zip");
         if (!URLDownloader.download(new URL(HANDLE_URL), tmpFile)) {
           return false;
         }
         ZipUtil.extract(tmpFile, handleFile.getParentFile(), new FilenameFilter() {
-
           public boolean accept(File dir, String name) {
             return HANDLE_EXE.equals(name);
           }

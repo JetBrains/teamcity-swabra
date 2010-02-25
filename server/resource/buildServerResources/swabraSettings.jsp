@@ -113,11 +113,11 @@
 
   <tr class="noBorder" id="swabra.process.analizer.container"
       style="${displayLockingProcessesSettings ? '' : 'display: none;'}">
-    <th><label for="swabra.process.analizer">Handle.exe path:</label>
+    <th><label for="swabra.process.analizer">Handle.exe path: <l:star/></label>
     </th>
     <td><props:textProperty name="swabra.process.analizer" className="longField"/>
             <span class="smallNote">
-                Path to
+                Absolute path to
                 <a showdiscardchangesmessage="false"
                    target="_blank"
                    href="http://technet.microsoft.com/en-us/sysinternals/bb896655.aspx">Handle</a>
