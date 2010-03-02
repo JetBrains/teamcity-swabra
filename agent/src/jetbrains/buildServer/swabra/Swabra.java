@@ -104,7 +104,7 @@ public final class Swabra extends AgentLifeCycleAdapter {
       myHandlePath = runningBuild.getAgentConfiguration().getCacheDirectory("handle").getAbsolutePath() + "/handle.exe";
       if (!prepareHandle()) {
         myHandlePath = null;
-        myLogger.message("Swabra: No Handle executable prepared", false);
+        myLogger.swabraMessage("No Handle executable prepared", false);
       }
     } else {
       myHandlePath = null;
@@ -134,7 +134,7 @@ public final class Swabra extends AgentLifeCycleAdapter {
       }
       if (myPropertiesProcessor.isClean(myCheckoutDir)) {
         if (BEFORE_BUILD.equals(myMode)) {
-          myLogger.debug("Swabra: Will not perform files cleanup, directory is supposed to be clean from newly created and modified files");
+          myLogger.swabraDebug("Will not perform files cleanup, directory is supposed to be clean from newly created and modified files");
         }
         return;
       }
@@ -143,7 +143,7 @@ public final class Swabra extends AgentLifeCycleAdapter {
       myPropertiesProcessor.deleteRecord(myCheckoutDir);
     }
 
-    myLogger.debug("Swabra: Previous build files cleanup is performed before build");
+    myLogger.swabraDebug("Previous build files cleanup is performed before build");
     final FilesCollector.CollectionResult result = myFilesCollector.collect(snapshot, myCheckoutDir);
 
     switch (result) {
@@ -188,13 +188,13 @@ public final class Swabra extends AgentLifeCycleAdapter {
       ProcessExecutor.runHandleAcceptEula(myHandlePath, myCheckoutDir.getAbsolutePath(), myLogger.getBuildLogger());
     }
     if (AFTER_BUILD.equals(myMode)) {
-      myLogger.message("Swabra: Build files cleanup will be performed after build", true);
+      myLogger.swabraMessage("Build files cleanup will be performed after build", true);
     }
   }
 
   public void buildFinished(@NotNull final BuildFinishedStatus buildStatus) {
     if (AFTER_BUILD.equals(myMode)) {
-      myLogger.debug("Swabra: Build files cleanup is performed after build");
+      myLogger.swabraDebug("Build files cleanup is performed after build");
 
       final Thread t = new Thread(new Runnable() {
         public void run() {
@@ -241,7 +241,7 @@ public final class Swabra extends AgentLifeCycleAdapter {
       try {
         t.join();
       } catch (InterruptedException e) {
-        logger.error("Swabra: Interrupted while waiting for previous build files cleanup");
+        logger.swabraError("Interrupted while waiting for previous build files cleanup");
         logger.exception(e, true);
       }
     }
@@ -251,24 +251,24 @@ public final class Swabra extends AgentLifeCycleAdapter {
   private void doCleanup(File checkoutDir) {
     myDirectoryCleaner.cleanFolder(checkoutDir, new SmartDirectoryCleanerCallback() {
       public void logCleanStarted(File dir) {
-        myLogger.message("Swabra: Need a clean snapshot of checkout directory - forcing clean checkout for " + dir, true);
+        myLogger.swabraMessage("Need a clean snapshot of checkout directory - forcing clean checkout for " + dir, true);
       }
 
       public void logFailedToDeleteEmptyDirectory(File dir) {
-        myLogger.warn("Swabra: Failed to delete empty checkout directory " + dir.getAbsolutePath());
+        myLogger.swabraWarn("Failed to delete empty checkout directory " + dir.getAbsolutePath());
       }
 
       public void logFailedToCleanFilesUnderDirectory(File dir) {
-        myLogger.warn("Swabra: Failed to delete files in directory " + dir.getAbsolutePath());
+        myLogger.swabraWarn("Failed to delete files in directory " + dir.getAbsolutePath());
 
       }
 
       public void logFailedToCleanFile(File file) {
-        myLogger.warn("Swabra: Failed to delete file " + file.getAbsolutePath());
+        myLogger.swabraWarn("Failed to delete file " + file.getAbsolutePath());
       }
 
       public void logFailedToCleanEntireFolder(File dir) {
-        myLogger.warn("Swabra: Failed to delete directory " + dir.getAbsolutePath());
+        myLogger.swabraWarn("Failed to delete directory " + dir.getAbsolutePath());
         myPropertiesProcessor.markDirty(myCheckoutDir);
         myMode = null;
       }
@@ -291,22 +291,22 @@ public final class Swabra extends AgentLifeCycleAdapter {
     try {
       if (notDefined(myHandlePath)) {
         myHandlePath = System.getProperty(HANDLE_EXE_SYSTEM_PROP);
-        myLogger.warn("Swabra: No Handle path passed in Swabra settings. Getting from system property "
+        myLogger.swabraWarn("No Handle path passed in Swabra settings. Getting from system property "
           + HANDLE_EXE_SYSTEM_PROP);
         if (notDefined(myHandlePath)) {
-          myLogger.warn("Swabra: No Handle path passed in " + HANDLE_EXE_SYSTEM_PROP + " system property. Will not use Handle");
+          myLogger.swabraWarn("No Handle path passed in " + HANDLE_EXE_SYSTEM_PROP + " system property. Will not use Handle");
           return false;
         }
       }
       final File handleFile = new File(myHandlePath);
       if (!handleFile.isFile()) {
-        myLogger.warn("Swabra: No Handle executable found at " + myHandlePath);
+        myLogger.swabraWarn("No Handle executable found at " + myHandlePath);
         if (System.getProperty(DISABLE_DOWNLOAD_HANDLE) != null) {
-          myLogger.warn("Swabra: Will not download Handle executable from " + HANDLE_URL + ", (DISABLE_DOWNLOAD_HANDLE = \""
+          myLogger.swabraWarn("Will not download Handle executable from " + HANDLE_URL + ", (DISABLE_DOWNLOAD_HANDLE = \""
             + System.getProperty(DISABLE_DOWNLOAD_HANDLE) + "\")");
           return false;
         }
-        myLogger.warn("Swabra: Downloading Handle executable from " + HANDLE_URL);
+        myLogger.swabraWarn("Downloading Handle executable from " + HANDLE_URL);
         final File tmpFile = FileUtil.createTempFile("", ".zip");
         if (!URLDownloader.download(new URL(HANDLE_URL), tmpFile)) {
           return false;

@@ -59,13 +59,13 @@ public class SnapshotGenerator {
   public boolean generateSnapshot(@NotNull String snapshotName) {
     final File snapshot = new File(myTempDir, snapshotName + Swabra.SNAPSHOT_SUFFIX);
     if (snapshot.exists()) {
-      myLogger.debug("Swabra: Snapshot file " + snapshot.getAbsolutePath() + " exists, try deleting");
+      myLogger.swabraDebug("Snapshot file " + snapshot.getAbsolutePath() + " exists, try deleting");
       if (!FileUtil.delete(snapshot)) {
-        myLogger.error("Swabra: Unable to delete " + snapshot.getAbsolutePath());
+        myLogger.swabraError("Unable to delete " + snapshot.getAbsolutePath());
         return false;
       }
     }
-    myLogger.message("Swabra: Saving state of checkout directory " + myCheckoutDir +
+    myLogger.swabraMessage("Saving state of checkout directory " + myCheckoutDir +
       " to snapshot file " + snapshot.getAbsolutePath(), true);
 
     BufferedWriter writer = null;
@@ -75,9 +75,9 @@ public class SnapshotGenerator {
 
       iterateAndBuildSnapshot(writer);
 
-      myLogger.message("Swabra: Finished saving state of checkout directory " + myCheckoutDir + " to snapshot file " + snapshot.getAbsolutePath(), false);
+      myLogger.swabraMessage("Finished saving state of checkout directory " + myCheckoutDir + " to snapshot file " + snapshot.getAbsolutePath(), false);
     } catch (Exception e) {
-      myLogger.error("Swabra: Unable to save snapshot of checkout directory '" + myCheckoutDir.getAbsolutePath()
+      myLogger.swabraError("Unable to save snapshot of checkout directory '" + myCheckoutDir.getAbsolutePath()
         + "' to file " + snapshot.getAbsolutePath());
       myLogger.exception(e, true);
       return false;

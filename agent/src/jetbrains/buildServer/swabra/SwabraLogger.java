@@ -61,6 +61,30 @@ public final class SwabraLogger {
     myClassLogger.debug(message);
   }
 
+  public void swabraMessage(@NotNull String message, boolean useBuildLog) {
+    message = prepareMessage(message);
+    myClassLogger.info(message);
+    if (useBuildLog) {
+      myBuildLogger.message(message);
+    }
+  }
+
+  public void swabraWarn(@NotNull String message) {
+    message = prepareMessage(message);
+    myClassLogger.warn(message);
+    myBuildLogger.warning(message);
+  }
+
+  public void swabraError(@NotNull String message) {
+    message = prepareMessage(message);
+    myClassLogger.error(message);
+    myBuildLogger.error(message);
+  }
+
+  public void swabraDebug(@NotNull String message) {
+    myClassLogger.debug(prepareMessage(message));
+  }
+
   public void exception(@NotNull Throwable e, boolean useBuildLog) {
     myClassLogger.warn(e.getMessage(), e);
     if (useBuildLog) {
@@ -78,5 +102,9 @@ public final class SwabraLogger {
 
   public BuildProgressLogger getBuildLogger() {
     return myBuildLogger;
+  }
+
+  private String prepareMessage(String message) {
+    return "Swabra: " + message;
   }
 }

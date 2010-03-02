@@ -53,19 +53,19 @@ public final class SwabraPropertiesProcessor {
   }
 
   public void markDirty(@NotNull File dir) {
-    myLogger.debug("Swabra: Marking " + dir.getAbsolutePath() + " as dirty");
+    myLogger.swabraDebug("Marking " + dir.getAbsolutePath() + " as dirty");
     myProperties.put(unifyPath(dir), DIRTY);
     writeProperties();
   }
 
   public void markClean(@NotNull File dir) {
-    myLogger.debug("Swabra: Marking " + dir.getAbsolutePath() + " as clean");
+    myLogger.swabraDebug("Marking " + dir.getAbsolutePath() + " as clean");
     myProperties.put(unifyPath(dir), CLEAN);
     writeProperties();
   }
 
   public void setSnapshot(@NotNull File dir, @NotNull String snapshot) {
-    myLogger.debug("Swabra: Setting snapshot " + snapshot + " for " + dir.getAbsolutePath());
+    myLogger.swabraDebug("Setting snapshot " + snapshot + " for " + dir.getAbsolutePath());
     myProperties.put(unifyPath(dir), snapshot);
     writeProperties();
   }
@@ -91,7 +91,7 @@ public final class SwabraPropertiesProcessor {
   public void readProperties() {
     myProperties = new HashMap<String, String>();
     if (!myPropertiesFile.isFile()) {
-      myLogger.message("Swabra: Couldn't read checkout directories states from " + myPropertiesFile.getAbsolutePath() + ", no file present", false);
+      myLogger.swabraMessage("Couldn't read checkout directories states from " + myPropertiesFile.getAbsolutePath() + ", no file present", false);
       return;
     }
     BufferedReader reader = null;
@@ -101,26 +101,26 @@ public final class SwabraPropertiesProcessor {
       while (fileRecord != null) {
         final String[] mapElem = fileRecord.split(KEY_VAL_SEPARATOR);
         if (mapElem.length != 2) {
-          myLogger.error("Swabra: Error reading checkout directories states from " + myPropertiesFile.getAbsolutePath() + ", came across illegal record");
+          myLogger.swabraError("Error reading checkout directories states from " + myPropertiesFile.getAbsolutePath() + ", came across illegal record");
           return;
         }
         myProperties.put(mapElem[0], mapElem[1]);
         fileRecord = reader.readLine();
       }
     } catch (IOException e) {
-      myLogger.error("Swabra: Error reading checkout directories states from " + myPropertiesFile.getAbsolutePath());
+      myLogger.swabraError("Error reading checkout directories states from " + myPropertiesFile.getAbsolutePath());
       myLogger.exception(e, true);
     } finally {
       if (reader != null) {
         try {
           reader.close();
         } catch (IOException e) {
-          myLogger.error("Swabra: Error closing checkout directories states file " + myPropertiesFile.getAbsolutePath());
+          myLogger.swabraError("Error closing checkout directories states file " + myPropertiesFile.getAbsolutePath());
           myLogger.exception(e, true);
         }
       }
       if (!FileUtil.delete(myPropertiesFile)) {
-        myLogger.error("Swabra: Error deleting checkout directories states file " + myPropertiesFile.getAbsolutePath());
+        myLogger.swabraError("Error deleting checkout directories states file " + myPropertiesFile.getAbsolutePath());
       }
     }
   }
@@ -136,14 +136,14 @@ public final class SwabraPropertiesProcessor {
         writer.write(e.getKey() + KEY_VAL_SEPARATOR + e.getValue() + "\n");
       }
     } catch (IOException e) {
-      myLogger.error("Swabra: Error saving checkout directories states to " + myPropertiesFile.getAbsolutePath());
+      myLogger.swabraError("Error saving checkout directories states to " + myPropertiesFile.getAbsolutePath());
       myLogger.exception(e, true);
     } finally {
       if (writer != null) {
         try {
           writer.close();
         } catch (IOException e) {
-          myLogger.error("Swabra: Error closing checkout directories states file " + myPropertiesFile.getAbsolutePath());
+          myLogger.swabraError("Error closing checkout directories states file " + myPropertiesFile.getAbsolutePath());
           myLogger.exception(e, true);
         }
       }

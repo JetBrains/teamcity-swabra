@@ -54,7 +54,7 @@ public class FilesCollector {
       return CollectionResult.FAILURE;
     }
 
-    myLogger.message("Swabra: Scanning checkout directory " + checkoutDir + " for newly created and modified files...", true);
+    myLogger.swabraMessage("Scanning checkout directory " + checkoutDir + " for newly created and modified files...", true);
     myLogger.activityStarted();
 
     try {
@@ -71,7 +71,7 @@ public class FilesCollector {
     }
 
     myLogger.activityFinished();
-    final String message = "Swabra: Finished scanning checkout directory " + checkoutDir
+    final String message = "Finished scanning checkout directory " + checkoutDir
       + " for newly created and modified files: "
       + results.detectedNewAndDeleted + " object(s) deleted, "
       + (results.detectedNewAndUnableToDelete == 0 ? "" : "unable to delete " + results.detectedNewAndUnableToDelete + " object(s), ")
@@ -79,26 +79,26 @@ public class FilesCollector {
       + results.detectedDeleted + " object(s) detected deleted";
 
     if (results.detectedDeleted > 0) {
-      myLogger.warn(message);
+      myLogger.swabraWarn(message);
       return CollectionResult.FAILURE;
     }
     if (results.detectedNewAndUnableToDelete != 0) {
-      myLogger.warn(message);
+      myLogger.swabraWarn(message);
       return CollectionResult.RETRY;
     }
-    myLogger.message(message, true);
+    myLogger.swabraMessage(message, true);
     return CollectionResult.SUCCESS;
   }
 
   private void removeSnapshot(File snapshot, File checkoutDir) {
     if (System.getProperty(NOT_DELETE_SNAPSHOT) != null) {
-      myLogger.debug("Swabra: Will not delete " + snapshot.getAbsolutePath()
+      myLogger.swabraDebug("Will not delete " + snapshot.getAbsolutePath()
         + " for directory " + checkoutDir.getAbsolutePath() + ", " + NOT_DELETE_SNAPSHOT + "property specified");
     } else if (!FileUtil.delete(snapshot)) {
-      myLogger.error("Swabra: Unable to remove snapshot file " + snapshot.getAbsolutePath()
+      myLogger.swabraError("Unable to remove snapshot file " + snapshot.getAbsolutePath()
         + " for directory " + checkoutDir.getAbsolutePath());
     } else {
-      myLogger.debug("Swabra: Successfully removed snapshot file " + snapshot.getAbsolutePath()
+      myLogger.swabraDebug("Successfully removed snapshot file " + snapshot.getAbsolutePath()
         + " for directory " + checkoutDir.getAbsolutePath() + " after files collection");
     }
   }
@@ -109,7 +109,7 @@ public class FilesCollector {
   }
 
   private void logUnableCollect(File snapshot, File checkoutDir, Exception e, String message) {
-    myLogger.error("Swabra: Unable to collect files in checkout directory " + checkoutDir.getAbsolutePath()
+    myLogger.swabraError("Unable to collect files in checkout directory " + checkoutDir.getAbsolutePath()
       + " from snapshot file " + snapshot.getAbsolutePath() +
       ((message != null ? ", " + message : "")));
     if (e != null) {
