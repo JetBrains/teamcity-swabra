@@ -11,6 +11,14 @@
       <properties />
     </buildFile>
   </component>
+  <component name="ArtifactManager">
+    <artifact type="jar" name="handle-provider">
+      <output-path>$PROJECT_DIR$/out/artifacts/handle_provider</output-path>
+      <root id="archive" name="handle-provider.jar">
+        <element id="module-output" name="handle-provider" />
+      </root>
+    </artifact>
+  </component>
   <component name="BuildJarProjectSettings">
     <option name="BUILD_JARS_ON_MAKE" value="false" />
   </component>
@@ -120,6 +128,7 @@
       <entry name="?*.properties" />
       <entry name="?*.xml" />
       <entry name="?*.jsp" />
+      <entry name="?*.js" />
       <entry name="?*.gif" />
       <entry name="?*.png" />
       <entry name="?*.jpeg" />
@@ -409,6 +418,7 @@
     <modules>
       <module fileurl="file://$PROJECT_DIR$/agent/agent.iml" filepath="$PROJECT_DIR$/agent/agent.iml" />
       <module fileurl="file://$PROJECT_DIR$/common/common.iml" filepath="$PROJECT_DIR$/common/common.iml" />
+      <module fileurl="file://$PROJECT_DIR$/handle-provider/handle-provider.iml" filepath="$PROJECT_DIR$/handle-provider/handle-provider.iml" />
       <module fileurl="file://$PROJECT_DIR$/server/server.iml" filepath="$PROJECT_DIR$/server/server.iml" />
       <module fileurl="file://$PROJECT_DIR$/swabra.iml" filepath="$PROJECT_DIR$/swabra.iml" />
       <module fileurl="file://$PROJECT_DIR$/tests/tests.iml" filepath="$PROJECT_DIR$/tests/tests.iml" />
@@ -522,7 +532,7 @@
       <JAVADOC />
       <SOURCES />
     </library>
-    <library name="TeamCity-agent-non-openapi">
+    <library name="TeamCity-processTerminator">
       <CLASSES>
         <root url="jar://$TeamCityDistribution$/webapps/ROOT/WEB-INF/lib/processesTerminator.jar!/" />
       </CLASSES>
@@ -539,6 +549,42 @@
     <library name="IDEA annotations">
       <CLASSES>
         <root url="jar://$TeamCityDistribution$/webapps/ROOT/WEB-INF/lib/annotations.jar!/" />
+      </CLASSES>
+      <JAVADOC />
+      <SOURCES />
+    </library>
+    <library name="TeamCity-spring">
+      <CLASSES>
+        <root url="jar://$TeamCityDistribution$/webapps/ROOT/WEB-INF/lib/spring.jar!/" />
+        <root url="jar://$TeamCityDistribution$/webapps/ROOT/WEB-INF/lib/spring-webmvc.jar!/" />
+      </CLASSES>
+      <JAVADOC />
+      <SOURCES />
+    </library>
+    <library name="TeamCity-jdom">
+      <CLASSES>
+        <root url="jar://$TeamCityDistribution$/webapps/ROOT/WEB-INF/lib/jdom.jar!/" />
+      </CLASSES>
+      <JAVADOC />
+      <SOURCES />
+    </library>
+    <library name="TeamCity-servletApi">
+      <CLASSES>
+        <root url="jar://$TeamCityDistribution$/lib/servlet-api.jar!/" />
+      </CLASSES>
+      <JAVADOC />
+      <SOURCES />
+    </library>
+    <library name="TeamCity-web">
+      <CLASSES>
+        <root url="jar://$TeamCityDistribution$/webapps/ROOT/WEB-INF/lib/web.jar!/" />
+      </CLASSES>
+      <JAVADOC />
+      <SOURCES />
+    </library>
+    <library name="TeamCity-runtime-util">
+      <CLASSES>
+        <root url="jar://$TeamCityDistribution$/devPackage/runtime-util.jar!/" />
       </CLASSES>
       <JAVADOC />
       <SOURCES />

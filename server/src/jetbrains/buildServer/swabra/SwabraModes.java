@@ -27,11 +27,11 @@ import java.util.Map;
  * Date: 21.04.2009
  * Time: 17:45:45
  */
-public class Modes {
+public class SwabraModes {
   @StateField
   public final List<SwabraMode> myModes;
 
-  public Modes() {
+  public SwabraModes() {
     myModes = new ArrayList<SwabraMode>(SwabraUtil.SWABRA_MODES.size());
     for (Map.Entry<String, String> e : SwabraUtil.SWABRA_MODES.entrySet()) {
       myModes.add(new SwabraMode(e.getKey(), e.getValue()));

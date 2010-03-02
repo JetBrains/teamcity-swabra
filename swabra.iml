@@ -5,6 +5,11 @@
     <content url="file://$MODULE_DIR$" />
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
+    <orderEntry type="module" module-name="agent" />
+    <orderEntry type="module" module-name="common" />
+    <orderEntry type="module" module-name="handle-provider" />
+    <orderEntry type="module" module-name="server" />
+    <orderEntry type="module" module-name="tests" />
   </component>
 </module>
 

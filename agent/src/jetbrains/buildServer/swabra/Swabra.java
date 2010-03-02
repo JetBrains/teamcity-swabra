@@ -100,7 +100,8 @@ public final class Swabra extends AgentLifeCycleAdapter {
 
     final boolean lockingProcessesDetectionEnabled = isLockingProcessesDetectionEnabled(runnerParams);
     if (lockingProcessesDetectionEnabled) {
-      myHandlePath = getHandlePath(runnerParams);
+//      myHandlePath = getHandlePath(runnerParams);
+      myHandlePath = runningBuild.getAgentConfiguration().getCacheDirectory("handle").getAbsolutePath() + "/handle.exe";
       if (!prepareHandle()) {
         myHandlePath = null;
         myLogger.message("Swabra: No Handle executable prepared", false);
