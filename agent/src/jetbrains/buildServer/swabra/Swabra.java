@@ -22,7 +22,6 @@ package jetbrains.buildServer.swabra;
  * Time: 14:10:58
  */
 
-import com.intellij.util.io.ZipUtil;
 import jetbrains.buildServer.agent.*;
 import jetbrains.buildServer.swabra.processes.HandlePidsProvider;
 import jetbrains.buildServer.swabra.processes.LockedFileResolver;
@@ -32,14 +31,10 @@ import jetbrains.buildServer.swabra.snapshots.FilesCollectionProcessorForTests;
 import jetbrains.buildServer.swabra.snapshots.FilesCollector;
 import jetbrains.buildServer.swabra.snapshots.SnapshotGenerator;
 import jetbrains.buildServer.util.EventDispatcher;
-import jetbrains.buildServer.util.FileUtil;
 import org.apache.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
-import java.io.FilenameFilter;
-import java.io.IOException;
-import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -52,7 +47,7 @@ public final class Swabra extends AgentLifeCycleAdapter {
   public static final String SNAPSHOT_SUFFIX = ".snapshot";
 
   public static final String HANDLE_EXE = "handle.exe";
-  public static final String HANDLE_EXE_SYSTEM_PROP = "swabra.handle.exe.path";
+  public static final String HANDLE_EXE_SYSTEM_PROP = "handle.exe.path";
   public static final String DISABLE_DOWNLOAD_HANDLE = "swabra.handle.disable.download";
   public static final String HANDLE_URL = "http://download.sysinternals.com/Files/Handle.zip";
 
@@ -98,14 +93,11 @@ public final class Swabra extends AgentLifeCycleAdapter {
     final boolean strict = isStrict(runnerParams);
     myTempDir = runningBuild.getAgentConfiguration().getCacheDirectory(CACHE_KEY);
 
+    prepareHandle();
+
     final boolean lockingProcessesDetectionEnabled = isLockingProcessesDetectionEnabled(runnerParams);
     if (lockingProcessesDetectionEnabled) {
-//      myHandlePath = getHandlePath(runnerParams);
-      myHandlePath = runningBuild.getAgentConfiguration().getCacheDirectory("handle").getAbsolutePath() + "/handle.exe";
-      if (!prepareHandle()) {
-        myHandlePath = null;
-        myLogger.swabraMessage("No Handle executable prepared", false);
-      }
+      prepareHandle();
     } else {
       myHandlePath = null;
     }
@@ -287,39 +279,17 @@ public final class Swabra extends AgentLifeCycleAdapter {
     return (value == null) || ("".equals(value));
   }
 
-  private boolean prepareHandle() {
-    try {
-      if (notDefined(myHandlePath)) {
-        myHandlePath = System.getProperty(HANDLE_EXE_SYSTEM_PROP);
-        myLogger.swabraWarn("No Handle path passed in Swabra settings. Getting from system property "
-          + HANDLE_EXE_SYSTEM_PROP);
-        if (notDefined(myHandlePath)) {
-          myLogger.swabraWarn("No Handle path passed in " + HANDLE_EXE_SYSTEM_PROP + " system property. Will not use Handle");
-          return false;
-        }
-      }
-      final File handleFile = new File(myHandlePath);
-      if (!handleFile.isFile()) {
-        myLogger.swabraWarn("No Handle executable found at " + myHandlePath);
-        if (System.getProperty(DISABLE_DOWNLOAD_HANDLE) != null) {
-          myLogger.swabraWarn("Will not download Handle executable from " + HANDLE_URL + ", (DISABLE_DOWNLOAD_HANDLE = \""
-            + System.getProperty(DISABLE_DOWNLOAD_HANDLE) + "\")");
-          return false;
-        }
-        myLogger.swabraWarn("Downloading Handle executable from " + HANDLE_URL);
-        final File tmpFile = FileUtil.createTempFile("", ".zip");
-        if (!URLDownloader.download(new URL(HANDLE_URL), tmpFile)) {
-          return false;
-        }
-        ZipUtil.extract(tmpFile, handleFile.getParentFile(), new FilenameFilter() {
-          public boolean accept(File dir, String name) {
-            return HANDLE_EXE.equals(name);
-          }
-        });
-      }
-      return true;
-    } catch (IOException e) {
-      return false;
+  private void prepareHandle() {
+    myHandlePath = System.getProperty(HANDLE_EXE_SYSTEM_PROP);
+    if (notDefined(myHandlePath)) {
+      myLogger.swabraWarn("Handle path not defined: " + myHandlePath);
+      myHandlePath = null;
+      return;
+    }
+    final File handleFile = new File(myHandlePath);
+    if (!handleFile.isFile()) {
+      myLogger.swabraWarn("No Handle executable found at " + myHandlePath);
+      myHandlePath = null;
     }
   }
 }
