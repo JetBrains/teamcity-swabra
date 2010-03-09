@@ -123,7 +123,6 @@ public class SwabraTest extends TestCase {
                        final Map<String, String> firstCallParams,
                        final Map<String, String> secondCallParams) throws Exception {
     System.out.println("CheckoutDir is " + myCheckoutDir);
-    System.setProperty(Swabra.DISABLE_DOWNLOAD_HANDLE, "True");
 
     final String goldFile = getTestDataPath(resultsFileName + ".gold", null);
     final String resultsFile = goldFile.replace(".gold", ".tmp");

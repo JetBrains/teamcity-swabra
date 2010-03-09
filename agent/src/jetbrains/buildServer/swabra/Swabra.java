@@ -48,8 +48,6 @@ public final class Swabra extends AgentLifeCycleAdapter {
 
   public static final String HANDLE_EXE = "handle.exe";
   public static final String HANDLE_EXE_SYSTEM_PROP = "handle.exe.path";
-  public static final String DISABLE_DOWNLOAD_HANDLE = "swabra.handle.disable.download";
-  public static final String HANDLE_URL = "http://download.sysinternals.com/Files/Handle.zip";
 
   public static final String TEST_LOG = "swabra.test.log";
 
