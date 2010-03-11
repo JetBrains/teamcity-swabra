@@ -46,7 +46,7 @@ public final class Swabra extends AgentLifeCycleAdapter {
 
   public static final String SNAPSHOT_SUFFIX = ".snapshot";
 
-  public static final String HANDLE_EXE = "handle.exe";
+  public static final String HANDLE_PATH_SUFFIX = File.separator + "handle.exe";
   public static final String HANDLE_EXE_SYSTEM_PROP = "handle.exe.path";
 
   public static final String TEST_LOG = "swabra.test.log";
@@ -152,7 +152,7 @@ public final class Swabra extends AgentLifeCycleAdapter {
 
   private FilesCollector initFilesCollector(BuildProgressLogger buildLogger, boolean verbose, boolean strict) {
     final LockedFileResolver lockedFileResolver =
-      ((myHandlePath == null) || (!unifyPath(myHandlePath).endsWith(File.separator + HANDLE_EXE))) ?
+      (myHandlePath == null) ?
         null : new LockedFileResolver(new HandlePidsProvider(myHandlePath, buildLogger), buildLogger);
 
     final FilesCollectionProcessor processor = (System.getProperty(TEST_LOG) == null) ?
@@ -281,6 +281,11 @@ public final class Swabra extends AgentLifeCycleAdapter {
     myHandlePath = System.getProperty(HANDLE_EXE_SYSTEM_PROP);
     if (notDefined(myHandlePath)) {
       myLogger.swabraWarn("Handle path not defined: " + myHandlePath);
+      myHandlePath = null;
+      return;
+    }
+    if (!unifyPath(myHandlePath).endsWith(HANDLE_PATH_SUFFIX)) {
+      myLogger.swabraWarn("Handle path must end with: " + HANDLE_PATH_SUFFIX);
       myHandlePath = null;
       return;
     }
