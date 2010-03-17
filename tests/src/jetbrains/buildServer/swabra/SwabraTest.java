@@ -29,7 +29,6 @@ import org.junit.After;
 import org.junit.Before;
 
 import java.io.File;
-import java.io.FileWriter;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -138,6 +137,9 @@ public class SwabraTest extends TestCase {
     final AgentRunningBuild build = createAgentRunningBuild(firstCallParams, myBuildAgentConf, myCheckoutDir, logger);
     final Swabra swabra = new Swabra(dispatcher, createSmartDirectoryCleaner());
 
+//    final File pttTemp = new File(TEST_DATA_PATH, "ptt");
+//    System.setProperty(ProcessTreeTerminator.TEMP_PATH_SYSTEM_PROPERTY, pttTemp.getAbsolutePath());
+
     final String checkoutDirPath = myCheckoutDir.getAbsolutePath();
 
     FileUtil.copyDir(getTestData(dirName + File.separator + BEFORE_BUILD, null), myCheckoutDir);
@@ -183,15 +185,10 @@ public class SwabraTest extends TestCase {
 
     System.out.println(results.toString().trim());
     //final String actual = results.toString().replace(myCheckoutDir.getAbsolutePath(), "##CHECKOUT_DIR##").replace(checkoutDirParent + File.separator + myCheckoutDir.hashCode() + ".snapshot", "##SNAPSHOT##").trim();
-    final String actual = readFile(new File(resultsFile)).replace(myCheckoutDir.getAbsolutePath(), "##CHECKOUT_DIR##").trim();
+    final String actual = readFile(new File(resultsFile)).trim().replace(myCheckoutDir.getAbsolutePath(), "##CHECKOUT_DIR##").replace("/", "\\");
     final String expected = readFile(new File(goldFile)).trim();
-    if (!actual.equals(expected)) {
-      final FileWriter resultsWriter = new FileWriter(resultsFile);
-      resultsWriter.write(actual);
-      resultsWriter.close();
-
-      assertEquals(actual, expected, actual);
-    }
+    assertEquals(actual, expected, actual);
+//    FileUtil.delete(pttTemp);
 
 //    final File actualSnapshotf = new File(myCheckoutDir.getAbsolutePath() + ".snapshot");
 //    if (actualSnapshotf.exists()) {

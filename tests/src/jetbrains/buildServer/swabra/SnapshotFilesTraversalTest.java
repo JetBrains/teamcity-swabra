@@ -47,7 +47,7 @@ public class SnapshotFilesTraversalTest extends TestCase {
     final File goldFile = getTestData(resultsFileName + ".gold", null);
     final String resultsFile = goldFile.getAbsolutePath().replace(".gold", ".tmp");
 
-    final String actual = results.toString().replace(File.separator, "\\").trim();
+    final String actual = results.toString().replace("/", "\\").trim();
     final String expected = readFile(goldFile).trim();
     if (!actual.equals(expected)) {
       final FileWriter resultsWriter = new FileWriter(resultsFile);

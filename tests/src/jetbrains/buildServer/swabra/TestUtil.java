@@ -17,6 +17,7 @@
 package jetbrains.buildServer.swabra;
 
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.io.*;
 
@@ -26,13 +27,13 @@ import java.io.*;
  * Time: 17:43:40
  */
 public class TestUtil {
-  private static final String TEST_DATA_PATH = "tests" + File.separator + "testData";
+  public static final String TEST_DATA_PATH = "tests" + File.separator + "testData";
 
-  public static String getTestDataPath(final String fileName, final String folderName) throws Exception {
+  public static String getTestDataPath(@Nullable final String fileName, @Nullable final String folderName) throws Exception {
     return getTestData(fileName, folderName).getAbsolutePath();
   }
 
-  public static File getTestData(final String fileName, final String folderName) throws Exception {
+  public static File getTestData(@Nullable final String fileName, @Nullable final String folderName) throws Exception {
     final String relativeFileName = TEST_DATA_PATH + (folderName != null ? File.separator + folderName : "") + (fileName != null ? File.separator + fileName : "");
     final File file1 = new File(relativeFileName);
     if (file1.exists()) {

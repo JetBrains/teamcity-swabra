@@ -69,7 +69,7 @@ public class SnapshotFilesIterator implements FilesIterator {
       final long length = getFileLength(fileRecord);
       final long lastModified = getFileLastModified(fileRecord);
 
-      if (path.endsWith(File.separator)) {
+      if (path.endsWith("/") || path.endsWith("\\")) {
         myCurrentDir = myRootFolder + path;
         return new FileInfo(myCurrentDir.substring(0, myCurrentDir.length() - 1), length, lastModified, false);
       } else {

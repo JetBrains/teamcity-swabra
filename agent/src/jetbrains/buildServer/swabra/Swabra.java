@@ -91,8 +91,6 @@ public final class Swabra extends AgentLifeCycleAdapter {
     final boolean strict = isStrict(runnerParams);
     myTempDir = runningBuild.getAgentConfiguration().getCacheDirectory(CACHE_KEY);
 
-    prepareHandle();
-
     final boolean lockingProcessesDetectionEnabled = isLockingProcessesDetectionEnabled(runnerParams);
     if (lockingProcessesDetectionEnabled) {
       prepareHandle();
@@ -280,7 +278,7 @@ public final class Swabra extends AgentLifeCycleAdapter {
   private void prepareHandle() {
     myHandlePath = System.getProperty(HANDLE_EXE_SYSTEM_PROP);
     if (notDefined(myHandlePath)) {
-      myLogger.swabraWarn("Handle path not defined: " + myHandlePath);
+      myLogger.swabraWarn("Handle path not defined");
       myHandlePath = null;
       return;
     }

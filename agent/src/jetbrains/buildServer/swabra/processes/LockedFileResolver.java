@@ -18,7 +18,6 @@ package jetbrains.buildServer.swabra.processes;
 
 import jetbrains.buildServer.agent.SimpleBuildLogger;
 import jetbrains.buildServer.processes.ProcessFilter;
-import jetbrains.buildServer.processes.ProcessNode;
 import jetbrains.buildServer.processes.ProcessTreeTerminator;
 import jetbrains.buildServer.util.FileUtil;
 import org.apache.log4j.Logger;
@@ -76,14 +75,9 @@ public class LockedFileResolver {
 
     if (kill) {
       info("Try killing locking process(es) for " + f);
-      ProcessTreeTerminator.kill(new ProcessFilter() {
-        public boolean accept(@NotNull ProcessNode processNode) {
-          return pids.contains(processNode.getPid());
-        }
-      });
-//      for (final long pid : pids) {
-//        ProcessTreeTerminator.kill(pid, ProcessFilter.MATCH_ALL);
-//      }
+      for (final long pid : pids) {
+        ProcessTreeTerminator.kill(pid, ProcessFilter.MATCH_ALL);
+      }
 
       final List<Long> alivePids = myPidsProvider.getPids(f);
 
