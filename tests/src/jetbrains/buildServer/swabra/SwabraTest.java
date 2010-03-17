@@ -18,7 +18,6 @@ package jetbrains.buildServer.swabra;
 
 import jetbrains.buildServer.TempFiles;
 import jetbrains.buildServer.agent.*;
-import jetbrains.buildServer.processes.ProcessTreeTerminator;
 import jetbrains.buildServer.util.EventDispatcher;
 import jetbrains.buildServer.util.FileUtil;
 import junit.framework.TestCase;
@@ -139,8 +138,8 @@ public class SwabraTest extends TestCase {
 //    final Swabra swabra = new Swabra(dispatcher, createSmartDirectoryCleaner(), new ProcessTerminator());
     final Swabra swabra = new Swabra(dispatcher, createSmartDirectoryCleaner());
 
-    final File pttTemp = new File(TEST_DATA_PATH, "ptt");
-    System.setProperty(ProcessTreeTerminator.TEMP_PATH_SYSTEM_PROPERTY, pttTemp.getAbsolutePath());
+//    final File pttTemp = new File(TEST_DATA_PATH, "ptt");
+//    System.setProperty(ProcessTreeTerminator.TEMP_PATH_SYSTEM_PROPERTY, pttTemp.getAbsolutePath());
 
     final String checkoutDirPath = myCheckoutDir.getAbsolutePath();
 
@@ -190,7 +189,7 @@ public class SwabraTest extends TestCase {
     final String actual = readFile(new File(resultsFile)).trim().replace(myCheckoutDir.getAbsolutePath(), "##CHECKOUT_DIR##").replace("/", "\\");
     final String expected = readFile(new File(goldFile)).trim();
     assertEquals(actual, expected, actual);
-    FileUtil.delete(pttTemp);
+//    FileUtil.delete(pttTemp);
 
 //    final File actualSnapshotf = new File(myCheckoutDir.getAbsolutePath() + ".snapshot");
 //    if (actualSnapshotf.exists()) {
