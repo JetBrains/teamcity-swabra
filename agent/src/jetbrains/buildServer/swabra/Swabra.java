@@ -52,7 +52,10 @@ public final class Swabra extends AgentLifeCycleAdapter {
   public static final String TEST_LOG = "swabra.test.log";
 
   private SwabraLogger myLogger;
+  @NotNull
   private SmartDirectoryCleaner myDirectoryCleaner;
+//  @NotNull
+//  private ProcessTerminator myProcessTerminator;
 
   private SwabraPropertiesProcessor myPropertiesProcessor;
   private FilesCollector myFilesCollector;
@@ -70,11 +73,14 @@ public final class Swabra extends AgentLifeCycleAdapter {
   }
 
   public Swabra(@NotNull final EventDispatcher<AgentLifeCycleListener> agentDispatcher,
-                @NotNull final SmartDirectoryCleaner directoryCleaner) {
+                @NotNull final SmartDirectoryCleaner directoryCleaner/*,
+                @NotNull ProcessTerminator processTerminator*/) {
     agentDispatcher.addListener(this);
     myDirectoryCleaner = directoryCleaner;
+//    myProcessTerminator = processTerminator;
   }
 
+  @Override
   public void buildStarted(@NotNull final AgentRunningBuild runningBuild) {
     final BuildProgressLogger buildLogger = runningBuild.getBuildLogger();
     final SwabraLogger logger = new SwabraLogger(buildLogger, Logger.getLogger(Swabra.class));
@@ -151,7 +157,7 @@ public final class Swabra extends AgentLifeCycleAdapter {
   private FilesCollector initFilesCollector(BuildProgressLogger buildLogger, boolean verbose, boolean strict) {
     final LockedFileResolver lockedFileResolver =
       (myHandlePath == null) ?
-        null : new LockedFileResolver(new HandlePidsProvider(myHandlePath, buildLogger), buildLogger);
+        null : new LockedFileResolver(new HandlePidsProvider(myHandlePath, buildLogger), /*myProcessTerminator,*/ buildLogger);
 
     final FilesCollectionProcessor processor = (System.getProperty(TEST_LOG) == null) ?
       new FilesCollectionProcessor(myLogger, lockedFileResolver, verbose, strict) :
@@ -160,8 +166,13 @@ public final class Swabra extends AgentLifeCycleAdapter {
     return new FilesCollector(processor, myLogger);
   }
 
-  public void beforeRunnerStart(@NotNull final AgentRunningBuild runningBuild) {
+  @Override
+  public void sourcesUpdated(@NotNull AgentRunningBuild runningBuild) {
     if (!isEnabled(myMode)) return;
+    makeSnapshot();
+  }
+
+  private void makeSnapshot() {
     final String snapshotName = "" + myCheckoutDir.hashCode();
     if (!new SnapshotGenerator(myCheckoutDir, myTempDir, myLogger).generateSnapshot(snapshotName)) {
       myPropertiesProcessor.markDirty(myCheckoutDir);
@@ -171,6 +182,15 @@ public final class Swabra extends AgentLifeCycleAdapter {
     }
   }
 
+  @Override
+  public void beforeRunnerStart(@NotNull final AgentRunningBuild runningBuild) {
+    if (!isEnabled(myMode)) return;
+    if (!runningBuild.isCheckoutOnAgent() && !runningBuild.isCheckoutOnServer()) {
+      makeSnapshot();
+    }
+  }
+
+  @Override
   public void beforeBuildFinish(@NotNull final BuildFinishedStatus buildStatus) {
     if (myHandlePath != null) {
       ProcessExecutor.runHandleAcceptEula(myHandlePath, myCheckoutDir.getAbsolutePath(), myLogger.getBuildLogger());
@@ -180,6 +200,7 @@ public final class Swabra extends AgentLifeCycleAdapter {
     }
   }
 
+  @Override
   public void buildFinished(@NotNull final BuildFinishedStatus buildStatus) {
     if (AFTER_BUILD.equals(myMode)) {
       myLogger.swabraDebug("Build files cleanup is performed after build");
