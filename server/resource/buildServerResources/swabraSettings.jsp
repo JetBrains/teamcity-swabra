@@ -118,50 +118,11 @@
     <th>
     </th>
     <td>
-      <a href="/admin/serverConfig.html?tab=handle-provider"
-         title="Download Handle executable for locking processes detection"
-         target="_blank"
-         showdiscardchangesmessage="true">Download handle.exe</a>
+      <a href="/handle.html"
+         showdiscardchangesmessage="false"
+         title="Download Handle executable for locking processes detection">Download Handle</a>
     </td>
   </tr>
-
-  <%--<tr class="noBorder" id="swabra.process.analizer.container"--%>
-  <%--style="${displayLockingProcessesSettings ? '' : 'display: none;'}">--%>
-  <%--<th><label for="swabra.process.analizer">Handle.exe path: <l:star/></label>--%>
-  <%--</th>--%>
-  <%--<td><props:textProperty name="swabra.process.analizer" className="longField"/>--%>
-  <%--<span class="smallNote">--%>
-  <%--Absolute path to--%>
-  <%--<a showdiscardchangesmessage="false"--%>
-  <%--target="_blank"--%>
-  <%--href="http://technet.microsoft.com/en-us/sysinternals/bb896655.aspx">Handle</a>--%>
-  <%--excutable on Windows agent. Is used to determine processes which hold files in the ckeckout directory.--%>
-  <%--</span>--%>
-  <%--</td>--%>
-  <%--</tr>--%>
-
-
-  <%--<tr class="noBorder" id="handle.download.container" style="display: none;">--%>
-  <%--<th></th>--%>
-  <%--<td>--%>
-  <%--<form id="handleForm" action="<c:url value='/swabra.html'/>"--%>
-  <%--onsubmit="return BS.HandleForm.submit()" method="post">--%>
-  <%--<table>--%>
-  <%--</table>--%>
-  <%--</form>--%>
-  <%--</td>--%>
-  <%--</tr>--%>
-
-  <%--<tr>--%>
-  <%--<th></th>--%>
-  <%--<td>--%>
-  <%--<div class="saveButtonsBlock">--%>
-  <%--<input class="submitButton" type="submit" name="submitButton" value="Download"/>--%>
-  <%--<forms:saving/>--%>
-  <%--<br clear="all"/>--%>
-  <%--</div>--%>
-  <%--</td>--%>
-  <%--</tr>--%>
 
   <tr class="noBorder" id="swabra.verbose.container"
       style="${displayBeforeBuildSwabraSettings ? '' : 'display: none;'}">
