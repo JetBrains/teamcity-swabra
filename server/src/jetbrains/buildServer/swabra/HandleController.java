@@ -4,7 +4,6 @@ import jetbrains.buildServer.controllers.ActionErrors;
 import jetbrains.buildServer.controllers.BaseFormXmlController;
 import jetbrains.buildServer.controllers.FormUtil;
 import jetbrains.buildServer.controllers.ValidationUtil;
-import jetbrains.buildServer.controllers.admin.AdminOverviewController;
 import jetbrains.buildServer.messages.Status;
 import jetbrains.buildServer.serverSide.SBuildServer;
 import jetbrains.buildServer.web.openapi.PluginDescriptor;
@@ -49,7 +48,7 @@ public class HandleController extends BaseFormXmlController {
   protected ModelAndView doGet(HttpServletRequest request, HttpServletResponse response) {
     final Map<String, Object> model = new HashMap<String, Object>();
     model.put("handleForm", getForm(request));
-    model.put("handlePrefix", request.getContextPath() + myPluginDescriptor.getPluginResourcesPath());
+    model.put("handlePathPrefix", request.getContextPath() + myPluginDescriptor.getPluginResourcesPath());
     return new ModelAndView(myPluginDescriptor.getPluginResourcesPath(MY_JSP), model);
   }
 
@@ -81,7 +80,7 @@ public class HandleController extends BaseFormXmlController {
     FormUtil.FormCreator<HandleForm> formCreator = new FormUtil.FormCreator<HandleForm>() {
       public HandleForm createForm(final HttpServletRequest request) {
         final HandleForm form = new HandleForm();
-        form.getCameFromSupport().setUrlFromRequest(request, AdminOverviewController.getOverviewPageUrl(request));
+        form.getCameFromSupport().setUrlFromRequest(request, "/admin/serverConfig.html?init=1");
         return form;
       }
     };

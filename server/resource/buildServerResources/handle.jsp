@@ -4,6 +4,8 @@
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 
 <jsp:useBean id="handleForm" type="jetbrains.buildServer.swabra.HandleForm" scope="request"/>
+<jsp:useBean id="handlePathPrefix" type="java.lang.String" scope="request"/>
+
 <c:set var="title" value="Download Handle" scope="request"/>
 
 <bs:page>
@@ -29,11 +31,11 @@
           /js/bs/forms.js
         </bs:linkScript>
 
-        <script type="text/javascript" src="${handlePrefix}handle.js"></script>
+        <script type="text/javascript" src="${handlePathPrefix}handle.js"></script>
 
         <script type="text/javascript">
           BS.Navigation.items = [
-            {title: "My Settings & Tools", url: '<c:url value="/profile.html"/>'},
+            {title: "Server Configuration", url: '<c:url value="/admin/serverConfig.html?init=1"/>'},
             {title: "${title}", selected:true}
           ];
         </script>
