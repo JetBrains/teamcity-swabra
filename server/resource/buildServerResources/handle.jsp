@@ -6,6 +6,7 @@
 <jsp:useBean id="handleForm" type="jetbrains.buildServer.swabra.web.HandleForm" scope="request"/>
 <jsp:useBean id="handlePathPrefix" type="java.lang.String" scope="request"/>
 <jsp:useBean id="pageUrl" type="java.lang.String" scope="request"/>
+<jsp:useBean id="canDownload" type="java.lang.Boolean" scope="request"/>
 
 <c:set var="title" value="Download Handle" scope="request"/>
 
@@ -48,12 +49,22 @@
               onsubmit="return BS.HandleForm.submit()" method="post">
 
           <table class="runnerFormTable">
+            <c:if test="${not canDownload}">
+              <tr class="noBorder">
+                <td colspan="2">
+                      <span class="error">
+                        You don't have enough permissions to download Handle.zip.
+                        Please contact your administrator.
+                      </span>
+                </td>
+              </tr>
+            </c:if>
             <l:settingsGroup title="Configure URL">
               <th><label for="handleUrl">URL for downloading Handle.zip: <l:star/></label>
               </th>
               <td>
                 <forms:textField name="url" id="url" style="width:30em;"
-                                 value="${handleForm.url}"/>
+                                 value="${handleForm.url}" disabled="${not canDownload}"/>
                 <span class="error" id="errorUrl"></span>
 
                 <div class="smallNote" style="margin: 0;">
@@ -63,7 +74,7 @@
                      href="http://technet.microsoft.com/en-us/sysinternals/bb896655.aspx">Handle</a>
                   excutable (handle.exe).
                   <br/>
-                  On Windows agents Handle is used to determine processes which hold files in the ckeckout directory.
+                  On Windows agents Handle is used to determine processes which hold files in the checkout directory.
                   <br/>
                   Note that Handle will be present on agents only after the upgrade process.
                 </div>
@@ -73,7 +84,8 @@
 
           <div class="saveButtonsBlock">
             <forms:cancel cameFromSupport="${handleForm.cameFromSupport}"/>
-            <input class="submitButton" type="submit" name="submitButton" value="Download"/>
+            <input class="submitButton" type="submit"
+                   name="submitButton" value="Download" disabled="${not canDownload}"/>
             <forms:saving/>
             <input type="hidden" id="submit" name="submit"/>
             <br clear="all"/>

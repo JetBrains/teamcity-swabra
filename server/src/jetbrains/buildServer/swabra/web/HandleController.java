@@ -6,11 +6,15 @@ import jetbrains.buildServer.controllers.FormUtil;
 import jetbrains.buildServer.controllers.ValidationUtil;
 import jetbrains.buildServer.messages.Status;
 import jetbrains.buildServer.serverSide.SBuildServer;
+import jetbrains.buildServer.serverSide.auth.AuthUtil;
+import jetbrains.buildServer.serverSide.auth.Permission;
+import jetbrains.buildServer.serverSide.auth.SecurityContext;
 import jetbrains.buildServer.swabra.SwabraHandleProvider;
 import jetbrains.buildServer.web.openapi.PluginDescriptor;
 import jetbrains.buildServer.web.openapi.WebControllerManager;
 import org.jdom.Element;
 import org.jetbrains.annotations.NonNls;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.web.servlet.ModelAndView;
 
 import javax.servlet.http.HttpServletRequest;
@@ -30,15 +34,21 @@ public class HandleController extends BaseFormXmlController {
   @NonNls
   private static final String MY_JSP = "handle.jsp";
 
+  @NotNull
   private final PluginDescriptor myPluginDescriptor;
+  @NotNull
   private final WebControllerManager myWebControllerManager;
+  @NotNull
+  private final SecurityContext mySecurityContext;
 
-  public HandleController(final SBuildServer server,
-                          final PluginDescriptor pluginDescriptor,
-                          final WebControllerManager webControllerManager) {
+  public HandleController(@NotNull final SBuildServer server,
+                          @NotNull final PluginDescriptor pluginDescriptor,
+                          @NotNull final WebControllerManager webControllerManager,
+                          @NotNull final SecurityContext securityContext) {
     super(server);
     myPluginDescriptor = pluginDescriptor;
     myWebControllerManager = webControllerManager;
+    mySecurityContext = securityContext;
   }
 
   public void register() {
@@ -48,8 +58,11 @@ public class HandleController extends BaseFormXmlController {
   @Override
   protected ModelAndView doGet(HttpServletRequest request, HttpServletResponse response) {
     final Map<String, Object> model = new HashMap<String, Object>();
+
     model.put("handleForm", getForm(request));
     model.put("handlePathPrefix", request.getContextPath() + myPluginDescriptor.getPluginResourcesPath());
+    model.put("canDownload", AuthUtil.hasGlobalPermission(mySecurityContext.getAuthorityHolder(), Permission.AUTHORIZE_AGENT));
+
     return new ModelAndView(myPluginDescriptor.getPluginResourcesPath(MY_JSP), model);
   }
 
