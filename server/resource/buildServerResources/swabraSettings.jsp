@@ -18,8 +18,6 @@
 <c:set var="displayLockingProcessesSettings"
        value="${not empty propertiesBean.properties['swabra.locking.processes'] ? true : false}"/>
 
-<script type="text/javascript" src="${swabraPathPrefix}handle.js"></script>
-
 <l:settingsGroup title="Swabra">
 
   <tr class="noBorder" id="swabra.mode.container">
@@ -120,6 +118,7 @@
     <td>
       <a href="/handle.html"
          showdiscardchangesmessage="false"
+         target="_blank"
          title="Download Handle executable for locking processes detection">Download handle.exe</a>
     </td>
   </tr>

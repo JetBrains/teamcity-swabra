@@ -11,7 +11,7 @@ BS.HandleListener = OO.extend(BS.ErrorsAwareListener, {
       document.location.reload();
     }
   }
-})
+});
 
 BS.HandleForm = OO.extend(BS.AbstractWebForm, {
   formElement: function() {
@@ -33,4 +33,4 @@ BS.HandleForm = OO.extend(BS.AbstractWebForm, {
 
     return false;
   }
-})
+});

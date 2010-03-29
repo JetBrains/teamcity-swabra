@@ -1,4 +1,4 @@
-package jetbrains.buildServer.swabra;
+package jetbrains.buildServer.swabra.web;
 
 import jetbrains.buildServer.messages.Status;
 import jetbrains.buildServer.util.Dates;

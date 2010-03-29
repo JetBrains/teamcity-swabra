@@ -1,4 +1,4 @@
-package jetbrains.buildServer.swabra;
+package jetbrains.buildServer.swabra.web;
 
 import jetbrains.buildServer.controllers.ActionErrors;
 import jetbrains.buildServer.controllers.BaseFormXmlController;
@@ -6,6 +6,7 @@ import jetbrains.buildServer.controllers.FormUtil;
 import jetbrains.buildServer.controllers.ValidationUtil;
 import jetbrains.buildServer.messages.Status;
 import jetbrains.buildServer.serverSide.SBuildServer;
+import jetbrains.buildServer.swabra.SwabraHandleProvider;
 import jetbrains.buildServer.web.openapi.PluginDescriptor;
 import jetbrains.buildServer.web.openapi.WebControllerManager;
 import org.jdom.Element;

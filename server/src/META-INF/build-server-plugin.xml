@@ -3,7 +3,7 @@
 
 <beans default-autowire="constructor">
   <bean id="testReportParserPluginSettings"
-        class="jetbrains.buildServer.swabra.SwabraSettings" init-method="registerExtensions">
+        class="jetbrains.buildServer.swabra.web.SwabraSettings" init-method="registerExtensions">
     <property name="supportedRunTypes">
       <list>
         <value>simpleRunner</value>
@@ -23,7 +23,7 @@
       </list>
     </property>
   </bean>
-  <bean id="handleController" class="jetbrains.buildServer.swabra.HandleController"
+  <bean id="handleController" class="jetbrains.buildServer.swabra.web.HandleController"
         init-method="register"/>
 
 </beans>

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package jetbrains.buildServer.swabra;
+package jetbrains.buildServer.swabra.web;
 
 import jetbrains.buildServer.serverSide.ProjectManager;
 import jetbrains.buildServer.web.openapi.PagePlaces;
