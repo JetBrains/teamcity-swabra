@@ -2,7 +2,7 @@
 <%@ taglib prefix="l" tagdir="/WEB-INF/tags/layout" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ taglib prefix="forms" tagdir="/WEB-INF/tags/forms" %>
-<jsp:useBean id="buildForm" type="jetbrains.buildServer.controllers.admin.projects.BuildTypeForm" scope="request"/>
+
 <jsp:useBean id="propertiesBean" scope="request" type="jetbrains.buildServer.controllers.BasePropertiesBean"/>
 <jsp:useBean id="swabraModes" scope="request" class="jetbrains.buildServer.swabra.SwabraModes"/>
 
@@ -120,7 +120,7 @@
     <td>
       <a href="/handle.html"
          showdiscardchangesmessage="false"
-         title="Download Handle executable for locking processes detection">Download Handle</a>
+         title="Download Handle executable for locking processes detection">Download handle.exe</a>
     </td>
   </tr>
 
