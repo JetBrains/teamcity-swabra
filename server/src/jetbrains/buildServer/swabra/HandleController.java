@@ -71,17 +71,17 @@ public class HandleController extends BaseFormXmlController {
       } catch (Throwable throwable) {
         form.addMessage("Failed to download Handle, please see teamcity-server.log for details", Status.ERROR);
       }
+      form.setRunning(false);
+    } else {
+      writeErrors(xmlResponse, errors);
     }
-    form.setRunning(false);
-    errors.serialize(xmlResponse);
   }
 
   static HandleForm getForm(HttpServletRequest request) {
     FormUtil.FormCreator<HandleForm> formCreator = new FormUtil.FormCreator<HandleForm>() {
       public HandleForm createForm(final HttpServletRequest request) {
-        HandleForm form = new HandleForm();
+        final HandleForm form = new HandleForm();
         form.getCameFromSupport().setUrlFromRequest(request, AdminOverviewController.getOverviewPageUrl(request));
-        form.rememberState();
         return form;
       }
     };

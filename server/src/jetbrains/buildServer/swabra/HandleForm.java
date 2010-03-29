@@ -1,6 +1,5 @@
 package jetbrains.buildServer.swabra;
 
-import jetbrains.buildServer.controllers.RememberState;
 import jetbrains.buildServer.messages.Status;
 import jetbrains.buildServer.util.Dates;
 import jetbrains.buildServer.web.util.CameFromSupport;
@@ -15,7 +14,7 @@ import java.util.List;
  * Date: 26.02.2010
  * Time: 13:12:22
  */
-public class HandleForm extends RememberState {
+public class HandleForm {
   private String myUrl = "http://download.sysinternals.com/Files/Handle.zip";
   private boolean myRunning = false;
   private List<String> myMessages = new ArrayList<String>();
