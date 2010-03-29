@@ -23,6 +23,7 @@
       </list>
     </property>
   </bean>
+  <bean id="handleTab" class="jetbrains.buildServer.swabra.HandleProviderAdminTab"/>
   <bean id="handleController" class="jetbrains.buildServer.swabra.HandleController"
         init-method="register"/>
 

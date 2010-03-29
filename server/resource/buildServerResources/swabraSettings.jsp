@@ -118,9 +118,10 @@
     <th>
     </th>
     <td>
-      <a href="/handle.html"
-         showdiscardchangesmessage="false"
-         title="Download Handle executable for locking processes detection">Download Handle</a>
+      <a href="/admin/serverConfig.html?tab=handle-provider"
+         title="Download Handle executable for locking processes detection"
+         target="_blank"
+         showdiscardchangesmessage="true">Download handle.exe</a>
     </td>
   </tr>
 
