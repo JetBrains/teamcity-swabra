@@ -5,11 +5,10 @@ import jetbrains.buildServer.controllers.BaseFormXmlController;
 import jetbrains.buildServer.controllers.FormUtil;
 import jetbrains.buildServer.controllers.ValidationUtil;
 import jetbrains.buildServer.messages.Status;
-import jetbrains.buildServer.serverSide.SBuildServer;
 import jetbrains.buildServer.serverSide.auth.AuthUtil;
 import jetbrains.buildServer.serverSide.auth.Permission;
 import jetbrains.buildServer.serverSide.auth.SecurityContext;
-import jetbrains.buildServer.swabra.SwabraHandleProvider;
+import jetbrains.buildServer.swabra.HandleProvider;
 import jetbrains.buildServer.web.openapi.PluginDescriptor;
 import jetbrains.buildServer.web.openapi.WebControllerManager;
 import org.jdom.Element;
@@ -19,7 +18,6 @@ import org.springframework.web.servlet.ModelAndView;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -40,15 +38,18 @@ public class HandleController extends BaseFormXmlController {
   private final WebControllerManager myWebControllerManager;
   @NotNull
   private final SecurityContext mySecurityContext;
+  @NotNull
+  private final HandleProvider myHandleProvider;
 
-  public HandleController(@NotNull final SBuildServer server,
-                          @NotNull final PluginDescriptor pluginDescriptor,
+
+  public HandleController(@NotNull final PluginDescriptor pluginDescriptor,
                           @NotNull final WebControllerManager webControllerManager,
-                          @NotNull final SecurityContext securityContext) {
-    super(server);
+                          @NotNull final SecurityContext securityContext,
+                          @NotNull final HandleProvider handleProvider) {
     myPluginDescriptor = pluginDescriptor;
     myWebControllerManager = webControllerManager;
     mySecurityContext = securityContext;
+    myHandleProvider = handleProvider;
   }
 
   public void register() {
@@ -62,6 +63,7 @@ public class HandleController extends BaseFormXmlController {
     model.put("handleForm", getForm(request));
     model.put("handlePathPrefix", request.getContextPath() + myPluginDescriptor.getPluginResourcesPath());
     model.put("canDownload", AuthUtil.hasGlobalPermission(mySecurityContext.getAuthorityHolder(), Permission.AUTHORIZE_AGENT));
+//    model.put("canDownload", false);
 
     return new ModelAndView(myPluginDescriptor.getPluginResourcesPath(MY_JSP), model);
   }
@@ -78,8 +80,7 @@ public class HandleController extends BaseFormXmlController {
       form.setRunning(true);
       form.addMessage("Start downloading Handle.zip from " + form.getUrl() + "...", Status.NORMAL);
       try {
-        SwabraHandleProvider.downloadAndExtract(form.getUrl(),
-          new File(myServer.getServerRootPath() + "/update/plugins/handle-provider.zip"));
+        myHandleProvider.downloadAndExtract(form.getUrl());
         form.addMessage("Successfully downloaded Handle.zip from " + form.getUrl(), Status.NORMAL);
       } catch (Throwable throwable) {
         form.addMessage("Failed to download Handle, please see teamcity-server.log for details", Status.ERROR);
