@@ -81,21 +81,25 @@ public final class Swabra extends AgentLifeCycleAdapter {
   }
 
   @Override
+  public void agentStarted(@NotNull BuildAgent agent) {
+    myLogger = new SwabraLogger(Logger.getLogger(Swabra.class));
+    myTempDir = agent.getConfiguration().getCacheDirectory(CACHE_KEY);
+    myPropertiesProcessor = new SwabraPropertiesProcessor(myTempDir, myLogger);
+  }
+
+  @Override
   public void buildStarted(@NotNull final AgentRunningBuild runningBuild) {
-    final BuildProgressLogger buildLogger = runningBuild.getBuildLogger();
-    final SwabraLogger logger = new SwabraLogger(buildLogger, Logger.getLogger(Swabra.class));
     final File checkoutDir = runningBuild.getCheckoutDirectory();
+    waitForUnfinishedThreads(checkoutDir);
 
-    waitForUnfinishedThreads(checkoutDir, logger);
-
-    myLogger = logger;
+    final BuildProgressLogger buildLogger = runningBuild.getBuildLogger();
+    myLogger.setBuildLogger(buildLogger);
     myCheckoutDir = checkoutDir;
 
     final Map<String, String> runnerParams = runningBuild.getRunnerParameters();
     myMode = getSwabraMode(runnerParams);
     final boolean verbose = isVerbose(runnerParams);
     final boolean strict = isStrict(runnerParams);
-    myTempDir = runningBuild.getAgentConfiguration().getCacheDirectory(CACHE_KEY);
 
     final boolean lockingProcessesDetectionEnabled = isLockingProcessesDetectionEnabled(runnerParams);
     if (lockingProcessesDetectionEnabled) {
@@ -106,7 +110,6 @@ public final class Swabra extends AgentLifeCycleAdapter {
 
     logSettings(myMode, myCheckoutDir.getAbsolutePath(), strict, lockingProcessesDetectionEnabled, myHandlePath, verbose);
 
-    myPropertiesProcessor = new SwabraPropertiesProcessor(myTempDir, myLogger);
     myPropertiesProcessor.readProperties();
 
     if (!isEnabled(myMode)) {
@@ -137,7 +140,6 @@ public final class Swabra extends AgentLifeCycleAdapter {
       myPropertiesProcessor.deleteRecord(myCheckoutDir);
     }
 
-    myLogger.swabraDebug("Previous build files cleanup is performed before build");
     final FilesCollector.CollectionResult result = myFilesCollector.collect(snapshot, myCheckoutDir);
 
     switch (result) {
@@ -203,8 +205,6 @@ public final class Swabra extends AgentLifeCycleAdapter {
   @Override
   public void buildFinished(@NotNull final BuildFinishedStatus buildStatus) {
     if (AFTER_BUILD.equals(myMode)) {
-      myLogger.swabraDebug("Build files cleanup is performed after build");
-
       final Thread t = new Thread(new Runnable() {
         public void run() {
           final FilesCollector.CollectionResult result =
@@ -243,15 +243,15 @@ public final class Swabra extends AgentLifeCycleAdapter {
       "', verbose = '" + verbose + "'.");
   }
 
-  private void waitForUnfinishedThreads(@NotNull File checkoutDir, @NotNull SwabraLogger logger) {
+  private void waitForUnfinishedThreads(@NotNull File checkoutDir) {
     final Thread t = myPrevThreads.get(checkoutDir);
     if ((t != null) && t.isAlive()) {
-      logger.message("Waiting for Swabra to cleanup previous build files", true);
+      myLogger.message("Waiting for Swabra to cleanup previous build files", true);
       try {
         t.join();
       } catch (InterruptedException e) {
-        logger.swabraError("Interrupted while waiting for previous build files cleanup");
-        logger.exception(e, true);
+        myLogger.swabraError("Interrupted while waiting for previous build files cleanup");
+        myLogger.exception(e, true);
       }
     }
     myPrevThreads.remove(checkoutDir);

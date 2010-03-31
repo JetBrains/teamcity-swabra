@@ -47,21 +47,18 @@ public class SwabraTest extends TestCase {
 
   private File myCheckoutDir;
   private TempFiles myTempFiles;
-  private BuildAgentConfiguration myBuildAgentConf;
   private Mockery myContext;
 
 
   private AgentRunningBuild createAgentRunningBuild(@NotNull final Map<String, String> runParams,
-                                                    @NotNull final BuildAgentConfiguration conf,
                                                     @NotNull final File checkoutDir,
                                                     @NotNull final SimpleBuildLogger logger) {
     final AgentRunningBuild runningBuild = myContext.mock(AgentRunningBuild.class);
-    setRunningBuildParams(runParams, conf, checkoutDir, logger, runningBuild);
+    setRunningBuildParams(runParams, checkoutDir, logger, runningBuild);
     return runningBuild;
   }
 
   private void setRunningBuildParams(@NotNull final Map<String, String> runParams,
-                                     @NotNull final BuildAgentConfiguration conf,
                                      @NotNull final File checkoutDir,
                                      @NotNull final SimpleBuildLogger logger,
                                      @NotNull final AgentRunningBuild runningBuild) {
@@ -71,8 +68,6 @@ public class SwabraTest extends TestCase {
         will(returnValue(runParams));
         oneOf(runningBuild).getBuildLogger();
         will(returnValue(logger));
-        oneOf(runningBuild).getAgentConfiguration();
-        will(returnValue(conf));
         oneOf(runningBuild).getCheckoutDirectory();
         will(returnValue(checkoutDir));
         allowing(runningBuild).isCleanBuild();
@@ -92,6 +87,17 @@ public class SwabraTest extends TestCase {
     return conf;
   }
 
+  private BuildAgent createBuildAgent(@NotNull final File cachesDir) {
+    final BuildAgent agent = myContext.mock(BuildAgent.class);
+    myContext.checking(new Expectations() {
+      {
+        allowing(agent).getConfiguration();
+        will(returnValue(createBuildAgentConf(cachesDir)));
+      }
+    });
+    return agent;
+  }
+
   private SmartDirectoryCleaner createSmartDirectoryCleaner() {
     return new SmartDirectoryCleaner() {
       public void cleanFolder(@NotNull File file, @NotNull SmartDirectoryCleanerCallback callback) {
@@ -109,7 +115,6 @@ public class SwabraTest extends TestCase {
     myTempFiles = new TempFiles();
     myCheckoutDir = new File(myTempFiles.createTempDir(), "checkout_dir");
     myCheckoutDir.mkdirs();
-    myBuildAgentConf = createBuildAgentConf(myCheckoutDir.getParentFile());
   }
 
   @After
@@ -134,12 +139,15 @@ public class SwabraTest extends TestCase {
 
     final SimpleBuildLogger logger = new BuildProgressLoggerMock(results);
     final EventDispatcher<AgentLifeCycleListener> dispatcher = EventDispatcher.create(AgentLifeCycleListener.class);
-    final AgentRunningBuild build = createAgentRunningBuild(firstCallParams, myBuildAgentConf, myCheckoutDir, logger);
+    final AgentRunningBuild build = createAgentRunningBuild(firstCallParams, myCheckoutDir, logger);
 //    final Swabra swabra = new Swabra(dispatcher, createSmartDirectoryCleaner(), new ProcessTerminator());
     final Swabra swabra = new Swabra(dispatcher, createSmartDirectoryCleaner());
 
 //    final File pttTemp = new File(TEST_DATA_PATH, "ptt");
 //    System.setProperty(ProcessTreeTerminator.TEMP_PATH_SYSTEM_PROPERTY, pttTemp.getAbsolutePath());
+
+
+    dispatcher.getMulticaster().agentStarted(createBuildAgent(myCheckoutDir.getParentFile()));
 
     final String checkoutDirPath = myCheckoutDir.getAbsolutePath();
 
@@ -162,7 +170,7 @@ public class SwabraTest extends TestCase {
     Thread.sleep(100);
 
     myContext.assertIsSatisfied();
-    setRunningBuildParams(secondCallParams, myBuildAgentConf, myCheckoutDir, logger, build);
+    setRunningBuildParams(secondCallParams, myCheckoutDir, logger, build);
 
     FileUtil.copyDir(getTestData(dirName + File.separator + BEFORE_BUILD, null), myCheckoutDir);
     FileUtil.delete(new File(checkoutDirPath + File.separator + ".svn"));
