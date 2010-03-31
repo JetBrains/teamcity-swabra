@@ -84,7 +84,10 @@ public final class Swabra extends AgentLifeCycleAdapter {
   public void agentStarted(@NotNull BuildAgent agent) {
     myLogger = new SwabraLogger(Logger.getLogger(Swabra.class));
     myTempDir = agent.getConfiguration().getCacheDirectory(CACHE_KEY);
+    myTempDir.mkdirs();
+
     myPropertiesProcessor = new SwabraPropertiesProcessor(myTempDir, myLogger);
+    myPropertiesProcessor.cleanupProperties(agent.getConfiguration().getWorkDirectory().listFiles());
   }
 
   @Override

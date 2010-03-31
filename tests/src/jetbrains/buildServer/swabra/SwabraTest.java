@@ -82,6 +82,8 @@ public class SwabraTest extends TestCase {
       {
         allowing(conf).getCacheDirectory(with(Swabra.CACHE_KEY));
         will(returnValue(cachesDir));
+        allowing(conf).getWorkDirectory();
+        will(returnValue(cachesDir));
       }
     });
     return conf;

@@ -20,8 +20,11 @@ import jetbrains.buildServer.util.FileUtil;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.*;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.CountDownLatch;
 
 /**
  * User: vbedrosova
@@ -43,13 +46,16 @@ public final class SwabraPropertiesProcessor {
   @NotNull
   private final File myPropertiesFile;
 
+  private final CountDownLatch myCleanupFinishedSignal;
+
   public static String unifyPath(@NotNull File dir) {
-    return dir.getAbsolutePath().replace("/", File.separator).replace("\\", File.separator);
+    return dir.getAbsolutePath().replace("\\", "/");
   }
 
   public SwabraPropertiesProcessor(@NotNull File tempDir, @NotNull SwabraLogger logger) {
     myPropertiesFile = new File(tempDir, FILE_NAME);
     myLogger = logger;
+    myCleanupFinishedSignal = new CountDownLatch(1);
   }
 
   public void markDirty(@NotNull File dir) {
@@ -89,6 +95,15 @@ public final class SwabraPropertiesProcessor {
   }
 
   public void readProperties() {
+    try {
+      myCleanupFinishedSignal.await();
+    } catch (InterruptedException e) {
+      myLogger.swabraError("Thread interrupted");
+    }
+    readPropertiesNoAwait();
+  }
+
+  private void readPropertiesNoAwait() {
     myProperties = new HashMap<String, String>();
     if (!myPropertiesFile.isFile()) {
       myLogger.swabraMessage("Couldn't read checkout directories states from " + myPropertiesFile.getAbsolutePath() + ", no file present", false);
@@ -148,5 +163,35 @@ public final class SwabraPropertiesProcessor {
         }
       }
     }
+  }
+
+  public void cleanupProperties(final File[] actualCheckoutDirs) {
+    if (actualCheckoutDirs == null || actualCheckoutDirs.length == 0) {
+      return;
+    }
+    new Thread(new Runnable() {
+      public void run() {
+        try {
+          readPropertiesNoAwait();
+          final Set<String> savedCheckoutDirs = myProperties.keySet();
+          if (savedCheckoutDirs.isEmpty()) {
+            return;
+          }
+          final ArrayList<String> toRemove = new ArrayList<String>(savedCheckoutDirs);
+          for (File dir : actualCheckoutDirs) {
+            if (!dir.isDirectory()) {
+              continue;
+            }
+            toRemove.remove(unifyPath(dir));
+          }
+          for (String s : toRemove) {
+            myProperties.remove(s);
+          }
+          writeProperties();
+        } finally {
+          myCleanupFinishedSignal.countDown();
+        }
+      }
+    }).start();
   }
 }
