@@ -50,12 +50,11 @@
 
           <table class="runnerFormTable">
             <c:if test="${not canDownload}">
-              <tr class="noBorder">
+              <tr>
                 <td colspan="2">
-                      <span class="error">
-                        You don't have enough permissions to download Handle.zip.
-                        Please contact your administrator.
-                      </span>
+                  <div class="attentionComment">
+                    <font color="red">You don't have enough permissions to download Handle.zip. Please contact your administrator.</font>
+                  </div>
                 </td>
               </tr>
             </c:if>
