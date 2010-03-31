@@ -24,40 +24,39 @@
 </c:choose>
 
 <c:choose>
-    <c:when test="${not empty propertiesBean.properties['swabra.mode']}">
-      <div class="parameter">
-        Strict mode:
-        <c:choose>
-          <c:when test="${propertiesBean.properties['swabra.strict']}">
-            <strong>enabled</strong>
-          </c:when>
-          <c:otherwise>
-            <strong>disabled</strong>
-          </c:otherwise>
-        </c:choose>
-      </div>
-    </c:when>
+  <c:when test="${not empty propertiesBean.properties['swabra.mode']}">
+    <div class="parameter">
+      Strict mode:
+      <c:choose>
+        <c:when test="${propertiesBean.properties['swabra.strict']}">
+          <strong>enabled</strong>
+        </c:when>
+        <c:otherwise>
+          <strong>disabled</strong>
+        </c:otherwise>
+      </c:choose>
+    </div>
+  </c:when>
 </c:choose>
-
 
 
 <c:choose>
   <c:when test="${not empty propertiesBean.properties['swabra.locking.processes']}">
     <div class="parameter">
       Locking processes detection:
-      <strong>enabled</strong>      
+      <strong>enabled</strong>
     </div>
-    <div class="parameter">
-      Handle.exe path:
-      <c:choose>
-        <c:when test="${empty propertiesBean.properties['swabra.process.analizer']}">
-          <strong>none specified</strong>
-        </c:when>
-        <c:otherwise>
-          <strong>${propertiesBean.properties['swabra.process.analizer']}</strong>
-        </c:otherwise>
-      </c:choose>
-    </div>
+    <%--<div class="parameter">--%>
+    <%--Handle.exe path:--%>
+    <%--<c:choose>--%>
+    <%--<c:when test="${empty propertiesBean.properties['swabra.process.analizer']}">--%>
+    <%--<strong>none specified</strong>--%>
+    <%--</c:when>--%>
+    <%--<c:otherwise>--%>
+    <%--<strong>${propertiesBean.properties['swabra.process.analizer']}</strong>--%>
+    <%--</c:otherwise>--%>
+    <%--</c:choose>--%>
+    <%--</div>--%>
   </c:when>
   <c:otherwise>
     <div class="parameter">
