@@ -87,6 +87,27 @@
     </td>
   </tr>
 
+  <tr class="noBorder" id="swabra.kill.container"
+      style="${displaySwabraSettings ? '' : 'display: none;'}">
+    <th>Locking processes kill:</th>
+    <td>
+      <c:set var="onclick">
+        if (this.checked) {
+        BS.Util.show($('swabra.download.handle.container'));
+        } else {
+        BS.Util.hide($('swabra.download.handle.container'));
+        }
+        BS.MultilineProperties.updateVisible();
+      </c:set>
+      <props:checkboxProperty name="swabra.kill" onclick="${onclick}"/>
+      <label for="swabra.kill">Kill file locking processes on Windows agents</label>
+            <span class="smallNote">
+              When Swabra comes across a newly created file which is locked it tries to kill the locking process.
+              Note that handle.exe is required on agents.
+            </span>
+    </td>
+  </tr>
+
   <tr class="noBorder" id="swabra.strict.container"
       style="${displaySwabraSettings ? '' : 'display: none;'}">
     <th>Strict mode:</th>
@@ -112,6 +133,10 @@
       </c:set>
       <props:checkboxProperty name="swabra.locking.processes" onclick="${onclick}"/>
       <label for="swabra.locking.processes">Determine file locking processes on Windows agents</label>
+      <span class="smallNote">
+        At the end of the build the checkout directory is checked for locking processes. The checking results are present in the build log.
+        Note that handle.exe is required on agents.
+      </span>
     </td>
   </tr>
 

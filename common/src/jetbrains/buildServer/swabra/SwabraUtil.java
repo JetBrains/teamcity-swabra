@@ -32,6 +32,7 @@ public class SwabraUtil {
   public static final String VERBOSE = "swabra.verbose";
   public static final String LOCKING_PROCESS_DETECTION = "swabra.locking.processes";
 
+  public static final String KILL = "swabra.kill";
   public static final String STRICT = "swabra.strict";
 
   public static final String AFTER_BUILD = "swabra.after.build";
@@ -64,11 +65,15 @@ public class SwabraUtil {
     return params.containsKey(VERBOSE) && isSwabraEnabled(params);
   }
 
+  public static boolean isKill(@NotNull final Map<String, String> params) {
+    return params.containsKey(KILL) && isSwabraEnabled(params);
+  }
+
   public static boolean isStrict(@NotNull final Map<String, String> params) {
     return params.containsKey(STRICT) && isSwabraEnabled(params);
   }
 
-  public static boolean isLockingProcessesDetectionEnabled(@NotNull final Map<String, String> params) {
+  public static boolean isLockingProcessesDetection(@NotNull final Map<String, String> params) {
     return SystemInfo.isWindows && params.containsKey(LOCKING_PROCESS_DETECTION);
   }
 

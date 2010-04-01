@@ -67,6 +67,7 @@ public final class Swabra extends AgentLifeCycleAdapter {
 
   private Map<File, Thread> myPrevThreads = new HashMap<File, Thread>();
   private String myHandlePath;
+  private boolean myLockingProcessesDetection;
 
   private static boolean isEnabled(final String mode) {
     return BEFORE_BUILD.equals(mode) || AFTER_BUILD.equals(mode);
@@ -103,15 +104,17 @@ public final class Swabra extends AgentLifeCycleAdapter {
     myMode = getSwabraMode(runnerParams);
     final boolean verbose = isVerbose(runnerParams);
     final boolean strict = isStrict(runnerParams);
+    final boolean kill = isKill(runnerParams);
+    myLockingProcessesDetection = isLockingProcessesDetection(runnerParams);
 
-    final boolean lockingProcessesDetectionEnabled = isLockingProcessesDetectionEnabled(runnerParams);
-    if (lockingProcessesDetectionEnabled) {
+    if (kill || myLockingProcessesDetection) {
       prepareHandle();
     } else {
       myHandlePath = null;
     }
 
-    logSettings(myMode, myCheckoutDir.getAbsolutePath(), strict, lockingProcessesDetectionEnabled, myHandlePath, verbose);
+    logSettings(myMode, myCheckoutDir.getAbsolutePath(),
+      kill, strict, myLockingProcessesDetection, myHandlePath, verbose);
 
     myPropertiesProcessor.readProperties();
 
@@ -121,7 +124,7 @@ public final class Swabra extends AgentLifeCycleAdapter {
       return;
     }
 
-    myFilesCollector = initFilesCollector(buildLogger, verbose, strict);
+    myFilesCollector = initFilesCollector(buildLogger, verbose, kill);
 
     final File snapshot;
     try {
@@ -159,14 +162,14 @@ public final class Swabra extends AgentLifeCycleAdapter {
     }
   }
 
-  private FilesCollector initFilesCollector(BuildProgressLogger buildLogger, boolean verbose, boolean strict) {
+  private FilesCollector initFilesCollector(BuildProgressLogger buildLogger, boolean verbose, boolean kill) {
     final LockedFileResolver lockedFileResolver =
       (myHandlePath == null) ?
         null : new LockedFileResolver(new HandlePidsProvider(myHandlePath, buildLogger), /*myProcessTerminator,*/ buildLogger);
 
     final FilesCollectionProcessor processor = (System.getProperty(TEST_LOG) == null) ?
-      new FilesCollectionProcessor(myLogger, lockedFileResolver, verbose, strict) :
-      new FilesCollectionProcessorForTests(myLogger, lockedFileResolver, verbose, strict, System.getProperty(TEST_LOG));
+      new FilesCollectionProcessor(myLogger, lockedFileResolver, verbose, kill) :
+      new FilesCollectionProcessorForTests(myLogger, lockedFileResolver, verbose, kill, System.getProperty(TEST_LOG));
 
     return new FilesCollector(processor, myLogger);
   }
@@ -197,7 +200,7 @@ public final class Swabra extends AgentLifeCycleAdapter {
 
   @Override
   public void beforeBuildFinish(@NotNull final BuildFinishedStatus buildStatus) {
-    if (myHandlePath != null) {
+    if (myLockingProcessesDetection) {
       ProcessExecutor.runHandleAcceptEula(myHandlePath, myCheckoutDir.getAbsolutePath(), myLogger.getBuildLogger());
     }
     if (AFTER_BUILD.equals(myMode)) {
@@ -237,9 +240,13 @@ public final class Swabra extends AgentLifeCycleAdapter {
     return new File(myTempDir, myPropertiesProcessor.getSnapshot(myCheckoutDir) + SNAPSHOT_SUFFIX);
   }
 
-  private void logSettings(String mode, String checkoutDir, boolean strict, boolean lockingProcessesDetectionEnabled, String handlePath, boolean verbose) {
+  private void logSettings(String mode, String checkoutDir,
+                           boolean kill, boolean strict,
+                           boolean lockingProcessesDetectionEnabled,
+                           String handlePath, boolean verbose) {
     myLogger.debug("Swabra settings: mode = '" + mode +
       "', checkoutDir = " + checkoutDir +
+      "', kill = " + kill +
       "', strict = " + strict +
       "', locking processes detection = " + lockingProcessesDetectionEnabled +
       "', handle path = " + handlePath +
