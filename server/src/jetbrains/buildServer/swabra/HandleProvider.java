@@ -40,7 +40,7 @@ public class HandleProvider {
 
     final File pluginTempFolder = preparePluginFolder();
     try {
-      final File pluginAgentTempFolder = prepareSubFolder(pluginTempFolder, "handle-plugin");
+      final File pluginAgentTempFolder = prepareSubFolder(pluginTempFolder, "handle-provider");
       try {
         final File binFolder = prepareSubFolder(pluginAgentTempFolder, "bin");
         final File handleZip = downloadHandleZip(url);
