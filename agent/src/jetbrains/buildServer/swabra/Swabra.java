@@ -253,7 +253,7 @@ public final class Swabra extends AgentLifeCycleAdapter {
       try {
         t.join();
       } catch (InterruptedException e) {
-        myLogger.swabraError("Interrupted while waiting for previous build files cleanup");
+        myLogger.swabraWarn("Interrupted while waiting for previous build files cleanup");
         myLogger.exception(e, true);
       }
     }

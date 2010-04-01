@@ -61,11 +61,12 @@ public class SnapshotGenerator {
     if (snapshot.exists()) {
       myLogger.swabraDebug("Snapshot file " + snapshot.getAbsolutePath() + " exists, try deleting");
       if (!FileUtil.delete(snapshot)) {
-        myLogger.swabraError("Unable to delete " + snapshot.getAbsolutePath());
+        myLogger.swabraWarn("Unable to delete " + snapshot.getAbsolutePath());
         return false;
       }
     }
-    myLogger.swabraMessage("Saving state of checkout directory " + myCheckoutDir +
+    myLogger.activityStarted();
+    myLogger.message("Saving state of checkout directory " + myCheckoutDir +
       " to snapshot file " + snapshot.getAbsolutePath(), true);
 
     BufferedWriter writer = null;
@@ -75,9 +76,9 @@ public class SnapshotGenerator {
 
       iterateAndBuildSnapshot(writer);
 
-      myLogger.swabraMessage("Finished saving state of checkout directory " + myCheckoutDir + " to snapshot file " + snapshot.getAbsolutePath(), false);
+      myLogger.message("Finished saving state of checkout directory " + myCheckoutDir + " to snapshot file " + snapshot.getAbsolutePath(), false);
     } catch (Exception e) {
-      myLogger.swabraError("Unable to save snapshot of checkout directory '" + myCheckoutDir.getAbsolutePath()
+      myLogger.warn("Unable to save snapshot of checkout directory '" + myCheckoutDir.getAbsolutePath()
         + "' to file " + snapshot.getAbsolutePath());
       myLogger.exception(e, true);
       return false;
@@ -89,6 +90,8 @@ public class SnapshotGenerator {
       } catch (IOException e) {
         myLogger.exception(e, true);
         return false;
+      } finally {
+        myLogger.activityFinished();
       }
     }
     return true;
