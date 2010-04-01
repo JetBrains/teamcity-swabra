@@ -5,6 +5,7 @@
 
 <jsp:useBean id="propertiesBean" scope="request" type="jetbrains.buildServer.controllers.BasePropertiesBean"/>
 <jsp:useBean id="swabraModes" scope="request" class="jetbrains.buildServer.swabra.SwabraModes"/>
+<%--<jsp:useBean id="handlePresent" type="java.lang.Boolean" scope="request"/>--%>
 
 <c:set var="displaySwabraSettings"
        value="${not empty propertiesBean.properties['swabra.mode'] ? true : false}"/>
@@ -111,17 +112,19 @@
     </td>
   </tr>
 
+  <%--<c:if test="${handlePresent}">--%>
   <tr class="noBorder" id="swabra.process.analizer.container"
       style="${displayLockingProcessesSettings ? '' : 'display: none;'}">
     <th>
     </th>
     <td>
       <a href="/handle.html"
-         showdiscardchangesmessage="false"
+         showdiscardchangesmessage="true"
          target="_blank"
          title="Download Handle executable for locking processes detection">Download handle.exe</a>
     </td>
   </tr>
+  <%--</c:if>--%>
 
   <tr class="noBorder" id="swabra.verbose.container"
       style="${displayBeforeBuildSwabraSettings ? '' : 'display: none;'}">
