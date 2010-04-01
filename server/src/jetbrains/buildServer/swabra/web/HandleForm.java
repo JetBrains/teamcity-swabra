@@ -17,7 +17,7 @@ import java.util.List;
 public class HandleForm {
   private String myUrl = "http://download.sysinternals.com/Files/Handle.zip";
   private boolean myRunning = false;
-  private List<String> myMessages = new ArrayList<String>();
+  private List<String> myDownloadHandleMessages = new ArrayList<String>();
   private final CameFromSupport myCameFromSupport = new CameFromSupport();
 
   private int myErrors = 0;
@@ -39,12 +39,12 @@ public class HandleForm {
     myRunning = running;
   }
 
-  public List<String> getMessages() {
-    return myMessages;
+  public List<String> getDownloadHandleMessages() {
+    return myDownloadHandleMessages;
   }
 
   public void clearMessages() {
-    myMessages.clear();
+    myDownloadHandleMessages.clear();
     myErrors = 0;
   }
 
@@ -69,7 +69,7 @@ public class HandleForm {
       finalText = "<span " + errorId + " class='" + className + "'>" + escapedText + "</span>";
     }
 
-    myMessages.add(timestamp() + finalText);
+    myDownloadHandleMessages.add(timestamp() + finalText);
   }
 
   private String timestamp() {

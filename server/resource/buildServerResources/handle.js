@@ -22,7 +22,7 @@ BS.HandleForm = OO.extend(BS.AbstractWebForm, {
     var that = this;
 
     window.setTimeout(function() {
-      $('handleProgress').refresh();
+      $('downloadHandleMessages').refresh();
     }, 200);
 
     BS.FormSaver.save(this, this.formElement().action, OO.extend(BS.HandleListener, {

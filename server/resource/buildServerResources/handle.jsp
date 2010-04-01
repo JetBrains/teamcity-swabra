@@ -99,23 +99,18 @@
           </div>
         </form>
 
-        <bs:refreshable containerId="handleProgress" pageUrl="${pageUrl}">
-          <div class="handleLog">
-            <c:forEach items="${handleForm.messages}" var="message">
+        <bs:refreshable containerId="downloadHandleMessages" pageUrl="${pageUrl}">
+          <div class="downloadHandleMessagesLog">
+            <c:forEach items="${handleForm.downloadHandleMessages}" var="message">
               ${message}<br/>
             </c:forEach>
           </div>
           <script type="text/javascript">
-            <c:choose>
-            <c:when test="${handleForm.running}">
+            <c:if test="${handleForm.running}">
             window.setTimeout(function() {
-              $('handleProgress').refresh()
+              $('downloadHandleMessages').refresh()
             }, 200);
-            </c:when>
-            <c:otherwise>
-            $('handleProgress').refresh();
-            </c:otherwise>
-            </c:choose>
+            </c:if>
           </script>
         </bs:refreshable>
 
