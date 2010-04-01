@@ -62,14 +62,16 @@ public class HandleController extends BaseFormXmlController {
 
     model.put("handleForm", getForm(request));
     model.put("handlePathPrefix", request.getContextPath() + myPluginDescriptor.getPluginResourcesPath());
-    model.put("canDownload", AuthUtil.hasGlobalPermission(mySecurityContext.getAuthorityHolder(), Permission.AUTHORIZE_AGENT));
-//    model.put("canDownload", false);
+    model.put("canDownload", hasPermission());
 
     return new ModelAndView(myPluginDescriptor.getPluginResourcesPath(MY_JSP), model);
   }
 
   @Override
   protected void doPost(HttpServletRequest request, HttpServletResponse response, Element xmlResponse) {
+    if (!hasPermission()) {
+      return;
+    }
     final HandleForm form = getForm(request);
     form.clearMessages();
     FormUtil.bindFromRequest(request, form);
@@ -89,6 +91,10 @@ public class HandleController extends BaseFormXmlController {
     } else {
       writeErrors(xmlResponse, errors);
     }
+  }
+
+  private boolean hasPermission() {
+    return AuthUtil.hasGlobalPermission(mySecurityContext.getAuthorityHolder(), Permission.AUTHORIZE_AGENT);
   }
 
   static HandleForm getForm(HttpServletRequest request) {
