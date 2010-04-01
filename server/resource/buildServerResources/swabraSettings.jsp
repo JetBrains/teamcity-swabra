@@ -5,7 +5,10 @@
 
 <jsp:useBean id="propertiesBean" scope="request" type="jetbrains.buildServer.controllers.BasePropertiesBean"/>
 <jsp:useBean id="swabraModes" scope="request" class="jetbrains.buildServer.swabra.SwabraModes"/>
-<%--<jsp:useBean id="handlePresent" type="java.lang.Boolean" scope="request"/>--%>
+
+<%@ page import="jetbrains.buildServer.swabra.HandleProvider" %>
+<c:set var="handlePresent"><%=HandleProvider.isHandlePresent()%>
+</c:set>
 
 <c:set var="displaySwabraSettings"
        value="${not empty propertiesBean.properties['swabra.mode'] ? true : false}"/>
@@ -101,9 +104,9 @@
     <td>
       <c:set var="onclick">
         if (this.checked) {
-        BS.Util.show($('swabra.process.analizer.container'));
+        BS.Util.show($('swabra.download.handle.container'));
         } else {
-        BS.Util.hide($('swabra.process.analizer.container'));
+        BS.Util.hide($('swabra.download.handle.container'));
         }
         BS.MultilineProperties.updateVisible();
       </c:set>
@@ -112,19 +115,19 @@
     </td>
   </tr>
 
-  <%--<c:if test="${handlePresent}">--%>
-  <tr class="noBorder" id="swabra.process.analizer.container"
-      style="${displayLockingProcessesSettings ? '' : 'display: none;'}">
-    <th>
-    </th>
-    <td>
-      <a href="/handle.html"
-         showdiscardchangesmessage="true"
-         target="_blank"
-         title="Download Handle executable for locking processes detection">Download handle.exe</a>
-    </td>
-  </tr>
-  <%--</c:if>--%>
+  <c:if test="${not handlePresent}">
+    <tr class="noBorder" id="swabra.download.handle.container"
+        style="${displayLockingProcessesSettings ? '' : 'display: none;'}">
+      <th>
+      </th>
+      <td>
+        <a href="/handle.html"
+           showdiscardchangesmessage="true"
+           target="_blank"
+           title="Download Handle executable for locking processes detection">Download handle.exe</a>
+      </td>
+    </tr>
+  </c:if>
 
   <tr class="noBorder" id="swabra.verbose.container"
       style="${displayBeforeBuildSwabraSettings ? '' : 'display: none;'}">

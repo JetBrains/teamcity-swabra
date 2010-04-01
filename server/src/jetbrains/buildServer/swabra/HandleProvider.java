@@ -2,7 +2,6 @@ package jetbrains.buildServer.swabra;
 
 
 import com.intellij.util.io.ZipUtil;
-import jetbrains.buildServer.serverSide.ServerPaths;
 import jetbrains.buildServer.util.FileUtil;
 import org.apache.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
@@ -21,15 +20,18 @@ public class HandleProvider {
   public static final String HANDLE_PROVIDER_JAR = "handle-provider.jar";
   public static final String TEAMCITY_PLUGIN_XML = "teamcity-plugin.xml";
 
-  @NotNull
-  private final File myPluginFolder;
+  private static File myPluginFolder;
 
-  public HandleProvider(@NotNull ServerPaths serverPaths) {
-    myPluginFolder = new File(serverPaths.getPluginsDir(), "/handle-provider");
+  public static void initPluginFolder(@NotNull String pluginsDir) {
+    myPluginFolder = new File(pluginsDir, "/handle-provider");
   }
 
-  public boolean isHandlePresent() {
-    return myPluginFolder.isDirectory();
+  public static boolean isHandlePresent() {
+    if (myPluginFolder == null) {
+      return false;
+    }
+    final File[] files = myPluginFolder.listFiles();
+    return files != null && files.length > 0;
   }
 
   public void downloadAndExtract(@NotNull String url) throws Throwable {

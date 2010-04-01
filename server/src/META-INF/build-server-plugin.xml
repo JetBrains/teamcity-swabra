@@ -23,7 +23,27 @@
       </list>
     </property>
   </bean>
+
   <bean class="jetbrains.buildServer.swabra.web.HandleController" init-method="register"/>
+
   <bean class="jetbrains.buildServer.swabra.HandleProvider"/>
 
+  <bean id="serverPluginsFolder" class="org.springframework.beans.factory.config.MethodInvokingFactoryBean">
+    <property name="targetObject">
+      <ref bean="serverPaths"/>
+    </property>
+    <property name="targetMethod">
+      <value>getPluginsDir</value>
+    </property>
+  </bean>
+
+  <bean id="setSwabraPluginsFolder" class="org.springframework.beans.factory.config.MethodInvokingFactoryBean">
+    <property name="staticMethod"
+              value="jetbrains.buildServer.swabra.HandleProvider.initPluginFolder"/>
+    <property name="arguments">
+      <list>
+        <ref local="serverPluginsFolder"/>
+      </list>
+    </property>
+  </bean>
 </beans>
