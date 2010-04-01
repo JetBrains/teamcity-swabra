@@ -80,24 +80,24 @@
               </td>
             </l:settingsGroup>
           </table>
-        </form>
 
-      <div class="saveButtonsBlock">
-        <forms:cancel cameFromSupport="${handleForm.cameFromSupport}"/>
-        <c:choose>
-          <c:when test="${not canDownload}">
-            <input class="submitButton" type="submit"
-                   name="submitButton" value="Download" disabled="true"/>
-          </c:when>
-          <c:otherwise>
-            <input class="submitButton" type="submit"
-                   name="submitButton" value="Download"/>
-          </c:otherwise>
-        </c:choose>
-        <forms:saving/>
-        <input type="hidden" id="submit" name="submit"/>
-        <br clear="all"/>
-      </div>
+          <div class="saveButtonsBlock">
+            <forms:cancel cameFromSupport="${handleForm.cameFromSupport}"/>
+            <c:choose>
+              <c:when test="${not canDownload}">
+                <input class="submitButton" type="submit"
+                       name="submitButton" value="Download" disabled="true"/>
+              </c:when>
+              <c:otherwise>
+                <input class="submitButton" type="submit"
+                       name="submitButton" value="Download"/>
+              </c:otherwise>
+            </c:choose>
+            <forms:saving/>
+            <input type="hidden" id="submit" name="submit"/>
+            <br clear="all"/>
+          </div>
+        </form>
 
         <bs:refreshable containerId="handleProgress" pageUrl="${pageUrl}">
           <div class="handleLog">
