@@ -90,6 +90,17 @@
     </td>
   </tr>
 
+  <tr class="noBorder" id="swabra.strict.container"
+      style="${displaySwabraSettings ? '' : 'display: none;'}">
+    <th>Strict mode:</th>
+    <td>
+      <props:checkboxProperty name="swabra.strict"/>
+      <label for="swabra.strict">Turn on strict mode</label>
+            <span class="smallNote">
+              Ensure the checkout directory corresponds to the sources in the repository, otherwise perform clean checkout.            </span>
+    </td>
+  </tr>
+
   <tr class="noBorder" id="swabra.kill.container"
       style="${displaySwabraSettings ? '' : 'display: none;'}">
     <th>Locking processes kill:</th>
@@ -108,17 +119,6 @@
               When Swabra comes across a newly created file which is locked it tries to kill the locking process.
               Note that handle.exe is required on agents.
             </span>
-    </td>
-  </tr>
-
-  <tr class="noBorder" id="swabra.strict.container"
-      style="${displaySwabraSettings ? '' : 'display: none;'}">
-    <th>Strict mode:</th>
-    <td>
-      <props:checkboxProperty name="swabra.strict"/>
-      <label for="swabra.strict">Turn on strict mode</label>
-            <span class="smallNote">
-              Ensure the checkout directory corresponds to the sources in the repository, otherwise perform clean checkout.            </span>
     </td>
   </tr>
 
