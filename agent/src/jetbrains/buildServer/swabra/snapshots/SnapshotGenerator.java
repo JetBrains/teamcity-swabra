@@ -80,7 +80,7 @@ public class SnapshotGenerator {
     } catch (Exception e) {
       myLogger.warn("Unable to save snapshot of checkout directory '" + myCheckoutDir.getAbsolutePath()
         + "' to file " + snapshot.getAbsolutePath());
-      myLogger.exception(e, true);
+      myLogger.exception(e);
       return false;
     } finally {
       try {
@@ -88,7 +88,7 @@ public class SnapshotGenerator {
           writer.close();
         }
       } catch (IOException e) {
-        myLogger.exception(e, true);
+        myLogger.exception(e);
         return false;
       } finally {
         myLogger.activityFinished();

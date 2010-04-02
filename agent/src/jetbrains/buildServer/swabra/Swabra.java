@@ -110,13 +110,13 @@ public final class Swabra extends AgentLifeCycleAdapter {
     logSettings(myMode, myCheckoutDir.getAbsolutePath(),
       kill, strict, myLockingProcessesDetection, verbose);
 
-    myPropertiesProcessor.readProperties();
-
     if (kill || myLockingProcessesDetection) {
       prepareHandle();
     } else {
       myHandlePath = null;
     }
+
+    myPropertiesProcessor.readProperties();
 
     if (!isEnabled(myMode)) {
       myLogger.message("Swabra is disabled", false);
@@ -270,7 +270,6 @@ public final class Swabra extends AgentLifeCycleAdapter {
         t.join();
       } catch (InterruptedException e) {
         myLogger.swabraWarn("Interrupted while waiting for previous build files cleanup");
-        myLogger.exception(e, true);
       }
     }
     myPrevThreads.remove(checkoutDir);

@@ -59,7 +59,12 @@ public final class SwabraPropertiesProcessor {
   }
 
   public void markDirty(@NotNull File dir) {
-    myLogger.swabraDebug("Marking " + dir.getAbsolutePath() + " as dirty");
+    final String path = dir.getAbsolutePath();
+    final String state = myProperties.get(path);
+    if (state == null || DIRTY.equals(state)) {
+      return;
+    }
+    myLogger.swabraDebug("Marking " + path + " as dirty");
     myProperties.put(unifyPath(dir), DIRTY);
     writeProperties();
   }
@@ -124,14 +129,14 @@ public final class SwabraPropertiesProcessor {
       }
     } catch (IOException e) {
       myLogger.swabraWarn("Error reading checkout directories states from " + myPropertiesFile.getAbsolutePath());
-      myLogger.exception(e, true);
+      myLogger.exception(e);
     } finally {
       if (reader != null) {
         try {
           reader.close();
         } catch (IOException e) {
           myLogger.swabraWarn("Error closing checkout directories states file " + myPropertiesFile.getAbsolutePath());
-          myLogger.exception(e, true);
+          myLogger.exception(e);
         }
       }
       if (!FileUtil.delete(myPropertiesFile)) {
@@ -152,14 +157,14 @@ public final class SwabraPropertiesProcessor {
       }
     } catch (IOException e) {
       myLogger.swabraWarn("Error saving checkout directories states to " + myPropertiesFile.getAbsolutePath());
-      myLogger.exception(e, true);
+      myLogger.exception(e);
     } finally {
       if (writer != null) {
         try {
           writer.close();
         } catch (IOException e) {
           myLogger.swabraWarn("Error closing checkout directories states file " + myPropertiesFile.getAbsolutePath());
-          myLogger.exception(e, true);
+          myLogger.exception(e);
         }
       }
     }

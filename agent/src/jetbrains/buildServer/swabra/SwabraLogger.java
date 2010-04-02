@@ -82,23 +82,12 @@ public final class SwabraLogger {
     }
   }
 
-  public void swabraError(@NotNull String message) {
-    message = prepareMessage(message);
-    myClassLogger.error(message);
-    if (myBuildLogger != null) {
-      myBuildLogger.error(message);
-    }
-  }
-
   public void swabraDebug(@NotNull String message) {
     myClassLogger.debug(prepareMessage(message));
   }
 
-  public void exception(@NotNull Throwable e, boolean useBuildLog) {
+  public void exception(@NotNull Throwable e) {
     myClassLogger.warn(e.getMessage(), e);
-    if (useBuildLog && myBuildLogger != null) {
-      myBuildLogger.exception(e);
-    }
   }
 
   public void activityStarted() {
