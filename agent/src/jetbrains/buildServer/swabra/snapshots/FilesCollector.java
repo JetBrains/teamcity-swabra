@@ -83,10 +83,11 @@ public class FilesCollector {
 
     final FilesCollectionProcessor.Results results = myProcessor.getResults();
 
-    final String message = results.detectedNewAndDeleted + " object(s) deleted, "
-      + (results.detectedNewAndUnableToDelete == 0 ? "" : "unable to delete " + results.detectedNewAndUnableToDelete + " object(s), ")
-      + results.detectedModified + " object(s) detected modified, "
-      + results.detectedDeleted + " object(s) detected deleted";
+    final int detectedNew = results.detectedNewAndDeleted + results.detectedNewAndUnableToDelete;
+    final String message = "Detected " + detectedNew + " newly created " + geObjectsNumber(detectedNew) +
+      (detectedNew > 0 ? " (" + results.detectedNewAndDeleted + " of them deleted)" : "") +
+      ", " + results.detectedModified + " modified " + geObjectsNumber(results.detectedModified) +
+      ", " + results.detectedDeleted + " deleted " + geObjectsNumber(results.detectedDeleted);
 
     try {
       if (results.detectedNewAndUnableToDelete != 0) {
@@ -104,6 +105,10 @@ public class FilesCollector {
     } finally {
       myLogger.activityFinished();
     }
+  }
+
+  private String geObjectsNumber(int number) {
+    return number == 1 ? "object" : "objects";
   }
 
   private void removeSnapshot(File snapshot, File checkoutDir) {
