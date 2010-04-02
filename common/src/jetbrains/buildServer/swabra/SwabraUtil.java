@@ -66,7 +66,7 @@ public class SwabraUtil {
   }
 
   public static boolean isKill(@NotNull final Map<String, String> params) {
-    return params.containsKey(KILL) && isSwabraEnabled(params);
+    return SystemInfo.isWindows && params.containsKey(KILL) && isSwabraEnabled(params);
   }
 
   public static boolean isStrict(@NotNull final Map<String, String> params) {
