@@ -32,6 +32,7 @@
         if (selectedValue == 'swabra.before.build') {
         BS.Util.show($('swabra.verbose.container'));
         BS.Util.show($('swabra.strict.container'));
+        BS.Util.show($('swabra.kill.container'));
 
         BS.Util.hide($('swabra.mode.note'));
         BS.Util.show($('swabra.before.build.mode.note'));
@@ -41,6 +42,7 @@
         if (selectedValue == 'swabra.after.build') {
         BS.Util.hide($('swabra.verbose.container'));
         BS.Util.show($('swabra.strict.container'));
+        BS.Util.show($('swabra.kill.container'));
 
         BS.Util.hide($('swabra.mode.note'));
         BS.Util.hide($('swabra.before.build.mode.note'));
@@ -48,6 +50,7 @@
         } else {
         BS.Util.hide($('swabra.verbose.container'));
         BS.Util.hide($('swabra.strict.container'));
+        BS.Util.hide($('swabra.kill.container'));
 
         BS.Util.show($('swabra.mode.note'));
         BS.Util.hide($('swabra.before.build.mode.note'));
