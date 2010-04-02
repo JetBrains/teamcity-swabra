@@ -83,10 +83,6 @@ public class FilesCollector {
 
     final FilesCollectionProcessor.Results results = myProcessor.getResults();
 
-    if (results.detectedNewAndUnableToDelete == 0) {
-      removeSnapshot(snapshot, checkoutDir);
-    }
-
     final String message = results.detectedNewAndDeleted + " object(s) deleted, "
       + (results.detectedNewAndUnableToDelete == 0 ? "" : "unable to delete " + results.detectedNewAndUnableToDelete + " object(s), ")
       + results.detectedModified + " object(s) detected modified, "
@@ -96,6 +92,8 @@ public class FilesCollector {
       if (results.detectedNewAndUnableToDelete != 0) {
         myLogger.warn(message);
         return CollectionResult.RETRY;
+      } else {
+        removeSnapshot(snapshot, checkoutDir);
       }
       if (results.detectedDeleted > 0 || results.detectedModified > 0) {
         myLogger.warn(message);
