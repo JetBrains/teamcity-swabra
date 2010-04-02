@@ -97,7 +97,7 @@
       <props:checkboxProperty name="swabra.strict"/>
       <label for="swabra.strict">Turn on strict mode</label>
             <span class="smallNote">
-              Ensure the checkout directory corresponds to the sources in the repository, otherwise perform clean checkout.            </span>
+              Ensure that at the build start the checkout directory corresponds to the sources in the repository, otherwise perform clean checkout.</span>
     </td>
   </tr>
 
