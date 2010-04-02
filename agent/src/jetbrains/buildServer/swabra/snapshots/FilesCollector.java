@@ -34,7 +34,24 @@ public class FilesCollector {
   private static final String NOT_DELETE_SNAPSHOT = "swabra.preserve.snapshot";
 
   public static enum CollectionResult {
-    SUCCESS, FAILURE, RETRY
+    SUCCESS {
+      @Override
+      public String toString() {
+        return "SUCCESS";
+      }
+    },
+    FAILURE {
+      @Override
+      public String toString() {
+        return "FAILURE";
+      }
+    },
+    RETRY {
+      @Override
+      public String toString() {
+        return "RETRY";
+      }
+    }
   }
 
   @NotNull
@@ -76,13 +93,13 @@ public class FilesCollector {
       + results.detectedDeleted + " object(s) detected deleted";
 
     try {
-      if (results.detectedDeleted > 0) {
-        myLogger.warn(message);
-        return CollectionResult.FAILURE;
-      }
       if (results.detectedNewAndUnableToDelete != 0) {
         myLogger.warn(message);
         return CollectionResult.RETRY;
+      }
+      if (results.detectedDeleted > 0 || results.detectedModified > 0) {
+        myLogger.warn(message);
+        return CollectionResult.FAILURE;
       }
       myLogger.message(message, true);
       return CollectionResult.SUCCESS;

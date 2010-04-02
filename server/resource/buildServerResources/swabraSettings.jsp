@@ -118,8 +118,7 @@
       <props:checkboxProperty name="swabra.strict"/>
       <label for="swabra.strict">Turn on strict mode</label>
             <span class="smallNote">
-                  Fail build if at build start in the checkout directory there are any files newly created during previous build which Swabra couldn't delete.
-            </span>
+              Ensure the checkout directory corresponds to the sources in the repository, otherwise perform clean checkout.            </span>
     </td>
   </tr>
 
