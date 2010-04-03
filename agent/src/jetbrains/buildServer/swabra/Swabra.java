@@ -188,7 +188,6 @@ public final class Swabra extends AgentLifeCycleAdapter {
 
   @Override
   public void beforeBuildFinish(@NotNull final BuildFinishedStatus buildStatus) {
-    if (!isEnabled(myMode)) return;
     myLogger.activityStarted();
     try {
       if (myLockingProcessesDetection) {
