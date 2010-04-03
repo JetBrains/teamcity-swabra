@@ -22,6 +22,7 @@ import jetbrains.buildServer.processes.ProcessTreeTerminator;
 import jetbrains.buildServer.util.FileUtil;
 import org.apache.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.io.File;
 import java.util.List;
@@ -43,11 +44,17 @@ public class LockedFileResolver {
 
   @NotNull
   private final LockingPidsProvider myPidsProvider;
+//  @NotNull
+//  private final ProcessTerminator myProcessTerminator;
 
+  @Nullable
   private final SimpleBuildLogger myLogger;
 
-  public LockedFileResolver(@NotNull LockingPidsProvider pidsProvider, SimpleBuildLogger logger) {
+  public LockedFileResolver(@NotNull LockingPidsProvider pidsProvider,
+                            /*@NotNull ProcessTerminator processTerminator,*/
+                            @Nullable SimpleBuildLogger logger) {
     myPidsProvider = pidsProvider;
+//    myProcessTerminator = processTerminator;
     myLogger = logger;
   }
 
@@ -65,7 +72,7 @@ public class LockedFileResolver {
     final List<Long> pids = myPidsProvider.getPids(f);
 
     if (pids.isEmpty()) {
-      warn("Found no locking processes for " + f);
+      info("Found no locking processes for " + f);
       return false;
     } else {
       final StringBuffer message = new StringBuffer("Found locking process(es) for ").append(f).append(": ");
@@ -78,6 +85,9 @@ public class LockedFileResolver {
       for (final long pid : pids) {
         ProcessTreeTerminator.kill(pid, ProcessFilter.MATCH_ALL);
       }
+//      for (final long pid : pids) {
+//        myProcessTerminator.kill(pid, ProcessFilter.MATCH_ALL);
+//      }
 
       final List<Long> alivePids = myPidsProvider.getPids(f);
 

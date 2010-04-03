@@ -22,7 +22,9 @@ package jetbrains.buildServer.swabra;
  * Time: 14:10:58
  */
 
+import jetbrains.buildServer.ExecResult;
 import jetbrains.buildServer.agent.*;
+import jetbrains.buildServer.swabra.processes.HandleOutputReader;
 import jetbrains.buildServer.swabra.processes.HandlePidsProvider;
 import jetbrains.buildServer.swabra.processes.LockedFileResolver;
 import jetbrains.buildServer.swabra.processes.ProcessExecutor;
@@ -166,9 +168,7 @@ public final class Swabra extends AgentLifeCycleAdapter {
       case RETRY:
         myPropertiesProcessor.markDirty(myCheckoutDir);
         myMode = null;
-        if (strict) {
-          fail();
-        }
+        fail();
     }
   }
 
@@ -189,7 +189,24 @@ public final class Swabra extends AgentLifeCycleAdapter {
   @Override
   public void beforeBuildFinish(@NotNull final BuildFinishedStatus buildStatus) {
     if (myLockingProcessesDetection) {
-      ProcessExecutor.runHandleAcceptEula(myHandlePath, myCheckoutDir.getAbsolutePath(), myLogger.getBuildLogger());
+      final ExecResult result = ProcessExecutor.runHandleAcceptEula(myHandlePath, myCheckoutDir.getAbsolutePath());
+      if (HandleOutputReader.noResult(result.getStdout())) {
+        myLogger.swabraMessage("No processes lock the checkout directory", true);
+      } else {
+        myLogger.activityStarted();
+        myLogger.swabraMessage("The following processes lock the checkout directory", true);
+        try {
+          HandleOutputReader.read(result.getStdout(), new HandleOutputReader.LineProcessor() {
+            public void processLine(@NotNull String line) {
+              if (line.contains(myCheckoutDir.getAbsolutePath())) {
+                myLogger.warn(line);
+              }
+            }
+          });
+        } finally {
+          myLogger.activityFinished();
+        }
+      }
     }
     if (AFTER_BUILD.equals(myMode)) {
       myLogger.swabraMessage("Build files cleanup will be performed after build", true);

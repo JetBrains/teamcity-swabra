@@ -21,10 +21,7 @@ import jetbrains.buildServer.agent.SimpleBuildLogger;
 import org.apache.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
 
-import java.io.BufferedReader;
 import java.io.File;
-import java.io.IOException;
-import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -39,7 +36,6 @@ import java.util.List;
 public class HandlePidsProvider implements LockedFileResolver.LockingPidsProvider {
   private static final Logger LOG = Logger.getLogger(LockedFileResolver.class);
 
-  private static final String NO_RESULT = "No matching handles found.";
   private static final String PID = "pid: ";
 
   @NotNull
@@ -53,19 +49,17 @@ public class HandlePidsProvider implements LockedFileResolver.LockingPidsProvide
 
   @NotNull
   public List<Long> getPids(@NotNull final File file) {
-    final ExecResult result = ProcessExecutor.runHandleAcceptEula(myHandleExePath, file.getAbsolutePath(), null);
-    if (result.getStdout().contains(NO_RESULT)) {
+    final ExecResult result = ProcessExecutor.runHandleAcceptEula(myHandleExePath, file.getAbsolutePath());
+    if (HandleOutputReader.noResult(result.getStdout())) {
       return Collections.emptyList();
     }
     return getPidsFromStdout(result.getStdout(), file.getAbsolutePath());
   }
 
-  private List<Long> getPidsFromStdout(String stdout, String path) {
+  private List<Long> getPidsFromStdout(String stdout, final String path) {
     final List<Long> pids = new ArrayList<Long>();
-    final BufferedReader reader = new BufferedReader(new StringReader(stdout));
-    try {
-      String line = reader.readLine();
-      while (line != null) {
+    HandleOutputReader.read(stdout, new HandleOutputReader.LineProcessor() {
+      public void processLine(@NotNull String line) {
         final int pathIndex = line.indexOf(path);
         if (pathIndex != -1) {
           line = line.substring(0, pathIndex).replaceAll("\\s+", " ");
@@ -74,32 +68,18 @@ public class HandlePidsProvider implements LockedFileResolver.LockingPidsProvide
           try {
             pids.add(Long.parseLong(line));
           } catch (NumberFormatException e) {
-            error("Unable to parse pid string " + line, e);
+            warning("Unable to parse pid string " + line, e);
           }
         }
-        line = reader.readLine();
       }
-      return pids;
-    } catch (IOException e) {
-      error("IOException when reading", e);
-      return pids;
-    } finally {
-      try {
-        reader.close();
-      } catch (IOException e) {
-        error("IOException when closing reader", e);
-        return pids;
-      }
-    }
+    });
+    return pids;
   }
 
-  private void error(String message, Throwable t) {
-    LOG.error(message);
+  private void warning(String message, Throwable t) {
+    LOG.warn(message, t);
     if (myLogger != null) {
-      myLogger.error(message);
-      if (t != null) {
-        myLogger.exception(t);
-      }
+      myLogger.warning(message);
     }
   }
 }
