@@ -136,7 +136,7 @@ public final class Swabra extends AgentLifeCycleAdapter {
       }
       if (myPropertiesProcessor.isDirty(myCheckoutDir)) {
         if (strict) {
-          doCleanup(myCheckoutDir);
+          doCleanup(myCheckoutDir, strict);
         } else {
           myLogger.swabraDebug("Checkout dir is dirty, but strict mode disabled. Do nothing");
         }
@@ -162,7 +162,7 @@ public final class Swabra extends AgentLifeCycleAdapter {
 
     switch (result) {
       case FAILURE:
-        doCleanup(myCheckoutDir);
+        doCleanup(myCheckoutDir, strict);
         return;
 
       case RETRY:
@@ -188,14 +188,15 @@ public final class Swabra extends AgentLifeCycleAdapter {
 
   @Override
   public void beforeBuildFinish(@NotNull final BuildFinishedStatus buildStatus) {
-    if (myLockingProcessesDetection) {
-      final ExecResult result = ProcessExecutor.runHandleAcceptEula(myHandlePath, myCheckoutDir.getAbsolutePath());
-      if (HandleOutputReader.noResult(result.getStdout())) {
-        myLogger.swabraMessage("No processes lock the checkout directory", true);
-      } else {
-        myLogger.activityStarted();
-        myLogger.swabraMessage("The following processes lock the checkout directory", true);
-        try {
+    if (!isEnabled(myMode)) return;
+    myLogger.activityStarted();
+    try {
+      if (myLockingProcessesDetection) {
+        final ExecResult result = ProcessExecutor.runHandleAcceptEula(myHandlePath, myCheckoutDir.getAbsolutePath());
+        if (HandleOutputReader.noResult(result.getStdout())) {
+          myLogger.swabraMessage("No processes lock the checkout directory", true);
+        } else {
+          myLogger.message("The following processes lock the checkout directory", true);
           HandleOutputReader.read(result.getStdout(), new HandleOutputReader.LineProcessor() {
             public void processLine(@NotNull String line) {
               if (line.contains(myCheckoutDir.getAbsolutePath())) {
@@ -203,13 +204,13 @@ public final class Swabra extends AgentLifeCycleAdapter {
               }
             }
           });
-        } finally {
-          myLogger.activityFinished();
         }
       }
-    }
-    if (AFTER_BUILD.equals(myMode)) {
-      myLogger.swabraMessage("Build files cleanup will be performed after build", true);
+      if (AFTER_BUILD.equals(myMode)) {
+        myLogger.swabraMessage("Build files cleanup will be performed after build", true);
+      }
+    } finally {
+      myLogger.activityFinished();
     }
   }
 
@@ -244,7 +245,7 @@ public final class Swabra extends AgentLifeCycleAdapter {
   private FilesCollector initFilesCollector(BuildProgressLogger buildLogger, boolean verbose, boolean kill) {
     final LockedFileResolver lockedFileResolver =
       (!kill || myHandlePath == null) ?
-        null : new LockedFileResolver(new HandlePidsProvider(myHandlePath, buildLogger), /*myProcessTerminator,*/ buildLogger);
+        null : new LockedFileResolver(new HandlePidsProvider(myHandlePath), /*myProcessTerminator,*/ buildLogger);
 
     final FilesCollectionProcessor processor = (System.getProperty(TEST_LOG) == null) ?
       new FilesCollectionProcessor(myLogger, lockedFileResolver, verbose, kill) :
@@ -292,31 +293,37 @@ public final class Swabra extends AgentLifeCycleAdapter {
     myPrevThreads.remove(checkoutDir);
   }
 
-  private void doCleanup(File checkoutDir) {
+  private void doCleanup(File checkoutDir, boolean strict) {
+    myLogger.activityStarted();
     myDirectoryCleaner.cleanFolder(checkoutDir, new SmartDirectoryCleanerCallback() {
       public void logCleanStarted(File dir) {
-        myLogger.swabraMessage("Need a clean snapshot of checkout directory - forcing clean checkout for " + dir, true);
+        myLogger.message("Need a clean snapshot of checkout directory - forcing clean checkout for " + dir, true);
       }
 
       public void logFailedToDeleteEmptyDirectory(File dir) {
-        myLogger.swabraWarn("Failed to delete empty checkout directory " + dir.getAbsolutePath());
+        myLogger.error("Failed to delete empty directory " + dir.getAbsolutePath());
       }
 
       public void logFailedToCleanFilesUnderDirectory(File dir) {
-        myLogger.swabraWarn("Failed to delete files in directory " + dir.getAbsolutePath());
+        myLogger.error("Failed to delete files in directory " + dir.getAbsolutePath());
 
       }
 
       public void logFailedToCleanFile(File file) {
-        myLogger.swabraWarn("Failed to delete file " + file.getAbsolutePath());
+        myLogger.error("Failed to delete file " + file.getAbsolutePath());
       }
 
       public void logFailedToCleanEntireFolder(File dir) {
-        myLogger.swabraWarn("Failed to delete directory " + dir.getAbsolutePath());
+        myLogger.error("Failed to delete directory " + dir.getAbsolutePath());
         myPropertiesProcessor.markDirty(myCheckoutDir);
         myMode = null;
       }
     });
+    myLogger.activityFinished();
+    if (strict && myMode == null) {
+      //cleanup failed
+      fail();
+    }
   }
 
   private static String unifyPath(String path) {
@@ -328,7 +335,7 @@ public final class Swabra extends AgentLifeCycleAdapter {
   }
 
   private void fail() {
-    myLogger.message("##teamcity[buildStatus status='FAILURE' text='Swabra failed cleanup']", true);
+    myLogger.message("##teamcity[buildStatus status='FAILURE' text='Swabra failed cleanup: some files are locked']", true);
   }
 
   private void prepareHandle() {

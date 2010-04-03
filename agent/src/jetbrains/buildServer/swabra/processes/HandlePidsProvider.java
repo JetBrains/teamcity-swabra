@@ -17,7 +17,6 @@
 package jetbrains.buildServer.swabra.processes;
 
 import jetbrains.buildServer.ExecResult;
-import jetbrains.buildServer.agent.SimpleBuildLogger;
 import org.apache.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
 
@@ -40,11 +39,9 @@ public class HandlePidsProvider implements LockedFileResolver.LockingPidsProvide
 
   @NotNull
   private final String myHandleExePath;
-  private final SimpleBuildLogger myLogger;
 
-  public HandlePidsProvider(@NotNull String handleExePath, SimpleBuildLogger logger) {
+  public HandlePidsProvider(@NotNull String handleExePath) {
     myHandleExePath = handleExePath;
-    myLogger = logger;
   }
 
   @NotNull
@@ -68,18 +65,11 @@ public class HandlePidsProvider implements LockedFileResolver.LockingPidsProvide
           try {
             pids.add(Long.parseLong(line));
           } catch (NumberFormatException e) {
-            warning("Unable to parse pid string " + line, e);
+            LOG.warn("Unable to parse pid string " + line, e);
           }
         }
       }
     });
     return pids;
-  }
-
-  private void warning(String message, Throwable t) {
-    LOG.warn(message, t);
-    if (myLogger != null) {
-      myLogger.warning(message);
-    }
   }
 }

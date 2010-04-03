@@ -62,6 +62,13 @@ public final class SwabraLogger {
     }
   }
 
+  public void error(@NotNull String message) {
+    myClassLogger.error(message);
+    if (myBuildLogger != null) {
+      myBuildLogger.error(message);
+    }
+  }
+
   public void debug(@NotNull final String message) {
     myClassLogger.debug(message);
   }
