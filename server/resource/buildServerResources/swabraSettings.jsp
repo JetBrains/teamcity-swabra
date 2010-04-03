@@ -136,7 +136,7 @@
       <props:checkboxProperty name="swabra.locking.processes" onclick="${onclick}"/>
       <label for="swabra.locking.processes">Determine file locking processes on Windows agents</label>
       <span class="smallNote">
-        At the end of the build the checkout directory is checked for locking processes. The checking results are present in the build log.
+        Before the end of the build the checkout directory is checked for locking processes. The checking results are present in the build log.
         Note that handle.exe is required on agents.
       </span>
     </td>
