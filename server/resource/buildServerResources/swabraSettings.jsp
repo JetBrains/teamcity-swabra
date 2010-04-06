@@ -103,7 +103,7 @@
 
   <tr class="noBorder" id="swabra.kill.container"
       style="${displaySwabraSettings ? '' : 'display: none;'}">
-    <th>Locking processes kill:</th>
+    <th>Kill locking processes:</th>
     <td>
       <c:set var="onclick">
         if (this.checked) {
