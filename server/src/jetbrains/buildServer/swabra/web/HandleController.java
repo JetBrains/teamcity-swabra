@@ -28,7 +28,7 @@ import java.util.Map;
  */
 public class HandleController extends BaseFormXmlController {
   @NonNls
-  private static final String CONTROLLER_PATH = "/handle.html";
+  private static final String CONTROLLER_PATH = "/admin/handle.html";
   @NonNls
   private static final String MY_JSP = "handle.jsp";
 

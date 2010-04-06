@@ -148,7 +148,7 @@
       <th>
       </th>
       <td>
-        <a href="/handle.html"
+        <a href="handle.html"
            showdiscardchangesmessage="true"
            target="_blank"
            title="Download Handle executable for locking processes detection">Download handle.exe</a>
