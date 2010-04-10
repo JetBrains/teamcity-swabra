@@ -35,7 +35,7 @@ public class HandleProvider {
   }
 
   public void downloadAndExtract(@NotNull String url) throws Throwable {
-    LOG.debug("Downloading Handle.zip from " + url + " and extracting it into handle-provider plugin to "
+    LOG.debug("Downloading SysInternals Handle.zip from " + url + " and extracting it into handle-provider plugin to "
       + myPluginFolder.getAbsolutePath() + "...");
 
     final File pluginTempFolder = preparePluginFolder();

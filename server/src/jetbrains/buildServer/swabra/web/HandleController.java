@@ -79,7 +79,7 @@ public class HandleController extends BaseFormXmlController {
     validate(form, errors);
     if (errors.hasNoErrors()) {
       form.setRunning(true);
-      form.addMessage("Start downloading Handle.zip from " + form.getUrl() + "...", Status.NORMAL);
+      form.addMessage("Start downloading SysInternals Handle.zip from " + form.getUrl() + "...", Status.NORMAL);
       try {
         myHandleProvider.downloadAndExtract(form.getUrl());
         form.addMessage("Successfully downloaded Handle.zip from " + form.getUrl(), Status.NORMAL);
