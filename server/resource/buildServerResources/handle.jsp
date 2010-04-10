@@ -44,9 +44,8 @@
     </jsp:attribute>
 
     <jsp:attribute name="body_include">
-
-        <form id="handleForm" action="<c:url value='/handle.html'/>"
-              onsubmit="return BS.HandleForm.submit()" method="post">
+      <div style="width: 80%;">
+        <form id="handleForm" action="${pageUrl}" onsubmit="return BS.HandleForm.submit()" method="post">
 
           <table class="runnerFormTable">
             <c:if test="${not canDownload}">
@@ -59,9 +58,8 @@
               </tr>
             </c:if>
             <l:settingsGroup title="Configure URL">
-              <th><label for="handleUrl">URL for downloading Handle.zip: <l:star/></label>
-              </th>
-              <td>
+              <th class="noBorder"><label for="handleUrl">URL for downloading Handle.zip: <l:star/></label></th>
+              <td class="noBorder">
                 <forms:textField name="url" id="url" style="width:30em;"
                                  value="${handleForm.url}" disabled="${not canDownload}"/>
                 <span class="error" id="errorUrl"></span>
@@ -70,7 +68,7 @@
                   Url for downloading Handle.zip archive containing
                   <a showdiscardchangesmessage="false"
                      target="_blank"
-                     href="http://technet.microsoft.com/en-us/sysinternals/bb896655.aspx">Handle</a>
+                     href="http://technet.microsoft.com/en-us/sysinternals/bb896655.aspx">SysInternals Handle</a>
                   excutable (handle.exe).
                   <br/>
                   On Windows agents Handle is used to determine processes which hold files in the checkout directory.
@@ -113,6 +111,6 @@
             </c:if>
           </script>
         </bs:refreshable>
-
+      </div>
     </jsp:attribute>
 </bs:page>

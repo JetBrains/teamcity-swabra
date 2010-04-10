@@ -7,8 +7,7 @@
 <jsp:useBean id="swabraModes" scope="request" class="jetbrains.buildServer.swabra.SwabraModes"/>
 
 <%@ page import="jetbrains.buildServer.swabra.HandleProvider" %>
-<c:set var="handlePresent"><%=HandleProvider.isHandlePresent()%>
-</c:set>
+<c:set var="handlePresent"><%=HandleProvider.isHandlePresent()%></c:set>
 
 <c:set var="displaySwabraSettings"
        value="${not empty propertiesBean.properties['swabra.mode'] ? true : false}"/>
@@ -143,15 +142,11 @@
   </tr>
 
   <c:if test="${not handlePresent}">
-    <tr class="noBorder" id="swabra.download.handle.container"
-        style="${displayLockingProcessesSettings ? '' : 'display: none;'}">
-      <th>
-      </th>
+    <tr class="noBorder" id="swabra.download.handle.container" style="${displayLockingProcessesSettings ? '' : 'display: none;'}">
+      <th></th>
       <td>
-        <a href="handle.html"
-           showdiscardchangesmessage="true"
-           target="_blank"
-           title="Download Handle executable for locking processes detection">Download handle.exe</a>
+        <c:url var="handleDownloader" value="/admin/handle.html"/>
+        <input type="button" value="Install SysInternals Handle.exe" onclick="window.open('${handleDownloader}', '_blank')"/>
       </td>
     </tr>
   </c:if>
