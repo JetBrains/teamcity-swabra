@@ -1,25 +1,24 @@
 package jetbrains.buildServer.swabra.web;
 
+import java.util.HashMap;
+import java.util.Map;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import jetbrains.buildServer.controllers.ActionErrors;
 import jetbrains.buildServer.controllers.BaseFormXmlController;
 import jetbrains.buildServer.controllers.FormUtil;
-import jetbrains.buildServer.controllers.ValidationUtil;
 import jetbrains.buildServer.messages.Status;
 import jetbrains.buildServer.serverSide.auth.AuthUtil;
 import jetbrains.buildServer.serverSide.auth.Permission;
 import jetbrains.buildServer.serverSide.auth.SecurityContext;
 import jetbrains.buildServer.swabra.HandleProvider;
+import jetbrains.buildServer.util.StringUtil;
 import jetbrains.buildServer.web.openapi.PluginDescriptor;
 import jetbrains.buildServer.web.openapi.WebControllerManager;
 import org.jdom.Element;
 import org.jetbrains.annotations.NonNls;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.web.servlet.ModelAndView;
-
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import java.util.HashMap;
-import java.util.Map;
 
 /**
  * User: vbedrosova
@@ -110,7 +109,7 @@ public class HandleController extends BaseFormXmlController {
 
   private void validate(HandleForm form, ActionErrors errors) {
     final String url = form.getUrl();
-    if (ValidationUtil.isEmptyOrNull(url)) {
+    if (StringUtil.isEmptyOrSpaces(url)) {
       errors.addError("wrongUrl", "Url is empty");
       return;
     }
