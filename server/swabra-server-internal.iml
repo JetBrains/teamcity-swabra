@@ -6,7 +6,7 @@
         <webroots>
           <root url="file://$MODULE_DIR$/resource/buildServerResources" relative="/plugins/swabra" />
         </webroots>
-        <context-artifact name="web-deployment:web-deployment exploded" />
+        <context-artifact name="web-deployment" />
       </configuration>
     </facet>
   </component>
