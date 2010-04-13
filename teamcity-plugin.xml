@@ -5,7 +5,6 @@
     <name>swabra</name>
     <display-name>Swabra</display-name>
     <description>Add support for cleaning new files created during the build. Modified or deleted files are reported in the build log.</description>
-    <download-url>http://confluence.jetbrains.net/display/TW/Swabra</download-url>
     <version>@version@</version>
     <vendor>
       <name>JetBrains, s.r.o.</name>
