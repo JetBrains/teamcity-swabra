@@ -190,7 +190,7 @@ public final class Swabra extends AgentLifeCycleAdapter {
   public void beforeBuildFinish(@NotNull final BuildFinishedStatus buildStatus) {
     myLogger.activityStarted();
     try {
-      if (myLockingProcessesDetection) {
+      if (myLockingProcessesDetection && myHandlePath != null) {
         final ExecResult result = ProcessExecutor.runHandleAcceptEula(myHandlePath, myCheckoutDir.getAbsolutePath());
         if (HandleOutputReader.noResult(result.getStdout())) {
           myLogger.swabraMessage("No processes lock the checkout directory", true);
