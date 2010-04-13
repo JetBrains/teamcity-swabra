@@ -4,8 +4,8 @@
   <info>
     <name>swabra</name>
     <display-name>Swabra</display-name>
-    <description>Add support for cleaning new files created during the build. Modified or deleted files are reported in the build log.</description>
     <version>@version@</version>
+    <description>Add support for cleaning new files created during the build. Modified or deleted files are reported in the build log.</description>
     <vendor>
       <name>JetBrains, s.r.o.</name>
       <url>http://www.jetbrains.com</url>
