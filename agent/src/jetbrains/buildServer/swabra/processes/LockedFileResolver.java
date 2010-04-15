@@ -16,13 +16,11 @@
 
 package jetbrains.buildServer.swabra.processes;
 
-import jetbrains.buildServer.agent.SimpleBuildLogger;
 import jetbrains.buildServer.processes.ProcessFilter;
 import jetbrains.buildServer.processes.ProcessTreeTerminator;
 import jetbrains.buildServer.util.FileUtil;
 import org.apache.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 import java.io.File;
 import java.util.List;
@@ -47,15 +45,10 @@ public class LockedFileResolver {
 //  @NotNull
 //  private final ProcessTerminator myProcessTerminator;
 
-  @Nullable
-  private final SimpleBuildLogger myLogger;
-
-  public LockedFileResolver(@NotNull LockingPidsProvider pidsProvider,
-                            /*@NotNull ProcessTerminator processTerminator,*/
-                            @Nullable SimpleBuildLogger logger) {
+  public LockedFileResolver(@NotNull LockingPidsProvider pidsProvider/*,
+                            @NotNull ProcessTerminator processTerminator,*/) {
     myPidsProvider = pidsProvider;
 //    myProcessTerminator = processTerminator;
-    myLogger = logger;
   }
 
 
@@ -72,16 +65,16 @@ public class LockedFileResolver {
     final List<Long> pids = myPidsProvider.getPids(f);
 
     if (pids.isEmpty()) {
-      info("Found no locking processes for " + f);
+      LOG.info("Found no locking processes for " + f);
       return false;
     } else {
       final StringBuffer message = new StringBuffer("Found locking process(es) for ").append(f).append(": ");
       appendPids(pids, message);
-      warn(message.toString());
+      LOG.info(message.toString());
     }
 
     if (kill) {
-      info("Try killing locking process(es) for " + f);
+      LOG.info("Try killing locking process(es) for " + f);
       for (final long pid : pids) {
         ProcessTreeTerminator.kill(pid, ProcessFilter.MATCH_ALL);
       }
@@ -92,12 +85,12 @@ public class LockedFileResolver {
       final List<Long> alivePids = myPidsProvider.getPids(f);
 
       if (alivePids.isEmpty()) {
-        info("Killed all locking processes for " + f);
+        LOG.info("Killed all locking processes for " + f);
         return true;
       } else {
         final StringBuffer message = new StringBuffer("Unable to kill locking process(es) for ").append(f).append(": ");
         appendPids(alivePids, message);
-        warn(message.toString());
+        LOG.warn(message.toString());
         return false;
       }
     }
@@ -128,20 +121,6 @@ public class LockedFileResolver {
     }
     LOG.info("Unable to delete " + f);
     return false;
-  }
-
-  private void info(String message) {
-    LOG.info(message);
-    if (myLogger != null) {
-      myLogger.message(message);
-    }
-  }
-
-  private void warn(String message) {
-    LOG.warn(message);
-    if (myLogger != null) {
-      myLogger.warning(message);
-    }
   }
 
   private void appendPids(List<Long> processes, StringBuffer message) {

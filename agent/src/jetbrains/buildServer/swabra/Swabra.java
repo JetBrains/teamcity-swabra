@@ -98,9 +98,7 @@ public final class Swabra extends AgentLifeCycleAdapter {
   @Override
   public void buildStarted(@NotNull final AgentRunningBuild runningBuild) {
 //    waitForUnfinishedThreads(checkoutDir);
-    final BuildProgressLogger buildLogger = runningBuild.getBuildLogger();
-
-    myLogger.setBuildLogger(buildLogger);
+    myLogger.setBuildLogger(runningBuild.getBuildLogger());
     myCheckoutDir = runningBuild.getCheckoutDirectory();
 
     final Map<String, String> runnerParams = runningBuild.getRunnerParameters();
@@ -148,16 +146,18 @@ public final class Swabra extends AgentLifeCycleAdapter {
         return;
       }
     }
-    final FilesCollector filesCollector = initFilesCollector(buildLogger, verbose, kill);
+    final FilesCollector filesCollector = initFilesCollector(verbose, kill);
     final FilesCollector.CollectionResult result = filesCollector.collect(new File(myTempDir, snapshotName), myCheckoutDir);
 
     switch (result) {
       case ERROR:
+        myLogger.swabraDebug("Some error occurred during files collecting. Will force clean checkout");
         doCleanup(myCheckoutDir);
         return;
 
       case DIRTY:
         if (myStrict) {
+          myLogger.swabraDebug("Checkout directory contains modified files or some files were deleted. Will force clean checkout");
           doCleanup(myCheckoutDir);
         }
         return;
@@ -189,7 +189,7 @@ public final class Swabra extends AgentLifeCycleAdapter {
       try {
         final ExecResult result = ProcessExecutor.runHandleAcceptEula(myHandlePath, myCheckoutDir.getAbsolutePath());
         if (HandleOutputReader.noResult(result.getStdout())) {
-          myLogger.swabraMessage("No processes lock the checkout directory", true);
+          myLogger.message("No processes lock the checkout directory", true);
         } else {
           myLogger.message("The following processes lock the checkout directory", true);
 
@@ -207,10 +207,10 @@ public final class Swabra extends AgentLifeCycleAdapter {
     }
   }
 
-  private FilesCollector initFilesCollector(BuildProgressLogger buildLogger, boolean verbose, boolean kill) {
+  private FilesCollector initFilesCollector(boolean verbose, boolean kill) {
     final LockedFileResolver lockedFileResolver =
       (!kill || myHandlePath == null) ?
-        null : new LockedFileResolver(new HandlePidsProvider(myHandlePath), /*myProcessTerminator,*/ buildLogger);
+        null : new LockedFileResolver(new HandlePidsProvider(myHandlePath)/*, myProcessTerminator,*/);
 
     final FilesCollectionProcessor processor = (System.getProperty(TEST_LOG) == null) ?
       new FilesCollectionProcessor(myLogger, lockedFileResolver, verbose, kill) :

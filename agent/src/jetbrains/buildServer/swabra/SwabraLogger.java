@@ -44,10 +44,6 @@ public final class SwabraLogger {
     myBuildLogger = buildLogger;
   }
 
-  public BuildProgressLogger getBuildLogger() {
-    return myBuildLogger;
-  }
-
   public void message(@NotNull final String message, boolean useBuildLog) {
     myClassLogger.info(message);
     if (useBuildLog && myBuildLogger != null) {
