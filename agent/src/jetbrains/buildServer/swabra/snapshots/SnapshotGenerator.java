@@ -41,6 +41,7 @@ public class SnapshotGenerator {
   private final File myTempDir;
   private final File myCheckoutDir;
   private String myCheckoutDirParent;
+  private int mySavedObjects;
 
   private final SwabraLogger myLogger;
 
@@ -65,9 +66,10 @@ public class SnapshotGenerator {
         return false;
       }
     }
+    mySavedObjects = 0;
     myLogger.activityStarted();
     myLogger.message("Saving state of checkout directory " + myCheckoutDir +
-      " to snapshot file " + snapshot.getAbsolutePath(), true);
+      " to snapshot file " + snapshot.getAbsolutePath() + "...", true);
 
     BufferedWriter writer = null;
     try {
@@ -75,8 +77,8 @@ public class SnapshotGenerator {
       writer.write(getSnapshotHeader(myCheckoutDirParent));
 
       iterateAndBuildSnapshot(writer);
-
-      myLogger.message("Finished saving state of checkout directory " + myCheckoutDir + " to snapshot file " + snapshot.getAbsolutePath(), false);
+      myLogger.debug("Successfully finished saving state of checkout directory " + myCheckoutDir +
+        " to snapshot file " + snapshot.getAbsolutePath() + ", saved " + mySavedObjects + " objects");
     } catch (Exception e) {
       myLogger.warn("Unable to save snapshot of checkout directory '" + myCheckoutDir.getAbsolutePath()
         + "' to file " + snapshot.getAbsolutePath());
@@ -102,6 +104,7 @@ public class SnapshotGenerator {
     tr.traverse(new FileSystemFilesIterator(myCheckoutDir), new FilesTraversal.SimpleProcessor() {
       public void process(FileInfo file) throws Exception {
         writer.write(getSnapshotEntry(file, myCheckoutDirParent));
+        ++mySavedObjects;
       }
     });
   }

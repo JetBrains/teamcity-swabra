@@ -4,97 +4,44 @@
 <%@ taglib prefix="forms" tagdir="/WEB-INF/tags/forms" %>
 
 <jsp:useBean id="propertiesBean" scope="request" type="jetbrains.buildServer.controllers.BasePropertiesBean"/>
-<jsp:useBean id="swabraModes" scope="request" class="jetbrains.buildServer.swabra.SwabraModes"/>
 
 <%@ page import="jetbrains.buildServer.swabra.HandleProvider" %>
-<c:set var="handlePresent"><%=HandleProvider.isHandlePresent()%></c:set>
+<c:set var="handlePresent"><%=HandleProvider.isHandlePresent()%>
+</c:set>
 
 <c:set var="displaySwabraSettings"
-       value="${not empty propertiesBean.properties['swabra.mode'] ? true : false}"/>
-
-<c:set var="displayBeforeBuildSwabraSettings"
-       value="${propertiesBean.properties['swabra.mode'] == 'swabra.before.build' ? true : false}"/>
-
-<c:set var="displayAfterBuildSwabraSettings"
-       value="${propertiesBean.properties['swabra.mode'] == 'swabra.after.build' ? true : false}"/>
-
-<c:set var="displayLockingProcessesSettings"
-       value="${not empty propertiesBean.properties['swabra.locking.processes'] ? true : false}"/>
+       value="${empty propertiesBean.properties['swabra.enabled'] ? false : true}"/>
 
 <l:settingsGroup title="Swabra">
 
-  <tr class="noBorder" id="swabra.mode.container">
-    <th><label for="swabra.mode">Perform build files cleanup:</label></th>
+  <tr class="noBorder">
+    <th>Build files cleanup:</th>
     <td>
-      <c:set var="onchange">
-        var selectedValue = this.options[this.selectedIndex].value;
-        if (selectedValue == 'swabra.before.build') {
+      <c:set var="onclick1">
+        if (this.checked) {
+        BS.Util.show($('swabra.strict.container'));
+        BS.Util.show($('swabra.kill.container'));
         BS.Util.show($('swabra.verbose.container'));
-        BS.Util.show($('swabra.strict.container'));
-        BS.Util.show($('swabra.kill.container'));
-
-        BS.Util.hide($('swabra.mode.note'));
-        BS.Util.show($('swabra.before.build.mode.note'));
-        BS.Util.hide($('swabra.after.build.mode.note'));
-
         } else {
-        if (selectedValue == 'swabra.after.build') {
-        BS.Util.hide($('swabra.verbose.container'));
-        BS.Util.show($('swabra.strict.container'));
-        BS.Util.show($('swabra.kill.container'));
-
-        BS.Util.hide($('swabra.mode.note'));
-        BS.Util.hide($('swabra.before.build.mode.note'));
-        BS.Util.show($('swabra.after.build.mode.note'));
-        } else {
-        BS.Util.hide($('swabra.verbose.container'));
         BS.Util.hide($('swabra.strict.container'));
         BS.Util.hide($('swabra.kill.container'));
-
-        BS.Util.show($('swabra.mode.note'));
-        BS.Util.hide($('swabra.before.build.mode.note'));
-        BS.Util.hide($('swabra.after.build.mode.note'));
-        }
+        BS.Util.hide($('swabra.verbose.container'));
         }
         BS.MultilineProperties.updateVisible();
       </c:set>
-      <props:selectProperty name="swabra.mode"
-                            onchange="${onchange}">
-        <c:set var="selected" value="false"/>
-        <c:if test="${empty propertiesBean.properties['swabra.mode']}">
-          <c:set var="selected" value="true"/>
-        </c:if>
-        <props:option value="" selected="${selected}">&lt;Do not cleanup&gt;</props:option>
-        <c:forEach var="mode" items="${swabraModes.modes}">
-          <c:set var="selected" value="false"/>
-          <c:if test="${mode.id == propertiesBean.properties['swabra.mode']}">
-            <c:set var="selected" value="true"/>
-          </c:if>
-          <props:option value="${mode.id}"
-                        selected="${selected}"><c:out value="${mode.displayName}"/></props:option>
-        </c:forEach>
-      </props:selectProperty>
-      <span class="smallNote" id="swabra.mode.note" style="${displaySwabraSettings ? 'display: none;' : ''}">
-        Choose cleanup mode.
-      </span>
-    <span class="smallNote" id="swabra.before.build.mode.note"
-          style="${displayBeforeBuildSwabraSettings ? '' : 'display: none;'}">
-        Previous build files cleanup will be performed at build start. You only need to use this mode
-        if files are required between builds.
-    </span>
-    <span class="smallNote" id="swabra.after.build.mode.note"
-          style="${displayAfterBuildSwabraSettings ? '' : 'display: none;'}">
-        Build files cleanup will be performed after the build. Between builds there will be clean copy in the checkout directory.
-    </span>
+      <props:checkboxProperty name="swabra.enabled" onclick="${onclick1}"/>
+      <label for="swabra.enabled">Perform build files cleanup</label>
+      <span class="smallNote">
+        At the build start inspect the checkout directory for files created, modified and deleted during previous build.</span>
     </td>
   </tr>
 
   <tr class="noBorder" id="swabra.strict.container"
       style="${displaySwabraSettings ? '' : 'display: none;'}">
-    <th>Strict mode:</th>
+    <th>Clean checkout directory:</th>
     <td>
       <props:checkboxProperty name="swabra.strict"/>
-      <label for="swabra.strict">Turn on strict mode</label>
+      <label for="swabra.strict">Ensure clean checkout directory</label>
             <span class="smallNote">
               Ensure that at the build start the checkout directory corresponds to the sources in the repository, otherwise perform clean checkout.</span>
     </td>
@@ -102,9 +49,9 @@
 
   <tr class="noBorder" id="swabra.kill.container"
       style="${displaySwabraSettings ? '' : 'display: none;'}">
-    <th>Kill locking processes:</th>
+    <th>Locking processes kill:</th>
     <td>
-      <c:set var="onclick">
+      <c:set var="onclick2">
         if (this.checked) {
         BS.Util.show($('swabra.download.handle.container'));
         } else {
@@ -112,10 +59,10 @@
         }
         BS.MultilineProperties.updateVisible();
       </c:set>
-      <props:checkboxProperty name="swabra.kill" onclick="${onclick}"/>
+      <props:checkboxProperty name="swabra.kill" onclick="${onclick2}"/>
       <label for="swabra.kill">Kill file locking processes on Windows agents</label>
             <span class="smallNote">
-              When Swabra comes across a newly created file which is locked it tries to kill the locking process.
+              When Swabra comes across a newly created file which is locked it tries to kill the locking process.<br/>
               Note that handle.exe is required on agents.
             </span>
     </td>
@@ -124,7 +71,7 @@
   <tr class="noBorder" id="swabra.locking.processes.container">
     <th>Locking processes detection:</th>
     <td>
-      <c:set var="onclick">
+      <c:set var="onclick3">
         if (this.checked) {
         BS.Util.show($('swabra.download.handle.container'));
         } else {
@@ -132,30 +79,32 @@
         }
         BS.MultilineProperties.updateVisible();
       </c:set>
-      <props:checkboxProperty name="swabra.locking.processes" onclick="${onclick}"/>
+      <props:checkboxProperty name="swabra.locking.processes" onclick="${onclick3}"/>
       <label for="swabra.locking.processes">Determine file locking processes on Windows agents</label>
       <span class="smallNote">
-        Before the end of the build the checkout directory is inspected for locking processes.
+        Before the end of the build the checkout directory is inspected for locking processes.<br/>
         Note that handle.exe is required on agents.
       </span>
     </td>
   </tr>
 
+  <tr class="noBorder" id="swabra.verbose.container"
+      style="${displaySwabraSettings ? '' : 'display: none;'}">
+    <th><label for="swabra.verbose">Verbose output:</label></th>
+    <td>
+      <props:checkboxProperty name="swabra.verbose"/>
+    </td>
+  </tr>
+
   <c:if test="${not handlePresent}">
-    <tr class="noBorder" id="swabra.download.handle.container" style="${displayLockingProcessesSettings ? '' : 'display: none;'}">
-      <th></th>
+    <tr class="noBorder" id="swabra.download.handle.container"
+        style="${empty propertiesBean.properties['swabra.locking.processes'] ? "display: none" : ""}">
+      <th>
+      </th>
       <td>
         <c:url var="handleDownloader" value="/admin/handle.html"/>
         <input type="button" value="Install SysInternals Handle.exe" onclick="window.open('${handleDownloader}', '_blank')"/>
       </td>
     </tr>
   </c:if>
-
-  <tr class="noBorder" id="swabra.verbose.container"
-      style="${displayBeforeBuildSwabraSettings ? '' : 'display: none;'}">
-    <th><label for="swabra.verbose">Verbose output:</label></th>
-    <td>
-      <props:checkboxProperty name="swabra.verbose"/>
-    </td>
-  </tr>
 </l:settingsGroup>

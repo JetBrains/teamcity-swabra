@@ -36,9 +36,6 @@ public final class SwabraPropertiesProcessor {
   private static final String FILE_NAME = "snapshot.map";
   private static final String KEY_VAL_SEPARATOR = "=";
 
-  private static final String DIRTY = "[dirty]";
-  private static final String CLEAN = "[clean]";
-
   @NotNull
   private Map<String, String> myProperties;
   @NotNull
@@ -58,60 +55,42 @@ public final class SwabraPropertiesProcessor {
     myCleanupFinishedSignal = new CountDownLatch(1);
   }
 
-  public void markDirty(@NotNull File dir) {
-    final String path = dir.getAbsolutePath();
-    final String state = myProperties.get(path);
-    if (state == null || DIRTY.equals(state)) {
-      return;
-    }
-    myLogger.swabraDebug("Marking " + path + " as dirty");
-    myProperties.put(unifyPath(dir), DIRTY);
+  @NotNull
+  public File getPropertiesFile() {
+    return myPropertiesFile;
+  }
+
+  public synchronized void deleteRecord(@NotNull File dir) {
+    readProperties(false);
+    myProperties.remove(unifyPath(dir));
     writeProperties();
   }
 
-  public void markClean(@NotNull File dir) {
-    myLogger.swabraDebug("Marking " + dir.getAbsolutePath() + " as clean");
-    myProperties.put(unifyPath(dir), CLEAN);
-    writeProperties();
-  }
-
-  public void setSnapshot(@NotNull File dir, @NotNull String snapshot) {
+  public synchronized void setSnapshot(@NotNull File dir, @NotNull String snapshot) {
+    readProperties(false);
     myLogger.swabraDebug("Setting snapshot " + snapshot + " for " + dir.getAbsolutePath());
     myProperties.put(unifyPath(dir), snapshot);
     writeProperties();
   }
 
-  public boolean isDirty(@NotNull File dir) {
-    final String info = myProperties.get(unifyPath(dir));
-    return (info == null) || DIRTY.equals(info);
-  }
-
-  public boolean isClean(@NotNull File dir) {
-    return CLEAN.equals(myProperties.get(unifyPath(dir)));
-  }
-
-  public String getSnapshot(@NotNull File dir) {
+  public synchronized String getSnapshot(@NotNull File dir) {
+    readProperties(true);
     return myProperties.get(unifyPath(dir));
   }
 
-  public void deleteRecord(@NotNull File dir) {
-    myProperties.remove(unifyPath(dir));
-    writeProperties();
-  }
-
-  public void readProperties() {
+  private void readProperties(boolean preserveFile) {
     try {
       myCleanupFinishedSignal.await();
     } catch (InterruptedException e) {
       myLogger.swabraWarn("Thread interrupted");
     }
-    readPropertiesNoAwait();
+    readPropertiesNoAwait(preserveFile);
   }
 
-  private void readPropertiesNoAwait() {
+  private void readPropertiesNoAwait(boolean preserveFile) {
     myProperties = new HashMap<String, String>();
     if (!myPropertiesFile.isFile()) {
-      myLogger.swabraMessage("Couldn't read checkout directories states from " + myPropertiesFile.getAbsolutePath() + ", no file present", false);
+      myLogger.swabraDebug("Couldn't read checkout directories states from " + myPropertiesFile.getAbsolutePath() + ", no file present");
       return;
     }
     BufferedReader reader = null;
@@ -139,14 +118,17 @@ public final class SwabraPropertiesProcessor {
           myLogger.exception(e);
         }
       }
-      if (!FileUtil.delete(myPropertiesFile)) {
-        myLogger.swabraWarn("Error deleting checkout directories states file " + myPropertiesFile.getAbsolutePath());
+      if (!preserveFile) {
+        deletePropertiesFile();
       }
     }
   }
 
   public void writeProperties() {
     if (myProperties.isEmpty()) {
+      if (myPropertiesFile.isFile()) {
+        deletePropertiesFile();
+      }
       return;
     }
     BufferedWriter writer = null;
@@ -170,6 +152,12 @@ public final class SwabraPropertiesProcessor {
     }
   }
 
+  private void deletePropertiesFile() {
+    if (!FileUtil.delete(myPropertiesFile)) {
+      myLogger.swabraWarn("Error deleting checkout directories states file " + myPropertiesFile.getAbsolutePath());
+    }
+  }
+
   public void cleanupProperties(final File[] actualCheckoutDirs) {
     if (actualCheckoutDirs == null || actualCheckoutDirs.length == 0) {
       return;
@@ -177,7 +165,7 @@ public final class SwabraPropertiesProcessor {
     new Thread(new Runnable() {
       public void run() {
         try {
-          readPropertiesNoAwait();
+          readPropertiesNoAwait(false);
           final Set<String> savedCheckoutDirs = myProperties.keySet();
           if (savedCheckoutDirs.isEmpty()) {
             return;

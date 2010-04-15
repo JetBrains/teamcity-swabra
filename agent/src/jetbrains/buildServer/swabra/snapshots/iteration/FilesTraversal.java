@@ -38,6 +38,8 @@ public class FilesTraversal {
     void processDeleted(FileInfo info);
 
     void processAdded(FileInfo info);
+
+    void processUnchanged(FileInfo info);
   }
 
   public void traverse(@NotNull FilesIterator it, @NotNull SimpleProcessor simpleProcessor) throws Exception {
@@ -68,6 +70,8 @@ public class FilesTraversal {
       } else {
         if (fileModified(info1, info2)) {
           processor.processModified(info1, info2);
+        } else {
+          processor.processUnchanged(info1);
         }
         info1 = it1.getNext();
         info2 = it2.getNext();

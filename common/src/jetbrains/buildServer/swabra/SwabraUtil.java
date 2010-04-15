@@ -19,7 +19,6 @@ package jetbrains.buildServer.swabra;
 import com.intellij.openapi.util.SystemInfo;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -28,38 +27,35 @@ import java.util.Map;
  * Time: 15:02:17
  */
 public class SwabraUtil {
-  public static final String MODE = "swabra.mode";
-  public static final String VERBOSE = "swabra.verbose";
-  public static final String LOCKING_PROCESS_DETECTION = "swabra.locking.processes";
-
+//  public static final String MODE = "swabra.mode";
+  public static final String ENABLED = "swabra.enabled";
   public static final String KILL = "swabra.kill";
   public static final String STRICT = "swabra.strict";
-
-  public static final String AFTER_BUILD = "swabra.after.build";
-  public static final String BEFORE_BUILD = "swabra.before.build";
-
-  public static final String PROCESS_ANALIZER = "swabra.process.analizer";
-
+  public static final String VERBOSE = "swabra.verbose";
+  public static final String LOCKING_PROCESS_DETECTION = "swabra.locking.processes";
   public static final String TRUE = "true";
 
-  public static final Map<String, String> SWABRA_MODES = new HashMap<String, String>();
+//  public static final String AFTER_BUILD = "swabra.after.build";
+//  public static final String BEFORE_BUILD = "swabra.before.build";
 
-  static {
-    SWABRA_MODES.put(AFTER_BUILD, "After build");
-    SWABRA_MODES.put(BEFORE_BUILD, "Before next build");
-  }
+//  public static final Map<String, String> SWABRA_MODES = new HashMap<String, String>();
+//  static {
+//    SWABRA_MODES.put(AFTER_BUILD, "After build");
+//    SWABRA_MODES.put(BEFORE_BUILD, "Before next build");
+//  }
 
   public static boolean isSwabraEnabled(@NotNull final Map<String, String> params) {
-    return params.containsKey(MODE);
+    return params.containsKey(ENABLED);
+//    return params.containsKey(MODE);
   }
 
-  public static String getSwabraMode(@NotNull final Map<String, String> params) {
-    return params.get(MODE);
-  }
-
-  public static void enableSwabra(@NotNull final Map<String, String> params, @NotNull String mode) {
-    params.put(MODE, mode);
-  }
+//  public static String getSwabraMode(@NotNull final Map<String, String> params) {
+//    return params.get(MODE);
+//  }
+//
+//  public static void enableSwabra(@NotNull final Map<String, String> params, @NotNull String mode) {
+//    params.put(MODE, mode);
+//  }
 
   public static boolean isVerbose(@NotNull final Map<String, String> params) {
     return params.containsKey(VERBOSE) && isSwabraEnabled(params);
@@ -75,9 +71,5 @@ public class SwabraUtil {
 
   public static boolean isLockingProcessesDetection(@NotNull final Map<String, String> params) {
     return SystemInfo.isWindows && params.containsKey(LOCKING_PROCESS_DETECTION);
-  }
-
-  public static String getHandlePath(@NotNull final Map<String, String> runParams) {
-    return runParams.get(PROCESS_ANALIZER);
   }
 }

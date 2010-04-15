@@ -34,24 +34,10 @@ public class FilesCollector {
   private static final String NOT_DELETE_SNAPSHOT = "swabra.preserve.snapshot";
 
   public static enum CollectionResult {
-    SUCCESS {
-      @Override
-      public String toString() {
-        return "SUCCESS";
-      }
-    },
-    FAILURE {
-      @Override
-      public String toString() {
-        return "FAILURE";
-      }
-    },
-    RETRY {
-      @Override
-      public String toString() {
-        return "RETRY";
-      }
-    }
+    CLEAN,
+    ERROR,
+    DIRTY,
+    LOCKED
   }
 
   @NotNull
@@ -68,7 +54,7 @@ public class FilesCollector {
   public CollectionResult collect(@NotNull File snapshot, @NotNull File checkoutDir) {
     if (!snapshot.exists() || (snapshot.length() == 0)) {
       logUnableCollect(snapshot, checkoutDir, "file doesn't exist");
-      return CollectionResult.FAILURE;
+      return CollectionResult.ERROR;
     }
 
     myLogger.activityStarted();
@@ -78,36 +64,36 @@ public class FilesCollector {
       iterateAndCollect(snapshot, checkoutDir);
     } catch (Exception e) {
       logUnableCollect(snapshot, checkoutDir, "Exception occurred: " + e.getMessage());
-      return CollectionResult.FAILURE;
+      return CollectionResult.ERROR;
     }
 
     final FilesCollectionProcessor.Results results = myProcessor.getResults();
 
     final int detectedNew = results.detectedNewAndDeleted + results.detectedNewAndUnableToDelete;
-    final String message = "Detected " + detectedNew + " newly created " + geObjectsNumber(detectedNew) +
+    final String message = "Detected " + results.detectedUnchanged + " unchanged " + getObjectsNumber(results.detectedUnchanged) +
+      ", " + detectedNew + " newly created " + getObjectsNumber(detectedNew) +
       (detectedNew > 0 ? " (" + results.detectedNewAndDeleted + " of them deleted)" : "") +
-      ", " + results.detectedModified + " modified " + geObjectsNumber(results.detectedModified) +
-      ", " + results.detectedDeleted + " deleted " + geObjectsNumber(results.detectedDeleted);
+      ", " + results.detectedModified + " modified " + getObjectsNumber(results.detectedModified) +
+      ", " + results.detectedDeleted + " deleted " + getObjectsNumber(results.detectedDeleted);
 
+    removeSnapshot(snapshot, checkoutDir);
     try {
       if (results.detectedNewAndUnableToDelete != 0) {
         myLogger.warn(message);
-        return CollectionResult.RETRY;
-      } else {
-        removeSnapshot(snapshot, checkoutDir);
+        return CollectionResult.LOCKED;
       }
       if (results.detectedDeleted > 0 || results.detectedModified > 0) {
         myLogger.warn(message);
-        return CollectionResult.FAILURE;
+        return CollectionResult.DIRTY;
       }
       myLogger.message(message, true);
-      return CollectionResult.SUCCESS;
+      return CollectionResult.CLEAN;
     } finally {
       myLogger.activityFinished();
     }
   }
 
-  private String geObjectsNumber(int number) {
+  private String getObjectsNumber(int number) {
     return number == 1 ? "object" : "objects";
   }
 

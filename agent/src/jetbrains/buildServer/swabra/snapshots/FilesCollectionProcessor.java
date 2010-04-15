@@ -24,6 +24,8 @@ public class FilesCollectionProcessor implements FilesTraversal.ComparisonProces
   private final boolean myStrictDeletion;
   private final boolean myVerbose;
 
+  private int myDetectedUnchanged;
+
   private int myDetectedNewAndDeleted;
   private int myDetectedModified;
   private int myDetectedDeleted;
@@ -43,6 +45,11 @@ public class FilesCollectionProcessor implements FilesTraversal.ComparisonProces
     myStrictDeletion = strict;
 
     myUnableToDeleteFiles = new ArrayList<File>();
+  }
+
+  public void processUnchanged(FileInfo info) {
+    ++myDetectedUnchanged;
+    myLogger.debug("Detected unchanged " + info.getPath());
   }
 
   public void processModified(FileInfo info1, FileInfo info2) {
@@ -78,9 +85,11 @@ public class FilesCollectionProcessor implements FilesTraversal.ComparisonProces
       deleteSubDirs(myCurrentNewDir);
     }
 
-    myResults = new Results(myDetectedNewAndDeleted, myUnableToDeleteFiles.size(),
+    myResults = new Results(myDetectedUnchanged,
+      myDetectedNewAndDeleted, myUnableToDeleteFiles.size(),
       myDetectedModified, myDetectedDeleted);
 
+    myDetectedUnchanged = 0;
     myDetectedNewAndDeleted = 0;
     myDetectedModified = 0;
     myDetectedDeleted = 0;
@@ -145,15 +154,18 @@ public class FilesCollectionProcessor implements FilesTraversal.ComparisonProces
   }
 
   public static final class Results {
+    public final int detectedUnchanged;
     public final int detectedNewAndDeleted;
     public final int detectedNewAndUnableToDelete;
     public final int detectedModified;
     public final int detectedDeleted;
 
-    public Results(int detectedNewAndDeleted,
+    public Results(int detectedUnchanged,
+                   int detectedNewAndDeleted,
                    int detectedNewAndUnableToDelete,
                    int detectedModified,
                    int detectedDeleted) {
+      this.detectedUnchanged = detectedUnchanged;
       this.detectedNewAndDeleted = detectedNewAndDeleted;
       this.detectedNewAndUnableToDelete = detectedNewAndUnableToDelete;
       this.detectedModified = detectedModified;

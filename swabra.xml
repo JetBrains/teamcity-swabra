@@ -497,6 +497,7 @@
     <pathelement location="${common.output.dir}"/>
     <pathelement location="${common.testoutput.dir}"/>
     <path refid="library.idea_annotations.classpath"/>
+    <path refid="library.teamcity-processterminator.classpath"/>
   </path>
 
   <path id="tests.runtime.module.classpath">
@@ -511,6 +512,7 @@
     <path refid="library.log4j.classpath"/>
     <path refid="common.runtime.module.classpath"/>
     <path refid="library.idea_annotations.classpath"/>
+    <path refid="library.teamcity-processterminator.classpath"/>
   </path>
 
 

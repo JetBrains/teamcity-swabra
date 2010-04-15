@@ -50,14 +50,6 @@ public class SwabraTest extends TestCase {
   private Mockery myContext;
 
 
-  private AgentRunningBuild createAgentRunningBuild(@NotNull final Map<String, String> runParams,
-                                                    @NotNull final File checkoutDir,
-                                                    @NotNull final SimpleBuildLogger logger) {
-    final AgentRunningBuild runningBuild = myContext.mock(AgentRunningBuild.class);
-    setRunningBuildParams(runParams, checkoutDir, logger, runningBuild);
-    return runningBuild;
-  }
-
   private void setRunningBuildParams(@NotNull final Map<String, String> runParams,
                                      @NotNull final File checkoutDir,
                                      @NotNull final SimpleBuildLogger logger,
@@ -126,14 +118,12 @@ public class SwabraTest extends TestCase {
   }
 
   private void runTest(final String dirName, final String resultsFileName,
-                       final Map<String, String> firstCallParams,
-                       final Map<String, String> secondCallParams) throws Exception {
+                       Map<String, String>... params) throws Exception {
     System.out.println("CheckoutDir is " + myCheckoutDir);
 
     final String goldFile = getTestDataPath(resultsFileName + ".gold", null);
     final String resultsFile = goldFile.replace(".gold", ".tmp");
     System.setProperty(Swabra.TEST_LOG, resultsFile);
-//    final String snapshotFile = goldFile.replace(".gold", ".snapshot");
 
     new File(resultsFile).delete();
 
@@ -141,7 +131,7 @@ public class SwabraTest extends TestCase {
 
     final SimpleBuildLogger logger = new BuildProgressLoggerMock(results);
     final EventDispatcher<AgentLifeCycleListener> dispatcher = EventDispatcher.create(AgentLifeCycleListener.class);
-    final AgentRunningBuild build = createAgentRunningBuild(firstCallParams, myCheckoutDir, logger);
+    final AgentRunningBuild build = myContext.mock(AgentRunningBuild.class);
 //    final Swabra swabra = new Swabra(dispatcher, createSmartDirectoryCleaner(), new ProcessTerminator());
     final Swabra swabra = new Swabra(dispatcher, createSmartDirectoryCleaner());
 
@@ -153,65 +143,39 @@ public class SwabraTest extends TestCase {
 
     final String checkoutDirPath = myCheckoutDir.getAbsolutePath();
 
-    FileUtil.copyDir(getTestData(dirName + File.separator + BEFORE_BUILD, null), myCheckoutDir);
-    FileUtil.delete(new File(checkoutDirPath + File.separator + ".svn"));
-    dispatcher.getMulticaster().buildStarted(build);
-    Thread.sleep(100);
-    cleanCheckoutDir();
+    for (Map<String, String> param : params) {
+      setRunningBuildParams(param, myCheckoutDir, logger, build);
 
-    FileUtil.copyDir(getTestData(dirName + File.separator + AFTER_CHECKOUT, null), myCheckoutDir);
-    FileUtil.delete(new File(checkoutDirPath + File.separator + ".svn"));
-    dispatcher.getMulticaster().sourcesUpdated(build);
-    dispatcher.getMulticaster().beforeBuildFinish(BuildFinishedStatus.FINISHED_SUCCESS);
-    Thread.sleep(100);
-    cleanCheckoutDir();
-
-    FileUtil.copyDir(getTestData(dirName + File.separator + AFTER_BUILD, null), myCheckoutDir);
-    FileUtil.delete(new File(checkoutDirPath + File.separator + ".svn"));
-    dispatcher.getMulticaster().buildFinished(BuildFinishedStatus.FINISHED_SUCCESS);
-    Thread.sleep(100);
-
-    myContext.assertIsSatisfied();
-    setRunningBuildParams(secondCallParams, myCheckoutDir, logger, build);
-
-    FileUtil.copyDir(getTestData(dirName + File.separator + BEFORE_BUILD, null), myCheckoutDir);
-    FileUtil.delete(new File(checkoutDirPath + File.separator + ".svn"));
-    dispatcher.getMulticaster().buildStarted(build);
-    Thread.sleep(100);
-    cleanCheckoutDir();
-
-    FileUtil.copyDir(getTestData(dirName + File.separator + AFTER_CHECKOUT, null), myCheckoutDir);
-    FileUtil.delete(new File(checkoutDirPath + File.separator + ".svn"));
-    dispatcher.getMulticaster().sourcesUpdated(build);
-    dispatcher.getMulticaster().beforeBuildFinish(BuildFinishedStatus.FINISHED_SUCCESS);
-    Thread.sleep(100);
-    cleanCheckoutDir();
-
-    FileUtil.copyDir(getTestData(dirName + File.separator + AFTER_BUILD, null), myCheckoutDir);
-    FileUtil.delete(new File(checkoutDirPath + File.separator + ".svn"));
-    dispatcher.getMulticaster().buildFinished(BuildFinishedStatus.FINISHED_SUCCESS);
-    Thread.sleep(100);
-
-    myContext.assertIsSatisfied();
+      runBuild(dirName, dispatcher, build, checkoutDirPath);
+    }
 
     System.out.println(results.toString().trim());
-    //final String actual = results.toString().replace(myCheckoutDir.getAbsolutePath(), "##CHECKOUT_DIR##").replace(checkoutDirParent + File.separator + myCheckoutDir.hashCode() + ".snapshot", "##SNAPSHOT##").trim();
     final String actual = readFile(new File(resultsFile)).trim().replace(myCheckoutDir.getAbsolutePath(), "##CHECKOUT_DIR##").replace("/", "\\");
     final String expected = readFile(new File(goldFile)).trim();
     assertEquals(actual, expected, actual);
 //    FileUtil.delete(pttTemp);
+  }
 
-//    final File actualSnapshotf = new File(myCheckoutDir.getAbsolutePath() + ".snapshot");
-//    if (actualSnapshotf.exists()) {
-//      final File goldSnapshotf = new File(snapshotFile);
-//      String actualSnapshot = readFile(actualSnapshotf).replace(myCheckoutDir.getParent(), "##WORK_DIR##").replace(myCheckoutDir.getName(), "##CHECKOUT_DIR##").trim();
-//      String expectedSnapshot = readFile(goldSnapshotf).trim();
-//      if (!actualSnapshot.equals(expectedSnapshot)) {
-//        FileUtil.copy(actualSnapshotf, new File(goldSnapshotf.getAbsolutePath() + ".tmp"));
-//
-//        assertEquals(actualSnapshot, expectedSnapshot, actualSnapshot);
-//      }
-//    }
+  private void runBuild(String dirName, EventDispatcher<AgentLifeCycleListener> dispatcher, AgentRunningBuild build, String checkoutDirPath) throws Exception {
+    FileUtil.copyDir(getTestData(dirName + File.separator + BEFORE_BUILD, null), myCheckoutDir);
+    FileUtil.delete(new File(checkoutDirPath + File.separator + ".svn"));
+    dispatcher.getMulticaster().buildStarted(build);
+    Thread.sleep(100);
+    cleanCheckoutDir();
+
+    FileUtil.copyDir(getTestData(dirName + File.separator + AFTER_CHECKOUT, null), myCheckoutDir);
+    FileUtil.delete(new File(checkoutDirPath + File.separator + ".svn"));
+    dispatcher.getMulticaster().sourcesUpdated(build);
+    dispatcher.getMulticaster().beforeBuildFinish(BuildFinishedStatus.FINISHED_SUCCESS);
+    Thread.sleep(100);
+    cleanCheckoutDir();
+
+    FileUtil.copyDir(getTestData(dirName + File.separator + AFTER_BUILD, null), myCheckoutDir);
+    FileUtil.delete(new File(checkoutDirPath + File.separator + ".svn"));
+    dispatcher.getMulticaster().buildFinished(BuildFinishedStatus.FINISHED_SUCCESS);
+    Thread.sleep(100);
+
+    myContext.assertIsSatisfied();
   }
 
   private void cleanCheckoutDir() {
@@ -223,18 +187,33 @@ public class SwabraTest extends TestCase {
     }
   }
 
-  public void testEmptyCheckoutDirBeforeBuild() throws Exception {
+  public void testEmptyCheckoutDirNonStrict() throws Exception {
     final Map<String, String> firstCallParams = new HashMap<String, String>();
+    firstCallParams.put(SwabraUtil.ENABLED, SwabraUtil.TRUE);
     firstCallParams.put(SwabraUtil.VERBOSE, SwabraUtil.TRUE);
-    firstCallParams.put(SwabraUtil.MODE, SwabraUtil.BEFORE_BUILD);
 
     final Map<String, String> secondCallParams = new HashMap<String, String>();
+    secondCallParams.put(SwabraUtil.ENABLED, SwabraUtil.TRUE);
     secondCallParams.put(SwabraUtil.VERBOSE, SwabraUtil.TRUE);
-    secondCallParams.put(SwabraUtil.MODE, SwabraUtil.BEFORE_BUILD);
 
     runTest("emptyCheckoutDir", "emptyCheckoutDir_b", firstCallParams, secondCallParams);
   }
 
+  public void testEmptyCheckoutDirStrict() throws Exception {
+    final Map<String, String> firstCallParams = new HashMap<String, String>();
+    firstCallParams.put(SwabraUtil.ENABLED, SwabraUtil.TRUE);
+    firstCallParams.put(SwabraUtil.STRICT, SwabraUtil.TRUE);
+    firstCallParams.put(SwabraUtil.VERBOSE, SwabraUtil.TRUE);
+
+    final Map<String, String> secondCallParams = new HashMap<String, String>();
+    secondCallParams.put(SwabraUtil.ENABLED, SwabraUtil.TRUE);
+    secondCallParams.put(SwabraUtil.STRICT, SwabraUtil.TRUE);
+    secondCallParams.put(SwabraUtil.VERBOSE, SwabraUtil.TRUE);
+
+    runTest("emptyCheckoutDir", "emptyCheckoutDir_b", firstCallParams, secondCallParams);
+  }
+
+/*
   public void testEmptyCheckoutDirAfterBuild() throws Exception {
     final Map<String, String> firstCallParams = new HashMap<String, String>();
     firstCallParams.put(SwabraUtil.VERBOSE, SwabraUtil.TRUE);
@@ -246,92 +225,173 @@ public class SwabraTest extends TestCase {
 
     runTest("emptyCheckoutDir", "emptyCheckoutDir_a", firstCallParams, secondCallParams);
   }
+*/
 
-  public void testOneCreatedOneModifiedOneNotChangedBeforeBuild() throws Exception {
+  public void testOneCreatedOneModifiedOneNotChangedNonStrict() throws Exception {
     final Map<String, String> firstCallParams = new HashMap<String, String>();
+    firstCallParams.put(SwabraUtil.ENABLED, SwabraUtil.TRUE);
     firstCallParams.put(SwabraUtil.VERBOSE, SwabraUtil.TRUE);
-    firstCallParams.put(SwabraUtil.MODE, SwabraUtil.BEFORE_BUILD);
 
     final Map<String, String> secondCallParams = new HashMap<String, String>();
+    secondCallParams.put(SwabraUtil.ENABLED, SwabraUtil.TRUE);
     secondCallParams.put(SwabraUtil.VERBOSE, SwabraUtil.TRUE);
-    secondCallParams.put(SwabraUtil.MODE, SwabraUtil.BEFORE_BUILD);
 
     runTest("oneCreatedOneModifiedOneNotChanged", "oneCreatedOneModifiedOneNotChanged_b",
       firstCallParams, secondCallParams);
   }
 
-  public void testOneCreatedOneModifiedOneNotChangedAfterBuild() throws Exception {
+  public void testOneCreatedOneModifiedOneNotChangedStrict() throws Exception {
     final Map<String, String> firstCallParams = new HashMap<String, String>();
+    firstCallParams.put(SwabraUtil.ENABLED, SwabraUtil.TRUE);
+    firstCallParams.put(SwabraUtil.STRICT, SwabraUtil.TRUE);
     firstCallParams.put(SwabraUtil.VERBOSE, SwabraUtil.TRUE);
-    firstCallParams.put(SwabraUtil.MODE, SwabraUtil.AFTER_BUILD);
 
     final Map<String, String> secondCallParams = new HashMap<String, String>();
+    secondCallParams.put(SwabraUtil.ENABLED, SwabraUtil.TRUE);
+    secondCallParams.put(SwabraUtil.STRICT, SwabraUtil.TRUE);
     secondCallParams.put(SwabraUtil.VERBOSE, SwabraUtil.TRUE);
-    secondCallParams.put(SwabraUtil.MODE, SwabraUtil.AFTER_BUILD);
 
-    runTest("oneCreatedOneModifiedOneNotChanged", "oneCreatedOneModifiedOneNotChanged_a",
+    runTest("oneCreatedOneModifiedOneNotChanged", "oneCreatedOneModifiedOneNotChanged_b",
       firstCallParams, secondCallParams);
   }
 
-  public void testOneCreatedOneModifiedOneNotChangedBeforeAfter() throws Exception {
+//  public void testOneCreatedOneModifiedOneNotChangedAfterBuild() throws Exception {
+//    final Map<String, String> firstCallParams = new HashMap<String, String>();
+//    firstCallParams.put(SwabraUtil.VERBOSE, SwabraUtil.TRUE);
+//    firstCallParams.put(SwabraUtil.MODE, SwabraUtil.AFTER_BUILD);
+//
+//    final Map<String, String> secondCallParams = new HashMap<String, String>();
+//    secondCallParams.put(SwabraUtil.VERBOSE, SwabraUtil.TRUE);
+//    secondCallParams.put(SwabraUtil.MODE, SwabraUtil.AFTER_BUILD);
+//
+//    runTest("oneCreatedOneModifiedOneNotChanged", "oneCreatedOneModifiedOneNotChanged_a",
+//      firstCallParams, secondCallParams);
+//  }
+//
+//  public void testOneCreatedOneModifiedOneNotChangedBeforeAfter() throws Exception {
+//    final Map<String, String> firstCallParams = new HashMap<String, String>();
+//    firstCallParams.put(SwabraUtil.VERBOSE, SwabraUtil.TRUE);
+//    firstCallParams.put(SwabraUtil.MODE, SwabraUtil.BEFORE_BUILD);
+//
+//    final Map<String, String> secondCallParams = new HashMap<String, String>();
+//    secondCallParams.put(SwabraUtil.VERBOSE, SwabraUtil.TRUE);
+//    secondCallParams.put(SwabraUtil.MODE, SwabraUtil.AFTER_BUILD);
+//
+//    runTest("oneCreatedOneModifiedOneNotChanged", "oneCreatedOneModifiedOneNotChanged_b_a",
+//      firstCallParams, secondCallParams);
+//  }
+//
+//  public void testOneCreatedOneModifiedOneNotChangedAfterBefore() throws Exception {
+//    final Map<String, String> firstCallParams = new HashMap<String, String>();
+//    firstCallParams.put(SwabraUtil.VERBOSE, SwabraUtil.TRUE);
+//    firstCallParams.put(SwabraUtil.MODE, SwabraUtil.AFTER_BUILD);
+//
+//    final Map<String, String> secondCallParams = new HashMap<String, String>();
+//    secondCallParams.put(SwabraUtil.VERBOSE, SwabraUtil.TRUE);
+//    secondCallParams.put(SwabraUtil.MODE, SwabraUtil.BEFORE_BUILD);
+//
+//    runTest("oneCreatedOneModifiedOneNotChanged", "oneCreatedOneModifiedOneNotChanged_a_b",
+//      firstCallParams, secondCallParams);
+//  }
+//
+//  public void testOneCreatedOneModifiedOneNotChangedTurnedOffBefore() throws Exception {
+//    final Map<String, String> firstCallParams = new HashMap<String, String>();
+//    firstCallParams.put(SwabraUtil.VERBOSE, SwabraUtil.TRUE);
+//
+//    final Map<String, String> secondCallParams = new HashMap<String, String>();
+//    secondCallParams.put(SwabraUtil.VERBOSE, SwabraUtil.TRUE);
+//    secondCallParams.put(SwabraUtil.MODE, SwabraUtil.BEFORE_BUILD);
+//
+//    runTest("oneCreatedOneModifiedOneNotChanged", "oneCreatedOneModifiedOneNotChanged_off_b",
+//      firstCallParams, secondCallParams);
+//  }
+//
+//  public void testOneCreatedOneModifiedOneNotChangedTurnedOffAfter() throws Exception {
+//    final Map<String, String> firstCallParams = new HashMap<String, String>();
+//    firstCallParams.put(SwabraUtil.VERBOSE, SwabraUtil.TRUE);
+//
+//    final Map<String, String> secondCallParams = new HashMap<String, String>();
+//    secondCallParams.put(SwabraUtil.VERBOSE, SwabraUtil.TRUE);
+//    secondCallParams.put(SwabraUtil.MODE, SwabraUtil.AFTER_BUILD);
+//
+//    runTest("oneCreatedOneModifiedOneNotChanged", "oneCreatedOneModifiedOneNotChanged_off_a",
+//      firstCallParams, secondCallParams);
+//  }
+//
+//  public void testOneDeletedAfterBuild() throws Exception {
+//    final Map<String, String> firstCallParams = new HashMap<String, String>();
+//    firstCallParams.put(SwabraUtil.VERBOSE, SwabraUtil.TRUE);
+//
+//    final Map<String, String> secondCallParams = new HashMap<String, String>();
+//    secondCallParams.put(SwabraUtil.VERBOSE, SwabraUtil.TRUE);
+//    secondCallParams.put(SwabraUtil.MODE, SwabraUtil.AFTER_BUILD);
+//
+//    runTest("oneDeleted", "oneDeleted_a",
+//      firstCallParams, secondCallParams);
+//  }
+
+  public void testOneDeletedNonStrict() throws Exception {
     final Map<String, String> firstCallParams = new HashMap<String, String>();
+    firstCallParams.put(SwabraUtil.ENABLED, SwabraUtil.TRUE);
     firstCallParams.put(SwabraUtil.VERBOSE, SwabraUtil.TRUE);
-    firstCallParams.put(SwabraUtil.MODE, SwabraUtil.BEFORE_BUILD);
 
     final Map<String, String> secondCallParams = new HashMap<String, String>();
+    secondCallParams.put(SwabraUtil.ENABLED, SwabraUtil.TRUE);
     secondCallParams.put(SwabraUtil.VERBOSE, SwabraUtil.TRUE);
-    secondCallParams.put(SwabraUtil.MODE, SwabraUtil.AFTER_BUILD);
-
-    runTest("oneCreatedOneModifiedOneNotChanged", "oneCreatedOneModifiedOneNotChanged_b_a",
-      firstCallParams, secondCallParams);
-  }
-
-  public void testOneCreatedOneModifiedOneNotChangedAfterBefore() throws Exception {
-    final Map<String, String> firstCallParams = new HashMap<String, String>();
-    firstCallParams.put(SwabraUtil.VERBOSE, SwabraUtil.TRUE);
-    firstCallParams.put(SwabraUtil.MODE, SwabraUtil.AFTER_BUILD);
-
-    final Map<String, String> secondCallParams = new HashMap<String, String>();
-    secondCallParams.put(SwabraUtil.VERBOSE, SwabraUtil.TRUE);
-    secondCallParams.put(SwabraUtil.MODE, SwabraUtil.BEFORE_BUILD);
-
-    runTest("oneCreatedOneModifiedOneNotChanged", "oneCreatedOneModifiedOneNotChanged_a_b",
-      firstCallParams, secondCallParams);
-  }
-
-  public void testOneCreatedOneModifiedOneNotChangedTurnedOffBefore() throws Exception {
-    final Map<String, String> firstCallParams = new HashMap<String, String>();
-    firstCallParams.put(SwabraUtil.VERBOSE, SwabraUtil.TRUE);
-
-    final Map<String, String> secondCallParams = new HashMap<String, String>();
-    secondCallParams.put(SwabraUtil.VERBOSE, SwabraUtil.TRUE);
-    secondCallParams.put(SwabraUtil.MODE, SwabraUtil.BEFORE_BUILD);
-
-    runTest("oneCreatedOneModifiedOneNotChanged", "oneCreatedOneModifiedOneNotChanged_off_b",
-      firstCallParams, secondCallParams);
-  }
-
-  public void testOneCreatedOneModifiedOneNotChangedTurnedOffAfter() throws Exception {
-    final Map<String, String> firstCallParams = new HashMap<String, String>();
-    firstCallParams.put(SwabraUtil.VERBOSE, SwabraUtil.TRUE);
-
-    final Map<String, String> secondCallParams = new HashMap<String, String>();
-    secondCallParams.put(SwabraUtil.VERBOSE, SwabraUtil.TRUE);
-    secondCallParams.put(SwabraUtil.MODE, SwabraUtil.AFTER_BUILD);
-
-    runTest("oneCreatedOneModifiedOneNotChanged", "oneCreatedOneModifiedOneNotChanged_off_a",
-      firstCallParams, secondCallParams);
-  }
-
-  public void testOneDeletedAfterBuild() throws Exception {
-    final Map<String, String> firstCallParams = new HashMap<String, String>();
-    firstCallParams.put(SwabraUtil.VERBOSE, SwabraUtil.TRUE);
-
-    final Map<String, String> secondCallParams = new HashMap<String, String>();
-    secondCallParams.put(SwabraUtil.VERBOSE, SwabraUtil.TRUE);
-    secondCallParams.put(SwabraUtil.MODE, SwabraUtil.AFTER_BUILD);
 
     runTest("oneDeleted", "oneDeleted_a",
       firstCallParams, secondCallParams);
+  }
+
+  public void testOneDeletedStrict() throws Exception {
+    final Map<String, String> firstCallParams = new HashMap<String, String>();
+    firstCallParams.put(SwabraUtil.ENABLED, SwabraUtil.TRUE);
+    firstCallParams.put(SwabraUtil.STRICT, SwabraUtil.TRUE);
+    firstCallParams.put(SwabraUtil.VERBOSE, SwabraUtil.TRUE);
+
+    final Map<String, String> secondCallParams = new HashMap<String, String>();
+    secondCallParams.put(SwabraUtil.ENABLED, SwabraUtil.TRUE);
+    secondCallParams.put(SwabraUtil.STRICT, SwabraUtil.TRUE);
+    secondCallParams.put(SwabraUtil.VERBOSE, SwabraUtil.TRUE);
+
+    runTest("oneDeleted", "oneDeleted_a",
+      firstCallParams, secondCallParams);
+  }
+
+  public void testOneCreatedOneModifiedOneNotChangedNonStrict3() throws Exception {
+    final Map<String, String> firstCallParams = new HashMap<String, String>();
+    firstCallParams.put(SwabraUtil.ENABLED, SwabraUtil.TRUE);
+    firstCallParams.put(SwabraUtil.VERBOSE, SwabraUtil.TRUE);
+
+    final Map<String, String> secondCallParams = new HashMap<String, String>();
+    secondCallParams.put(SwabraUtil.ENABLED, SwabraUtil.TRUE);
+    secondCallParams.put(SwabraUtil.VERBOSE, SwabraUtil.TRUE);
+
+    final Map<String, String> thirdCallParams = new HashMap<String, String>();
+    thirdCallParams.put(SwabraUtil.ENABLED, SwabraUtil.TRUE);
+    thirdCallParams.put(SwabraUtil.VERBOSE, SwabraUtil.TRUE);
+
+    runTest("oneCreatedOneModifiedOneNotChanged", "oneCreatedOneModifiedOneNotChanged_b",
+      firstCallParams, secondCallParams, thirdCallParams);
+  }
+
+  public void testOneCreatedOneModifiedOneNotChangedStrict3() throws Exception {
+    final Map<String, String> firstCallParams = new HashMap<String, String>();
+    firstCallParams.put(SwabraUtil.ENABLED, SwabraUtil.TRUE);
+    firstCallParams.put(SwabraUtil.STRICT, SwabraUtil.TRUE);
+    firstCallParams.put(SwabraUtil.VERBOSE, SwabraUtil.TRUE);
+
+    final Map<String, String> secondCallParams = new HashMap<String, String>();
+    secondCallParams.put(SwabraUtil.ENABLED, SwabraUtil.TRUE);
+    secondCallParams.put(SwabraUtil.STRICT, SwabraUtil.TRUE);
+    secondCallParams.put(SwabraUtil.VERBOSE, SwabraUtil.TRUE);
+
+    final Map<String, String> thirdCallParams = new HashMap<String, String>();
+    thirdCallParams.put(SwabraUtil.ENABLED, SwabraUtil.TRUE);
+    thirdCallParams.put(SwabraUtil.STRICT, SwabraUtil.TRUE);
+    thirdCallParams.put(SwabraUtil.VERBOSE, SwabraUtil.TRUE);
+
+    runTest("oneCreatedOneModifiedOneNotChanged", "oneCreatedOneModifiedOneNotChanged_b",
+      firstCallParams, secondCallParams, thirdCallParams);
   }
 }

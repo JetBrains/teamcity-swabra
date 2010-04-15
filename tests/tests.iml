@@ -16,6 +16,7 @@
     <orderEntry type="library" name="Log4J" level="project" />
     <orderEntry type="module" module-name="common" />
     <orderEntry type="library" name="IDEA annotations" level="project" />
+    <orderEntry type="library" name="TeamCity-processTerminator" level="project" />
   </component>
 </module>
 
