@@ -12,12 +12,21 @@
 <c:set var="displaySwabraSettings"
        value="${empty propertiesBean.properties['swabra.enabled'] ? false : true}"/>
 
+<c:set var="updateHandleDownloader">
+  if ($('swabra.kill').checked || $('swabra.locking.processes').checked) {
+  BS.Util.show($('swabra.download.handle.container'));
+  } else {
+  BS.Util.hide($('swabra.download.handle.container'));
+  }
+  BS.MultilineProperties.updateVisible();
+</c:set>
+
 <l:settingsGroup title="Swabra">
 
   <tr class="noBorder">
     <th>Build files cleanup:</th>
     <td>
-      <c:set var="onclick1">
+      <c:set var="onclick">
         if (this.checked) {
         BS.Util.show($('swabra.strict.container'));
         BS.Util.show($('swabra.kill.container'));
@@ -29,7 +38,7 @@
         }
         BS.MultilineProperties.updateVisible();
       </c:set>
-      <props:checkboxProperty name="swabra.enabled" onclick="${onclick1}"/>
+      <props:checkboxProperty name="swabra.enabled" onclick="${onclick}"/>
       <label for="swabra.enabled">Perform build files cleanup</label>
       <span class="smallNote">
         At the build start inspect the checkout directory for files created, modified and deleted during previous build.</span>
@@ -51,15 +60,7 @@
       style="${displaySwabraSettings ? '' : 'display: none;'}">
     <th>Locking processes kill:</th>
     <td>
-      <c:set var="onclick2">
-        if (this.checked) {
-        BS.Util.show($('swabra.download.handle.container'));
-        } else {
-        BS.Util.hide($('swabra.download.handle.container'));
-        }
-        BS.MultilineProperties.updateVisible();
-      </c:set>
-      <props:checkboxProperty name="swabra.kill" onclick="${onclick2}"/>
+      <props:checkboxProperty name="swabra.kill" onclick="${updateHandleDownloader}"/>
       <label for="swabra.kill">Kill file locking processes on Windows agents</label>
             <span class="smallNote">
               When Swabra comes across a newly created file which is locked it tries to kill the locking process.<br/>
@@ -71,15 +72,7 @@
   <tr class="noBorder" id="swabra.locking.processes.container">
     <th>Locking processes detection:</th>
     <td>
-      <c:set var="onclick3">
-        if (this.checked) {
-        BS.Util.show($('swabra.download.handle.container'));
-        } else {
-        BS.Util.hide($('swabra.download.handle.container'));
-        }
-        BS.MultilineProperties.updateVisible();
-      </c:set>
-      <props:checkboxProperty name="swabra.locking.processes" onclick="${onclick3}"/>
+      <props:checkboxProperty name="swabra.locking.processes" onclick="${updateHandleDownloader}"/>
       <label for="swabra.locking.processes">Determine file locking processes on Windows agents</label>
       <span class="smallNote">
         Before the end of the build the checkout directory is inspected for locking processes.<br/>
