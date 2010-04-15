@@ -141,7 +141,7 @@ public final class Swabra extends AgentLifeCycleAdapter {
     if (snapshotName.endsWith(NON_STRICT_MARK)) {
       snapshotName = snapshotName.substring(0, snapshotName.length() - 1);
       if (myStrict) {
-        myLogger.swabraDebug("Snapshot " + snapshotName + " was saved without strict mode. Will force clean checkout");
+        myLogger.swabraDebug("Snapshot " + snapshotName + " was saved without \"Ensure clean checlout\" mode. Will force clean checkout");
         doCleanup(myCheckoutDir);
         return;
       }
