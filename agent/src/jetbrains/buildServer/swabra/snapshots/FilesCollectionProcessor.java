@@ -30,7 +30,7 @@ public class FilesCollectionProcessor implements FilesTraversal.ComparisonProces
   private int myDetectedModified;
   private int myDetectedDeleted;
 
-  private File myCurrentNewDir;
+  private FileInfo myCurrentNewDir;
   private final List<File> myUnableToDeleteFiles;
 
   private Results myResults;
@@ -48,31 +48,33 @@ public class FilesCollectionProcessor implements FilesTraversal.ComparisonProces
   }
 
   public void processUnchanged(FileInfo info) {
+    deleteNewDir();
     ++myDetectedUnchanged;
     myLogger.debug("Detected unchanged " + info.getPath());
   }
 
   public void processModified(FileInfo info1, FileInfo info2) {
+    deleteNewDir();
     ++myDetectedModified;
     myLogger.message("Detected modified " + info1.getPath(), myVerbose);
   }
 
   public void processDeleted(FileInfo info) {
+    deleteNewDir();
     ++myDetectedDeleted;
     myLogger.message("Detected deleted " + info.getPath(), myVerbose);
   }
 
   public void processAdded(FileInfo info) {
+    if (isAncestor(myCurrentNewDir, info)) {
+      return;
+    }
+    deleteNewDir();
     final File file = new File(info.getPath());
     if (file.isFile()) {
       deleteObject(file);
     } else {
-      if (myCurrentNewDir == null) {
-        myCurrentNewDir = file;
-      } else if (!file.getAbsolutePath().startsWith(myCurrentNewDir.getAbsolutePath())) {
-        deleteSubDirs(myCurrentNewDir);
-        myCurrentNewDir = file;
-      }
+      myCurrentNewDir = info;
     }
   }
 
@@ -81,9 +83,7 @@ public class FilesCollectionProcessor implements FilesTraversal.ComparisonProces
   }
 
   public void comparisonFinished() {
-    if (myCurrentNewDir != null) {
-      deleteSubDirs(myCurrentNewDir);
-    }
+    deleteNewDir();
 
     myResults = new Results(myDetectedUnchanged,
       myDetectedNewAndDeleted, myUnableToDeleteFiles.size(),
@@ -94,18 +94,34 @@ public class FilesCollectionProcessor implements FilesTraversal.ComparisonProces
     myDetectedModified = 0;
     myDetectedDeleted = 0;
     myUnableToDeleteFiles.clear();
-    myCurrentNewDir = null;
   }
 
   public Results getResults() {
     return myResults;
   }
 
+  private void deleteNewDir() {
+    if (myCurrentNewDir != null) {
+      deleteSubDirs(myCurrentNewDir);
+      myCurrentNewDir = null;
+    }
+  }
+
+  private static boolean isAncestor(FileInfo info1, FileInfo info2) {
+    return info1 != null && info2.getPath().startsWith(info1.getPath() + File.separator);
+  }
+
+  private void deleteSubDirs(FileInfo info) {
+    deleteSubDirs(new File(info.getPath()));
+  }
+
   private void deleteSubDirs(File dir) {
     final File[] files = dir.listFiles();
     if (files != null && files.length > 0) {
       for (File f : files) {
-        if (f.isDirectory()) {
+        if (f.isFile()) {
+          deleteObject(f);
+        } else if (f.isDirectory()) {
           deleteSubDirs(f);
         }
       }

@@ -16,10 +16,12 @@
 
 package jetbrains.buildServer.swabra;
 
+import jetbrains.buildServer.util.FileUtil;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.*;
+import java.util.List;
 
 /**
  * User: vbedrosova
@@ -64,4 +66,16 @@ public class TestUtil {
     }
   }
 
+  private static final String SVN_FILE = ".svn";
+
+  public static void deleteSvnFiles(File root) {
+    final List<File> subDirectories = FileUtil.getSubDirectories(root);
+    for (File f : subDirectories) {
+      if (SVN_FILE.equals(f.getName())) {
+        FileUtil.delete(f);
+      } else {
+        deleteSvnFiles(f);
+      }
+    }
+  }
 }

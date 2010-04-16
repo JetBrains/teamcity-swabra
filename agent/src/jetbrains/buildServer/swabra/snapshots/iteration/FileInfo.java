@@ -16,6 +16,7 @@
 
 package jetbrains.buildServer.swabra.snapshots.iteration;
 
+import jetbrains.buildServer.swabra.SwabraUtil;
 import org.jetbrains.annotations.NotNull;
 
 /**
@@ -31,7 +32,7 @@ public class FileInfo {
   private final boolean myIsFile;
 
   public FileInfo(@NotNull String path, long length, long lastModified, boolean isFile) {
-    myPath = path;
+    myPath = SwabraUtil.unifyPath(path);
     myLength = length;
     myLastModified = lastModified;
     myIsFile = isFile;

@@ -16,6 +16,7 @@
 
 package jetbrains.buildServer.swabra.snapshots;
 
+import jetbrains.buildServer.swabra.SwabraUtil;
 import jetbrains.buildServer.swabra.snapshots.iteration.FileInfo;
 import org.jetbrains.annotations.NotNull;
 
@@ -39,14 +40,7 @@ public class SnapshotUtil {
   }
 
   public static String getSnapshotHeader(@NotNull String baseDirName) {
-    return baseDirName + File.separator + LINE_SEPARATOR;
-  }
-
-  public static String getSnapshotEntry(@NotNull File file, @NotNull String baseDirName) {
-    final boolean isFile = file.isFile();
-    String fPath = file.getAbsolutePath();
-    fPath = isFile ? file.getName() : getDirPath(baseDirName, fPath); //+1 for trailing slash
-    return getSnapshoEntry(fPath, file.length(), file.lastModified());
+    return SwabraUtil.unifyPath(baseDirName) + File.separator + LINE_SEPARATOR;
   }
 
   public static String getSnapshotEntry(@NotNull FileInfo file, @NotNull String baseDirName) {

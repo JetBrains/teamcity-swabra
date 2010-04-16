@@ -16,24 +16,47 @@
 
 package jetbrains.buildServer.swabra.snapshots.iteration;
 
-import java.io.File;
-import java.util.Comparator;
+import static jetbrains.buildServer.swabra.SwabraUtil.unifyPath;
 
 /**
  * User: vbedrosova
  * Date: 02.02.2010
  * Time: 13:22:24
  */
-public class FilesComparator implements Comparator<File> {
-  public int compare(File o1, File o2) {
-    return compare(o1.getAbsolutePath(), o1.isFile(), o2.getAbsolutePath(), o2.isFile());
-  }
-
+public class FilesComparator {
   public static int compare(FileInfo o1, FileInfo o2) {
     return compare(o1.getPath(), o1.isFile(), o2.getPath(), o2.isFile());
   }
 
   private static int compare(String path1, boolean isFile1, String path2, boolean isFile2) {
+    if (path1.equals(path2)) {
+      return compareByType(isFile1, isFile2);
+    }
+
+    final String[] path1Parts = unifyPath(path1, '/').split("/");
+    final String[] path2Parts = unifyPath(path2, '/').split("/");
+
+    final int len1 = path1Parts.length;
+    final int len2 = path2Parts.length;
+    final int len = Math.min(len1, len2);
+
+    for (int i = 0; i < len; ++i) {
+      final int comparisonResult = path1Parts[i].compareTo(path2Parts[i]);
+      if (comparisonResult != 0) {
+        return comparisonResult;
+      }
+    }
+
+    if (len1 < len2) {
+      return -1;
+    } else if (len2 < len1) {
+      return 1;
+    }
+    final int res = compareByType(isFile1, isFile2);
+    return res == 0 ? path1Parts[len].compareTo(path2Parts[len]) : res;
+  }
+
+  public static int compareByType(boolean isFile1, boolean isFile2) {
     if (isFile1) {
       if (!isFile2) {
         return -1;
@@ -43,6 +66,6 @@ public class FilesComparator implements Comparator<File> {
         return 1;
       }
     }
-    return path1.compareTo(path2);
+    return 0;
   }
 }

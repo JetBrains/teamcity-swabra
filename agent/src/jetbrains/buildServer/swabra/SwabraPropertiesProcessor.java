@@ -26,6 +26,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.CountDownLatch;
 
+import static jetbrains.buildServer.swabra.SwabraUtil.unifyPath;
+
 /**
  * User: vbedrosova
  * Date: 18.11.2009
@@ -44,10 +46,6 @@ public final class SwabraPropertiesProcessor {
   private final File myPropertiesFile;
 
   private final CountDownLatch myCleanupFinishedSignal;
-
-  public static String unifyPath(@NotNull File dir) {
-    return dir.getAbsolutePath().replace("\\", "/");
-  }
 
   public SwabraPropertiesProcessor(@NotNull File tempDir, @NotNull SwabraLogger logger) {
     myPropertiesFile = new File(tempDir, FILE_NAME);

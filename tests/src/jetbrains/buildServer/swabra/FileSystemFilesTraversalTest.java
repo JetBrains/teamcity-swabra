@@ -25,7 +25,6 @@ import junit.framework.TestCase;
 
 import java.io.File;
 import java.io.FileWriter;
-import java.util.List;
 
 import static jetbrains.buildServer.swabra.TestUtil.getTestData;
 import static jetbrains.buildServer.swabra.TestUtil.readFile;
@@ -36,15 +35,13 @@ import static jetbrains.buildServer.swabra.TestUtil.readFile;
  * Time: 17:40:03
  */
 public class FileSystemFilesTraversalTest extends TestCase {
-  private static final String SVN_FILE = ".svn";
-
   private void runTest(String resultsFileName) throws Exception {
     final FilesTraversal traversal = new FilesTraversal();
     final StringBuffer results = new StringBuffer();
 
     final File root = new File(new TempFiles().createTempDir(), "root");
     FileUtil.copyDir(getTestData("filesTraverse", null), root);
-    deleteSvnFiles(root);
+    TestUtil.deleteSvnFiles(root);
 
     traversal.traverse(new FileSystemFilesIterator(root),
       new FilesTraversal.SimpleProcessor() {
@@ -56,7 +53,7 @@ public class FileSystemFilesTraversalTest extends TestCase {
     final File goldFile = getTestData(resultsFileName + ".gold", null);
     final String resultsFile = goldFile.getAbsolutePath().replace(".gold", ".tmp");
 
-    final String actual = results.toString().replace(root.getAbsolutePath(), "##ROOT##").replace(File.separator, "\\").trim();
+    final String actual = results.toString().trim().replace(root.getAbsolutePath(), "##ROOT##").replace("/", "\\");
     final String expected = readFile(goldFile).trim();
     if (!actual.equals(expected)) {
       final FileWriter resultsWriter = new FileWriter(resultsFile);
@@ -64,17 +61,6 @@ public class FileSystemFilesTraversalTest extends TestCase {
       resultsWriter.close();
 
       assertEquals(actual, expected, actual);
-    }
-  }
-
-  private void deleteSvnFiles(File root) {
-    final List<File> subDirectories = FileUtil.getSubDirectories(root);
-    for (File f : subDirectories) {
-      if (SVN_FILE.equals(f.getName())) {
-        FileUtil.delete(f);
-      } else {
-        deleteSvnFiles(f);
-      }
     }
   }
 

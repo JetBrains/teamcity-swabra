@@ -19,6 +19,7 @@ package jetbrains.buildServer.swabra;
 import com.intellij.openapi.util.SystemInfo;
 import org.jetbrains.annotations.NotNull;
 
+import java.io.File;
 import java.util.Map;
 
 /**
@@ -71,5 +72,17 @@ public class SwabraUtil {
 
   public static boolean isLockingProcessesDetection(@NotNull final Map<String, String> params) {
     return SystemInfo.isWindows && params.containsKey(LOCKING_PROCESS_DETECTION);
+  }
+
+  public static String unifyPath(String path) {
+    return unifyPath(path, File.separatorChar);
+  }
+
+  public static String unifyPath(String path, char withSeparator) {
+    return path.replace('\\', withSeparator).replace('/', withSeparator);
+  }
+
+  public static String unifyPath(File file) {
+    return unifyPath(file.getAbsolutePath());
   }
 }

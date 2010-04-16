@@ -18,6 +18,7 @@ package jetbrains.buildServer.swabra.snapshots;
 
 import jetbrains.buildServer.swabra.Swabra;
 import jetbrains.buildServer.swabra.SwabraLogger;
+import jetbrains.buildServer.swabra.SwabraUtil;
 import jetbrains.buildServer.swabra.snapshots.iteration.FileInfo;
 import jetbrains.buildServer.swabra.snapshots.iteration.FileSystemFilesIterator;
 import jetbrains.buildServer.swabra.snapshots.iteration.FilesTraversal;
@@ -50,7 +51,7 @@ public class SnapshotGenerator {
                            @NotNull SwabraLogger logger) {
     myTempDir = tempDir;
     myCheckoutDir = checkoutDir;
-    myCheckoutDirParent = checkoutDir.getParent();
+    myCheckoutDirParent = SwabraUtil.unifyPath(checkoutDir.getParent());
     if (myCheckoutDirParent.endsWith(File.separator)) {
       myCheckoutDirParent = myCheckoutDirParent.substring(0, myCheckoutDirParent.length() - 1);
     }

@@ -37,7 +37,7 @@ public class SnapshotFilesTraversalTest extends TestCase {
     final FilesTraversal traversal = new FilesTraversal();
     final StringBuffer results = new StringBuffer();
 
-    traversal.traverse(new SnapshotFilesIterator(getTestData("test.snapshot", null)),
+    traversal.traverse(new SnapshotFilesIterator(getTestData("filesTraverse.snapshot", null)),
       new FilesTraversal.SimpleProcessor() {
         public void process(FileInfo file) {
           results.append(file.getPath()).append(" ").append(file.getLength()).append(" ").append(file.getLastModified()).append("\n");
@@ -47,7 +47,7 @@ public class SnapshotFilesTraversalTest extends TestCase {
     final File goldFile = getTestData(resultsFileName + ".gold", null);
     final String resultsFile = goldFile.getAbsolutePath().replace(".gold", ".tmp");
 
-    final String actual = results.toString().replace("/", "\\").trim();
+    final String actual = results.toString().trim().replace("/", "\\");
     final String expected = readFile(goldFile).trim();
     if (!actual.equals(expected)) {
       final FileWriter resultsWriter = new FileWriter(resultsFile);

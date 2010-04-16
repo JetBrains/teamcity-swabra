@@ -139,12 +139,12 @@ public final class Swabra extends AgentLifeCycleAdapter {
       return;
     }
     if (snapshotName.endsWith(NON_STRICT_MARK)) {
-      snapshotName = snapshotName.substring(0, snapshotName.length() - 1);
       if (myStrict) {
         myLogger.swabraDebug("Snapshot " + snapshotName + " was saved without \"Ensure clean checlout\" mode. Will force clean checkout");
         doCleanup(myCheckoutDir);
         return;
       }
+      snapshotName = snapshotName.substring(0, snapshotName.length() - 1);
     }
     final FilesCollector filesCollector = initFilesCollector(verbose, kill);
     final FilesCollector.CollectionResult result = filesCollector.collect(new File(myTempDir, snapshotName), myCheckoutDir);
@@ -266,10 +266,6 @@ public final class Swabra extends AgentLifeCycleAdapter {
       }
     });
     myLogger.activityFinished();
-  }
-
-  private static String unifyPath(String path) {
-    return path.replace("/", File.separator).replace("\\", File.separator);
   }
 
   private void fail() {
