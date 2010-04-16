@@ -58,7 +58,7 @@ public class FilesCollector {
     }
 
     myLogger.activityStarted();
-    myLogger.message("Scanning checkout directory " + checkoutDir + " for newly created and modified files...", true);
+    myLogger.message("Scanning checkout directory " + checkoutDir + " for newly created, modified and deleted files...", true);
 
     try {
       iterateAndCollect(snapshot, checkoutDir);
