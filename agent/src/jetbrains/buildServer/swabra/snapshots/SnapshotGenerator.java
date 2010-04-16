@@ -16,7 +16,6 @@
 
 package jetbrains.buildServer.swabra.snapshots;
 
-import jetbrains.buildServer.swabra.Swabra;
 import jetbrains.buildServer.swabra.SwabraLogger;
 import jetbrains.buildServer.swabra.SwabraUtil;
 import jetbrains.buildServer.swabra.snapshots.iteration.FileInfo;
@@ -59,7 +58,7 @@ public class SnapshotGenerator {
   }
 
   public boolean generateSnapshot(@NotNull String snapshotName) {
-    final File snapshot = new File(myTempDir, snapshotName + Swabra.SNAPSHOT_SUFFIX);
+    final File snapshot = new File(myTempDir, snapshotName);
     if (snapshot.exists()) {
       myLogger.swabraDebug("Snapshot file " + snapshot.getAbsolutePath() + " exists, try deleting");
       if (!FileUtil.delete(snapshot)) {

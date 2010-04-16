@@ -38,6 +38,9 @@ public final class SwabraPropertiesProcessor {
   private static final String FILE_NAME = "snapshot.map";
   private static final String KEY_VAL_SEPARATOR = "=";
 
+  public static final String SNAPSHOT_SUFFIX = ".snapshot";
+  public static final String MARK = "*";
+
   @NotNull
   private Map<String, String> myProperties;
   @NotNull
@@ -156,8 +159,8 @@ public final class SwabraPropertiesProcessor {
     }
   }
 
-  public void cleanupProperties(final File[] actualCheckoutDirs) {
-    if (actualCheckoutDirs == null || actualCheckoutDirs.length == 0) {
+  public void cleanupPropertiesAndSnapshots(final File[] actualCheckoutDirs) {
+    if (actualCheckoutDirs == null) {
       return;
     }
     new Thread(new Runnable() {
@@ -165,6 +168,7 @@ public final class SwabraPropertiesProcessor {
         try {
           readPropertiesNoAwait(false);
           final Set<String> savedCheckoutDirs = myProperties.keySet();
+//          final File[] snapshots =
           if (savedCheckoutDirs.isEmpty()) {
             return;
           }
@@ -184,5 +188,21 @@ public final class SwabraPropertiesProcessor {
         }
       }
     }).start();
+  }
+
+  public boolean isMarkedSnapshot(String snapshotName) {
+    return snapshotName.endsWith(MARK);
+  }
+
+  public String getNonMarkedSnapshotName(String snapshotName) {
+    return snapshotName.substring(0, snapshotName.length() - 1);
+  }
+
+  public String markSnapshotName(String snapshotName) {
+    return snapshotName + MARK;
+  }
+
+  public String generateSnapshotName(File checkoutDirectory) {
+    return Integer.toHexString(checkoutDirectory.hashCode()) + SNAPSHOT_SUFFIX;
   }
 }

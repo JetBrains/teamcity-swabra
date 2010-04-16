@@ -45,9 +45,6 @@ import static jetbrains.buildServer.swabra.SwabraUtil.*;
 public final class Swabra extends AgentLifeCycleAdapter {
   public static final String CACHE_KEY = "swabra";
 
-  public static final String SNAPSHOT_SUFFIX = ".snapshot";
-  public static final String NON_STRICT_MARK = "*";
-
   public static final String HANDLE_PATH_SUFFIX = File.separator + "handle.exe";
   public static final String HANDLE_EXE_SYSTEM_PROP = "handle.exe.path";
 
@@ -92,7 +89,7 @@ public final class Swabra extends AgentLifeCycleAdapter {
     myTempDir.mkdirs();
 
     myPropertiesProcessor = new SwabraPropertiesProcessor(myTempDir, myLogger);
-    myPropertiesProcessor.cleanupProperties(agent.getConfiguration().getWorkDirectory().listFiles());
+    myPropertiesProcessor.cleanupPropertiesAndSnapshots(agent.getConfiguration().getWorkDirectory().listFiles());
   }
 
   @Override
@@ -138,13 +135,13 @@ public final class Swabra extends AgentLifeCycleAdapter {
       doCleanup(myCheckoutDir);
       return;
     }
-    if (snapshotName.endsWith(NON_STRICT_MARK)) {
+    if (myPropertiesProcessor.isMarkedSnapshot(snapshotName)) {
       if (myStrict) {
         myLogger.swabraDebug("Snapshot " + snapshotName + " was saved without \"Ensure clean checlout\" mode. Will force clean checkout");
         doCleanup(myCheckoutDir);
         return;
       }
-      snapshotName = snapshotName.substring(0, snapshotName.length() - 1);
+      snapshotName = myPropertiesProcessor.getNonMarkedSnapshotName(snapshotName);
     }
     final FilesCollector filesCollector = initFilesCollector(verbose, kill);
     final FilesCollector.CollectionResult result = filesCollector.collect(new File(myTempDir, snapshotName), myCheckoutDir);
@@ -220,11 +217,12 @@ public final class Swabra extends AgentLifeCycleAdapter {
   }
 
   private void makeSnapshot() {
-    final String snapshotName = Integer.toHexString(myCheckoutDir.hashCode());
+    final String snapshotName = myPropertiesProcessor.generateSnapshotName(myCheckoutDir);
     if (!new SnapshotGenerator(myCheckoutDir, myTempDir, myLogger).generateSnapshot(snapshotName)) {
       myEnabled = false;
     } else {
-      myPropertiesProcessor.setSnapshot(myCheckoutDir, snapshotName + SNAPSHOT_SUFFIX + (myStrict ? "" : NON_STRICT_MARK));
+      myPropertiesProcessor.setSnapshot(myCheckoutDir,
+        myStrict ? snapshotName : myPropertiesProcessor.markSnapshotName(snapshotName));
     }
   }
 
