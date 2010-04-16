@@ -38,9 +38,8 @@ public class FilesComparator {
 
     final int len1 = path1Parts.length;
     final int len2 = path2Parts.length;
-    final int len = Math.min(len1, len2);
 
-    for (int i = 0; i < len; ++i) {
+    for (int i = 0; i < Math.min(len1, len2); ++i) {
       final int comparisonResult = path1Parts[i].compareTo(path2Parts[i]);
       if (comparisonResult != 0) {
         return comparisonResult;
@@ -52,8 +51,7 @@ public class FilesComparator {
     } else if (len2 < len1) {
       return 1;
     }
-    final int res = compareByType(isFile1, isFile2);
-    return res == 0 ? path1Parts[len].compareTo(path2Parts[len]) : res;
+    return compareByType(isFile1, isFile2);
   }
 
   public static int compareByType(boolean isFile1, boolean isFile2) {
