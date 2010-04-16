@@ -81,6 +81,9 @@ public class SnapshotFilesIterator implements FilesIterator {
   }
 
   private void closeReader() {
+    if (myReader == null) {
+      return;
+    }
     try {
       myReader.close();
     } catch (IOException e) {
