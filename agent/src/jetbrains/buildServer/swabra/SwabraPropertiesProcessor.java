@@ -20,10 +20,7 @@ import jetbrains.buildServer.util.FileUtil;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.*;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.CountDownLatch;
 
 import static jetbrains.buildServer.swabra.SwabraUtil.unifyPath;
@@ -167,27 +164,47 @@ public final class SwabraPropertiesProcessor {
       public void run() {
         try {
           readPropertiesNoAwait(false);
+
           final Set<String> savedCheckoutDirs = myProperties.keySet();
-//          final File[] snapshots =
-          if (savedCheckoutDirs.isEmpty()) {
+          final List<File> snapshots = getSnapshotFiles();
+
+          if (savedCheckoutDirs.isEmpty() && snapshots.isEmpty()) {
             return;
           }
-          final ArrayList<String> toRemove = new ArrayList<String>(savedCheckoutDirs);
+
+          final ArrayList<String> propertiesToRemove = new ArrayList<String>(savedCheckoutDirs);
+          final ArrayList<File> snapshotsToRemove = new ArrayList<File>(snapshots);
+
           for (File dir : actualCheckoutDirs) {
             if (!dir.isDirectory()) {
               continue;
             }
-            toRemove.remove(unifyPath(dir));
+            propertiesToRemove.remove(unifyPath(dir));
+            snapshotsToRemove.remove(getSnapshotFile(dir));
           }
-          for (String s : toRemove) {
+
+          for (String s : propertiesToRemove) {
             myProperties.remove(s);
           }
+
           writeProperties();
+
+          for (File f : snapshotsToRemove) {
+            FileUtil.delete(f);
+          }
         } finally {
           myCleanupFinishedSignal.countDown();
         }
       }
     }).start();
+  }
+
+  private List<File> getSnapshotFiles() {
+    return Arrays.asList(myPropertiesFile.getParentFile().listFiles(new FileFilter() {
+      public boolean accept(File pathname) {
+        return pathname.getName().endsWith(SNAPSHOT_SUFFIX);
+      }
+    }));
   }
 
   public boolean isMarkedSnapshot(String snapshotName) {
@@ -202,7 +219,11 @@ public final class SwabraPropertiesProcessor {
     return snapshotName + MARK;
   }
 
-  public String generateSnapshotName(File checkoutDirectory) {
+  public String getSnapshotName(File checkoutDirectory) {
     return Integer.toHexString(checkoutDirectory.hashCode()) + SNAPSHOT_SUFFIX;
+  }
+
+  public File getSnapshotFile(File checkoutDirectory) {
+    return new File(myPropertiesFile.getParent(), Integer.toHexString(checkoutDirectory.hashCode()) + SNAPSHOT_SUFFIX);
   }
 }

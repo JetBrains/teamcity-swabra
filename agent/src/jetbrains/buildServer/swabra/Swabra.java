@@ -217,7 +217,7 @@ public final class Swabra extends AgentLifeCycleAdapter {
   }
 
   private void makeSnapshot() {
-    final String snapshotName = myPropertiesProcessor.generateSnapshotName(myCheckoutDir);
+    final String snapshotName = myPropertiesProcessor.getSnapshotName(myCheckoutDir);
     if (!new SnapshotGenerator(myCheckoutDir, myTempDir, myLogger).generateSnapshot(snapshotName)) {
       myEnabled = false;
     } else {
