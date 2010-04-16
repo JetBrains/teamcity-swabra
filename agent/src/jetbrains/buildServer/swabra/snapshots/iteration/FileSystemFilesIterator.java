@@ -66,7 +66,12 @@ public class FileSystemFilesIterator implements FilesIterator {
     final File[] files = folder.listFiles();
     if (files != null && files.length > 0) {
       final List<File> filesList = Arrays.asList(files);
-      Collections.sort(filesList, new FilesComparator());
+      Collections.sort(filesList, new Comparator<File>() {
+        public int compare(File o1, File o2) {
+          final int res = FilesComparator.compareByType(o1.isFile(), o2.isFile());
+          return res == 0 ? o1.getName().compareTo(o2.getName()) : res;
+        }
+      });
       myIterators.push(filesList.iterator());
     }
     return createFileInfo(folder);
