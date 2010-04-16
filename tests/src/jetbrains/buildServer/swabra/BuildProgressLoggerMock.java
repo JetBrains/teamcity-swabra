@@ -64,10 +64,6 @@ public class BuildProgressLoggerMock implements BuildProgressLogger {
     myText.append("\n");
   }
 
-  public StringBuilder getText() {
-    return myText;
-  }
-
   public void activityStarted(final String activityName, final String activityType) {
     myText.append("ACTIVITY STARTED: ");
     myText.append(activityName);

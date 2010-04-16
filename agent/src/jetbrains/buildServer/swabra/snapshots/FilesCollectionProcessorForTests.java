@@ -16,7 +16,7 @@ import java.io.IOException;
  * Time: 14:59:20
  */
 public class FilesCollectionProcessorForTests extends FilesCollectionProcessor {
-  private String myLogPath;
+  private final String myLogPath;
   private BufferedWriter myWriter;
 
   public FilesCollectionProcessorForTests(@NotNull SwabraLogger logger,

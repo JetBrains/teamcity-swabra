@@ -52,7 +52,7 @@ public class FilesTraversal {
 
   public void traverseCompare(@NotNull FilesIterator it1,
                               @NotNull FilesIterator it2,
-                              @NotNull ComparisonProcessor processor) throws Exception {
+                              @NotNull ComparisonProcessor processor) {
     processor.comparisonStarted();
 
     FileInfo info1 = it1.getNext();

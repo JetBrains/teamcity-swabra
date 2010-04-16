@@ -26,12 +26,12 @@ import java.net.URL;
  * Date: 29.12.2009
  * Time: 14:56:17
  */
-public class URLDownloader {
+class URLDownloader {
   private static final Logger LOG = Logger.getLogger(URLDownloader.class);
 
   private static final int DOWNLOAD_TRY_NUMBER = 10;
 
-  public static void download(URL source, File dest) throws IOException {
+  public static void download(URL source, File dest) {
     LOG.info(new StringBuilder("Downloading object from ").append(source).
       append(" to ").append(dest.getAbsolutePath()).append("...").toString());
 

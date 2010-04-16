@@ -30,7 +30,7 @@ import org.jetbrains.annotations.NotNull;
 public final class SwabraLogger {
   @NonNls
   private static final String AGENT_BLOCK = "agent";
-  public static final String ACTIVITY_NAME = "Swabra";
+  private static final String ACTIVITY_NAME = "Swabra";
 
   @NotNull
   private final Logger myClassLogger;
@@ -67,14 +67,6 @@ public final class SwabraLogger {
 
   public void debug(@NotNull final String message) {
     myClassLogger.debug(message);
-  }
-
-  public void swabraMessage(@NotNull String message, boolean useBuildLog) {
-    message = prepareMessage(message);
-    myClassLogger.info(message);
-    if (useBuildLog && myBuildLogger != null) {
-      myBuildLogger.message(message);
-    }
   }
 
   public void swabraWarn(@NotNull String message) {

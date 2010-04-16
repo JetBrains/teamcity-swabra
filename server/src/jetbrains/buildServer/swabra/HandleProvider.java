@@ -17,14 +17,10 @@ import java.util.zip.ZipOutputStream;
  */
 public class HandleProvider {
   private static final Logger LOG = Logger.getLogger(HandleProvider.class);
-  public static final String HANDLE_PROVIDER_JAR = "handle-provider.jar";
-  public static final String TEAMCITY_PLUGIN_XML = "teamcity-plugin.xml";
+  private static final String HANDLE_PROVIDER_JAR = "handle-provider.jar";
+  private static final String TEAMCITY_PLUGIN_XML = "teamcity-plugin.xml";
 
   private static File myPluginFolder;
-
-  public static void initPluginFolder(@NotNull String pluginsDir) {
-    myPluginFolder = new File(pluginsDir, "/handle-provider");
-  }
 
   public static boolean isHandlePresent() {
     if (myPluginFolder == null) {

@@ -28,8 +28,8 @@ import java.util.List;
  * Date: 30.01.2010
  * Time: 17:43:40
  */
-public class TestUtil {
-  public static final String TEST_DATA_PATH = "tests" + File.separator + "testData";
+class TestUtil {
+  private static final String TEST_DATA_PATH = "tests" + File.separator + "testData";
 
   public static String getTestDataPath(@Nullable final String fileName, @Nullable final String folderName) throws Exception {
     return getTestData(fileName, folderName).getAbsolutePath();

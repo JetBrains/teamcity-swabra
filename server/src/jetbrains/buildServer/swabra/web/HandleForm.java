@@ -17,7 +17,7 @@ import java.util.List;
 public class HandleForm {
   private String myUrl = "http://download.sysinternals.com/Files/Handle.zip";
   private boolean myRunning = false;
-  private List<String> myDownloadHandleMessages = new ArrayList<String>();
+  private final List<String> myDownloadHandleMessages = new ArrayList<String>();
   private final CameFromSupport myCameFromSupport = new CameFromSupport();
 
   private int myErrors = 0;

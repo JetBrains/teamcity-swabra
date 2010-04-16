@@ -31,12 +31,12 @@ import static jetbrains.buildServer.swabra.SwabraUtil.unifyPath;
  * Time: 16:50:49
  */
 
-public final class SwabraPropertiesProcessor {
+final class SwabraPropertiesProcessor {
   private static final String FILE_NAME = "snapshot.map";
   private static final String KEY_VAL_SEPARATOR = "=";
 
-  public static final String SNAPSHOT_SUFFIX = ".snapshot";
-  public static final String MARK = "*";
+  private static final String SNAPSHOT_SUFFIX = ".snapshot";
+  private static final String MARK = "*";
 
   @NotNull
   private Map<String, String> myProperties;
@@ -122,7 +122,7 @@ public final class SwabraPropertiesProcessor {
     }
   }
 
-  public void writeProperties() {
+  private void writeProperties() {
     if (myProperties.isEmpty()) {
       if (myPropertiesFile.isFile()) {
         deletePropertiesFile();

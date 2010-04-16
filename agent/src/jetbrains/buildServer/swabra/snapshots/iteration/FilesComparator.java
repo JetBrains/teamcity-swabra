@@ -23,7 +23,7 @@ import static jetbrains.buildServer.swabra.SwabraUtil.unifyPath;
  * Date: 02.02.2010
  * Time: 13:22:24
  */
-public class FilesComparator {
+class FilesComparator {
   public static int compare(FileInfo o1, FileInfo o2) {
     return compare(o1.getPath(), o1.isFile(), o2.getPath(), o2.isFile());
   }

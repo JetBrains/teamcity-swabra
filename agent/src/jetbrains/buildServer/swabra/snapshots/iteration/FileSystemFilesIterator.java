@@ -29,7 +29,7 @@ import java.util.*;
  */
 public class FileSystemFilesIterator implements FilesIterator {
   @NotNull
-  private File myRootFolder;
+  private final File myRootFolder;
   private Stack<Iterator<File>> myIterators;
 
   public FileSystemFilesIterator(@NotNull File rootFolder) {

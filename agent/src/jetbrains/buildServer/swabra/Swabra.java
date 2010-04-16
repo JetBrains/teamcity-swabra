@@ -45,14 +45,14 @@ import static jetbrains.buildServer.swabra.SwabraUtil.*;
 public final class Swabra extends AgentLifeCycleAdapter {
   public static final String CACHE_KEY = "swabra";
 
-  public static final String HANDLE_PATH_SUFFIX = File.separator + "handle.exe";
-  public static final String HANDLE_EXE_SYSTEM_PROP = "handle.exe.path";
+  private static final String HANDLE_PATH_SUFFIX = File.separator + "handle.exe";
+  private static final String HANDLE_EXE_SYSTEM_PROP = "handle.exe.path";
 
   public static final String TEST_LOG = "swabra.test.log";
 
   private SwabraLogger myLogger;
   @NotNull
-  private SmartDirectoryCleaner myDirectoryCleaner;
+  private final SmartDirectoryCleaner myDirectoryCleaner;
 //  @NotNull
 //  private ProcessTerminator myProcessTerminator;
 

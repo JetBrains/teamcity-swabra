@@ -103,6 +103,7 @@ public class SwabraTest extends TestCase {
     };
   }
 
+  @Override
   @Before
   public void setUp() throws Exception {
     myContext = new JUnit4Mockery();
@@ -111,6 +112,7 @@ public class SwabraTest extends TestCase {
     myCheckoutDir.mkdirs();
   }
 
+  @Override
   @After
   public void tearDown() throws Exception {
     myTempFiles.cleanup();

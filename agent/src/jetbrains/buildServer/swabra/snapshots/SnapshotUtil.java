@@ -31,11 +31,11 @@ public class SnapshotUtil {
   private static final String SEPARATOR = "\t";
   private static final String LINE_SEPARATOR = "\r\n";
 
-  public static String encodeDate(long timestamp) {
+  private static String encodeDate(long timestamp) {
     return String.valueOf(timestamp);
   }
 
-  public static long decodeDate(String encodedDate) {
+  private static long decodeDate(String encodedDate) {
     return Long.parseLong(encodedDate);
   }
 

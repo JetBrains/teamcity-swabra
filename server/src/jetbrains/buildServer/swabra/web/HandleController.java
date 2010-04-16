@@ -1,9 +1,5 @@
 package jetbrains.buildServer.swabra.web;
 
-import java.util.HashMap;
-import java.util.Map;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import jetbrains.buildServer.controllers.ActionErrors;
 import jetbrains.buildServer.controllers.BaseFormXmlController;
 import jetbrains.buildServer.controllers.FormUtil;
@@ -19,6 +15,11 @@ import org.jdom.Element;
 import org.jetbrains.annotations.NonNls;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.web.servlet.ModelAndView;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * User: vbedrosova
@@ -96,7 +97,7 @@ public class HandleController extends BaseFormXmlController {
     return AuthUtil.hasGlobalPermission(mySecurityContext.getAuthorityHolder(), Permission.AUTHORIZE_AGENT);
   }
 
-  static HandleForm getForm(HttpServletRequest request) {
+  private static HandleForm getForm(HttpServletRequest request) {
     FormUtil.FormCreator<HandleForm> formCreator = new FormUtil.FormCreator<HandleForm>() {
       public HandleForm createForm(final HttpServletRequest request) {
         final HandleForm form = new HandleForm();
@@ -119,7 +120,6 @@ public class HandleController extends BaseFormXmlController {
     }
     if (!url.endsWith("/Handle.zip")) {
       errors.addError("wrongUrl", "Url must end with /Handle.zip");
-      return;
     }
   }
 }
