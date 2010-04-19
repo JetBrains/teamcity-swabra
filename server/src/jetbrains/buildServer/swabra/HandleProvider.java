@@ -22,6 +22,10 @@ public class HandleProvider {
 
   private static File myPluginFolder;
 
+  public static void initPluginFolder(@NotNull String pluginsDir) {
+    myPluginFolder = new File(pluginsDir, "/handle-provider");
+  }
+
   public static boolean isHandlePresent() {
     if (myPluginFolder == null) {
       return false;
