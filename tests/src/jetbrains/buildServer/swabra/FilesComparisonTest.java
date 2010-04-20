@@ -66,7 +66,13 @@ public class FilesComparisonTest extends TestCase {
     }
   }
 
+  @org.junit.Test
   public void test1() throws Exception {
-    runTest("filesCompare");
+    runTest("filesCompare1");
+  }
+
+  @org.junit.Test
+  public void test2() throws Exception {
+    runTest("filesCompare2");
   }
 }

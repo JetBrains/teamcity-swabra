@@ -42,6 +42,12 @@ class FilesComparator {
     for (int i = 0; i < Math.min(len1, len2); ++i) {
       final int comparisonResult = path1Parts[i].compareTo(path2Parts[i]);
       if (comparisonResult != 0) {
+        if (i == (len1 - 1) && len1 == len2) {
+          final int comparisonByTypeResult = compareByType(isFile1, isFile2);
+          if (comparisonByTypeResult != 0) {
+            return comparisonByTypeResult;
+          }
+        }
         return comparisonResult;
       }
     }
