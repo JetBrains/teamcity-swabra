@@ -80,12 +80,12 @@ public class HandleController extends BaseFormXmlController {
     validate(form, errors);
     if (errors.hasNoErrors()) {
       form.setRunning(true);
-      form.addMessage("Start downloading SysInternals Handle.zip from " + form.getUrl() + "...", Status.NORMAL);
+      form.addMessage("Start downloading SysInternals handle.exe from " + form.getUrl() + "...", Status.NORMAL);
       try {
         myHandleProvider.downloadAndExtract(form.getUrl());
-        form.addMessage("Successfully downloaded Handle.zip from " + form.getUrl(), Status.NORMAL);
+        form.addMessage("Successfully downloaded handle.exe", Status.NORMAL);
       } catch (Throwable throwable) {
-        form.addMessage("Failed to download Handle, please see teamcity-server.log for details", Status.ERROR);
+        form.addMessage("Failed to download handle.exe, please see teamcity-server.log for details", Status.ERROR);
       }
       form.setRunning(false);
     } else {
@@ -118,8 +118,8 @@ public class HandleController extends BaseFormXmlController {
       errors.addError("wrongUrl", "Url must start with http://");
       return;
     }
-    if (!url.endsWith("/Handle.zip")) {
-      errors.addError("wrongUrl", "Url must end with /Handle.zip");
+    if (!url.endsWith("/handle.exe")) {
+      errors.addError("wrongUrl", "Url must end with /handle.exe");
     }
   }
 }

@@ -96,7 +96,7 @@
       </th>
       <td>
         <c:url var="handleDownloader" value="/admin/handle.html"/>
-        <input type="button" value="Install SysInternals Handle.exe" onclick="window.open('${handleDownloader}', '_blank')"/>
+        <input type="button" value="Install SysInternals handle.exe" onclick="window.open('${handleDownloader}', '_blank')"/>
       </td>
     </tr>
   </c:if>

@@ -65,15 +65,19 @@
                 <span class="error" id="errorUrl"></span>
 
                 <div class="smallNote" style="margin: 0;">
-                  Url for downloading Handle.zip archive containing
+                  Url for downloading SysInternals
                   <a showdiscardchangesmessage="false"
                      target="_blank"
-                     href="http://technet.microsoft.com/en-us/sysinternals/bb896655.aspx">SysInternals Handle</a>
-                  excutable (handle.exe).
+                     href="http://technet.microsoft.com/en-us/sysinternals/bb896655.aspx">handle.exe</a>.
                   <br/>
-                  On Windows agents Handle is used to determine processes which hold files in the checkout directory.
+                  On Windows agents handle.exe is used to determine processes which hold files in the checkout directory.
                   <br/>
-                  Note that Handle will be present on agents only after the upgrade process.
+                  Note that by pressing "Download" button you accept the
+                  <a showdiscardchangesmessage="false"
+                     target="_blank"
+                     href="http://technet.microsoft.com/en-us/sysinternals/bb469936.aspx">Sysinternals Software License Terms</a>.
+                  <br/>
+                  handle.exe will be present on agents only after the upgrade process.
                 </div>
               </td>
             </l:settingsGroup>

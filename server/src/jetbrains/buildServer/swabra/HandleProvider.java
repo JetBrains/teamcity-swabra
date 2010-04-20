@@ -35,7 +35,7 @@ public class HandleProvider {
   }
 
   public void downloadAndExtract(@NotNull String url) throws Throwable {
-    LOG.debug("Downloading SysInternals Handle.zip from " + url + " and extracting it into handle-provider plugin to "
+    LOG.debug("Downloading SysInternals handle.exe from " + url + " and extracting it into handle-provider plugin to "
       + myPluginFolder.getAbsolutePath() + "...");
 
     final File pluginTempFolder = preparePluginFolder();
@@ -43,8 +43,9 @@ public class HandleProvider {
       final File pluginAgentTempFolder = prepareSubFolder(pluginTempFolder, "handle-provider");
       try {
         final File binFolder = prepareSubFolder(pluginAgentTempFolder, "bin");
-        final File handleZip = downloadHandleZip(url);
-        extractHandleZip(binFolder, handleZip);
+//        final File handleZip = downloadHandleZip(url);
+//        extractHandleZip(binFolder, handleZip);
+        downloadHandleExe(url, new File(binFolder, "handle.exe"));
 
         final File libFolder = prepareSubFolder(pluginAgentTempFolder, "lib");
         copyOutResource(libFolder, HANDLE_PROVIDER_JAR);
@@ -111,6 +112,10 @@ public class HandleProvider {
     final File tmpFile = FileUtil.createTempFile("", ".zip");
     URLDownloader.download(new URL(url), tmpFile);
     return tmpFile;
+  }
+
+  private static void downloadHandleExe(String url, File dest) throws IOException {
+    URLDownloader.download(new URL(url), dest);
   }
 
   private static File prepareSubFolder(File baseFolder, String name) {
