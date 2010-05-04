@@ -134,8 +134,9 @@ public class SwabraTest extends TestCase {
     final SimpleBuildLogger logger = new BuildProgressLoggerMock(results);
     final EventDispatcher<AgentLifeCycleListener> dispatcher = EventDispatcher.create(AgentLifeCycleListener.class);
     final AgentRunningBuild build = myContext.mock(AgentRunningBuild.class);
+    final SwabraLogger swabraLogger = new SwabraLogger();
 //    final Swabra swabra = new Swabra(dispatcher, createSmartDirectoryCleaner(), new ProcessTerminator());
-    final Swabra swabra = new Swabra(dispatcher, createSmartDirectoryCleaner());
+    final Swabra swabra = new Swabra(dispatcher, createSmartDirectoryCleaner(), new SwabraLogger(), new SwabraPropertiesProcessor(dispatcher, swabraLogger));
 
 //    final File pttTemp = new File(TEST_DATA_PATH, "ptt");
 //    System.setProperty(ProcessTreeTerminator.TEMP_PATH_SYSTEM_PROPERTY, pttTemp.getAbsolutePath());

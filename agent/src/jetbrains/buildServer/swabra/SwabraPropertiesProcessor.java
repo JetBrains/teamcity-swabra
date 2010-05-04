@@ -16,6 +16,10 @@
 
 package jetbrains.buildServer.swabra;
 
+import jetbrains.buildServer.agent.AgentLifeCycleAdapter;
+import jetbrains.buildServer.agent.AgentLifeCycleListener;
+import jetbrains.buildServer.agent.BuildAgent;
+import jetbrains.buildServer.util.EventDispatcher;
 import jetbrains.buildServer.util.FileUtil;
 import org.jetbrains.annotations.NotNull;
 
@@ -31,26 +35,30 @@ import static jetbrains.buildServer.swabra.SwabraUtil.unifyPath;
  * Time: 16:50:49
  */
 
-final class SwabraPropertiesProcessor {
+final class SwabraPropertiesProcessor extends AgentLifeCycleAdapter {
   private static final String FILE_NAME = "snapshot.map";
   private static final String KEY_VAL_SEPARATOR = "=";
 
   private static final String SNAPSHOT_SUFFIX = ".snapshot";
   private static final String MARK = "*";
 
-  @NotNull
   private Map<String, String> myProperties;
-  @NotNull
   private final SwabraLogger myLogger;
-  @NotNull
-  private final File myPropertiesFile;
+  private File myPropertiesFile;
 
-  private final CountDownLatch myCleanupFinishedSignal;
+  private CountDownLatch myCleanupFinishedSignal;
 
-  public SwabraPropertiesProcessor(@NotNull File tempDir, @NotNull SwabraLogger logger) {
-    myPropertiesFile = new File(tempDir, FILE_NAME);
+  public SwabraPropertiesProcessor(@NotNull final EventDispatcher<AgentLifeCycleListener> agentDispatcher,
+                                   @NotNull final SwabraLogger logger) {
+    agentDispatcher.addListener(this);
     myLogger = logger;
+  }
+
+  @Override
+  public void agentStarted(@NotNull BuildAgent agent) {
     myCleanupFinishedSignal = new CountDownLatch(1);
+    myPropertiesFile = new File(agent.getConfiguration().getCacheDirectory(Swabra.CACHE_KEY), FILE_NAME);
+    cleanupPropertiesAndSnapshots(agent.getConfiguration().getWorkDirectory().listFiles());
   }
 
   @NotNull
@@ -156,7 +164,7 @@ final class SwabraPropertiesProcessor {
     }
   }
 
-  public void cleanupPropertiesAndSnapshots(final File[] actualCheckoutDirs) {
+  private void cleanupPropertiesAndSnapshots(final File[] actualCheckoutDirs) {
     if (actualCheckoutDirs == null) {
       return;
     }
@@ -211,7 +219,7 @@ final class SwabraPropertiesProcessor {
     return snapshotName.endsWith(MARK);
   }
 
-  public String getNonMarkedSnapshotName(String snapshotName) {
+  private String getNonMarkedSnapshotName(String snapshotName) {
     return snapshotName.substring(0, snapshotName.length() - 1);
   }
 
@@ -221,6 +229,13 @@ final class SwabraPropertiesProcessor {
 
   public String getSnapshotName(File checkoutDirectory) {
     return Integer.toHexString(checkoutDirectory.hashCode()) + SNAPSHOT_SUFFIX;
+  }
+
+  public File getSnapshotFile(String snapshotName) {
+    if (isMarkedSnapshot(snapshotName)) {
+      snapshotName = getNonMarkedSnapshotName(snapshotName);
+    }
+    return new File(myPropertiesFile.getParent(), snapshotName);
   }
 
   public File getSnapshotFile(File checkoutDirectory) {

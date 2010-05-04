@@ -32,57 +32,44 @@ public final class SwabraLogger {
   private static final String AGENT_BLOCK = "agent";
   private static final String ACTIVITY_NAME = "Swabra";
 
-  @NotNull
-  private final Logger myClassLogger;
+  public static final Logger CLASS_LOGGER = Logger.getLogger(SwabraLogger.class);
   private BuildProgressLogger myBuildLogger;
-
-  public SwabraLogger(@NotNull final Logger classLogger) {
-    myClassLogger = classLogger;
-  }
 
   public void setBuildLogger(@NotNull BuildProgressLogger buildLogger) {
     myBuildLogger = buildLogger;
   }
 
   public void message(@NotNull final String message, boolean useBuildLog) {
-    myClassLogger.info(message);
-    if (useBuildLog && myBuildLogger != null) {
-      myBuildLogger.message(message);
-    }
+    CLASS_LOGGER.info(message);
+    if (useBuildLog && myBuildLogger != null) myBuildLogger.message(message);
   }
 
   public void warn(@NotNull final String message) {
-    myClassLogger.warn(message);
-    if (myBuildLogger != null) {
-      myBuildLogger.warning(message);
-    }
+    CLASS_LOGGER.warn(message);
+    if (myBuildLogger != null) myBuildLogger.warning(message);
   }
 
   public void error(@NotNull String message) {
-    myClassLogger.error(message);
-    if (myBuildLogger != null) {
-      myBuildLogger.error(message);
-    }
+    CLASS_LOGGER.error(message);
+    if (myBuildLogger != null) myBuildLogger.error(message);
   }
 
   public void debug(@NotNull final String message) {
-    myClassLogger.debug(message);
+    CLASS_LOGGER.debug(message);
   }
 
   public void swabraWarn(@NotNull String message) {
     message = prepareMessage(message);
-    myClassLogger.warn(message);
-    if (myBuildLogger != null) {
-      myBuildLogger.warning(message);
-    }
+    CLASS_LOGGER.warn(message);
+    if (myBuildLogger != null) myBuildLogger.warning(message);
   }
 
   public void swabraDebug(@NotNull String message) {
-    myClassLogger.debug(prepareMessage(message));
+    CLASS_LOGGER.debug(prepareMessage(message));
   }
 
   public void exception(@NotNull Throwable e) {
-    myClassLogger.warn(e.getMessage(), e);
+    CLASS_LOGGER.warn(e.getMessage(), e);
   }
 
   public void activityStarted() {

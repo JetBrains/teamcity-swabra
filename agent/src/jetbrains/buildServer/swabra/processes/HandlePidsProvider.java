@@ -45,14 +45,13 @@ public class HandlePidsProvider implements LockedFileResolver.LockingPidsProvide
   }
 
   @NotNull
-  public List<Long> getPids(@NotNull final File file) {
+  public List<Long> getPids(@NotNull final File file) throws GetPidsException {
     final ExecResult result = ProcessExecutor.runHandleAcceptEula(myHandleExePath, file.getAbsolutePath());
     if (HandleOutputReader.noResult(result.getStdout())) {
       LOG.debug("No matching handles found for " + file.getAbsolutePath());
       return Collections.emptyList();
     } else if (HandleOutputReader.noAdministrativeRights(result.getStdout())) {
-      LOG.warn("Administrative privilege is required to run handle.exe");
-      return Collections.emptyList();
+      throw new GetPidsException("Administrative privilege is required to run handle.exe");
     }
     return getPidsFromStdout(result.getStdout(), file.getAbsolutePath());
   }

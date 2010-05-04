@@ -151,9 +151,9 @@ public class FilesCollectionProcessor implements FilesTraversal.ComparisonProces
     }
     if (myLockedFileResolver != null) {
       if (myStrictDeletion) {
-        return myLockedFileResolver.resolveDelete(f);
+        return myLockedFileResolver.resolveDelete(f, null);
       } else {
-        return myLockedFileResolver.resolve(f, false);
+        return myLockedFileResolver.resolve(f, false, null);
       }
     }
     return false;

@@ -38,7 +38,6 @@ import static jetbrains.buildServer.swabra.snapshots.SnapshotUtil.getSnapshotHea
  * Time: 14:04:16
  */
 public class SnapshotGenerator {
-  private final File myTempDir;
   private final File myCheckoutDir;
   private String myCheckoutDirParent;
   private int mySavedObjects;
@@ -46,9 +45,7 @@ public class SnapshotGenerator {
   private final SwabraLogger myLogger;
 
   public SnapshotGenerator(@NotNull File checkoutDir,
-                           @NotNull File tempDir,
                            @NotNull SwabraLogger logger) {
-    myTempDir = tempDir;
     myCheckoutDir = checkoutDir;
     myCheckoutDirParent = SwabraUtil.unifyPath(checkoutDir.getParent());
     if (myCheckoutDirParent.endsWith(File.separator)) {
@@ -57,8 +54,7 @@ public class SnapshotGenerator {
     myLogger = logger;
   }
 
-  public boolean generateSnapshot(@NotNull String snapshotName) {
-    final File snapshot = new File(myTempDir, snapshotName);
+  public boolean generateSnapshot(@NotNull File snapshot) {
     if (snapshot.exists()) {
       myLogger.swabraDebug("Snapshot file " + snapshot.getAbsolutePath() + " exists, try deleting");
       if (!FileUtil.delete(snapshot)) {
