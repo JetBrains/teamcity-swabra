@@ -30,10 +30,14 @@ import java.util.Map;
 public class SwabraUtil {
 //  public static final String MODE = "swabra.mode";
   public static final String ENABLED = "swabra.enabled";
-  public static final String KILL = "swabra.kill";
   public static final String STRICT = "swabra.strict";
   public static final String VERBOSE = "swabra.verbose";
+
+  public static final String LOCKING_PROCESS_KILL = "swabra.kill";
   public static final String LOCKING_PROCESS_DETECTION = "swabra.locking.processes";
+
+  public static final String LOCKING_PROCESS = "swabra.processes";
+
   public static final String TRUE = "true";
 
 //  public static final String AFTER_BUILD = "swabra.after.build";
@@ -45,7 +49,7 @@ public class SwabraUtil {
 //    SWABRA_MODES.put(BEFORE_BUILD, "Before next build");
 //  }
 
-  public static boolean isSwabraEnabled(@NotNull final Map<String, String> params) {
+  public static boolean isCleanupEnabled(@NotNull final Map<String, String> params) {
     return params.containsKey(ENABLED);
 //    return params.containsKey(MODE);
   }
@@ -59,19 +63,19 @@ public class SwabraUtil {
 //  }
 
   public static boolean isVerbose(@NotNull final Map<String, String> params) {
-    return params.containsKey(VERBOSE) && isSwabraEnabled(params);
+    return params.containsKey(VERBOSE) && isCleanupEnabled(params);
   }
 
-  public static boolean isKill(@NotNull final Map<String, String> params) {
-    return SystemInfo.isWindows && params.containsKey(KILL) && isSwabraEnabled(params);
+  public static boolean isLockingProcessesKill(@NotNull final Map<String, String> params) {
+    return SystemInfo.isWindows && (params.containsKey(LOCKING_PROCESS_KILL) || "kill".equals(params.get(LOCKING_PROCESS)));
   }
 
   public static boolean isStrict(@NotNull final Map<String, String> params) {
-    return params.containsKey(STRICT) && isSwabraEnabled(params);
+    return params.containsKey(STRICT) && isCleanupEnabled(params);
   }
 
-  public static boolean isLockingProcessesDetection(@NotNull final Map<String, String> params) {
-    return SystemInfo.isWindows && params.containsKey(LOCKING_PROCESS_DETECTION);
+  public static boolean isLockingProcessesReport(@NotNull final Map<String, String> params) {
+    return SystemInfo.isWindows && (params.containsKey(LOCKING_PROCESS_DETECTION) || "report".equals(params.get(LOCKING_PROCESS)));
   }
 
   public static String unifyPath(String path) {

@@ -16,6 +16,7 @@ public class HandleOutputReader {
   private static final Logger LOG = Logger.getLogger(HandleOutputReader.class);
 
   private static final String NO_RESULT = "No matching handles found.";
+  private static final String NO_ADMIN_RIGHTS = "Make sure that you are an administrator.";
 
   public static interface LineProcessor {
     void processLine(@NotNull String line);
@@ -23,6 +24,10 @@ public class HandleOutputReader {
 
   public static boolean noResult(@NotNull String handleOutput) {
     return handleOutput.length() == 0 || handleOutput.contains(NO_RESULT);
+  }
+
+  public static boolean noAdministrativeRights(@NotNull String handleOutput) {
+    return handleOutput.contains(NO_ADMIN_RIGHTS);
   }
 
   public static void read(@NotNull String handleOutput, @NotNull LineProcessor processor) {

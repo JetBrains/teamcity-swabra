@@ -15,18 +15,7 @@
 </div>
 
 <c:choose>
-  <c:when test="${not empty propertiesBean.properties['swabra.mode']}">
-    <div class="parameter">
-      Kill processes:
-      <c:choose>
-        <c:when test="${propertiesBean.properties['swabra.kill']}">
-          <strong>enabled</strong>
-        </c:when>
-        <c:otherwise>
-          <strong>disabled</strong>
-        </c:otherwise>
-      </c:choose>
-    </div>
+  <c:when test="${not empty propertiesBean.properties['swabra.enabled']}">
     <div class="parameter">
       Ensure clean checkout directory:
       <c:choose>
@@ -53,13 +42,13 @@
 </c:choose>
 
 <div class="parameter">
-  Locking processes detection:
+  Locking processes:
   <c:choose>
-    <c:when test="${not empty propertiesBean.properties['swabra.locking.processes']}">
-      <strong>enabled</strong>
+    <c:when test="${propertiesBean.properties['swabra.processes'] == 'kill' || not empty propertiesBean.properties['swabra.kill']}">
+      <strong>Kill</strong>
     </c:when>
     <c:otherwise>
-      <strong>disabled</strong>
+      <strong>Report</strong>
     </c:otherwise>
   </c:choose>
 </div>

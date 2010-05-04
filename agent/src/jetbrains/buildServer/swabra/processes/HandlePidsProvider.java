@@ -48,6 +48,10 @@ public class HandlePidsProvider implements LockedFileResolver.LockingPidsProvide
   public List<Long> getPids(@NotNull final File file) {
     final ExecResult result = ProcessExecutor.runHandleAcceptEula(myHandleExePath, file.getAbsolutePath());
     if (HandleOutputReader.noResult(result.getStdout())) {
+      LOG.debug("No matching handles found for " + file.getAbsolutePath());
+      return Collections.emptyList();
+    } else if (HandleOutputReader.noAdministrativeRights(result.getStdout())) {
+      LOG.warn("Administrative privilege is required to run handle.exe");
       return Collections.emptyList();
     }
     return getPidsFromStdout(result.getStdout(), file.getAbsolutePath());

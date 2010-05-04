@@ -12,14 +12,14 @@
 <c:set var="displaySwabraSettings"
        value="${empty propertiesBean.properties['swabra.enabled'] ? false : true}"/>
 
-<c:set var="updateHandleDownloader">
-  if ($('swabra.kill').checked || $('swabra.locking.processes').checked) {
-  BS.Util.show($('swabra.download.handle.container'));
-  } else {
-  BS.Util.hide($('swabra.download.handle.container'));
-  }
-  BS.MultilineProperties.updateVisible();
-</c:set>
+<%--<c:set var="updateHandleDownloader">--%>
+<%--if ($('swabra.kill').checked || $('swabra.locking.processes').checked) {--%>
+<%--BS.Util.show($('swabra.download.handle.container'));--%>
+<%--} else {--%>
+<%--BS.Util.hide($('swabra.download.handle.container'));--%>
+<%--}--%>
+<%--BS.MultilineProperties.updateVisible();--%>
+<%--</c:set>--%>
 
 <l:settingsGroup title="Swabra">
 
@@ -29,11 +29,9 @@
       <c:set var="onclick">
         if (this.checked) {
         BS.Util.show($('swabra.strict.container'));
-        BS.Util.show($('swabra.kill.container'));
         BS.Util.show($('swabra.verbose.container'));
         } else {
         BS.Util.hide($('swabra.strict.container'));
-        BS.Util.hide($('swabra.kill.container'));
         BS.Util.hide($('swabra.verbose.container'));
         }
         BS.MultilineProperties.updateVisible();
@@ -56,27 +54,45 @@
     </td>
   </tr>
 
-  <tr class="noBorder" id="swabra.kill.container"
-      style="${displaySwabraSettings ? '' : 'display: none;'}">
-    <th>Locking processes kill:</th>
-    <td>
-      <props:checkboxProperty name="swabra.kill" onclick="${updateHandleDownloader}"/>
-      <label for="swabra.kill">Kill file locking processes on Windows agents</label>
-            <span class="smallNote">
-              When Swabra comes across a newly created file which is locked it tries to kill the locking process.<br/>
-              Note that handle.exe is required on agents.
-            </span>
-    </td>
-  </tr>
+  <%--<tr class="noBorder" id="swabra.kill.container"--%>
+  <%--style="${displaySwabraSettings ? '' : 'display: none;'}">--%>
+  <%--<th>Locking processes kill:</th>--%>
+  <%--<td>--%>
+  <%--<props:checkboxProperty name="swabra.kill" onclick="${updateHandleDownloader}"/>--%>
+  <%--<label for="swabra.kill">Kill file locking processes on Windows agents</label>--%>
+  <%--<span class="smallNote">--%>
+  <%--When Swabra comes across a newly created file which is locked it tries to kill the locking process.<br/>--%>
+  <%--Note that handle.exe is required on agents.--%>
+  <%--</span>--%>
+  <%--</td>--%>
+  <%--</tr>--%>
 
-  <tr class="noBorder" id="swabra.locking.processes.container">
-    <th>Locking processes detection:</th>
+  <%--<tr class="noBorder" id="swabra.locking.processes.container">--%>
+  <%--<th>Locking processes detection:</th>--%>
+  <%--<td>--%>
+  <%--<props:checkboxProperty name="swabra.locking.processes" onclick="${updateHandleDownloader}"/>--%>
+  <%--<label for="swabra.locking.processes">Determine file locking processes on Windows agents</label>--%>
+  <%--<span class="smallNote">--%>
+  <%--Before the end of the build the checkout directory is inspected for locking processes.<br/>--%>
+  <%--Note that handle.exe is required on agents.--%>
+  <%--</span>--%>
+  <%--</td>--%>
+  <%--</tr>--%>
+
+  <tr class="noBorder">
+    <th>Locking processes:</th>
     <td>
-      <props:checkboxProperty name="swabra.locking.processes" onclick="${updateHandleDownloader}"/>
-      <label for="swabra.locking.processes">Determine file locking processes on Windows agents</label>
-      <span class="smallNote">
-        Before the end of the build the checkout directory is inspected for locking processes.<br/>
-        Note that handle.exe is required on agents.
+      <props:selectProperty name="swabra.processes">
+        <c:set var="selected"
+               value="${propertiesBean.properties['swabra.processes']}"/>
+        <props:option value="report"
+                      selected="${selected != 'kill'}">Report</props:option>
+        <props:option value="kill"
+                      selected="${selected == 'kill'}">Kill</props:option>
+      </props:selectProperty>
+        <span class="smallNote">
+          Before the end of the build inspect the checkout directory for locking processes and report them or kill.<br/>
+          Note that handle.exe is required on agents.
       </span>
     </td>
   </tr>
@@ -90,8 +106,7 @@
   </tr>
 
   <c:if test="${not handlePresent}">
-    <tr class="noBorder" id="swabra.download.handle.container"
-        style="${empty propertiesBean.properties['swabra.locking.processes'] ? "display: none" : ""}">
+    <tr class="noBorder">
       <th>
       </th>
       <td>

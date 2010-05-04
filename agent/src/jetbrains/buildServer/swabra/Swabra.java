@@ -57,11 +57,13 @@ public final class Swabra extends AgentLifeCycleAdapter {
 //  private ProcessTerminator myProcessTerminator;
 
   private SwabraPropertiesProcessor myPropertiesProcessor;
+  private LockedFileResolver myLockedFileResolver;
 
   //  private String myMode;
-  private boolean myEnabled;
+  private boolean myCleanupEnabled;
   private boolean myStrict;
-  private boolean myLockingProcessesDetection;
+  private boolean myLockingProcessesKill;
+  private boolean myLockingProcessesReport;
   private String myHandlePath;
 
   private File myCheckoutDir;
@@ -100,24 +102,27 @@ public final class Swabra extends AgentLifeCycleAdapter {
 
     final Map<String, String> runnerParams = runningBuild.getRunnerParameters();
 //    myMode = getSwabraMode(runnerParams);
-    myEnabled = isSwabraEnabled(runnerParams);
+    myCleanupEnabled = isCleanupEnabled(runnerParams);
     myStrict = isStrict(runnerParams);
-    final boolean kill = isKill(runnerParams);
+    myLockingProcessesKill = isLockingProcessesKill(runnerParams);
+    myLockingProcessesReport = isLockingProcessesReport(runnerParams);
     final boolean verbose = isVerbose(runnerParams);
-    myLockingProcessesDetection = isLockingProcessesDetection(runnerParams);
 
-    logSettings(myEnabled, myCheckoutDir, kill, myStrict, myLockingProcessesDetection, verbose);
+    logSettings(myCleanupEnabled, myCheckoutDir, myLockingProcessesKill, myStrict, myLockingProcessesReport, verbose);
 
-    if (kill || myLockingProcessesDetection) {
+    if (myLockingProcessesKill || myLockingProcessesReport) {
       prepareHandle();
     } else {
       myHandlePath = null;
     }
 
+    myLockedFileResolver = myLockingProcessesKill && myHandlePath != null ?
+      new LockedFileResolver(new HandlePidsProvider(myHandlePath)/*, myProcessTerminator,*/) : null;
+
     String snapshotName;
     try {
-      if (!myEnabled) {
-        myLogger.message("Swabra is disabled", false);
+      if (!myCleanupEnabled) {
+        myLogger.message("Swabra cleanup is disabled", false);
         return;
       }
 
@@ -143,7 +148,8 @@ public final class Swabra extends AgentLifeCycleAdapter {
       }
       snapshotName = myPropertiesProcessor.getNonMarkedSnapshotName(snapshotName);
     }
-    final FilesCollector filesCollector = initFilesCollector(verbose, kill);
+
+    final FilesCollector filesCollector = initFilesCollector(verbose);
     final FilesCollector.CollectionResult result = filesCollector.collect(new File(myTempDir, snapshotName), myCheckoutDir);
 
     switch (result) {
@@ -166,13 +172,13 @@ public final class Swabra extends AgentLifeCycleAdapter {
 
   @Override
   public void sourcesUpdated(@NotNull AgentRunningBuild runningBuild) {
-    if (!myEnabled) return;
+    if (!myCleanupEnabled) return;
     makeSnapshot();
   }
 
   @Override
   public void beforeRunnerStart(@NotNull final AgentRunningBuild runningBuild) {
-    if (!myEnabled) return;
+    if (!myCleanupEnabled) return;
     if (!runningBuild.isCheckoutOnAgent() && !runningBuild.isCheckoutOnServer()) {
       makeSnapshot();
     }
@@ -180,13 +186,16 @@ public final class Swabra extends AgentLifeCycleAdapter {
 
   @Override
   public void beforeBuildFinish(@NotNull final BuildFinishedStatus buildStatus) {
-    if (myLockingProcessesDetection && myHandlePath != null) {
+    if (myHandlePath == null) return;
+    if (myLockingProcessesReport || !myCleanupEnabled && myLockedFileResolver != null) {
       myLogger.activityStarted();
 
       try {
         final ExecResult result = ProcessExecutor.runHandleAcceptEula(myHandlePath, myCheckoutDir.getAbsolutePath());
         if (HandleOutputReader.noResult(result.getStdout())) {
           myLogger.message("No processes lock the checkout directory", true);
+        } else if (HandleOutputReader.noAdministrativeRights(result.getStdout())) {
+          myLogger.message("Not enough rights to run handle.exe. Administrative privilege is required.", true);
         } else {
           myLogger.message("The following processes lock the checkout directory", true);
 
@@ -198,20 +207,19 @@ public final class Swabra extends AgentLifeCycleAdapter {
             }
           });
         }
+        if (myLockingProcessesKill) {
+          myLockedFileResolver.resolve(myCheckoutDir, true);
+        }
       } finally {
         myLogger.activityFinished();
       }
     }
   }
 
-  private FilesCollector initFilesCollector(boolean verbose, boolean kill) {
-    final LockedFileResolver lockedFileResolver =
-      (!kill || myHandlePath == null) ?
-        null : new LockedFileResolver(new HandlePidsProvider(myHandlePath)/*, myProcessTerminator,*/);
-
+  private FilesCollector initFilesCollector(boolean verbose) {
     final FilesCollectionProcessor processor = (System.getProperty(TEST_LOG) == null) ?
-      new FilesCollectionProcessor(myLogger, lockedFileResolver, verbose, kill) :
-      new FilesCollectionProcessorForTests(myLogger, lockedFileResolver, verbose, true, System.getProperty(TEST_LOG));
+      new FilesCollectionProcessor(myLogger, myLockedFileResolver, verbose, myLockingProcessesKill) :
+      new FilesCollectionProcessorForTests(myLogger, myLockedFileResolver, verbose, true, System.getProperty(TEST_LOG));
 
     return new FilesCollector(processor, myLogger);
   }
@@ -219,7 +227,7 @@ public final class Swabra extends AgentLifeCycleAdapter {
   private void makeSnapshot() {
     final String snapshotName = myPropertiesProcessor.getSnapshotName(myCheckoutDir);
     if (!new SnapshotGenerator(myCheckoutDir, myTempDir, myLogger).generateSnapshot(snapshotName)) {
-      myEnabled = false;
+      myCleanupEnabled = false;
     } else {
       myPropertiesProcessor.setSnapshot(myCheckoutDir,
         myStrict ? snapshotName : myPropertiesProcessor.markSnapshotName(snapshotName));
@@ -227,14 +235,14 @@ public final class Swabra extends AgentLifeCycleAdapter {
   }
 
   private void logSettings(boolean enabled, File checkoutDir,
-                           boolean kill, boolean strict,
-                           boolean lockingProcessesDetectionEnabled,
+                           boolean lockingProcessesKill, boolean strict,
+                           boolean lockingProcessesReport,
                            boolean verbose) {
     myLogger.debug("Swabra settings: enabled = '" + enabled +
       "', checkoutDir = " + checkoutDir.getAbsolutePath() +
-      "', kill = " + kill +
       "', strict = " + strict +
-      "', locking processes detection = " + lockingProcessesDetectionEnabled +
+      "', kill = " + lockingProcessesKill +
+      "', locking processes report = " + lockingProcessesReport +
       "', verbose = '" + verbose + "'.");
   }
 
@@ -267,7 +275,7 @@ public final class Swabra extends AgentLifeCycleAdapter {
   }
 
   private void fail() {
-    myEnabled = false;
+    myCleanupEnabled = false;
     myLogger.message("##teamcity[buildStatus status='FAILURE' text='Swabra failed cleanup: some files are locked']", true);
   }
 
