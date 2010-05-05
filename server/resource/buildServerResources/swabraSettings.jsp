@@ -114,13 +114,16 @@
       <span class="smallNote" id="swabra.processes.report.note" style="${selected == 'report' ? '' : 'display: none;'}">
         Report about such processes in the build log.
         <br/>
-        Note that handle.exe is required on agents.
       </span>
       <span class="smallNote" id="swabra.processes.kill.note" style="${selected == 'kill' ? '' : 'display: none;'}">
         Report about such processes in the build log and kill them.
         <br/>
-        Note that handle.exe is required on agents.
-    </span>
+      </span>
+      <c:if test="${not handlePresent}">
+        <span class="smallNote">
+          Note that handle.exe is required on agents.
+        </span>
+      </c:if>
     </td>
   </tr>
 
