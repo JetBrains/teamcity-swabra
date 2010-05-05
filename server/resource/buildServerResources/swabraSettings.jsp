@@ -82,18 +82,45 @@
   <tr class="noBorder">
     <th>Locking processes:</th>
     <td>
-      <props:selectProperty name="swabra.processes">
-        <c:set var="selected"
-               value="${propertiesBean.properties['swabra.processes']}"/>
+      <c:set var="onchange">
+        var selectedValue = this.options[this.selectedIndex].value;
+        if (selectedValue == '') {
+        BS.Util.hide($('swabra.download.handle.container'));
+        } else {
+        BS.Util.show($('swabra.download.handle.container'));
+        if (selectedValue == 'report') {
+        BS.Util.show($('swabra.processes.report.note'));
+        BS.Util.hide($('swabra.processes.kill.note'));
+        } else if (selectedValue == 'kill') {
+        BS.Util.hide($('swabra.processes.report.note'));
+        BS.Util.show($('swabra.processes.kill.note'));
+        }
+        }
+        BS.MultilineProperties.updateVisible();
+      </c:set>
+      <c:set var="selected"
+             value="${propertiesBean.properties['swabra.processes']}"/>
+      <props:selectProperty name="swabra.processes" onchange="${onchange}">
+        <%--<props:option value=""--%>
+        <%--selected="${empty selected}">&lt;Do not detect&gt;</props:option>--%>
         <props:option value="report"
-                      selected="${selected != 'kill'}">Report</props:option>
+                      selected="${selected == 'report'}">Report</props:option>
         <props:option value="kill"
                       selected="${selected == 'kill'}">Kill</props:option>
       </props:selectProperty>
-        <span class="smallNote">
-          Before the end of the build inspect the checkout directory for locking processes and report them or kill.<br/>
-          Note that handle.exe is required on agents.
+      <span class="smallNote">
+        Before the end of the build inspect the checkout directory for processes locking files in this directory.
+      </span>  
+      <span class="smallNote" id="swabra.processes.report.note" style="${selected == 'report' ? '' : 'display: none;'}">
+        Report about such processes in the build log.
+        <br/>
+        Note that handle.exe is required on agents.
       </span>
+      <span class="smallNote" id="swabra.processes.kill.note" style="${selected == 'kill' ? '' : 'display: none;'}">
+        Report about such processes in the build log and kill them.
+        <br/>
+        Note that handle.exe is required on agents.
+    </span>
     </td>
   </tr>
 
@@ -106,7 +133,7 @@
   </tr>
 
   <c:if test="${not handlePresent}">
-    <tr class="noBorder">
+    <tr class="noBorder" id="swabra.download.handle.container">
       <th>
       </th>
       <td>
