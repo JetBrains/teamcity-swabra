@@ -6,20 +6,15 @@
 <jsp:useBean id="propertiesBean" scope="request" type="jetbrains.buildServer.controllers.BasePropertiesBean"/>
 
 <%@ page import="jetbrains.buildServer.swabra.HandleProvider" %>
+
 <c:set var="handlePresent"><%=HandleProvider.isHandlePresent()%>
 </c:set>
 
+<c:set var="selected"
+       value="${propertiesBean.properties['swabra.processes']}"/>
+
 <c:set var="displaySwabraSettings"
        value="${empty propertiesBean.properties['swabra.enabled'] ? false : true}"/>
-
-<%--<c:set var="updateHandleDownloader">--%>
-<%--if ($('swabra.kill').checked || $('swabra.locking.processes').checked) {--%>
-<%--BS.Util.show($('swabra.download.handle.container'));--%>
-<%--} else {--%>
-<%--BS.Util.hide($('swabra.download.handle.container'));--%>
-<%--}--%>
-<%--BS.MultilineProperties.updateVisible();--%>
-<%--</c:set>--%>
 
 <l:settingsGroup title="Swabra">
 
@@ -54,39 +49,20 @@
     </td>
   </tr>
 
-  <%--<tr class="noBorder" id="swabra.kill.container"--%>
-  <%--style="${displaySwabraSettings ? '' : 'display: none;'}">--%>
-  <%--<th>Locking processes kill:</th>--%>
-  <%--<td>--%>
-  <%--<props:checkboxProperty name="swabra.kill" onclick="${updateHandleDownloader}"/>--%>
-  <%--<label for="swabra.kill">Kill file locking processes on Windows agents</label>--%>
-  <%--<span class="smallNote">--%>
-  <%--When Swabra comes across a newly created file which is locked it tries to kill the locking process.<br/>--%>
-  <%--Note that handle.exe is required on agents.--%>
-  <%--</span>--%>
-  <%--</td>--%>
-  <%--</tr>--%>
-
-  <%--<tr class="noBorder" id="swabra.locking.processes.container">--%>
-  <%--<th>Locking processes detection:</th>--%>
-  <%--<td>--%>
-  <%--<props:checkboxProperty name="swabra.locking.processes" onclick="${updateHandleDownloader}"/>--%>
-  <%--<label for="swabra.locking.processes">Determine file locking processes on Windows agents</label>--%>
-  <%--<span class="smallNote">--%>
-  <%--Before the end of the build the checkout directory is inspected for locking processes.<br/>--%>
-  <%--Note that handle.exe is required on agents.--%>
-  <%--</span>--%>
-  <%--</td>--%>
-  <%--</tr>--%>
-
   <tr class="noBorder">
     <th>Locking processes:</th>
     <td>
       <c:set var="onchange">
         var selectedValue = this.options[this.selectedIndex].value;
         if (selectedValue == '') {
+        BS.Util.hide($('swabra.processes.note'));
+        BS.Util.hide($('swabra.processes.report.note'));
+        BS.Util.hide($('swabra.processes.kill.note'));
+        BS.Util.hide($('swabra.processes.handle.note'));
         BS.Util.hide($('swabra.download.handle.container'));
         } else {
+        BS.Util.show($('swabra.processes.note'));
+        BS.Util.show($('swabra.processes.handle.note'));
         BS.Util.show($('swabra.download.handle.container'));
         if (selectedValue == 'report') {
         BS.Util.show($('swabra.processes.report.note'));
@@ -98,17 +74,16 @@
         }
         BS.MultilineProperties.updateVisible();
       </c:set>
-      <c:set var="selected"
-             value="${propertiesBean.properties['swabra.processes']}"/>
       <props:selectProperty name="swabra.processes" onchange="${onchange}">
-        <%--<props:option value=""--%>
-        <%--selected="${empty selected}">&lt;Do not detect&gt;</props:option>--%>
+        <props:option value=""
+                      selected="${empty selected}">&lt;Do not detect&gt;</props:option>
         <props:option value="report"
                       selected="${selected == 'report'}">Report</props:option>
         <props:option value="kill"
                       selected="${selected == 'kill'}">Kill</props:option>
       </props:selectProperty>
-      <span class="smallNote">
+
+      <span class="smallNote" id="swabra.processes.note" style="${empty selected ? 'display: none;' : ''}">
         Before the end of the build inspect the checkout directory for processes locking files in this directory.
       </span>  
       <span class="smallNote" id="swabra.processes.report.note" style="${selected == 'report' ? '' : 'display: none;'}">
@@ -120,7 +95,7 @@
         <br/>
       </span>
       <c:if test="${not handlePresent}">
-        <span class="smallNote">
+        <span class="smallNote" id="swabra.processes.handle.note" style="${empty selected ? 'display: none;' : ''}">
           Note that handle.exe is required on agents.
         </span>
       </c:if>
@@ -136,7 +111,7 @@
   </tr>
 
   <c:if test="${not handlePresent}">
-    <tr class="noBorder" id="swabra.download.handle.container">
+    <tr class="noBorder" id="swabra.download.handle.container" style="${empty selected ? 'display: none;' : ''}">
       <th>
       </th>
       <td>
