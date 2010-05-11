@@ -36,6 +36,8 @@ import java.io.File;
 
 
 public final class Swabra extends AgentLifeCycleAdapter {
+  public static final String DEBUG_MODE = "swabra.debug.mode";
+
   public static final String CACHE_KEY = "swabra";
   public static final String TEST_LOG = "swabra.test.log";
 
@@ -66,6 +68,8 @@ public final class Swabra extends AgentLifeCycleAdapter {
 
   @Override
   public void buildStarted(@NotNull final AgentRunningBuild runningBuild) {
+//    System.setProperty(DEBUG_MODE, "true");
+
     myLogger.setBuildLogger(runningBuild.getBuildLogger());
 
     myCheckoutDir = runningBuild.getCheckoutDirectory();

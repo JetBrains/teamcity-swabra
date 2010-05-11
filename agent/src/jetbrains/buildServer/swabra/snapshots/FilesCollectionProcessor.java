@@ -1,5 +1,6 @@
 package jetbrains.buildServer.swabra.snapshots;
 
+import jetbrains.buildServer.swabra.Swabra;
 import jetbrains.buildServer.swabra.SwabraLogger;
 import jetbrains.buildServer.swabra.processes.LockedFileResolver;
 import jetbrains.buildServer.swabra.snapshots.iteration.FileInfo;
@@ -135,7 +136,15 @@ public class FilesCollectionProcessor implements FilesTraversal.ComparisonProces
       myLogger.warn("Detected new, unable to delete " + file.getAbsolutePath());
     } else {
       ++myDetectedNewAndDeleted;
-      myLogger.message("Detected new and deleted " + file.getAbsolutePath(), myVerbose);
+
+      final String message = "Detected new and deleted " + file.getAbsolutePath();
+      if (myVerbose) {
+        myLogger.message(message, true);
+      } else if ("true".equalsIgnoreCase(System.getProperty(Swabra.DEBUG_MODE))) {
+        myLogger.message(message, false);
+      } else {
+        myLogger.debug(message);
+      }
     }
   }
 
