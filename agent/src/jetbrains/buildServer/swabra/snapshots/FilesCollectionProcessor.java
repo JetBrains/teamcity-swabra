@@ -2,6 +2,8 @@ package jetbrains.buildServer.swabra.snapshots;
 
 import jetbrains.buildServer.swabra.Swabra;
 import jetbrains.buildServer.swabra.SwabraLogger;
+import jetbrains.buildServer.swabra.SwabraSettings;
+import jetbrains.buildServer.swabra.SwabraUtil;
 import jetbrains.buildServer.swabra.processes.LockedFileResolver;
 import jetbrains.buildServer.swabra.snapshots.iteration.FileInfo;
 import jetbrains.buildServer.swabra.snapshots.iteration.FilesTraversal;
@@ -11,6 +13,7 @@ import org.jetbrains.annotations.NotNull;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Pattern;
 
 /**
  * User: vbedrosova
@@ -22,8 +25,7 @@ public class FilesCollectionProcessor implements FilesTraversal.ComparisonProces
   private final SwabraLogger myLogger;
   private final LockedFileResolver myLockedFileResolver;
 
-  private final boolean myStrictDeletion;
-  private final boolean myVerbose;
+  private SwabraSettings mySettings;
 
   private int myDetectedUnchanged;
 
@@ -34,36 +36,54 @@ public class FilesCollectionProcessor implements FilesTraversal.ComparisonProces
   private FileInfo myCurrentNewDir;
   private final List<File> myUnableToDeleteFiles;
 
+  private final List<Pattern> myIgnoredPathsPatterns;
+  private final List<String> myIgnoredPaths;
+
   private Results myResults;
 
   public FilesCollectionProcessor(@NotNull SwabraLogger logger,
                                   LockedFileResolver resolver,
-                                  boolean verbose,
-                                  boolean strict) {
+                                  SwabraSettings settings) {
     myLogger = logger;
     myLockedFileResolver = resolver;
-    myVerbose = verbose;
-    myStrictDeletion = strict;
+    mySettings = settings;
+
+    myIgnoredPathsPatterns = new ArrayList<Pattern>();
+    myIgnoredPaths = new ArrayList<String>();
+
+    for (final String p : settings.getIgnoredPaths().split(" *[,\n\r] *")) {
+      if (p.length() > 0) {
+        final String resolvedPath = FileUtil.resolvePath(mySettings.getCheckoutDir(), p).getAbsolutePath();
+        if (isAntMask(p)) {
+          myIgnoredPathsPatterns.add(Pattern.compile(FileUtil.convertAntToRegexp(resolvedPath)));
+        } else {
+          myIgnoredPaths.add(resolvedPath);
+        }
+      }
+    }
 
     myUnableToDeleteFiles = new ArrayList<File>();
   }
 
   public void processUnchanged(FileInfo info) {
     deleteNewDir();
+    if (isIgnored(info)) return;
     ++myDetectedUnchanged;
     myLogger.debug("Detected unchanged " + info.getPath());
   }
 
   public void processModified(FileInfo info1, FileInfo info2) {
     deleteNewDir();
+    if (isIgnored(info1)) return;
     ++myDetectedModified;
-    myLogger.message("Detected modified " + info1.getPath(), myVerbose);
+    myLogger.message("Detected modified " + info1.getPath(), mySettings.isVerbose());
   }
 
   public void processDeleted(FileInfo info) {
     deleteNewDir();
+    if (isIgnored(info)) return;
     ++myDetectedDeleted;
-    myLogger.message("Detected deleted " + info.getPath(), myVerbose);
+    myLogger.message("Detected deleted " + info.getPath(), mySettings.isVerbose());
   }
 
   public void processAdded(FileInfo info) {
@@ -97,13 +117,43 @@ public class FilesCollectionProcessor implements FilesTraversal.ComparisonProces
     myUnableToDeleteFiles.clear();
   }
 
+  private boolean isIgnored(FileInfo info) {
+    return isIgnored(info.getPath());
+  }
+
+  private boolean isIgnored(String path) {
+    if (!myIgnoredPaths.isEmpty()) {
+      File f = new File(path);
+      do {
+        if (myIgnoredPaths.contains(f.getAbsolutePath())) {
+          myLogger.debug(path + " is ignored by swabra");
+          return true;
+        }
+        f = f.getParentFile();
+      } while (f != null);
+    }
+
+    if (!myIgnoredPathsPatterns.isEmpty()) {
+      final String antUnifiedPath = SwabraUtil.unifyPath(path, '/');
+      for (final Pattern p : myIgnoredPathsPatterns) {
+        if (p.matcher(antUnifiedPath).matches()) {
+          myLogger.debug(path + " is ignored by swabra");
+          return true;
+        }
+      }
+    }
+    return false;
+  }
+
   public Results getResults() {
     return myResults;
   }
 
   private void deleteNewDir() {
     if (myCurrentNewDir != null) {
-      deleteSubDirs(myCurrentNewDir);
+      if (!isIgnored(myCurrentNewDir)) {
+        deleteSubDirs(myCurrentNewDir);
+      }
       myCurrentNewDir = null;
     }
   }
@@ -131,6 +181,7 @@ public class FilesCollectionProcessor implements FilesTraversal.ComparisonProces
   }
 
   private void deleteObject(File file) {
+    if (isIgnored(file.getAbsolutePath())) return;
     if (!resolveDelete(file)) {
       myUnableToDeleteFiles.add(file);
       myLogger.warn("Detected new, unable to delete " + file.getAbsolutePath());
@@ -138,7 +189,7 @@ public class FilesCollectionProcessor implements FilesTraversal.ComparisonProces
       ++myDetectedNewAndDeleted;
 
       final String message = "Detected new and deleted " + file.getAbsolutePath();
-      if (myVerbose) {
+      if (mySettings.isVerbose()) {
         myLogger.message(message, true);
       } else if ("true".equalsIgnoreCase(System.getProperty(Swabra.DEBUG_MODE))) {
         myLogger.message(message, false);
@@ -159,7 +210,7 @@ public class FilesCollectionProcessor implements FilesTraversal.ComparisonProces
       return true;
     }
     if (myLockedFileResolver != null) {
-      if (myStrictDeletion) {
+      if (mySettings.isStrict()) {
         return myLockedFileResolver.resolveDelete(f, null);
       } else {
         return myLockedFileResolver.resolve(f, false, null);
@@ -176,6 +227,10 @@ public class FilesCollectionProcessor implements FilesTraversal.ComparisonProces
       }
     }
     return false;
+  }
+
+  private static boolean isAntMask(String s) {
+    return (s.contains("*") || s.contains("?"));
   }
 
   public static final class Results {

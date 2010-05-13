@@ -29,6 +29,7 @@ import org.junit.After;
 import org.junit.Before;
 
 import java.io.File;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -53,17 +54,20 @@ public class SwabraTest extends TestCase {
   private void setRunningBuildParams(@NotNull final Map<String, String> runParams,
                                      @NotNull final File checkoutDir,
                                      @NotNull final SimpleBuildLogger logger,
+                                     @NotNull final BuildParametersMap buildParameters,
                                      @NotNull final AgentRunningBuild runningBuild) {
     myContext.checking(new Expectations() {
       {
-        oneOf(runningBuild).getRunnerParameters();
+        allowing(runningBuild).getRunnerParameters();
         will(returnValue(runParams));
-        oneOf(runningBuild).getBuildLogger();
+        allowing(runningBuild).getBuildLogger();
         will(returnValue(logger));
-        oneOf(runningBuild).getCheckoutDirectory();
+        allowing(runningBuild).getCheckoutDirectory();
         will(returnValue(checkoutDir));
         allowing(runningBuild).isCleanBuild();
         will(returnValue(false));
+        allowing(runningBuild).getBuildParameters();
+        will(returnValue(buildParameters));
       }
     });
   }
@@ -99,6 +103,25 @@ public class SwabraTest extends TestCase {
         if (!FileUtil.delete(file)) {
           callback.logFailedToCleanEntireFolder(file);
         }
+      }
+    };
+  }
+
+  private BuildParametersMap createBuildParametersMap() {
+    return new BuildParametersMap() {
+      @NotNull
+      public Map<String, String> getEnvironmentVariables() {
+        return Collections.emptyMap();
+      }
+
+      @NotNull
+      public Map<String, String> getSystemProperties() {
+        return Collections.emptyMap();
+      }
+
+      @NotNull
+      public Map<String, String> getAllParameters() {
+        return Collections.emptyMap();
       }
     };
   }
@@ -147,7 +170,7 @@ public class SwabraTest extends TestCase {
     final String checkoutDirPath = myCheckoutDir.getAbsolutePath();
 
     for (Map<String, String> param : params) {
-      setRunningBuildParams(param, myCheckoutDir, logger, build);
+      setRunningBuildParams(param, myCheckoutDir, logger, createBuildParametersMap(), build);
 
       runBuild(dirName, dispatcher, build, checkoutDirPath);
     }

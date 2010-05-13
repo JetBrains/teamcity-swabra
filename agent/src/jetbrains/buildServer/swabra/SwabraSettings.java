@@ -1,5 +1,7 @@
 package jetbrains.buildServer.swabra;
 
+import jetbrains.buildServer.agent.AgentRunningBuild;
+
 import java.io.File;
 import java.util.Map;
 
@@ -9,6 +11,8 @@ import java.util.Map;
  * Time: 19:04:35
  */
 public class SwabraSettings {
+  private static final String IGNORED_PATHS_PROPERTY = "swabra.ignored.paths";
+
   private static final String HANDLE_PATH_SUFFIX = File.separator + "handle.exe";
   private static final String HANDLE_EXE_SYSTEM_PROP = "handle.exe.path";
 
@@ -22,12 +26,23 @@ public class SwabraSettings {
 
   private String myHandlePath;
 
-  public SwabraSettings(Map<String, String> runnerParams, SwabraLogger logger) {
+  private final String myIgnoredPaths;
+
+  private final File myCheckoutDir;
+
+
+  public SwabraSettings(AgentRunningBuild runningBuild, SwabraLogger logger) {
+    final Map<String, String> runnerParams = runningBuild.getRunnerParameters();
     myCleanupEnabled = SwabraUtil.isCleanupEnabled(runnerParams);
     myStrict = SwabraUtil.isStrict(runnerParams);
     myLockingProcessesKill = SwabraUtil.isLockingProcessesKill(runnerParams);
     myLockingProcessesReport = SwabraUtil.isLockingProcessesReport(runnerParams);
     myVerbose = SwabraUtil.isVerbose(runnerParams);
+    myCheckoutDir = runningBuild.getCheckoutDirectory();
+
+    final Map<String, String> systemProperties = runningBuild.getBuildParameters().getSystemProperties();
+    myIgnoredPaths = systemProperties.containsKey(IGNORED_PATHS_PROPERTY) ? systemProperties.get(IGNORED_PATHS_PROPERTY) : "";
+
     logSettings();
     prepareHandle(logger);
   }
@@ -60,6 +75,14 @@ public class SwabraSettings {
     return myHandlePath;
   }
 
+  public String getIgnoredPaths() {
+    return myIgnoredPaths;
+  }
+
+  public File getCheckoutDir() {
+    return myCheckoutDir;
+  }
+
   public boolean isVerbose() {
     return myVerbose;
   }
@@ -67,9 +90,10 @@ public class SwabraSettings {
   private void logSettings() {
     SwabraLogger.CLASS_LOGGER.debug("Swabra settings: " +
       "cleanup enabled = '" + myCleanupEnabled +
-      "', strict = " + myStrict +
-      "', locking processes kill = " + myLockingProcessesKill +
-      "', locking processes report = " + myLockingProcessesReport +
+      "', strict = '" + myStrict +
+      "', locking processes kill = '" + myLockingProcessesKill +
+      "', locking processes report = '" + myLockingProcessesReport +
+      "', ignored paths = '" + myIgnoredPaths +
       "', verbose = '" + myVerbose + "'.");
   }
 
