@@ -33,6 +33,8 @@ public class FilesTraversal {
 
     void comparisonFinished();
 
+    boolean willProcess(FileInfo info);
+
     void processModified(FileInfo info1, FileInfo info2);
 
     void processDeleted(FileInfo info);
@@ -62,27 +64,27 @@ public class FilesTraversal {
       final int comparisonResult = FilesComparator.compare(info1, info2);
 
       if (fileAdded(comparisonResult)) {
-        processor.processAdded(info2);
+        process(info2, null, FileChangeType.ADDED, processor);
         info2 = it2.getNext();
       } else if (fileDeleted(comparisonResult)) {
-        processor.processDeleted(info1);
+        process(info1, null, FileChangeType.DELETED, processor);
         info1 = it1.getNext();
       } else {
         if (fileModified(info1, info2)) {
-          processor.processModified(info1, info2);
+          process(info1, info2, FileChangeType.MODIFIED, processor);
         } else {
-          processor.processUnchanged(info1);
+          process(info1, null, FileChangeType.UNCHANGED, processor);
         }
         info1 = it1.getNext();
         info2 = it2.getNext();
       }
     }
     while (info1 != null) {
-      processor.processDeleted(info1);
+      process(info1, null, FileChangeType.DELETED, processor);
       info1 = it1.getNext();
     }
     while (info2 != null) {
-      processor.processAdded(info2);
+      process(info2, null, FileChangeType.ADDED, processor);
       info2 = it2.getNext();
     }
     processor.comparisonFinished();
@@ -99,5 +101,24 @@ public class FilesTraversal {
   private static boolean fileModified(FileInfo was, FileInfo is) {
     return (was.isFile() || is.isFile())
       && (was.getLength() != is.getLength() || was.getLastModified() != is.getLastModified());
+  }
+
+  private static void process(FileInfo info1, FileInfo info2, FileChangeType changeType, ComparisonProcessor processor) {
+    if (processor.willProcess(info1)) {
+      switch (changeType) {
+        case ADDED:
+          processor.processAdded(info1);
+          break;
+        case DELETED:
+          processor.processDeleted(info1);
+          break;
+        case MODIFIED:
+          processor.processModified(info1, info2);
+          break;
+        case UNCHANGED:
+          processor.processUnchanged(info1);
+          break;
+      }
+    }
   }
 }

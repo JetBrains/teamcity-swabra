@@ -3,7 +3,10 @@ package jetbrains.buildServer.swabra;
 import jetbrains.buildServer.agent.AgentRunningBuild;
 
 import java.io.File;
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * User: vbedrosova
@@ -12,6 +15,8 @@ import java.util.Map;
  */
 public class SwabraSettings {
   private static final String IGNORED_PATHS_PROPERTY = "swabra.ignored.paths";
+
+  private static final String[] DEFAULT_IGNORED_PATHS = {"**/.svn", "**/.git", "**/.hg", "**/CVS"};
 
   private static final String HANDLE_PATH_SUFFIX = File.separator + "handle.exe";
   private static final String HANDLE_EXE_SYSTEM_PROP = "handle.exe.path";
@@ -26,7 +31,7 @@ public class SwabraSettings {
 
   private String myHandlePath;
 
-  private final String myIgnoredPaths;
+  private final Set<String> myIgnoredPaths;
 
   private final File myCheckoutDir;
 
@@ -41,7 +46,12 @@ public class SwabraSettings {
     myCheckoutDir = runningBuild.getCheckoutDirectory();
 
     final Map<String, String> systemProperties = runningBuild.getBuildParameters().getSystemProperties();
-    myIgnoredPaths = systemProperties.containsKey(IGNORED_PATHS_PROPERTY) ? systemProperties.get(IGNORED_PATHS_PROPERTY) : "";
+    myIgnoredPaths = new HashSet<String>();
+    if (systemProperties.containsKey(IGNORED_PATHS_PROPERTY)) {
+      myIgnoredPaths.addAll(Arrays.asList(systemProperties.get(IGNORED_PATHS_PROPERTY).split(" *[,\n\r] *")));
+    } else if (runningBuild.isCheckoutOnAgent()) {
+      myIgnoredPaths.addAll(Arrays.asList(DEFAULT_IGNORED_PATHS));
+    }
 
     logSettings();
     prepareHandle(logger);
@@ -75,7 +85,7 @@ public class SwabraSettings {
     return myHandlePath;
   }
 
-  public String getIgnoredPaths() {
+  public Set<String> getIgnoredPaths() {
     return myIgnoredPaths;
   }
 
@@ -93,7 +103,6 @@ public class SwabraSettings {
       "', strict = '" + myStrict +
       "', locking processes kill = '" + myLockingProcessesKill +
       "', locking processes report = '" + myLockingProcessesReport +
-      "', ignored paths = '" + myIgnoredPaths +
       "', verbose = '" + myVerbose + "'.");
   }
 

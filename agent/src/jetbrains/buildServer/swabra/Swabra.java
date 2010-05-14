@@ -25,10 +25,7 @@ package jetbrains.buildServer.swabra;
 import jetbrains.buildServer.agent.*;
 import jetbrains.buildServer.swabra.processes.HandlePidsProvider;
 import jetbrains.buildServer.swabra.processes.LockedFileResolver;
-import jetbrains.buildServer.swabra.snapshots.FilesCollectionProcessor;
-import jetbrains.buildServer.swabra.snapshots.FilesCollectionProcessorForTests;
-import jetbrains.buildServer.swabra.snapshots.FilesCollector;
-import jetbrains.buildServer.swabra.snapshots.SnapshotGenerator;
+import jetbrains.buildServer.swabra.snapshots.*;
 import jetbrains.buildServer.util.EventDispatcher;
 import org.jetbrains.annotations.NotNull;
 
@@ -104,7 +101,7 @@ public final class Swabra extends AgentLifeCycleAdapter {
       }
     }
 
-    final FilesCollector filesCollector = initFilesCollector(mySettings.isVerbose());
+    final FilesCollector filesCollector = initFilesCollector();
     final FilesCollector.CollectionResult result = filesCollector.collect(myPropertiesProcessor.getSnapshotFile(snapshotName), mySettings.getCheckoutDir());
 
     switch (result) {
@@ -159,11 +156,15 @@ public final class Swabra extends AgentLifeCycleAdapter {
     }
   }
 
-  private FilesCollector initFilesCollector(boolean verbose) {
-    final FilesCollectionProcessor processor = (System.getProperty(TEST_LOG) == null) ?
-      new FilesCollectionProcessor(myLogger, myLockedFileResolver, mySettings) :
-      new FilesCollectionProcessorForTests(myLogger, myLockedFileResolver, mySettings, System.getProperty(TEST_LOG));
-
+  private FilesCollector initFilesCollector() {
+    FilesCollectionProcessor processor;
+    if (System.getProperty(TEST_LOG) != null) {
+      processor = new FilesCollectionProcessorForTests(myLogger, myLockedFileResolver, mySettings.isVerbose(), mySettings.isStrict(), System.getProperty(TEST_LOG));
+    } else if (mySettings.getIgnoredPaths().isEmpty()) {
+      processor = new FilesCollectionProcessor(myLogger, myLockedFileResolver, mySettings.isVerbose(), mySettings.isStrict());
+    } else {
+      processor = new FilesCollectionIgnoreRulesProcessor(myLogger, myLockedFileResolver, mySettings);
+    }
     return new FilesCollector(processor, myLogger);
   }
 

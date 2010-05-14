@@ -53,7 +53,7 @@ public class FilesCollector {
 
   public CollectionResult collect(@NotNull File snapshot, @NotNull File checkoutDir) {
     if (!snapshot.exists() || (snapshot.length() == 0)) {
-      logUnableCollect(snapshot, checkoutDir, "file doesn't exist");
+      logUnableCollect(snapshot, checkoutDir, "file doesn't exist", null);
       return CollectionResult.ERROR;
     }
 
@@ -63,7 +63,7 @@ public class FilesCollector {
     try {
       iterateAndCollect(snapshot, checkoutDir);
     } catch (Exception e) {
-      logUnableCollect(snapshot, checkoutDir, "Exception occurred: " + e.getMessage());
+      logUnableCollect(snapshot, checkoutDir, "Exception occurred: " + e.getMessage(), e);
       return CollectionResult.ERROR;
     }
 
@@ -115,9 +115,12 @@ public class FilesCollector {
     traversal.traverseCompare(new SnapshotFilesIterator(snapshot), new FileSystemFilesIterator(checkoutDir), myProcessor);
   }
 
-  private void logUnableCollect(File snapshot, File checkoutDir, String message) {
+  private void logUnableCollect(File snapshot, File checkoutDir, String message, Throwable e) {
     myLogger.swabraWarn("Unable to collect files in checkout directory " + checkoutDir.getAbsolutePath()
       + " from snapshot file " + snapshot.getAbsolutePath() +
       ((message != null ? ", " + message : "")));
+    if (e != null) {
+      myLogger.exception(e);
+    }
   }
 }

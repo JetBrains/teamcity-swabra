@@ -68,6 +68,10 @@ public class SwabraTest extends TestCase {
         will(returnValue(false));
         allowing(runningBuild).getBuildParameters();
         will(returnValue(buildParameters));
+        allowing(runningBuild).isCheckoutOnAgent();
+        will(returnValue(false));
+        allowing(runningBuild).isCheckoutOnServer();
+        will(returnValue(true));
       }
     });
   }

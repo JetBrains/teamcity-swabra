@@ -35,6 +35,10 @@ public class FilesComparisonTest extends TestCase {
         public void comparisonFinished() {
         }
 
+        public boolean willProcess(FileInfo info) {
+          return true;
+        }
+
         public void processModified(FileInfo info1, FileInfo info2) {
           results.append("MODIFIED: ").append(info1.getPath()).append("\n");
         }

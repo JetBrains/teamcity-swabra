@@ -1,7 +1,6 @@
 package jetbrains.buildServer.swabra.snapshots;
 
 import jetbrains.buildServer.swabra.SwabraLogger;
-import jetbrains.buildServer.swabra.SwabraSettings;
 import jetbrains.buildServer.swabra.processes.LockedFileResolver;
 import jetbrains.buildServer.swabra.snapshots.iteration.FileInfo;
 import org.jetbrains.annotations.NotNull;
@@ -22,9 +21,10 @@ public class FilesCollectionProcessorForTests extends FilesCollectionProcessor {
 
   public FilesCollectionProcessorForTests(@NotNull SwabraLogger logger,
                                           LockedFileResolver resolver,
-                                          SwabraSettings settings,
+                                          boolean verbose,
+                                          boolean strict,
                                           String logPath) {
-    super(logger, resolver, settings);
+    super(logger, resolver, verbose, strict);
     myLogPath = logPath;
   }
 
