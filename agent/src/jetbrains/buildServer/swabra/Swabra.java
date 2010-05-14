@@ -79,7 +79,7 @@ public final class Swabra extends AgentLifeCycleAdapter {
         return;
       }
 
-      if (runningBuild.isCleanBuild()) {
+      if (runningBuild.isCleanBuild() || !mySettings.getCheckoutDir().isDirectory()) {
         myLogger.swabraDebug("Clean build. No need to cleanup");
         return;
       }
