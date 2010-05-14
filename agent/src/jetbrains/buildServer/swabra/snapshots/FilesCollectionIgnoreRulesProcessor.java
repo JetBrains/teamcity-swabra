@@ -25,8 +25,6 @@ public class FilesCollectionIgnoreRulesProcessor extends FilesCollectionProcesso
   private final List<Pattern> myIgnoredPathsPatterns;
   private final List<String> myIgnoredPaths;
 
-  private int myIgnored;
-
   public FilesCollectionIgnoreRulesProcessor(@NotNull SwabraLogger logger,
                                              LockedFileResolver resolver,
                                              SwabraSettings settings) {
