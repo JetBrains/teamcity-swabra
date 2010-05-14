@@ -49,6 +49,18 @@
     </td>
   </tr>
 
+  <tr class="noBorder" id="swabra.ignored.container"
+      style="${displaySwabraSettings ? '' : 'display: none;'}">
+    <th>Paths to ignore:</th>
+    <td>
+      <props:multilineProperty name="swabra.ignored" expanded="${not empty propertiesBean.properties['swabra.ignored']}" rows="5" cols="50"
+                               linkTitle="Type paths to ignore"/>
+      <span class="smallNote">
+        New line or comma separated paths which will be ignored while running build files cleanup.
+        Support ant-style wildcards like <strong>dir/**/?*.jar</strong>.</span>
+    </td>
+  </tr>
+
   <tr class="noBorder">
     <th>Locking processes:</th>
     <td>

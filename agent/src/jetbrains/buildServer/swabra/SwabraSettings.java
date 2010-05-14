@@ -3,10 +3,7 @@ package jetbrains.buildServer.swabra;
 import jetbrains.buildServer.agent.AgentRunningBuild;
 
 import java.io.File;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 /**
  * User: vbedrosova
@@ -48,10 +45,11 @@ public class SwabraSettings {
     final Map<String, String> systemProperties = runningBuild.getBuildParameters().getSystemProperties();
     myIgnoredPaths = new HashSet<String>();
     if (systemProperties.containsKey(IGNORED_PATHS_PROPERTY)) {
-      myIgnoredPaths.addAll(Arrays.asList(systemProperties.get(IGNORED_PATHS_PROPERTY).split(" *[,\n\r] *")));
+      myIgnoredPaths.addAll(splitIgnoredPaths(systemProperties.get(IGNORED_PATHS_PROPERTY)));
     } else if (runningBuild.isCheckoutOnAgent()) {
       myIgnoredPaths.addAll(Arrays.asList(DEFAULT_IGNORED_PATHS));
     }
+    myIgnoredPaths.addAll(splitIgnoredPaths(SwabraUtil.getIgnored(runnerParams)));
 
     logSettings();
     prepareHandle(logger);
@@ -131,5 +129,9 @@ public class SwabraSettings {
 
   private static boolean notDefined(String value) {
     return (value == null) || ("".equals(value));
+  }
+
+  private static List<String> splitIgnoredPaths(String ignoredPathsStr) {
+    return Arrays.asList(ignoredPathsStr.split(" *[,\n\r] *"));
   }
 }

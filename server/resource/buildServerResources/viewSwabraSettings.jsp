@@ -28,6 +28,10 @@
       </c:choose>
     </div>
     <div class="parameter">
+      Paths to ignore: <props:displayValue name="swabra.ignored"
+                                           emptyValue="none specified"/>
+    </div>
+    <div class="parameter">
       Verbose output:
       <c:choose>
         <c:when test="${propertiesBean.properties['swabra.verbose']}">

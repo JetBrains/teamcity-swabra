@@ -38,6 +38,8 @@ public class SwabraUtil {
 
   public static final String LOCKING_PROCESS = "swabra.processes";
 
+  public static final String IGNORED_PATHS = "swabra.ignored";
+
   public static final String TRUE = "true";
 
 //  public static final String AFTER_BUILD = "swabra.after.build";
@@ -76,6 +78,10 @@ public class SwabraUtil {
 
   public static boolean isLockingProcessesReport(@NotNull final Map<String, String> params) {
     return SystemInfo.isWindows && (params.containsKey(LOCKING_PROCESS_DETECTION) || "report".equals(params.get(LOCKING_PROCESS)));
+  }
+
+  public static String getIgnored(@NotNull final Map<String, String> params) {
+    return isCleanupEnabled(params) && params.containsKey(IGNORED_PATHS) ? params.get(IGNORED_PATHS) : "";
   }
 
   public static String unifyPath(String path) {
