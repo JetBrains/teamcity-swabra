@@ -150,4 +150,8 @@ public class BuildProgressLoggerMock implements BuildProgressLogger {
 
   public void flowFinished(final String flowId) {
   }
+
+  public void ignoreServiceMessages(final Runnable runnable) {
+    runnable.run();
+  }
 }
