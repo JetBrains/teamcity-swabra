@@ -25,9 +25,11 @@
         if (this.checked) {
         BS.Util.show($('swabra.strict.container'));
         BS.Util.show($('swabra.verbose.container'));
+        BS.Util.show($('swabra.ignored.container'));
         } else {
         BS.Util.hide($('swabra.strict.container'));
         BS.Util.hide($('swabra.verbose.container'));
+        BS.Util.hide($('swabra.ignored.container'));
         }
         BS.MultilineProperties.updateVisible();
       </c:set>
