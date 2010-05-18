@@ -93,12 +93,10 @@ public final class Swabra extends AgentLifeCycleAdapter {
       doCleanup(mySettings.getCheckoutDir());
       return;
     }
-    if (myPropertiesProcessor.isMarkedSnapshot(snapshotName)) {
-      if (mySettings.isStrict()) {
-        myLogger.swabraDebug("Snapshot " + snapshotName + " was saved without \"Ensure clean checkout\" mode. Will force clean checkout");
-        doCleanup(mySettings.getCheckoutDir());
-        return;
-      }
+    if (myPropertiesProcessor.isMarkedSnapshot(snapshotName) && mySettings.isStrict()) {
+      myLogger.swabraDebug("Snapshot " + snapshotName + " was saved without \"Ensure clean checkout\" mode. Will force clean checkout");
+      doCleanup(mySettings.getCheckoutDir());
+      return;
     }
 
     final FilesCollector filesCollector = initFilesCollector();
@@ -208,6 +206,8 @@ public final class Swabra extends AgentLifeCycleAdapter {
 
   private void fail() {
     mySettings.setCleanupEnabled(false);
-    myLogger.message("##teamcity[buildStatus status='FAILURE' text='Swabra failed cleanup: some files are locked']", true);
+    final String message = "Swabra cleanup failed";
+    myLogger.error(message + ": some files are locked");
+    myLogger.message("##teamcity[buildStatus status='FAILURE' text='{build.status.text}; " + message + "']", true);
   }
 }
