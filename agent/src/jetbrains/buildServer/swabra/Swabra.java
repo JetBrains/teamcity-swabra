@@ -89,12 +89,12 @@ public final class Swabra extends AgentLifeCycleAdapter {
       myPropertiesProcessor.deleteRecord(mySettings.getCheckoutDir());
     }
     if (snapshotName == null) {
-      myLogger.swabraDebug("No snapshot saved in " + myPropertiesProcessor.getPropertiesFile().getAbsolutePath() + " for this configuration. Will force clean checkout");
+      myLogger.message("No snapshot saved in " + myPropertiesProcessor.getPropertiesFile().getAbsolutePath() + " for this configuration. Will force clean checkout", false);
       doCleanup(mySettings.getCheckoutDir());
       return;
     }
     if (myPropertiesProcessor.isMarkedSnapshot(snapshotName) && mySettings.isStrict()) {
-      myLogger.swabraDebug("Snapshot " + snapshotName + " was saved without \"Ensure clean checkout\" mode. Will force clean checkout");
+      myLogger.message("Snapshot " + snapshotName + " was saved without \"Ensure clean checkout\" mode. Will force clean checkout", false);
       doCleanup(mySettings.getCheckoutDir());
       return;
     }
@@ -102,17 +102,20 @@ public final class Swabra extends AgentLifeCycleAdapter {
     final FilesCollector filesCollector = initFilesCollector();
     final FilesCollector.CollectionResult result = filesCollector.collect(myPropertiesProcessor.getSnapshotFile(snapshotName), mySettings.getCheckoutDir());
 
+    if (!mySettings.isStrict()) {
+      myLogger.message("Running in non-strict mode, ignore files collection result", false);
+      return;
+    }
+
     switch (result) {
       case ERROR:
-        myLogger.swabraDebug("Some error occurred during files collecting. Will force clean checkout");
+        myLogger.message("Some error occurred during files collecting. Will force clean checkout", false);
         doCleanup(mySettings.getCheckoutDir());
         return;
 
       case DIRTY:
-        if (mySettings.isStrict()) {
-          myLogger.swabraDebug("Checkout directory contains modified files or some files were deleted. Will force clean checkout");
-          doCleanup(mySettings.getCheckoutDir());
-        }
+        myLogger.message("Checkout directory contains modified files or some files were deleted. Will force clean checkout", false);
+        doCleanup(mySettings.getCheckoutDir());
         return;
 
       case LOCKED:
@@ -185,15 +188,17 @@ public final class Swabra extends AgentLifeCycleAdapter {
 
       public void logFailedToDeleteEmptyDirectory(File dir) {
         myLogger.error("Failed to delete empty directory " + dir.getAbsolutePath());
+        fail();
       }
 
       public void logFailedToCleanFilesUnderDirectory(File dir) {
         myLogger.error("Failed to delete files in directory " + dir.getAbsolutePath());
-
+        fail();
       }
 
       public void logFailedToCleanFile(File file) {
         myLogger.error("Failed to delete file " + file.getAbsolutePath());
+        fail();
       }
 
       public void logFailedToCleanEntireFolder(File dir) {
