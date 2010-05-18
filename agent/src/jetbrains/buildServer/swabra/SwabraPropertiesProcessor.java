@@ -67,7 +67,7 @@ final class SwabraPropertiesProcessor extends AgentLifeCycleAdapter {
       public void run() {
         cleanupPropertiesAndSnapshots(actualCheckoutDirs);
       }
-    }).start();
+    }, "Swabra-cleanup-snapshots").start();
   }
 
   @Override
