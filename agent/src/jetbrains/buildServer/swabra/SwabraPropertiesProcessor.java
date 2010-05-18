@@ -179,7 +179,7 @@ final class SwabraPropertiesProcessor extends AgentLifeCycleAdapter {
     }
   }
 
-  private synchronized void cleanupPropertiesAndSnapshots(final File[] actualCheckoutDirs) {
+  private void cleanupPropertiesAndSnapshots(final File[] actualCheckoutDirs) {
     try {
       readPropertiesNoAwait(false);
 
