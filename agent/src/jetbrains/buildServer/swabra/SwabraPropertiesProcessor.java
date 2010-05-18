@@ -100,10 +100,12 @@ final class SwabraPropertiesProcessor extends AgentLifeCycleAdapter {
   }
 
   private void readProperties(boolean preserveFile) {
-    try {
-      myCleanupFinishedSignal.await();
-    } catch (InterruptedException e) {
-      myLogger.swabraWarn("Thread interrupted");
+    if (myCleanupFinishedSignal != null) {
+      try {
+        myCleanupFinishedSignal.await();
+      } catch (InterruptedException e) {
+        myLogger.swabraWarn("Thread interrupted");
+      }
     }
     readPropertiesNoAwait(preserveFile);
   }
