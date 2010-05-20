@@ -55,9 +55,13 @@ final class SwabraPropertiesProcessor extends AgentLifeCycleAdapter {
   }
 
   @Override
+  public void afterAgentConfigurationLoaded(@NotNull BuildAgent agent) {
+    myPropertiesFile = new File(agent.getConfiguration().getCacheDirectory(Swabra.CACHE_KEY), FILE_NAME);
+  }
+
+  @Override
   public void agentStarted(@NotNull BuildAgent agent) {
     myCleanupFinishedSignal = new CountDownLatch(1);
-    myPropertiesFile = new File(agent.getConfiguration().getCacheDirectory(Swabra.CACHE_KEY), FILE_NAME);
 
     final File[] actualCheckoutDirs = agent.getConfiguration().getWorkDirectory().listFiles();
     if (actualCheckoutDirs == null) {
