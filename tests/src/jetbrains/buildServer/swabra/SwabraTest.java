@@ -16,10 +16,6 @@
 
 package jetbrains.buildServer.swabra;
 
-import java.io.File;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
 import jetbrains.buildServer.TempFiles;
 import jetbrains.buildServer.agent.*;
 import jetbrains.buildServer.util.EventDispatcher;
@@ -31,6 +27,11 @@ import org.jmock.Mockery;
 import org.jmock.integration.junit4.JUnit4Mockery;
 import org.junit.After;
 import org.junit.Before;
+
+import java.io.File;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 
 import static jetbrains.buildServer.swabra.TestUtil.*;
 
@@ -168,7 +169,9 @@ public class SwabraTest extends TestCase {
 //    System.setProperty(ProcessTreeTerminator.TEMP_PATH_SYSTEM_PROPERTY, pttTemp.getAbsolutePath());
 
 
-    dispatcher.getMulticaster().agentStarted(createBuildAgent(myCheckoutDir.getParentFile()));
+    final BuildAgent agent = createBuildAgent(myCheckoutDir.getParentFile());
+    dispatcher.getMulticaster().afterAgentConfigurationLoaded(agent);
+    dispatcher.getMulticaster().agentStarted(agent);
 
     final String checkoutDirPath = myCheckoutDir.getAbsolutePath();
 
