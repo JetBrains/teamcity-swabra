@@ -3,12 +3,10 @@ package jetbrains.buildServer.swabra.web;
 import jetbrains.buildServer.controllers.ActionErrors;
 import jetbrains.buildServer.controllers.BaseFormXmlController;
 import jetbrains.buildServer.controllers.FormUtil;
-import jetbrains.buildServer.messages.Status;
 import jetbrains.buildServer.serverSide.auth.AuthUtil;
 import jetbrains.buildServer.serverSide.auth.Permission;
 import jetbrains.buildServer.serverSide.auth.SecurityContext;
-import jetbrains.buildServer.swabra.HandleProvider;
-import jetbrains.buildServer.util.StringUtil;
+import jetbrains.buildServer.swabra.web.actions.BaseAction;
 import jetbrains.buildServer.web.openapi.PluginDescriptor;
 import jetbrains.buildServer.web.openapi.WebControllerManager;
 import org.jdom.Element;
@@ -19,6 +17,7 @@ import org.springframework.web.servlet.ModelAndView;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -39,17 +38,16 @@ public class HandleController extends BaseFormXmlController {
   @NotNull
   private final SecurityContext mySecurityContext;
   @NotNull
-  private final HandleProvider myHandleProvider;
-
+  final List<BaseAction> myActions;
 
   public HandleController(@NotNull final PluginDescriptor pluginDescriptor,
                           @NotNull final WebControllerManager webControllerManager,
                           @NotNull final SecurityContext securityContext,
-                          @NotNull final HandleProvider handleProvider) {
+                          @NotNull final List<BaseAction> actions) {
     myPluginDescriptor = pluginDescriptor;
     myWebControllerManager = webControllerManager;
     mySecurityContext = securityContext;
-    myHandleProvider = handleProvider;
+    myActions = actions;
   }
 
   public void register() {
@@ -62,7 +60,7 @@ public class HandleController extends BaseFormXmlController {
 
     model.put("handleForm", getForm(request));
     model.put("handlePathPrefix", request.getContextPath() + myPluginDescriptor.getPluginResourcesPath());
-    model.put("canDownload", hasPermission());
+    model.put("canLoad", hasPermission());
 
     return new ModelAndView(myPluginDescriptor.getPluginResourcesPath(MY_JSP), model);
   }
@@ -72,22 +70,18 @@ public class HandleController extends BaseFormXmlController {
     if (!hasPermission()) {
       return;
     }
+
     final HandleForm form = getForm(request);
     form.clearMessages();
     FormUtil.bindFromRequest(request, form);
 
+    final BaseAction action = getAction(form);
     final ActionErrors errors = new ActionErrors();
-    validate(form, errors);
+
+    action.validate(form, errors);
+
     if (errors.hasNoErrors()) {
-      form.setRunning(true);
-      form.addMessage("Start downloading SysInternals handle.exe from " + form.getUrl() + "...", Status.NORMAL);
-      try {
-        myHandleProvider.downloadAndExtract(form.getUrl());
-        form.addMessage("Successfully downloaded handle.exe", Status.NORMAL);
-      } catch (Throwable throwable) {
-        form.addMessage("Failed to download handle.exe, please see teamcity-server.log for details", Status.ERROR);
-      }
-      form.setRunning(false);
+      action.apply(form);
     } else {
       writeErrors(xmlResponse, errors);
     }
@@ -108,18 +102,13 @@ public class HandleController extends BaseFormXmlController {
     return FormUtil.getOrCreateForm(request, HandleForm.class, formCreator);
   }
 
-  private void validate(HandleForm form, ActionErrors errors) {
-    final String url = form.getUrl();
-    if (StringUtil.isEmptyOrSpaces(url)) {
-      errors.addError("wrongUrl", "Url is empty");
-      return;
+  private BaseAction getAction(HandleForm form) {
+    final String type = form.getLoadType();
+    for (final BaseAction action : myActions) {
+      if (action.getType().equals(type)) {
+        return action;
+      }
     }
-    if (!url.startsWith("http://")) {
-      errors.addError("wrongUrl", "Url must start with http://");
-      return;
-    }
-    if (!url.endsWith("/handle.exe")) {
-      errors.addError("wrongUrl", "Url must end with /handle.exe");
-    }
+    throw new IllegalArgumentException("Support only \"UPLOAD\" and \"DOWNLOAD\" load types");
   }
 }

@@ -34,10 +34,17 @@ public class HandleProvider {
     return files != null && files.length > 0;
   }
 
-  public void downloadAndExtract(@NotNull String url) throws Throwable {
+  public void downloadHandleAndPackPlugin(@NotNull String url) throws Throwable {
     LOG.debug("Downloading SysInternals handle.exe from " + url + " and extracting it into handle-provider plugin to "
       + myPluginFolder.getAbsolutePath() + "...");
 
+    final File tmpFile = new File(FileUtil.getTempDirectory(), "handle.exe");
+    downloadHandleExe(url, tmpFile);
+    packPlugin(tmpFile);
+    FileUtil.delete(tmpFile);
+  }
+
+  public void packPlugin(File handleExe) throws IOException {
     final File pluginTempFolder = preparePluginFolder();
     try {
       final File pluginAgentTempFolder = prepareSubFolder(pluginTempFolder, "handle-provider");
@@ -45,7 +52,7 @@ public class HandleProvider {
         final File binFolder = prepareSubFolder(pluginAgentTempFolder, "bin");
 //        final File handleZip = downloadHandleZip(url);
 //        extractHandleZip(binFolder, handleZip);
-        downloadHandleExe(url, new File(binFolder, "handle.exe"));
+        FileUtil.copy(handleExe, new File(binFolder, "handle.exe"));
 
         final File libFolder = prepareSubFolder(pluginAgentTempFolder, "lib");
         copyOutResource(libFolder, HANDLE_PROVIDER_JAR);

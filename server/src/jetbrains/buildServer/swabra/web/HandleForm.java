@@ -16,8 +16,10 @@ import java.util.List;
  */
 public class HandleForm {
   private String myUrl = "http://live.sysinternals.com/handle.exe";
+  private String myHandleFile;
+  private String myLoadType = "UPLOAD";
   private boolean myRunning = false;
-  private final List<String> myDownloadHandleMessages = new ArrayList<String>();
+  private final List<String> myLoadHandleMessages = new ArrayList<String>();
   private final CameFromSupport myCameFromSupport = new CameFromSupport();
 
   private int myErrors = 0;
@@ -31,6 +33,22 @@ public class HandleForm {
     myUrl = url;
   }
 
+  public String getHandleFile() {
+    return myHandleFile;
+  }
+
+  public void setHandleFile(String handleFile) {
+    myHandleFile = handleFile;
+  }
+
+  public String getLoadType() {
+    return myLoadType;
+  }
+
+  public void setLoadType(String loadType) {
+    myLoadType = loadType;
+  }
+
   public boolean isRunning() {
     return myRunning;
   }
@@ -39,12 +57,12 @@ public class HandleForm {
     myRunning = running;
   }
 
-  public List<String> getDownloadHandleMessages() {
-    return myDownloadHandleMessages;
+  public List<String> getLoadHandleMessages() {
+    return myLoadHandleMessages;
   }
 
   public void clearMessages() {
-    myDownloadHandleMessages.clear();
+    myLoadHandleMessages.clear();
     myErrors = 0;
   }
 
@@ -69,7 +87,7 @@ public class HandleForm {
       finalText = "<span " + errorId + " class='" + className + "'>" + escapedText + "</span>";
     }
 
-    myDownloadHandleMessages.add(timestamp() + finalText);
+    myLoadHandleMessages.add(timestamp() + finalText);
   }
 
   private String timestamp() {
