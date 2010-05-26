@@ -1,8 +1,10 @@
 package jetbrains.buildServer.swabra.web;
 
 import jetbrains.buildServer.controllers.BaseFormXmlController;
+import jetbrains.buildServer.serverSide.auth.Permission;
 import jetbrains.buildServer.util.FileUtil;
 import jetbrains.buildServer.web.openapi.WebControllerManager;
+import jetbrains.buildServer.web.util.SessionUser;
 import org.apache.log4j.Logger;
 import org.jdom.Content;
 import org.jdom.Element;
@@ -52,7 +54,9 @@ public class FileUploadController extends BaseFormXmlController {
 
   @Override
   protected void doPost(HttpServletRequest request, HttpServletResponse response, Element xmlResponse) {
-    //TODO: process permissions 
+    if (!hasPermission(request)) {
+      return;
+    }
     if (request instanceof MultipartHttpServletRequest) {
       final MultipartHttpServletRequest mRequest = (MultipartHttpServletRequest) request;
 
@@ -96,5 +100,9 @@ public class FileUploadController extends BaseFormXmlController {
 
   private static void logFailedToUpload(MultipartFile file, String message, Exception e) {
     LOG.warn("Failed to upload " + file.getOriginalFilename() + ": " + message, e);
+  }
+
+  private boolean hasPermission(HttpServletRequest request) {
+    return SessionUser.getUser(request).isPermissionGrantedGlobally(Permission.CHANGE_OWN_PROFILE);
   }
 }
