@@ -8,7 +8,6 @@
       <list>
         <value>simpleRunner</value>
         <value>Ant</value>
-        <value>rcodedup</value>
         <value>Duplicator</value>
         <value>FxCop</value>
         <value>Inspection</value>
@@ -18,8 +17,8 @@
         <value>NAnt</value>
         <value>rake-runner</value>
         <value>sln2003</value>
-        <value>sln2005</value>
-        <value>sln2008</value>
+        <value>VS.Solution</value>
+        <value>dotnet-dupfinder</value>
       </list>
     </property>
   </bean>
