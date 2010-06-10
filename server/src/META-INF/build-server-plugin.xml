@@ -27,7 +27,6 @@
   <bean class="jetbrains.buildServer.swabra.web.actions.DownloadAction"/>
 
   <bean class="jetbrains.buildServer.swabra.web.HandleController" init-method="register"/>
-  <bean class="jetbrains.buildServer.swabra.web.FileUploadController" init-method="register"/>
 
   <bean class="jetbrains.buildServer.swabra.HandleProvider"/>
 

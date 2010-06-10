@@ -31,10 +31,10 @@
           /js/bs/blocks.js
           /js/bs/blocksWithHeader.js
           /js/bs/forms.js
+          /js/bs/multipart.js
         </bs:linkScript>
 
         <script type="text/javascript" src="${handlePathPrefix}handle.js"></script>
-        <script type="text/javascript" src="${handlePathPrefix}multipart.js"></script>
 
         <script type="text/javascript">
           BS.Navigation.items = [
@@ -57,6 +57,7 @@
                   </div>
                 </td>
               </tr>
+              <c:set var="disableFileUpload">disbaled="disabled"</c:set>
             </c:if>
 
             <l:settingsGroup title="Load handle.exe">
@@ -87,16 +88,8 @@
               <tr id="uploadSettingsContainer" style="${handleForm.loadType == 'UPLOAD' ? '' : 'display: none;'}">
                 <th><label for="file:handleFile">Path for uploading: <l:star/></label></th>
                 <td>
-                  <c:choose>
-                    <c:when test="${canLoad}">
-                      <input type="file"
-                             name="file:handleFile" id="file:handleFile" size="60"/>
-                    </c:when>
-                    <c:otherwise>
-                      <input type="file"
-                             name="file:handleFile" id="file:handleFile" size="60" disabled="true"/>
-                    </c:otherwise>
-                  </c:choose>
+                  <c:set var="attrs">size="60" ${disableFileUpload}</c:set>
+                  <forms:file name="handleFile" attributes="${attrs}"/>
                   <span class="error" id="errorHandleFile"></span>
 
                   <div class="smallNote" style="margin: 0;">
