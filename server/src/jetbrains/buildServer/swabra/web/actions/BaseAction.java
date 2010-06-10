@@ -23,7 +23,5 @@ public abstract class BaseAction {
   public void validate(HandleForm form, ActionErrors errors) {
   }
 
-  ;
-
   public abstract void apply(HandleForm form);
 }
