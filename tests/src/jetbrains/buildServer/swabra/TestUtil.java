@@ -17,10 +17,10 @@
 package jetbrains.buildServer.swabra;
 
 import jetbrains.buildServer.util.FileUtil;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.io.*;
+import java.io.File;
+import java.io.FileNotFoundException;
 import java.util.List;
 
 /**
@@ -46,24 +46,6 @@ class TestUtil {
       return file2;
     }
     throw new FileNotFoundException("Either " + file1.getAbsolutePath() + " or file " + file2.getAbsolutePath() + " should exist.");
-  }
-
-  public static String readFile(@NotNull final File file) throws IOException {
-    if (!file.exists()) {
-      return "";
-    }
-    final FileInputStream inputStream = new FileInputStream(file);
-    try {
-      final BufferedInputStream bis = new BufferedInputStream(inputStream);
-      final byte[] bytes = new byte[(int) file.length()];
-      bis.read(bytes);
-      bis.close();
-
-      return new String(bytes);
-    }
-    finally {
-      inputStream.close();
-    }
   }
 
   private static final String SVN_FILE = ".svn";

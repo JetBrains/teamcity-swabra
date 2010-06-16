@@ -33,7 +33,8 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
-import static jetbrains.buildServer.swabra.TestUtil.*;
+import static jetbrains.buildServer.swabra.TestUtil.getTestData;
+import static jetbrains.buildServer.swabra.TestUtil.getTestDataPath;
 
 
 /**
@@ -182,8 +183,8 @@ public class SwabraTest extends TestCase {
     }
 
     System.out.println(results.toString().trim());
-    final String actual = readFile(new File(resultsFile)).trim().replace(myCheckoutDir.getAbsolutePath(), "##CHECKOUT_DIR##").replace("/", "\\");
-    final String expected = readFile(new File(goldFile)).trim();
+    final String actual = FileUtil.readText(new File(resultsFile)).trim().replace(myCheckoutDir.getAbsolutePath(), "##CHECKOUT_DIR##").replace("/", "\\");
+    final String expected = FileUtil.readText(new File(goldFile)).trim();
     assertEquals(actual, expected, actual);
 //    FileUtil.delete(pttTemp);
   }

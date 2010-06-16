@@ -3,7 +3,10 @@ package jetbrains.buildServer.swabra;
 import jetbrains.buildServer.agent.AgentRunningBuild;
 
 import java.io.File;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
 
 /**
  * User: vbedrosova
@@ -11,9 +14,9 @@ import java.util.*;
  * Time: 19:04:35
  */
 public class SwabraSettings {
-  private static final String IGNORED_PATHS_PROPERTY = "swabra.ignored.paths";
+  private static final String RULES_PROPERTY = "swabra.rules";
 
-  private static final String[] DEFAULT_IGNORED_PATHS = {"**/.svn", "**/.git", "**/.hg", "**/CVS"};
+  private static final String[] DEFAULT_EXCLUDE_RULES = {"-:**/.svn/**", "-:**/.git/**", "-:**/.hg/**", "-:**/CVS/**"};
 
   private static final String HANDLE_PATH_SUFFIX = File.separator + "handle.exe";
   private static final String HANDLE_EXE_SYSTEM_PROP = "handle.exe.path";
@@ -28,7 +31,7 @@ public class SwabraSettings {
 
   private String myHandlePath;
 
-  private final Set<String> myIgnoredPaths;
+  private final List<String> myRules;
 
   private final File myCheckoutDir;
 
@@ -43,13 +46,13 @@ public class SwabraSettings {
     myCheckoutDir = runningBuild.getCheckoutDirectory();
 
     final Map<String, String> systemProperties = runningBuild.getBuildParameters().getSystemProperties();
-    myIgnoredPaths = new HashSet<String>();
-    if (systemProperties.containsKey(IGNORED_PATHS_PROPERTY)) {
-      myIgnoredPaths.addAll(splitIgnoredPaths(systemProperties.get(IGNORED_PATHS_PROPERTY)));
+    myRules = new ArrayList<String>();
+    myRules.addAll(splitRules(SwabraUtil.getRules(runnerParams)));
+    if (systemProperties.containsKey(RULES_PROPERTY)) {
+      myRules.addAll(splitRules(systemProperties.get(RULES_PROPERTY)));
     } else if (runningBuild.isCheckoutOnAgent()) {
-      myIgnoredPaths.addAll(Arrays.asList(DEFAULT_IGNORED_PATHS));
+      myRules.addAll(Arrays.asList(DEFAULT_EXCLUDE_RULES));
     }
-    myIgnoredPaths.addAll(splitIgnoredPaths(SwabraUtil.getIgnored(runnerParams)));
 
     logSettings();
     prepareHandle(logger);
@@ -83,8 +86,8 @@ public class SwabraSettings {
     return myHandlePath;
   }
 
-  public Set<String> getIgnoredPaths() {
-    return myIgnoredPaths;
+  public List<String> getRules() {
+    return myRules;
   }
 
   public File getCheckoutDir() {
@@ -131,7 +134,7 @@ public class SwabraSettings {
     return (value == null) || ("".equals(value));
   }
 
-  private static List<String> splitIgnoredPaths(String ignoredPathsStr) {
-    return Arrays.asList(ignoredPathsStr.split(" *[,\n\r] *"));
+  private static List<String> splitRules(String rules) {
+    return Arrays.asList(rules.split(" *[,\n\r] *"));
   }
 }

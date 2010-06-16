@@ -11,6 +11,7 @@ import org.jetbrains.annotations.NotNull;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Stack;
 
 /**
  * User: vbedrosova
@@ -31,7 +32,7 @@ public class FilesCollectionProcessor implements FilesTraversal.ComparisonProces
   private int myDetectedModified;
   private int myDetectedDeleted;
 
-  private FileInfo myCurrentNewDir;
+  private Stack<String> myAddedDirs;
   private final List<File> myUnableToDeleteFiles;
 
   private Results myResults;
@@ -45,6 +46,7 @@ public class FilesCollectionProcessor implements FilesTraversal.ComparisonProces
     myVerbose = verbose;
     myStrictDeletion = strict;
 
+    myAddedDirs = new Stack<String>();
     myUnableToDeleteFiles = new ArrayList<File>();
   }
 
@@ -53,33 +55,31 @@ public class FilesCollectionProcessor implements FilesTraversal.ComparisonProces
   }
 
   public void processUnchanged(FileInfo info) {
-    deleteNewDir();
+    deleteAddedDirs();
     ++myDetectedUnchanged;
     myLogger.debug("Detected unchanged " + info.getPath());
   }
 
   public void processModified(FileInfo info1, FileInfo info2) {
-    deleteNewDir();
+    deleteAddedDirs();
     ++myDetectedModified;
     myLogger.message("Detected modified " + info1.getPath(), myVerbose);
   }
 
   public void processDeleted(FileInfo info) {
-    deleteNewDir();
+    deleteAddedDirs();
     ++myDetectedDeleted;
     myLogger.message("Detected deleted " + info.getPath(), myVerbose);
   }
 
   public void processAdded(FileInfo info) {
-    if (isAncestor(myCurrentNewDir, info)) {
-      return;
-    }
-    deleteNewDir();
+    deleteAddedDirs(info.getPath());
+
     final File file = new File(info.getPath());
     if (file.isFile()) {
       deleteObject(file);
     } else {
-      myCurrentNewDir = info;
+      myAddedDirs.push(info.getPath());
     }
   }
 
@@ -88,7 +88,7 @@ public class FilesCollectionProcessor implements FilesTraversal.ComparisonProces
   }
 
   public void comparisonFinished() {
-    deleteNewDir();
+    deleteAddedDirs();
 
     myResults = new Results(myDetectedUnchanged,
       myDetectedNewAndDeleted, myUnableToDeleteFiles.size(),
@@ -105,36 +105,23 @@ public class FilesCollectionProcessor implements FilesTraversal.ComparisonProces
     return myResults;
   }
 
-  private void deleteNewDir() {
-    if (myCurrentNewDir != null) {
-      deleteSubDirs(myCurrentNewDir);
-      myCurrentNewDir = null;
+  private void deleteAddedDirs(String nextAdded) {
+    while (canDelete(nextAdded)) {
+      deleteObject(new File(myAddedDirs.pop()));
     }
   }
 
-  private static boolean isAncestor(FileInfo info1, FileInfo info2) {
-    return info1 != null && info2.getPath().startsWith(info1.getPath() + File.separator);
-  }
-
-  private void deleteSubDirs(FileInfo info) {
-    deleteSubDirs(new File(info.getPath()));
-  }
-
-  private void deleteSubDirs(File dir) {
-    final File[] files = dir.listFiles();
-    if (files != null && files.length > 0) {
-      for (File f : files) {
-        if (f.isFile()) {
-          deleteObject(f);
-        } else if (f.isDirectory()) {
-          deleteSubDirs(f);
-        }
-      }
+  private void deleteAddedDirs() {
+    while (myAddedDirs.size() > 0) {
+      deleteObject(new File(myAddedDirs.pop()));
     }
-    deleteObject(dir);
   }
 
-  private void deleteObject(File file) {
+  private boolean canDelete(String path) {
+    return myAddedDirs.size() > 0 && !path.startsWith(myAddedDirs.peek());
+  }
+
+  protected void deleteObject(File file) {
     if (!resolveDelete(file)) {
       myUnableToDeleteFiles.add(file);
       myLogger.warn("Detected new, unable to delete " + file.getAbsolutePath());
@@ -152,7 +139,7 @@ public class FilesCollectionProcessor implements FilesTraversal.ComparisonProces
     }
   }
 
-  private boolean resolveDelete(File f) {
+  protected boolean resolveDelete(File f) {
     if (!f.exists()) {
       return true;
     }

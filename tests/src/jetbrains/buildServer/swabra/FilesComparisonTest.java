@@ -3,13 +3,13 @@ package jetbrains.buildServer.swabra;
 import jetbrains.buildServer.swabra.snapshots.iteration.FileInfo;
 import jetbrains.buildServer.swabra.snapshots.iteration.FilesTraversal;
 import jetbrains.buildServer.swabra.snapshots.iteration.SnapshotFilesIterator;
+import jetbrains.buildServer.util.FileUtil;
 import junit.framework.TestCase;
 
 import java.io.File;
 import java.io.FileWriter;
 
 import static jetbrains.buildServer.swabra.TestUtil.getTestData;
-import static jetbrains.buildServer.swabra.TestUtil.readFile;
 
 /**
  * User: vbedrosova
@@ -60,7 +60,7 @@ public class FilesComparisonTest extends TestCase {
     final String resultsFile = goldFile.getAbsolutePath().replace(".gold", ".tmp");
 
     final String actual = results.toString().trim().replace("/", "\\");
-    final String expected = readFile(goldFile).trim();
+    final String expected = FileUtil.readText(goldFile).trim();
     if (!actual.equals(expected)) {
       final FileWriter resultsWriter = new FileWriter(resultsFile);
       resultsWriter.write(actual);

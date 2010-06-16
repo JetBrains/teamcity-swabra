@@ -37,6 +37,7 @@
     <exclude name="**/.git/**"/>
     <exclude name="**/*.hprof/**"/>
     <exclude name="**/_svn/**"/>
+    <exclude name="**/.hg/**"/>
     <exclude name="**/.sbas/**"/>
     <exclude name="**/.IJI.*/**"/>
     <exclude name="**/vssver.scc/**"/>
@@ -312,6 +313,7 @@
     <path refid="library.intellij_idea_open_api.classpath"/>
     <path refid="library.idea_annotations.classpath"/>
     <path refid="library.teamcity-processterminator.classpath"/>
+    <path refid="library.teamcity-spring.classpath"/>
   </path>
 
   <path id="agent.runtime.module.classpath">
@@ -325,6 +327,7 @@
     <path refid="library.intellij_idea_open_api.classpath"/>
     <path refid="library.idea_annotations.classpath"/>
     <path refid="library.teamcity-processterminator.classpath"/>
+    <path refid="library.teamcity-spring.classpath"/>
   </path>
 
 

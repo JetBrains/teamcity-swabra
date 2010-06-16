@@ -16,7 +16,7 @@
 
 package jetbrains.buildServer.swabra.snapshots.iteration;
 
-import static jetbrains.buildServer.swabra.SwabraUtil.unifyPath;
+import java.io.File;
 
 /**
  * User: vbedrosova
@@ -24,6 +24,8 @@ import static jetbrains.buildServer.swabra.SwabraUtil.unifyPath;
  * Time: 13:22:24
  */
 class FilesComparator {
+  private static String SEPARATOR_REGEX = "/".equals(File.separator) ? "/" : "\\\\";
+
   public static int compare(FileInfo o1, FileInfo o2) {
     return compare(o1.getPath(), o1.isFile(), o2.getPath(), o2.isFile());
   }
@@ -33,8 +35,8 @@ class FilesComparator {
       return compareByType(isFile1, isFile2);
     }
 
-    final String[] path1Parts = unifyPath(path1, '/').split("/");
-    final String[] path2Parts = unifyPath(path2, '/').split("/");
+    final String[] path1Parts = path1.split(SEPARATOR_REGEX);
+    final String[] path2Parts = path2.split(SEPARATOR_REGEX);
 
     final int len1 = path1Parts.length;
     final int len2 = path2Parts.length;

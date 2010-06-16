@@ -25,11 +25,11 @@
         if (this.checked) {
         BS.Util.show($('swabra.strict.container'));
         BS.Util.show($('swabra.verbose.container'));
-        BS.Util.show($('swabra.ignored.container'));
+        BS.Util.show($('swabra.rules.container'));
         } else {
         BS.Util.hide($('swabra.strict.container'));
         BS.Util.hide($('swabra.verbose.container'));
-        BS.Util.hide($('swabra.ignored.container'));
+        BS.Util.hide($('swabra.rules.container'));
         }
         BS.MultilineProperties.updateVisible();
       </c:set>
@@ -51,16 +51,19 @@
     </td>
   </tr>
 
-  <tr class="noBorder" id="swabra.ignored.container"
+  <tr class="noBorder" id="swabra.rules.container"
       style="${displaySwabraSettings ? '' : 'display: none;'}">
-    <th>Paths to ignore:</th>
+    <th>Cleanup rules:</th>
     <td>
-      <props:multilineProperty name="swabra.ignored" expanded="${not empty propertiesBean.properties['swabra.ignored']}" rows="5" cols="50"
-                               linkTitle="Type paths to ignore"/>
-      <span class="smallNote">
-        New line or comma separated paths which will be ignored while running build files cleanup.
-        Support ant-style wildcards like <strong>dir/**/?*.jar</strong>.</span>
-    </td>
+        <props:multilineProperty name="swabra.rules" expanded="${not empty propertiesBean.properties['swabra.rules']}" rows="5" cols="50"
+                                 linkTitle="Type collection rules"/>
+      <div class="smallNote" style="margin-left: 0;">
+        Newline or comma delimited set of <strong>+|-:checkout_dir_relative_path</strong> rules.<br/>
+        By default all paths are included. Rules on any path should come in order from more abstract to more concrete,
+        e.g. use <strong>-:**/dir/**</strong> to exclude all <strong>dir</strong> folders and their content,
+        or <strong>-:some/dir, +:some/dir/inner</strong> to exclude <strong>some/dir</strong> folder and all it's content
+        except <strong>inner</strong> subfolder and it's content.<br/>
+      </div>
   </tr>
 
   <tr class="noBorder">
@@ -99,7 +102,7 @@
 
       <span class="smallNote" id="swabra.processes.note" style="${empty selected ? 'display: none;' : ''}">
         Before the end of the build inspect the checkout directory for processes locking files in this directory.
-      </span>  
+      </span>
       <span class="smallNote" id="swabra.processes.report.note" style="${selected == 'report' ? '' : 'display: none;'}">
         Report about such processes in the build log.
         <br/>

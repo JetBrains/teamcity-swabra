@@ -15,15 +15,15 @@ import java.io.IOException;
  * Date: 04.02.2010
  * Time: 14:59:20
  */
-public class FilesCollectionProcessorForTests extends FilesCollectionProcessor {
+public class FilesCollectionProcessorMock extends FilesCollectionProcessor {
   private final String myLogPath;
   private BufferedWriter myWriter;
 
-  public FilesCollectionProcessorForTests(@NotNull SwabraLogger logger,
-                                          LockedFileResolver resolver,
-                                          boolean verbose,
-                                          boolean strict,
-                                          String logPath) {
+  public FilesCollectionProcessorMock(@NotNull SwabraLogger logger,
+                                      LockedFileResolver resolver,
+                                      boolean verbose,
+                                      boolean strict,
+                                      String logPath) {
     super(logger, resolver, verbose, strict);
     myLogPath = logPath;
   }

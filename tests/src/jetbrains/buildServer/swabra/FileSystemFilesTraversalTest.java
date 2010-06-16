@@ -27,7 +27,6 @@ import java.io.File;
 import java.io.FileWriter;
 
 import static jetbrains.buildServer.swabra.TestUtil.getTestData;
-import static jetbrains.buildServer.swabra.TestUtil.readFile;
 
 /**
  * User: vbedrosova
@@ -54,7 +53,7 @@ public class FileSystemFilesTraversalTest extends TestCase {
     final String resultsFile = goldFile.getAbsolutePath().replace(".gold", ".tmp");
 
     final String actual = results.toString().trim().replace(root.getAbsolutePath(), "##ROOT##").replace("/", "\\");
-    final String expected = readFile(goldFile).trim();
+    final String expected = FileUtil.readText(goldFile).trim();
     if (!actual.equals(expected)) {
       final FileWriter resultsWriter = new FileWriter(resultsFile);
       resultsWriter.write(actual);
