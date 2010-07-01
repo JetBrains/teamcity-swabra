@@ -6,7 +6,10 @@ import jetbrains.buildServer.util.FileUtil;
 import org.apache.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
 
-import java.io.*;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.net.URL;
 import java.util.zip.ZipOutputStream;
 
@@ -17,57 +20,49 @@ import java.util.zip.ZipOutputStream;
  */
 public class HandleProvider {
   private static final Logger LOG = Logger.getLogger(HandleProvider.class);
+
   private static final String HANDLE_PROVIDER_JAR = "handle-provider.jar";
-  private static final String TEAMCITY_PLUGIN_XML = "teamcity-plugin.xml";
 
-  private static File myPluginFolder;
+  private static File myPluginFile;
 
-  public static void initPluginFolder(@NotNull String pluginsDir) {
-    myPluginFolder = new File(pluginsDir, "/handle-provider");
+  // is used in Spring!
+
+  public static void initPluginFile(@NotNull String pluginsDir) {
+    myPluginFile = new File(pluginsDir + "/update/plugins/handle-provider.zip");
   }
 
   public static boolean isHandlePresent() {
-    if (myPluginFolder == null) {
-      return false;
-    }
-    final File[] files = myPluginFolder.listFiles();
-    return files != null && files.length > 0;
+    return myPluginFile != null && myPluginFile.isFile();
   }
 
   public void downloadHandleAndPackPlugin(@NotNull String url) throws Throwable {
-    LOG.debug("Downloading SysInternals handle.exe from " + url + " and extracting it into handle-provider plugin to "
-      + myPluginFolder.getAbsolutePath() + "...");
-
     final File tmpFile = new File(FileUtil.getTempDirectory(), "handle.exe");
+
     downloadHandleExe(url, tmpFile);
     packPlugin(tmpFile);
+
     FileUtil.delete(tmpFile);
   }
 
   public void packPlugin(File handleExe) throws IOException {
-    final File pluginTempFolder = preparePluginFolder();
+    LOG.info("Packing " + handleExe.getAbsolutePath() + " into handle-provider plugin to " + myPluginFile.getAbsolutePath() + "...");
+
+    final File pluginTempFolder = preparePluginTempFolder();
     try {
-      final File pluginAgentTempFolder = prepareSubFolder(pluginTempFolder, "handle-provider");
-      try {
-        final File binFolder = prepareSubFolder(pluginAgentTempFolder, "bin");
-//        final File handleZip = downloadHandleZip(url);
-//        extractHandleZip(binFolder, handleZip);
-        FileUtil.copy(handleExe, new File(binFolder, "handle.exe"));
+      final File binFolder = prepareSubFolder(pluginTempFolder, "bin");
+      FileUtil.copy(handleExe, new File(binFolder, "handle.exe"));
 
-        final File libFolder = prepareSubFolder(pluginAgentTempFolder, "lib");
-        copyOutResource(libFolder, HANDLE_PROVIDER_JAR);
+      final File libFolder = prepareSubFolder(pluginTempFolder, "lib");
+      copyOutResource(libFolder, HANDLE_PROVIDER_JAR);
 
-        final File pluginAgentFolder = prepareSubFolder(pluginTempFolder, "agent");
-        zipPlugin(pluginAgentTempFolder, new File(pluginAgentFolder, "handle-provider.zip"));
-      } finally {
-        FileUtil.delete(pluginAgentTempFolder);
+      if (myPluginFile.isFile()) {
+        LOG.debug(myPluginFile.getAbsolutePath() + " exists, try delete");
+        if (FileUtil.delete(myPluginFile)) {
+          LOG.error("Failed to delete previously packed " + myPluginFile);
+        }
       }
-      copyOutResource(pluginTempFolder, TEAMCITY_PLUGIN_XML);
-      if (myPluginFolder.exists()) {
-        FileUtil.delete(myPluginFolder);
-      }
-      FileUtil.copyDir(pluginTempFolder, myPluginFolder);
-//      zipPlugin(pluginTempFolder, pluginFolder);
+
+      zipPlugin(pluginTempFolder, myPluginFile);
     } finally {
       FileUtil.delete(pluginTempFolder);
     }
@@ -105,44 +100,28 @@ public class HandleProvider {
       + pluginZip.getAbsolutePath());
   }
 
-  private static void extractHandleZip(File binFolder, File handleZip) throws IOException {
-    LOG.debug("Extracting " + handleZip.getAbsolutePath() + " to " + binFolder.getAbsolutePath() + "...");
-    ZipUtil.extract(handleZip, binFolder, new FilenameFilter() {
-      public boolean accept(File dir, String name) {
-        return "handle.exe".equals(name);
-      }
-    });
-    LOG.debug("Successfully extracted " + handleZip.getAbsolutePath() + " to " + binFolder.getAbsolutePath());
-  }
-
-  private static File downloadHandleZip(String url) throws IOException {
-    final File tmpFile = FileUtil.createTempFile("", ".zip");
-    URLDownloader.download(new URL(url), tmpFile);
-    return tmpFile;
-  }
-
   private static void downloadHandleExe(String url, File dest) throws IOException {
     URLDownloader.download(new URL(url), dest);
   }
 
-  private static File prepareSubFolder(File baseFolder, String name) {
-    final File binFolder = new File(baseFolder, name);
-    if (!binFolder.mkdirs()) {
-      LOG.debug("Failed to create subfolder " + binFolder.getAbsolutePath() + " for base folder " + baseFolder);
-    }
-    return binFolder;
-  }
-
-  private static File preparePluginFolder() {
+  private static File preparePluginTempFolder() {
     final File pluginFolder = new File(FileUtil.getTempDirectory(), "handle-provider");
     LOG.debug("handle-provider plugin temp folder is " + pluginFolder.getAbsolutePath());
 
     if (pluginFolder.exists()) {
       LOG.debug("handle-provider plugin folder " + pluginFolder.getAbsolutePath() + " exists, try delete");
       if (FileUtil.delete(pluginFolder)) {
-        LOG.debug("Failed to delete handle-provider plugin folder " + pluginFolder.getAbsolutePath());
+        LOG.error("Failed to delete handle-provider plugin folder " + pluginFolder.getAbsolutePath());
       }
     }
     return pluginFolder;
+  }
+
+  private static File prepareSubFolder(File baseFolder, String name) {
+    final File binFolder = new File(baseFolder, name);
+    if (!binFolder.mkdirs()) {
+      LOG.error("Failed to create subfolder " + binFolder.getAbsolutePath() + " for base folder " + baseFolder);
+    }
+    return binFolder;
   }
 }

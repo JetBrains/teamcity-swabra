@@ -30,21 +30,21 @@
 
   <bean class="jetbrains.buildServer.swabra.HandleProvider"/>
 
-  <bean id="serverPluginsFolder" class="org.springframework.beans.factory.config.MethodInvokingFactoryBean">
+  <bean id="serverRootPath" class="org.springframework.beans.factory.config.MethodInvokingFactoryBean">
     <property name="targetObject">
-      <ref bean="serverPaths"/>
+      <ref bean="buildServer"/>
     </property>
     <property name="targetMethod">
-      <value>getPluginsDir</value>
+      <value>getServerRootPath</value>
     </property>
   </bean>
 
   <bean id="setSwabraPluginsFolder" class="org.springframework.beans.factory.config.MethodInvokingFactoryBean">
     <property name="staticMethod"
-              value="jetbrains.buildServer.swabra.HandleProvider.initPluginFolder"/>
+              value="jetbrains.buildServer.swabra.HandleProvider.initPluginFile"/>
     <property name="arguments">
       <list>
-        <ref local="serverPluginsFolder"/>
+        <ref local="serverRootPath"/>
       </list>
     </property>
   </bean>
