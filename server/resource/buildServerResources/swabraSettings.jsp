@@ -127,14 +127,20 @@
     </td>
   </tr>
 
-  <c:if test="${not handlePresent}">
+  <c:choose>
+    <c:when test="${not handlePresent}">
+      <c:set var="actionName" value="Install"/>
+    </c:when>
+    <c:otherwise>
+      <c:set var="actionName" value="Update"/>
+    </c:otherwise>
+  </c:choose>
     <tr class="noBorder" id="swabra.download.handle.container" style="${empty selected ? 'display: none;' : ''}">
       <th>
       </th>
       <td>
         <c:url var="handleDownloader" value="/admin/handle.html"/>
-        <input type="button" value="Install SysInternals handle.exe" onclick="window.open('${handleDownloader}', '_blank')"/>
+        <a href="${handleDownloader}" target="_blank">${actionName} SysInternals handle.exe</a>
       </td>
     </tr>
-  </c:if>
 </l:settingsGroup>
