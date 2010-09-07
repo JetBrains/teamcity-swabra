@@ -94,7 +94,7 @@ public class BuildProgressLoggerMock implements BuildProgressLogger {
   public void preparationEndMessage() {
   }
 
-  public void error(final String type, final String message, final Throwable throwable) {
+  public void internalError(final String type, final String message, final Throwable throwable) {
   }
 
   public void progressStarted(final String message) {
