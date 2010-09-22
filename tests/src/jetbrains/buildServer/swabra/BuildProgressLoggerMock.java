@@ -16,18 +16,17 @@
 
 package jetbrains.buildServer.swabra;
 
-import jetbrains.buildServer.agent.BuildProgressLogger;
+import java.util.Date;
+import jetbrains.buildServer.agent.FlowLogger;
 import jetbrains.buildServer.messages.BuildMessage1;
 import org.jetbrains.annotations.NotNull;
-
-import java.util.Date;
 
 /**
  * User: vbedrosova
  * Date: 21.04.2009
  * Time: 15:03:19
  */
-public class BuildProgressLoggerMock implements BuildProgressLogger {
+public class BuildProgressLoggerMock implements FlowLogger {
   private final StringBuilder myText;
 
   public BuildProgressLoggerMock(final StringBuilder text) {
@@ -151,13 +150,25 @@ public class BuildProgressLoggerMock implements BuildProgressLogger {
   public void flush() {
   }
 
-  public void flowStarted(final String flowId, final String parentFlowId) {
-  }
-
-  public void flowFinished(final String flowId) {
-  }
-
   public void ignoreServiceMessages(final Runnable runnable) {
     runnable.run();
+  }
+
+  public FlowLogger getFlowLogger(final String flowId) {
+    return this;
+  }
+
+  public FlowLogger getThreadLogger() {
+    return this;
+  }
+
+  public void startFlow() {
+  }
+
+  public String getFlowId() {
+    return "test-flow-id";
+  }
+
+  public void disposeFlow() {
   }
 }
