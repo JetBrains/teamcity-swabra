@@ -140,7 +140,7 @@
       </th>
       <td>
         <c:url var="handleDownloader" value="/admin/handle.html"/>
-        <a href="${handleDownloader}" target="_blank">${actionName} SysInternals handle.exe</a>
+        <a href="${handleDownloader}" target="_blank" showdiscardchangesmessage="false">${actionName} SysInternals handle.exe</a>
       </td>
     </tr>
 </l:settingsGroup>
