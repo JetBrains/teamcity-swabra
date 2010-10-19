@@ -20,6 +20,7 @@ import com.intellij.openapi.util.SystemInfo;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
+import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -39,6 +40,10 @@ public class SwabraUtil {
   public static final String LOCKING_PROCESS = "swabra.processes";
 
   public static final String RULES = "swabra.rules";
+
+  private static final String[] KEYS = {ENABLED, STRICT, VERBOSE,
+                                        LOCKING_PROCESS_KILL, LOCKING_PROCESS_DETECTION, LOCKING_PROCESS,
+                                        RULES};
 
   public static final String TRUE = "true";
 
@@ -94,5 +99,15 @@ public class SwabraUtil {
 
   public static String unifyPath(File file) {
     return unifyPath(file.getAbsolutePath());
+  }
+
+  public static Map<String, String> getSwabraParameters(@NotNull final Map<String, String> params) {
+    final Map<String, String> swabraParams = new HashMap<String, String>();
+
+    for (final String key : KEYS) {
+      swabraParams.put(key, params.get(key));
+    }
+
+    return swabraParams;
   }
 }

@@ -1,7 +1,7 @@
 package jetbrains.buildServer.swabra.web;
 
-import jetbrains.buildServer.serverSide.PropertiesProcessor;
-import jetbrains.buildServer.serverSide.RunTypeExtension;
+import jetbrains.buildServer.serverSide.*;
+import jetbrains.buildServer.swabra.SwabraUtil;
 import jetbrains.buildServer.web.openapi.PluginDescriptor;
 import org.jetbrains.annotations.NotNull;
 
@@ -12,7 +12,7 @@ import java.util.*;
  * Date: 02.10.10
  * Time: 16:19
  */
-public class SwabraRunTypeExtension extends RunTypeExtension {
+public class SwabraRunTypeExtension extends RunTypeExtension implements BuildStartContextProcessor {
   private static final String SETTINGS = "swabraSettings.jsp";
   private static final String VIEW_SETTINGS = "viewSwabraSettings.jsp";
 
@@ -54,5 +54,18 @@ public class SwabraRunTypeExtension extends RunTypeExtension {
   //used in spring
   public void setSupportedRunTypes(List<String> supportedRunTypes) {
     mySupportedRunTypes = supportedRunTypes;
+  }
+
+  public void updateParameters(@NotNull BuildStartContext context) {
+    final Collection<? extends SRunnerContext> runners = context.getRunnerContexts();
+    if (!runners.isEmpty()) {
+      final Map<String, String> swabraParams = SwabraUtil.getSwabraParameters(runners.iterator().next().getRunParameters());
+
+      for (final Map.Entry<String, String> param : swabraParams.entrySet()) {
+        if (param.getValue() != null) {
+          context.addSharedParameter(param.getKey(), param.getValue());
+        }
+      }
+    }
   }
 }

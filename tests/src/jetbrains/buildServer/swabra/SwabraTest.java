@@ -59,7 +59,7 @@ public class SwabraTest extends TestCase {
                                      @NotNull final AgentRunningBuild runningBuild) {
     myContext.checking(new Expectations() {
       {
-        allowing(runningBuild).getRunnerParameters();
+        allowing(runningBuild).getSharedConfigParameters();
         will(returnValue(runParams));
         allowing(runningBuild).getBuildLogger();
         will(returnValue(logger));

@@ -37,17 +37,17 @@ public class SwabraSettings {
 
 
   public SwabraSettings(AgentRunningBuild runningBuild, SwabraLogger logger) {
-    final Map<String, String> runnerParams = runningBuild.getRunnerParameters();
-    myCleanupEnabled = SwabraUtil.isCleanupEnabled(runnerParams);
-    myStrict = SwabraUtil.isStrict(runnerParams);
-    myLockingProcessesKill = SwabraUtil.isLockingProcessesKill(runnerParams);
-    myLockingProcessesReport = SwabraUtil.isLockingProcessesReport(runnerParams);
-    myVerbose = SwabraUtil.isVerbose(runnerParams);
+    final Map<String, String> params = runningBuild.getSharedConfigParameters();
+    myCleanupEnabled = SwabraUtil.isCleanupEnabled(params);
+    myStrict = SwabraUtil.isStrict(params);
+    myLockingProcessesKill = SwabraUtil.isLockingProcessesKill(params);
+    myLockingProcessesReport = SwabraUtil.isLockingProcessesReport(params);
+    myVerbose = SwabraUtil.isVerbose(params);
     myCheckoutDir = runningBuild.getCheckoutDirectory();
 
     final Map<String, String> systemProperties = runningBuild.getBuildParameters().getSystemProperties();
     myRules = new ArrayList<String>();
-    myRules.addAll(splitRules(SwabraUtil.getRules(runnerParams)));
+    myRules.addAll(splitRules(SwabraUtil.getRules(params)));
     if (systemProperties.containsKey(RULES_PROPERTY)) {
       myRules.addAll(splitRules(systemProperties.get(RULES_PROPERTY)));
     } else if (runningBuild.isCheckoutOnAgent()) {
