@@ -23,7 +23,6 @@
     <orderEntry type="library" name="TeamCity-web" level="project" />
     <orderEntry type="library" name="TeamCity-common" level="project" />
     <orderEntry type="library" name="Log4J" level="project" />
-    <orderEntry type="library" name="TeamCity-runtime-util" level="project" />
   </component>
 </module>
 
