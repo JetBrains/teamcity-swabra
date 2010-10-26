@@ -106,10 +106,6 @@
     <pathelement location="${path.variable.teamcitydistribution}/webapps/ROOT/WEB-INF/lib/processesTerminator.jar"/>
   </path>
 
-  <path id="library.teamcity-runtime-util.classpath">
-    <pathelement location="${path.variable.teamcitydistribution}/devPackage/runtime-util.jar"/>
-  </path>
-
   <path id="library.teamcity-server.classpath">
     <pathelement location="${path.variable.teamcitydistribution}/devPackage/server-api.jar"/>
   </path>
@@ -124,7 +120,6 @@
   </path>
 
   <path id="library.teamcity-utils.classpath">
-    <pathelement location="${path.variable.teamcitydistribution}/devPackage/runtime-util.jar"/>
     <pathelement location="${path.variable.teamcitydistribution}/webapps/ROOT/WEB-INF/lib/util.jar"/>
   </path>
 
@@ -403,7 +398,6 @@
     <path refid="library.teamcity-web.classpath"/>
     <path refid="library.teamcity-common.classpath"/>
     <path refid="library.log4j.classpath"/>
-    <path refid="library.teamcity-runtime-util.classpath"/>
   </path>
 
   <path id="server.runtime.module.classpath">
@@ -419,7 +413,6 @@
     <path refid="library.teamcity-web.classpath"/>
     <path refid="library.teamcity-common.classpath"/>
     <path refid="library.log4j.classpath"/>
-    <path refid="library.teamcity-runtime-util.classpath"/>
   </path>
 
 
