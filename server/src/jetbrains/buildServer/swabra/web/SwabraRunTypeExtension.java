@@ -59,7 +59,7 @@ public class SwabraRunTypeExtension extends RunTypeExtension implements BuildSta
   public void updateParameters(@NotNull BuildStartContext context) {
     final Collection<? extends SRunnerContext> runners = context.getRunnerContexts();
     if (!runners.isEmpty()) {
-      final Map<String, String> swabraParams = SwabraUtil.getSwabraParameters(runners.iterator().next().getRunnerParameters());
+      final Map<String, String> swabraParams = SwabraUtil.getSwabraParameters(runners.iterator().next().getParameters());
 
       for (final Map.Entry<String, String> param : swabraParams.entrySet()) {
         if (param.getValue() != null) {
