@@ -58,7 +58,7 @@
       <strong>kill</strong>
     </c:when>
     <c:otherwise>
-      <strong>not detect</strong>
+      <strong>do not detect</strong>
     </c:otherwise>
   </c:choose>
 </div>
