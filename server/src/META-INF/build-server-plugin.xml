@@ -2,32 +2,6 @@
 <!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN//EN" "http://www.springframework.org/dtd/spring-beans.dtd">
 
 <beans default-autowire="constructor">
-  <bean id="testReportParserPluginSettings"
-        class="jetbrains.buildServer.swabra.web.SwabraRunTypeExtension">
-    <property name="supportedRunTypes">
-      <list>
-        <value>simpleRunner</value>
-        <value>Ant</value>
-        <value>Duplicator</value>
-        <value>FxCop</value>
-        <value>Inspection</value>
-        <value>Ipr</value>
-        <value>Maven2</value>
-        <value>MSBuild</value>
-        <value>NAnt</value>
-        <value>rake-runner</value>
-        <value>sln2003</value>
-        <value>VS.Solution</value>
-        <value>dotnet-dupfinder</value>
-        <value>gradle-runner</value>
-        <value>JPS</value>
-        <value>MSTest</value>
-        <value>NUnit</value>
-      </list>
-    </property>
-  </bean>
-
-
   <bean class="jetbrains.buildServer.swabra.web.actions.UploadAction"/>
   <bean class="jetbrains.buildServer.swabra.web.actions.DownloadAction"/>
 
