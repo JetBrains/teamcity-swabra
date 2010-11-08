@@ -6,10 +6,10 @@ import jetbrains.buildServer.serverSide.*;
 import jetbrains.buildServer.web.openapi.PluginDescriptor;
 import org.jetbrains.annotations.NotNull;
 
-public class SwabraBuildFacility extends BuildFacility implements BuildStartContextProcessor {
+public class SwabraBuildFeature extends BuildFeature implements BuildStartContextProcessor {
   private final String myEditUrl;
 
-  public SwabraBuildFacility(@NotNull final PluginDescriptor descriptor) {
+  public SwabraBuildFeature(@NotNull final PluginDescriptor descriptor) {
     myEditUrl = descriptor.getPluginResourcesPath("swabraSettings.jsp");
   }
 
@@ -33,8 +33,8 @@ public class SwabraBuildFacility extends BuildFacility implements BuildStartCont
   public void updateParameters(@NotNull BuildStartContext context) {
     SBuildType buildType = context.getBuild().getBuildType();
     if (buildType == null) return;
-    Collection<SBuildFacilityDescriptor> buildFacilities = buildType.getBuildFacilities();
-    for (SBuildFacilityDescriptor bf: buildFacilities) {
+    Collection<SBuildFeatureDescriptor> buildFeatures = buildType.getBuildFeatures();
+    for (SBuildFeatureDescriptor bf: buildFeatures) {
       if (bf.getType().equals(getType())) {
         for (final Map.Entry<String, String> param : bf.getParameters().entrySet()) {
           if (param.getValue() != null) {
@@ -46,7 +46,7 @@ public class SwabraBuildFacility extends BuildFacility implements BuildStartCont
   }
 
   @Override
-  public boolean isMultipleFacilitiesPerBuildTypeAllowed() {
+  public boolean isMultipleFeaturesPerBuildTypeAllowed() {
     return false;
   }
 

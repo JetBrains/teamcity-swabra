@@ -8,7 +8,7 @@
   <bean class="jetbrains.buildServer.swabra.web.HandleController" init-method="register"/>
 
   <bean class="jetbrains.buildServer.swabra.HandleProvider"/>
-  <bean class="jetbrains.buildServer.swabra.SwabraBuildFacility"/>
+  <bean class="jetbrains.buildServer.swabra.SwabraBuildFeature"/>
 
   <bean id="serverRootPath" class="org.springframework.beans.factory.config.MethodInvokingFactoryBean">
     <property name="targetObject">

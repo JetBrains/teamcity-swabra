@@ -12,7 +12,7 @@
 
 <tr>
   <td colspan="2">
-    <em>Swabra build extension cleans files created during the build.</em>
+    <em>Swabra build feature cleans files created during the build.</em>
   </td>
 </tr>
 <tr class="noBorder">
