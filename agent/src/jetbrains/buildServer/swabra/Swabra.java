@@ -22,7 +22,6 @@ package jetbrains.buildServer.swabra;
  * Time: 14:10:58
  */
 
-import java.io.File;
 import jetbrains.buildServer.agent.*;
 import jetbrains.buildServer.messages.Status;
 import jetbrains.buildServer.messages.serviceMessages.BuildStatus;
@@ -31,6 +30,8 @@ import jetbrains.buildServer.swabra.processes.LockedFileResolver;
 import jetbrains.buildServer.swabra.snapshots.*;
 import jetbrains.buildServer.util.EventDispatcher;
 import org.jetbrains.annotations.NotNull;
+
+import java.io.File;
 
 
 public final class Swabra extends AgentLifeCycleAdapter {
@@ -131,15 +132,16 @@ public final class Swabra extends AgentLifeCycleAdapter {
   }
 
   @Override
-  public void beforeRunnerStart(@NotNull final AgentRunningBuild runningBuild) {
+  public void beforeRunnerStart(@NotNull BuildRunnerContext runner) {
     if (!mySettings.isCleanupEnabled()) return;
+    final AgentRunningBuild runningBuild = runner.getBuild();
     if (!runningBuild.isCheckoutOnAgent() && !runningBuild.isCheckoutOnServer()) {
       makeSnapshot();
     }
   }
 
   @Override
-  public void beforeBuildFinish(@NotNull final BuildFinishedStatus buildStatus) {
+  public void beforeBuildFinish(@NotNull AgentRunningBuild build, @NotNull BuildFinishedStatus buildStatus) {
     if (!mySettings.isLockingProcessesDetectionEnabled()) return;
 
     myLogger.activityStarted();
