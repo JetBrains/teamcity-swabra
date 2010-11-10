@@ -32,13 +32,7 @@ public class FilesCollectionRulesAwareProcessor extends FilesCollectionProcessor
   public boolean willProcess(FileInfo info) {
     final String path = FileUtil.getRelativePath(myCheckouDir, info.getPath(), File.separatorChar);
 
-    if (myRules.exclude(path)) {
-      myLogger.debug("Excluded " + info.getPath());
-      return false;
-    }
-
-    myLogger.debug("Included " + info.getPath());
-    return true;
+    return !myRules.exclude(path);
   }
 }
 
