@@ -83,16 +83,16 @@ public class FilesCollector {
 
     removeSnapshot(snapshot, checkoutDir);
     if (results.detectedNewAndUnableToDelete != 0) {
-      myLogger.warn(message);
+      myLogger.swabraWarn(message);
       if (handler != null) handler.lockedFilesDetected();
       return;
     }
     if (results.detectedDeleted > 0 || results.detectedModified > 0) {
-      myLogger.warn(message);
+      myLogger.swabraWarn(message);
       if (handler != null) handler.dirtyStateDetected();
       return;
     }
-    myLogger.message(message, true);
+    myLogger.swabraMessage(message, true);
     if (handler != null) handler.success();
   }
 

@@ -87,6 +87,7 @@ public final class Swabra extends AgentLifeCycleAdapter {
       }
 
       directoryState = myPropertiesProcessor.getState(mySettings.getCheckoutDir());
+      myLogger.swabraDebug("Checkout directory state is " + directoryState);
     } finally {
       myPropertiesProcessor.deleteRecord(mySettings.getCheckoutDir());
     }
@@ -94,9 +95,11 @@ public final class Swabra extends AgentLifeCycleAdapter {
     switch (directoryState) {
       case CLEAN:
         // do nothing
+        myLogger.swabraDebug("Checkout directory is clean");
         return;
       case DIRTY:
         if (mySettings.isStrict()) {
+          myLogger.swabraDebug("Checkout directory is dirty");
           doCleanup(mySettings.getCheckoutDir());
           return;
         }
@@ -111,6 +114,7 @@ public final class Swabra extends AgentLifeCycleAdapter {
         }
         // else fall into next case
       case STRICT_PENDING:
+        myLogger.swabraDebug("Cleanup is performed before build");
         final FilesCollector filesCollector = initFilesCollector();
         filesCollector.collect(myPropertiesProcessor.getSnapshotFile(mySettings.getCheckoutDir()), mySettings.getCheckoutDir(),
           mySettings.isStrict() ?
@@ -138,6 +142,7 @@ public final class Swabra extends AgentLifeCycleAdapter {
         return;
       case UNKNOWN:
       default:
+        myLogger.message("Checkout directory state is unknown. Will force clean checkout", false);
         doCleanup(mySettings.getCheckoutDir());
     }
   }
@@ -184,6 +189,8 @@ public final class Swabra extends AgentLifeCycleAdapter {
   @Override
   public void buildFinished(@NotNull AgentRunningBuild build, @NotNull BuildFinishedStatus buildStatus) {
     if (!mySettings.isCleanupAfterBuild()) return;
+
+    myLogger.swabraDebug("Cleanup is performed after build");
 
     myPropertiesProcessor.deleteRecord(mySettings.getCheckoutDir());
 

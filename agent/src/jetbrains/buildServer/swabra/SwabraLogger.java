@@ -43,7 +43,6 @@ public final class SwabraLogger {
     CLASS_LOGGER.info(message);
     if (useBuildLog && myBuildLogger != null) myBuildLogger.message(message);
   }
-
   public void warn(@NotNull final String message) {
     CLASS_LOGGER.warn(message);
     if (myBuildLogger != null) myBuildLogger.warning(message);
@@ -56,6 +55,12 @@ public final class SwabraLogger {
 
   public void debug(@NotNull final String message) {
     CLASS_LOGGER.debug(message);
+  }
+
+  public void swabraMessage(@NotNull String message, boolean useBuildLog) {
+    message = prepareMessage(message);
+    CLASS_LOGGER.info(message);
+    if (useBuildLog && myBuildLogger != null) myBuildLogger.message(message);
   }
 
   public void swabraWarn(@NotNull String message) {
