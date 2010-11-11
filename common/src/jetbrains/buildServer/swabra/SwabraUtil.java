@@ -29,7 +29,6 @@ import java.util.Map;
  * Time: 15:02:17
  */
 public class SwabraUtil {
-//  public static final String MODE = "swabra.mode";
   public static final String ENABLED = "swabra.enabled";
   public static final String STRICT = "swabra.strict";
   public static final String VERBOSE = "swabra.verbose";
@@ -47,23 +46,30 @@ public class SwabraUtil {
 
   public static final String TRUE = "true";
 
-//  public static final String AFTER_BUILD = "swabra.after.build";
-//  public static final String BEFORE_BUILD = "swabra.before.build";
+  public static final String AFTER_BUILD = "swabra.after.build";
+  public static final String BEFORE_BUILD = "swabra.before.build";
 
-//  public static final Map<String, String> SWABRA_MODES = new HashMap<String, String>();
-//  static {
-//    SWABRA_MODES.put(AFTER_BUILD, "After build");
-//    SWABRA_MODES.put(BEFORE_BUILD, "Before next build");
-//  }
+  public static final Map<String, String> SWABRA_MODES = new HashMap<String, String>();
+  static {
+    SWABRA_MODES.put(AFTER_BUILD, "After build");
+    SWABRA_MODES.put(BEFORE_BUILD, "Before next build");
+  }
 
   public static boolean isCleanupEnabled(@NotNull final Map<String, String> params) {
     return params.containsKey(ENABLED);
-//    return params.containsKey(MODE);
   }
 
-//  public static String getSwabraMode(@NotNull final Map<String, String> params) {
-//    return params.get(MODE);
-//  }
+  public static String getCleanupMode(@NotNull final Map<String, String> params) {
+    return params.get(ENABLED);
+  }
+
+  public static boolean isAfterBuildCleanup(@NotNull final String mode) {
+    return AFTER_BUILD.equalsIgnoreCase(mode);
+  }
+
+  public static boolean isAfterBuildCleanup(@NotNull final Map<String, String> params) {
+    return isAfterBuildCleanup(getCleanupMode(params));
+  }
 //
 //  public static void enableSwabra(@NotNull final Map<String, String> params, @NotNull String mode) {
 //    params.put(MODE, mode);

@@ -7,7 +7,8 @@
 <%@ page import="jetbrains.buildServer.swabra.HandleProvider" %>
 
 <c:set var="handlePresent"><%=HandleProvider.isHandlePresent()%></c:set>
-<c:set var="selected" value="${propertiesBean.properties['swabra.processes']}"/>
+<c:set var="enabledSelected" value="${propertiesBean.properties['swabra.enabled']}"/>
+<c:set var="processesSelected" value="${propertiesBean.properties['swabra.processes']}"/>
 <c:set var="displaySwabraSettings" value="${empty propertiesBean.properties['swabra.enabled'] ? false : true}"/>
 
 <tr>
@@ -18,22 +19,31 @@
 <tr class="noBorder">
   <th>Build files cleanup:</th>
   <td>
-    <c:set var="onclick">
-      if (this.checked) {
-      BS.Util.show($('swabra.strict.container'));
-      BS.Util.show($('swabra.verbose.container'));
-      BS.Util.show($('swabra.rules.container'));
-      } else {
+    <c:set var="onchange">
+      var selectedValue = this.options[this.selectedIndex].value;
+      if (selectedValue == '') {
       BS.Util.hide($('swabra.strict.container'));
       BS.Util.hide($('swabra.verbose.container'));
       BS.Util.hide($('swabra.rules.container'));
+      } else {
+      BS.Util.show($('swabra.strict.container'));
+      BS.Util.show($('swabra.verbose.container'));
+      BS.Util.show($('swabra.rules.container'));
       }
       BS.MultilineProperties.updateVisible();
     </c:set>
-    <props:checkboxProperty name="swabra.enabled" onclick="${onclick}"/>
-    <label for="swabra.enabled">Perform build files cleanup</label>
-    <span class="smallNote">
-      At the build start inspect the checkout directory for files created, modified and deleted during previous build.</span>
+    <%--<props:checkboxProperty name="swabra.enabled" onclick="${onclick}"/>--%>
+    <%--<label for="swabra.enabled">Perform build files cleanup</label>--%>
+    <%--<span class="smallNote">--%>
+      <%--At the build start inspect the checkout directory for files created, modified and deleted during previous build.</span>--%>
+    <props:selectProperty name="swabra.enabled" onchange="${onchange}">
+      <props:option value=""
+                    selected="${empty enabledSelected}">&lt;Do not cleanup&gt;</props:option>
+      <props:option value="swabra.before.build"
+                    selected="${not empty enabledSelected && enabledSelected != 'swabra.after.build'}">Before build start</props:option>
+      <props:option value="swabra.after.build"
+                    selected="${enabledSelected == 'swabra.after.build'}">After build finish</props:option>
+    </props:selectProperty>
   </td>
 </tr>
 
@@ -90,26 +100,26 @@
     </c:set>
     <props:selectProperty name="swabra.processes" onchange="${onchange}">
       <props:option value=""
-                    selected="${empty selected}">&lt;Do not detect&gt;</props:option>
+                    selected="${empty processesSelected}">&lt;Do not detect&gt;</props:option>
       <props:option value="report"
-                    selected="${selected == 'report'}">Report</props:option>
+                    selected="${processesSelected == 'report'}">Report</props:option>
       <props:option value="kill"
-                    selected="${selected == 'kill'}">Kill</props:option>
+                    selected="${processesSelected == 'kill'}">Kill</props:option>
     </props:selectProperty>
 
-    <span class="smallNote" id="swabra.processes.note" style="${empty selected ? 'display: none;' : ''}">
+    <span class="smallNote" id="swabra.processes.note" style="${empty processesSelected ? 'display: none;' : ''}">
       Before the end of the build inspect the checkout directory for processes locking files in this directory.
     </span>
-    <span class="smallNote" id="swabra.processes.report.note" style="${selected == 'report' ? '' : 'display: none;'}">
+    <span class="smallNote" id="swabra.processes.report.note" style="${processesSelected == 'report' ? '' : 'display: none;'}">
       Report about such processes in the build log.
       <br/>
     </span>
-    <span class="smallNote" id="swabra.processes.kill.note" style="${selected == 'kill' ? '' : 'display: none;'}">
+    <span class="smallNote" id="swabra.processes.kill.note" style="${processesSelected == 'kill' ? '' : 'display: none;'}">
       Report about such processes in the build log and kill them.
       <br/>
     </span>
     <c:if test="${not handlePresent}">
-      <span class="smallNote" id="swabra.processes.handle.note" style="${empty selected ? 'display: none;' : ''}">
+      <span class="smallNote" id="swabra.processes.handle.note" style="${empty processesSelected ? 'display: none;' : ''}">
         Note that handle.exe is required on agents.
       </span>
     </c:if>
@@ -132,7 +142,7 @@
     <c:set var="actionName" value="Update"/>
   </c:otherwise>
 </c:choose>
-<tr class="noBorder" id="swabra.download.handle.container" style="${empty selected ? 'display: none;' : ''}">
+<tr class="noBorder" id="swabra.download.handle.container" style="${empty processesSelected ? 'display: none;' : ''}">
   <th>
   </th>
   <td>

@@ -74,7 +74,7 @@ public final class Swabra extends AgentLifeCycleAdapter {
     myLockedFileResolver = mySettings.isLockingProcessesDetectionEnabled() ?
       new LockedFileResolver(new HandlePidsProvider(mySettings.getHandlePath())/*, myProcessTerminator,*/) : null;
 
-    String snapshotName;
+    final SwabraPropertiesProcessor.DirectoryState directoryState;
     try {
       if (!mySettings.isCleanupEnabled()) {
         myLogger.message("Swabra cleanup is disabled", false);
@@ -86,42 +86,59 @@ public final class Swabra extends AgentLifeCycleAdapter {
         return;
       }
 
-      snapshotName = myPropertiesProcessor.getSnapshot(mySettings.getCheckoutDir());
+      directoryState = myPropertiesProcessor.getState(mySettings.getCheckoutDir());
     } finally {
       myPropertiesProcessor.deleteRecord(mySettings.getCheckoutDir());
     }
-    if (snapshotName == null) {
-      myLogger.message("No snapshot saved in " + myPropertiesProcessor.getPropertiesFile().getAbsolutePath() + " for this configuration. Will force clean checkout", false);
-      doCleanup(mySettings.getCheckoutDir());
-      return;
-    }
-    if (myPropertiesProcessor.isMarkedSnapshot(snapshotName) && mySettings.isStrict()) {
-      myLogger.message("Snapshot " + snapshotName + " was saved without \"Ensure clean checkout\" mode. Will force clean checkout", false);
-      doCleanup(mySettings.getCheckoutDir());
-      return;
-    }
 
-    final FilesCollector filesCollector = initFilesCollector();
-    final FilesCollector.CollectionResult result = filesCollector.collect(myPropertiesProcessor.getSnapshotFile(snapshotName), mySettings.getCheckoutDir());
-
-    if (!mySettings.isStrict()) {
-      myLogger.message("Running in non-strict mode, ignore files collection result", false);
-      return;
-    }
-
-    switch (result) {
-      case ERROR:
-        myLogger.message("Some error occurred during files collecting. Will force clean checkout", false);
-        doCleanup(mySettings.getCheckoutDir());
+    switch (directoryState) {
+      case CLEAN:
+        // do nothing
         return;
-
       case DIRTY:
-        myLogger.message("Checkout directory contains modified files or some files were deleted. Will force clean checkout", false);
-        doCleanup(mySettings.getCheckoutDir());
-        return;
+        if (mySettings.isStrict()) {
+          doCleanup(mySettings.getCheckoutDir());
+          return;
+        }
+        if (!mySettings.isCleanupBeforeBuild()) {
+          return;
+        }
+        // else fall into next case
+      case PENDING:
+        if (mySettings.isStrict()) {
+          doCleanup(mySettings.getCheckoutDir());
+          return;
+        }
+        // else fall into next case
+      case STRICT_PENDING:
+        final FilesCollector filesCollector = initFilesCollector();
+        filesCollector.collect(myPropertiesProcessor.getSnapshotFile(mySettings.getCheckoutDir()), mySettings.getCheckoutDir(),
+          mySettings.isStrict() ?
+          new FilesCollector.CollectionResultHandler() {
+            public void success() {
+              myLogger.message("Successfully performed cleanup", false);
+            }
 
-      case LOCKED:
-        fail();
+            public void error() {
+              myLogger.message("Some error occurred during files collecting. Will force clean checkout", false);
+              doCleanup(mySettings.getCheckoutDir());
+            }
+
+            public void lockedFilesDetected() {
+              fail();
+            }
+
+            public void dirtyStateDetected() {
+              myLogger.message("Checkout directory contains modified files or some files were deleted. Will force clean checkout", false);
+              doCleanup(mySettings.getCheckoutDir());
+            }
+          }
+          : null
+        );
+        return;
+      case UNKNOWN:
+      default:
+        doCleanup(mySettings.getCheckoutDir());
     }
   }
 
@@ -142,6 +159,10 @@ public final class Swabra extends AgentLifeCycleAdapter {
 
   @Override
   public void beforeBuildFinish(@NotNull AgentRunningBuild build, @NotNull BuildFinishedStatus buildStatus) {
+    if (mySettings.isCleanupAfterBuild()) {
+      myLogger.message("Build files cleanup will be performed after the build. Please refer to teamcity-agent.log for details", true);
+    }
+
     if (!mySettings.isLockingProcessesDetectionEnabled()) return;
 
     myLogger.activityStarted();
@@ -160,6 +181,38 @@ public final class Swabra extends AgentLifeCycleAdapter {
     }
   }
 
+  @Override
+  public void buildFinished(@NotNull AgentRunningBuild build, @NotNull BuildFinishedStatus buildStatus) {
+    if (!mySettings.isCleanupAfterBuild()) return;
+
+    myPropertiesProcessor.deleteRecord(mySettings.getCheckoutDir());
+
+    final FilesCollector filesCollector = initFilesCollector();
+    filesCollector.collect(myPropertiesProcessor.getSnapshotFile(mySettings.getCheckoutDir()), mySettings.getCheckoutDir(),
+      new FilesCollector.CollectionResultHandler() {
+        public void success() {
+          if (mySettings.isStrict()) {
+            myPropertiesProcessor.markClean(mySettings.getCheckoutDir());
+          } else {
+            myPropertiesProcessor.markDirty(mySettings.getCheckoutDir());
+          }
+        }
+
+        public void error() {
+          myPropertiesProcessor.markDirty(mySettings.getCheckoutDir());
+        }
+
+        public void lockedFilesDetected() {
+          myPropertiesProcessor.markPending(mySettings.getCheckoutDir(), mySettings.isStrict());
+        }
+
+        public void dirtyStateDetected() {
+          myPropertiesProcessor.markDirty(mySettings.getCheckoutDir());
+        }
+      }
+    );
+  }
+
   private FilesCollector initFilesCollector() {
     FilesCollectionProcessor processor;
     if (System.getProperty(TEST_LOG) != null) {
@@ -173,12 +226,10 @@ public final class Swabra extends AgentLifeCycleAdapter {
   }
 
   private void makeSnapshot() {
-    final String snapshotName = myPropertiesProcessor.getSnapshotName(mySettings.getCheckoutDir());
-    if (!new SnapshotGenerator(mySettings.getCheckoutDir(), myLogger).generateSnapshot(myPropertiesProcessor.getSnapshotFile(snapshotName))) {
+    if (!new SnapshotGenerator(mySettings.getCheckoutDir(), myLogger).generateSnapshot(myPropertiesProcessor.getSnapshotFile(mySettings.getCheckoutDir()))) {
       mySettings.setCleanupEnabled(false);
     } else {
-      myPropertiesProcessor.setSnapshot(mySettings.getCheckoutDir(),
-        mySettings.isStrict() ? snapshotName : myPropertiesProcessor.markSnapshotName(snapshotName));
+      myPropertiesProcessor.markPending(mySettings.getCheckoutDir(), mySettings.isStrict());
     }
   }
 

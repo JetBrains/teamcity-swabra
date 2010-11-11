@@ -45,16 +45,16 @@
   </c:when>
 </c:choose>
 
-<c:set var="selected"
+<c:set var="processesSelected"
        value="${propertiesBean.properties['swabra.processes']}"/>
 
 <div class="parameter">
   Locking processes:
   <c:choose>
-    <c:when test="${selected == 'report'}">
+    <c:when test="${processesSelected == 'report'}">
       <strong>report</strong>
     </c:when>
-    <c:when test="${selected == 'kill'}">
+    <c:when test="${processesSelected == 'kill'}">
       <strong>kill</strong>
     </c:when>
     <c:otherwise>

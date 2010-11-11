@@ -1,10 +1,11 @@
 package jetbrains.buildServer.swabra;
 
-import java.util.Collection;
-import java.util.Map;
 import jetbrains.buildServer.serverSide.*;
 import jetbrains.buildServer.web.openapi.PluginDescriptor;
 import org.jetbrains.annotations.NotNull;
+
+import java.util.Collection;
+import java.util.Map;
 
 public class SwabraBuildFeature extends BuildFeature implements BuildStartContextProcessor {
   private final String myEditUrl;
@@ -55,7 +56,11 @@ public class SwabraBuildFeature extends BuildFeature implements BuildStartContex
   public String describeParameters(@NotNull final Map<String, String> params) {
     StringBuilder result = new StringBuilder();
     if (SwabraUtil.isCleanupEnabled(params)) {
-      result.append("Build files cleanup enabled\n");
+      if (SwabraUtil.isAfterBuildCleanup(params)) {
+        result.append("Build files cleanup after build enabled\n");
+      } else {
+        result.append("Build files cleanup before build enabled\n");
+      }
     } else {
       result.append("Build files cleanup disabled\n");
     }

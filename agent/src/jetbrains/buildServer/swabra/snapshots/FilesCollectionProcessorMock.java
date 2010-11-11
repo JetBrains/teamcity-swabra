@@ -5,10 +5,8 @@ import jetbrains.buildServer.swabra.processes.LockedFileResolver;
 import jetbrains.buildServer.swabra.snapshots.iteration.FileInfo;
 import org.jetbrains.annotations.NotNull;
 
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileWriter;
 import java.io.IOException;
+import java.io.RandomAccessFile;
 
 /**
  * User: vbedrosova
@@ -17,7 +15,7 @@ import java.io.IOException;
  */
 public class FilesCollectionProcessorMock extends FilesCollectionProcessor {
   private final String myLogPath;
-  private BufferedWriter myWriter;
+  private RandomAccessFile myFile;
 
   public FilesCollectionProcessorMock(@NotNull SwabraLogger logger,
                                       LockedFileResolver resolver,
@@ -30,7 +28,10 @@ public class FilesCollectionProcessorMock extends FilesCollectionProcessor {
 
   private void log(String message) {
     try {
-      myWriter.write(message);
+      for (int i = 0; i < message.length(); ++i) {
+        myFile.writeByte(message.charAt(i));
+      }
+//      myFile.writeChars(message);
     } catch (IOException e) {
       e.printStackTrace();
     }
@@ -58,7 +59,7 @@ public class FilesCollectionProcessorMock extends FilesCollectionProcessor {
   public void comparisonFinished() {
     super.comparisonFinished();
     try {
-      myWriter.close();
+      myFile.close();
     } catch (IOException e) {
       e.printStackTrace();
     }
@@ -68,7 +69,8 @@ public class FilesCollectionProcessorMock extends FilesCollectionProcessor {
   public void comparisonStarted() {
     super.comparisonStarted();
     try {
-      myWriter = new BufferedWriter(new FileWriter(new File(myLogPath)));
+      myFile = new RandomAccessFile(myLogPath, "rw");
+      myFile.seek(myFile.length());
     } catch (IOException e) {
       e.printStackTrace();
     }

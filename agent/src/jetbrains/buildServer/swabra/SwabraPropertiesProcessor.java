@@ -91,18 +91,6 @@ final class SwabraPropertiesProcessor extends AgentLifeCycleAdapter {
     writeProperties();
   }
 
-  public synchronized void setSnapshot(@NotNull File dir, @NotNull String snapshot) {
-    readProperties(false);
-    myLogger.swabraDebug("Setting snapshot " + snapshot + " for " + dir.getAbsolutePath());
-    myProperties.put(unifyPath(dir), snapshot);
-    writeProperties();
-  }
-
-  public synchronized String getSnapshot(@NotNull File dir) {
-    readProperties(true);
-    return myProperties.get(unifyPath(dir));
-  }
-
   private void readProperties(boolean preserveFile) {
     if (myCleanupFinishedSignal != null) {
       try {
@@ -229,30 +217,60 @@ final class SwabraPropertiesProcessor extends AgentLifeCycleAdapter {
     }));
   }
 
-  public boolean isMarkedSnapshot(String snapshotName) {
-    return snapshotName.endsWith(MARK);
-  }
-
-  private String getNonMarkedSnapshotName(String snapshotName) {
-    return snapshotName.substring(0, snapshotName.length() - 1);
-  }
-
-  public String markSnapshotName(String snapshotName) {
-    return snapshotName + MARK;
-  }
-
   public String getSnapshotName(File checkoutDirectory) {
     return Integer.toHexString(checkoutDirectory.hashCode()) + SNAPSHOT_SUFFIX;
   }
 
-  public File getSnapshotFile(String snapshotName) {
-    if (isMarkedSnapshot(snapshotName)) {
-      snapshotName = getNonMarkedSnapshotName(snapshotName);
-    }
-    return new File(myPropertiesFile.getParent(), snapshotName);
-  }
-
   public File getSnapshotFile(File checkoutDirectory) {
     return new File(myPropertiesFile.getParent(), Integer.toHexString(checkoutDirectory.hashCode()) + SNAPSHOT_SUFFIX);
+  }
+
+  private static final String DIRTY = "dirty";
+  private static final String CLEAN = "clean";
+  private static final String PENDING = "pending";
+  private static final String STRICT_PENDING = "strict_pending";
+
+  public static enum DirectoryState {
+    UNKNOWN,
+    CLEAN,
+    DIRTY,
+    PENDING,
+    STRICT_PENDING
+  }
+
+  public DirectoryState getState(File checkoutDirectory) {
+    final String info = myProperties.get(unifyPath(checkoutDirectory));
+
+    if (info == null)
+      return DirectoryState.UNKNOWN;
+    if (CLEAN.equals(info))
+      return DirectoryState.CLEAN;
+    if (DIRTY.equals(info))
+      return DirectoryState.DIRTY;
+    if (PENDING.equals(info))
+      return DirectoryState.PENDING;
+    if (STRICT_PENDING.equals(info))
+      return DirectoryState.STRICT_PENDING;
+
+    return DirectoryState.UNKNOWN;
+  }
+
+  private synchronized void mark(@NotNull File dir, @NotNull String state) {
+    readProperties(false);
+    myLogger.swabraDebug("Marking " + dir.getAbsolutePath() + " as " + state);
+    myProperties.put(unifyPath(dir), state);
+    writeProperties();
+  }
+
+  public synchronized void markDirty(@NotNull File dir) {
+    mark(dir, DIRTY);
+  }
+
+  public synchronized void markClean(@NotNull File dir) {
+    mark(dir, CLEAN);
+  }
+
+  public synchronized void markPending(@NotNull File dir, boolean strict) {
+    mark(dir, strict ? STRICT_PENDING : PENDING);
   }
 }

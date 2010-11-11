@@ -22,6 +22,7 @@ import jetbrains.buildServer.swabra.snapshots.iteration.FilesTraversal;
 import jetbrains.buildServer.swabra.snapshots.iteration.SnapshotFilesIterator;
 import jetbrains.buildServer.util.FileUtil;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.io.File;
 
@@ -33,11 +34,11 @@ import java.io.File;
 public class FilesCollector {
   private static final String NOT_DELETE_SNAPSHOT = "swabra.preserve.snapshot";
 
-  public static enum CollectionResult {
-    CLEAN,
-    ERROR,
-    DIRTY,
-    LOCKED
+  public static interface CollectionResultHandler {
+    void success();
+    void error();
+    void lockedFilesDetected();
+    void dirtyStateDetected();
   }
 
   @NotNull
@@ -51,10 +52,11 @@ public class FilesCollector {
     myProcessor = processor;
   }
 
-  public CollectionResult collect(@NotNull File snapshot, @NotNull File checkoutDir) {
+  public void collect(@NotNull File snapshot, @NotNull File checkoutDir, @Nullable CollectionResultHandler handler) {
     if (!snapshot.exists() || (snapshot.length() == 0)) {
       logUnableCollect(snapshot, checkoutDir, "file doesn't exist", null);
-      return CollectionResult.ERROR;
+      if (handler != null) handler.error();
+      return;
     }
 
     myLogger.activityStarted();
@@ -64,8 +66,11 @@ public class FilesCollector {
       iterateAndCollect(snapshot, checkoutDir);
     } catch (Exception e) {
       logUnableCollect(snapshot, checkoutDir, "Exception occurred: " + e.getMessage(), e);
-      return CollectionResult.ERROR;
+      if (handler != null) handler.error();
+      return;
     }
+
+    myLogger.activityFinished();
 
     final FilesCollectionProcessor.Results results = myProcessor.getResults();
 
@@ -77,20 +82,18 @@ public class FilesCollector {
       ", " + results.detectedDeleted + " deleted " + getObjectsNumber(results.detectedDeleted);
 
     removeSnapshot(snapshot, checkoutDir);
-    try {
-      if (results.detectedNewAndUnableToDelete != 0) {
-        myLogger.warn(message);
-        return CollectionResult.LOCKED;
-      }
-      if (results.detectedDeleted > 0 || results.detectedModified > 0) {
-        myLogger.warn(message);
-        return CollectionResult.DIRTY;
-      }
-      myLogger.message(message, true);
-      return CollectionResult.CLEAN;
-    } finally {
-      myLogger.activityFinished();
+    if (results.detectedNewAndUnableToDelete != 0) {
+      myLogger.warn(message);
+      if (handler != null) handler.lockedFilesDetected();
+      return;
     }
+    if (results.detectedDeleted > 0 || results.detectedModified > 0) {
+      myLogger.warn(message);
+      if (handler != null) handler.dirtyStateDetected();
+      return;
+    }
+    myLogger.message(message, true);
+    if (handler != null) handler.success();
   }
 
   private String getObjectsNumber(int number) {
@@ -99,13 +102,13 @@ public class FilesCollector {
 
   private void removeSnapshot(File snapshot, File checkoutDir) {
     if (System.getProperty(NOT_DELETE_SNAPSHOT) != null) {
-      myLogger.swabraDebug("Will not delete " + snapshot.getAbsolutePath()
+      myLogger.swabraDebug("Will not delete " + snapshot.getName()
         + " for directory " + checkoutDir.getAbsolutePath() + ", " + NOT_DELETE_SNAPSHOT + "property specified");
     } else if (!FileUtil.delete(snapshot)) {
-      myLogger.swabraWarn("Unable to remove snapshot file " + snapshot.getAbsolutePath()
+      myLogger.swabraWarn("Unable to remove snapshot file " + snapshot.getName()
         + " for directory " + checkoutDir.getAbsolutePath());
     } else {
-      myLogger.swabraDebug("Successfully removed snapshot file " + snapshot.getAbsolutePath()
+      myLogger.swabraDebug("Successfully removed snapshot file " + snapshot.getName()
         + " for directory " + checkoutDir.getAbsolutePath() + " after files collection");
     }
   }
@@ -117,7 +120,7 @@ public class FilesCollector {
 
   private void logUnableCollect(File snapshot, File checkoutDir, String message, Throwable e) {
     myLogger.swabraWarn("Unable to collect files in checkout directory " + checkoutDir.getAbsolutePath()
-      + " from snapshot file " + snapshot.getAbsolutePath() +
+      + " from snapshot file " + snapshot.getName() +
       ((message != null ? ", " + message : "")));
     if (e != null) {
       myLogger.exception(e);
