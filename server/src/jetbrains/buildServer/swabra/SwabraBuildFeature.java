@@ -5,6 +5,7 @@ import jetbrains.buildServer.web.openapi.PluginDescriptor;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.Map;
 
 public class SwabraBuildFeature extends BuildFeature implements BuildStartContextProcessor {
@@ -71,5 +72,12 @@ public class SwabraBuildFeature extends BuildFeature implements BuildStartContex
       result.append("Will try to kill processes locking checkout directory\n");
     }
     return result.toString();
+  }
+
+  @Override
+  public Map<String, String> getDefaultParameters() {
+    final Map<String, String> defaults = new HashMap<String, String>(1);
+    defaults.put(SwabraUtil.ENABLED, SwabraUtil.BEFORE_BUILD);
+    return defaults;
   }
 }
