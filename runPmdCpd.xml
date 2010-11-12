@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<project name="runPmdCpd" basedir="." default="runPmdCpd">
+
+  <property name="pmdcpd.minimum.token.count" value="30"/>
+
+  <property name="pmdcpd.reports.dir" value="${basedir}/pmdcpd-reports"/>
+  <property name="pmdcpd.report" value="${pmdcpd.reports.dir}/pmdCpdResult.xml"/>
+
+  <taskdef name="cpd" classpath="${basedir}/lib/pmd-4.2.5.jar" classname="net.sourceforge.pmd.cpd.CPDTask"/>
+
+  <target name="runPmdCpd" depends="cleanup">
+    <cpd minimumTokenCount="${pmdcpd.minimum.token.count}"
+         ignoreLiterals="true"
+         ignoreIdentifiers="true"
+
+         outputFile="${pmdcpd.report}"
+         format="xml">
+
+      <fileset dir="${basedir}">
+        <include name="**/*.java"/>
+
+      </fileset>
+    </cpd>
+  </target>
+
+  <target name="cleanup">
+    <delete dir="${pmdcpd.reports.dir}" quiet="true"/>
+    <mkdir dir="${pmdcpd.reports.dir}"/>
+  </target>
+</project>
