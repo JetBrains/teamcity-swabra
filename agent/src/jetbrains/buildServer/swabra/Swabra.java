@@ -33,6 +33,8 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.File;
+import java.util.HashMap;
+import java.util.Map;
 
 
 public final class Swabra extends AgentLifeCycleAdapter {
@@ -54,6 +56,8 @@ public final class Swabra extends AgentLifeCycleAdapter {
 
   private boolean mySnapshotSaved;
 
+  private Map<File, Thread> myPrevThreads = new HashMap<File, Thread>();
+
   public Swabra(@NotNull final EventDispatcher<AgentLifeCycleListener> agentDispatcher,
                 @NotNull final SmartDirectoryCleaner directoryCleaner,
                 @NotNull final SwabraLogger logger,
@@ -73,6 +77,8 @@ public final class Swabra extends AgentLifeCycleAdapter {
     myLogger.setBuildLogger(runningBuild.getBuildLogger());
 
     mySettings = new SwabraSettings(runningBuild, myLogger);
+
+    waitForUnfinishedThreads(mySettings.getCheckoutDir());
 
     myLockedFileResolver = mySettings.isLockingProcessesDetectionEnabled() ?
       new LockedFileResolver(new HandlePidsProvider(mySettings.getHandlePath())/*, myProcessTerminator,*/) : null;
@@ -153,6 +159,19 @@ public final class Swabra extends AgentLifeCycleAdapter {
     }
   }
 
+  private void waitForUnfinishedThreads(@NotNull File checkoutDir) {
+    final Thread t = myPrevThreads.get(checkoutDir);
+    if ((t != null) && t.isAlive()) {
+      myLogger.swabraMessage("Waiting for previous build files cleanup", true);
+      try {
+        t.join();
+      } catch (InterruptedException e) {
+        myLogger.swabraWarn("Interrupted while waiting for previous build files cleanup");
+      }
+    }
+    myPrevThreads.remove(checkoutDir);
+  }
+
   @Override
   public void sourcesUpdated(@NotNull AgentRunningBuild runningBuild) {
     makeSnapshot();
@@ -196,25 +215,32 @@ public final class Swabra extends AgentLifeCycleAdapter {
     myPropertiesProcessor.deleteRecord(mySettings.getCheckoutDir());
 
     final FilesCollector filesCollector = initFilesCollector();
-    filesCollector.collect(myPropertiesProcessor.getSnapshotFile(mySettings.getCheckoutDir()), mySettings.getCheckoutDir(),
-      new FilesCollector.CollectionResultHandler() {
-        public void success() {
-          myPropertiesProcessor.markClean(mySettings.getCheckoutDir(), mySettings.isStrict());
-        }
 
-        public void error() {
-          myPropertiesProcessor.markDirty(mySettings.getCheckoutDir());
-        }
+    final Thread t = new Thread(new Runnable() {
+      public void run() {
+        filesCollector.collect(myPropertiesProcessor.getSnapshotFile(mySettings.getCheckoutDir()), mySettings.getCheckoutDir(),
+          new FilesCollector.CollectionResultHandler() {
+            public void success() {
+              myPropertiesProcessor.markClean(mySettings.getCheckoutDir(), mySettings.isStrict());
+            }
 
-        public void lockedFilesDetected() {
-          myPropertiesProcessor.markPending(mySettings.getCheckoutDir(), mySettings.isStrict());
-        }
+            public void error() {
+              myPropertiesProcessor.markDirty(mySettings.getCheckoutDir());
+            }
 
-        public void dirtyStateDetected() {
-          myPropertiesProcessor.markDirty(mySettings.getCheckoutDir());
-        }
+            public void lockedFilesDetected() {
+              myPropertiesProcessor.markPending(mySettings.getCheckoutDir(), mySettings.isStrict());
+            }
+
+            public void dirtyStateDetected() {
+              myPropertiesProcessor.markDirty(mySettings.getCheckoutDir());
+            }
+          }
+        );
       }
-    );
+    });
+    myPrevThreads.put(mySettings.getCheckoutDir(), t);
+    t.start();
   }
 
   private FilesCollector initFilesCollector() {
