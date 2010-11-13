@@ -79,7 +79,6 @@ public class SwabraTest extends TestCase {
 
     return build;
   }
-
   private BuildAgentConfiguration createBuildAgentConf(@NotNull final File cachesDir) {
     final BuildAgentConfiguration conf = myContext.mock(BuildAgentConfiguration.class);
     myContext.checking(new Expectations() {
@@ -178,20 +177,22 @@ public class SwabraTest extends TestCase {
 
     final Map<String, String> runParams = new HashMap<String, String>();
     final AgentRunningBuild build = createBuild(runParams, myCheckoutDir, logger, createBuildParametersMap());
+    final BuildRunnerContext runner = myContext.mock(BuildRunnerContext.class);
+
     for (Map<String, String> param : params) {
       runParams.clear();
       runParams.putAll(param);
-      runBuild(dirName, dispatcher, build, checkoutDirPath);
+      runBuild(dirName, dispatcher, build, runner, checkoutDirPath);
     }
 
-    System.out.println(results.toString().trim());
     final String actual = FileUtil.readText(new File(resultsFile)).trim().replace(myCheckoutDir.getAbsolutePath(), "##CHECKOUT_DIR##").replace("/", "\\");
     final String expected = FileUtil.readText(new File(goldFile)).trim();
     assertEquals(actual, expected, actual);
 //    FileUtil.delete(pttTemp);
   }
 
-  private void runBuild(String dirName, EventDispatcher<AgentLifeCycleListener> dispatcher, AgentRunningBuild build, String checkoutDirPath) throws Exception {
+  private void runBuild(String dirName, EventDispatcher<AgentLifeCycleListener> dispatcher, AgentRunningBuild build,
+                        BuildRunnerContext runner, String checkoutDirPath) throws Exception {
     FileUtil.copyDir(getTestData(dirName + File.separator + BEFORE_BUILD, null), myCheckoutDir);
     FileUtil.delete(new File(checkoutDirPath + File.separator + ".svn"));
     dispatcher.getMulticaster().buildStarted(build);
@@ -201,6 +202,9 @@ public class SwabraTest extends TestCase {
     FileUtil.copyDir(getTestData(dirName + File.separator + AFTER_CHECKOUT, null), myCheckoutDir);
     FileUtil.delete(new File(checkoutDirPath + File.separator + ".svn"));
     dispatcher.getMulticaster().sourcesUpdated(build);
+    Thread.sleep(100);
+    dispatcher.getMulticaster().beforeRunnerStart(runner);
+    Thread.sleep(100);
     dispatcher.getMulticaster().beforeBuildFinish(build, BuildFinishedStatus.FINISHED_SUCCESS);
     Thread.sleep(100);
     cleanCheckoutDir();

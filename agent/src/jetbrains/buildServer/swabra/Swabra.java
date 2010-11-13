@@ -51,6 +51,8 @@ public final class Swabra extends AgentLifeCycleAdapter {
   private LockedFileResolver myLockedFileResolver;
   private SwabraSettings mySettings;
 
+  private boolean mySnapshotSaved;
+
   public Swabra(@NotNull final EventDispatcher<AgentLifeCycleListener> agentDispatcher,
                 @NotNull final SmartDirectoryCleaner directoryCleaner,
                 @NotNull final SwabraLogger logger,
@@ -73,6 +75,8 @@ public final class Swabra extends AgentLifeCycleAdapter {
 
     myLockedFileResolver = mySettings.isLockingProcessesDetectionEnabled() ?
       new LockedFileResolver(new HandlePidsProvider(mySettings.getHandlePath())/*, myProcessTerminator,*/) : null;
+
+    mySnapshotSaved = false;
 
     final SwabraPropertiesProcessor.DirectoryState directoryState;
     try {
@@ -149,17 +153,12 @@ public final class Swabra extends AgentLifeCycleAdapter {
 
   @Override
   public void sourcesUpdated(@NotNull AgentRunningBuild runningBuild) {
-    if (!mySettings.isCleanupEnabled()) return;
     makeSnapshot();
   }
 
   @Override
   public void beforeRunnerStart(@NotNull BuildRunnerContext runner) {
-    if (!mySettings.isCleanupEnabled()) return;
-    final AgentRunningBuild runningBuild = runner.getBuild();
-    if (!runningBuild.isCheckoutOnAgent() && !runningBuild.isCheckoutOnServer()) {
-      makeSnapshot();
-    }
+    makeSnapshot();
   }
 
   @Override
@@ -233,6 +232,11 @@ public final class Swabra extends AgentLifeCycleAdapter {
   }
 
   private void makeSnapshot() {
+    if (!mySettings.isCleanupEnabled()) return;
+    if (mySnapshotSaved) return;
+
+    mySnapshotSaved = true;
+
     if (!new SnapshotGenerator(mySettings.getCheckoutDir(), myLogger).generateSnapshot(myPropertiesProcessor.getSnapshotFile(mySettings.getCheckoutDir()))) {
       mySettings.setCleanupEnabled(false);
     } else {
