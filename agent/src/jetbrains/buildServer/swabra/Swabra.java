@@ -30,6 +30,7 @@ import jetbrains.buildServer.swabra.processes.LockedFileResolver;
 import jetbrains.buildServer.swabra.snapshots.*;
 import jetbrains.buildServer.util.EventDispatcher;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.io.File;
 
@@ -86,12 +87,12 @@ public final class Swabra extends AgentLifeCycleAdapter {
       }
 
       if (runningBuild.isCleanBuild() || !mySettings.getCheckoutDir().isDirectory()) {
-        myLogger.swabraDebug("Clean build. No need to cleanup");
+        myLogger.message("Clean build. No need to cleanup", false);
         return;
       }
 
       directoryState = myPropertiesProcessor.getState(mySettings.getCheckoutDir());
-      myLogger.swabraDebug("Checkout directory state is " + directoryState);
+      myLogger.message("Checkout directory state is " + directoryState, false);
     } finally {
       myPropertiesProcessor.deleteRecord(mySettings.getCheckoutDir());
     }
@@ -103,8 +104,7 @@ public final class Swabra extends AgentLifeCycleAdapter {
         return;
       case DIRTY:
         if (mySettings.isStrict()) {
-          myLogger.swabraDebug("Checkout directory is dirty");
-          doCleanup(mySettings.getCheckoutDir());
+          doCleanup(mySettings.getCheckoutDir(), "Checkout directory contains newly created, modified or deleted files");
           return;
         }
         if (!mySettings.isCleanupBeforeBuild()) {
@@ -113,7 +113,7 @@ public final class Swabra extends AgentLifeCycleAdapter {
         // else fall into next case
       case PENDING:
         if (mySettings.isStrict()) {
-          doCleanup(mySettings.getCheckoutDir());
+          doCleanup(mySettings.getCheckoutDir(), "Checkout directory snapshot may contain information about newly created, modified or deleted files");
           return;
         }
         // else fall into next case
@@ -128,8 +128,7 @@ public final class Swabra extends AgentLifeCycleAdapter {
             }
 
             public void error() {
-              myLogger.message("Some error occurred during files collecting. Will force clean checkout", false);
-              doCleanup(mySettings.getCheckoutDir());
+              doCleanup(mySettings.getCheckoutDir(), "Some error occurred during cleanup");
             }
 
             public void lockedFilesDetected() {
@@ -137,8 +136,7 @@ public final class Swabra extends AgentLifeCycleAdapter {
             }
 
             public void dirtyStateDetected() {
-              myLogger.message("Checkout directory contains modified files or some files were deleted. Will force clean checkout", false);
-              doCleanup(mySettings.getCheckoutDir());
+              doCleanup(mySettings.getCheckoutDir(), "Checkout directory contains modified files or some files were deleted");
             }
           }
           : null
@@ -146,8 +144,7 @@ public final class Swabra extends AgentLifeCycleAdapter {
         return;
       case UNKNOWN:
       default:
-        myLogger.message("Checkout directory state is unknown. Will force clean checkout", false);
-        doCleanup(mySettings.getCheckoutDir());
+        doCleanup(mySettings.getCheckoutDir(), "Checkout directory state is unknown");
     }
   }
 
@@ -164,7 +161,7 @@ public final class Swabra extends AgentLifeCycleAdapter {
   @Override
   public void beforeBuildFinish(@NotNull AgentRunningBuild build, @NotNull BuildFinishedStatus buildStatus) {
     if (mySettings.isCleanupAfterBuild()) {
-      myLogger.message("Build files cleanup will be performed after the build. Please refer to teamcity-agent.log for details", true);
+      myLogger.swabraMessage("Cleanup will be performed after the build. Please refer to teamcity-agent.log for details", true);
     }
 
     if (!mySettings.isLockingProcessesDetectionEnabled()) return;
@@ -244,11 +241,13 @@ public final class Swabra extends AgentLifeCycleAdapter {
     }
   }
 
-  private void doCleanup(File checkoutDir) {
+  private void doCleanup(File checkoutDir, final @Nullable String reason) {
     myLogger.activityStarted();
     myDirectoryCleaner.cleanFolder(checkoutDir, new SmartDirectoryCleanerCallback() {
       public void logCleanStarted(File dir) {
-        myLogger.message("Need a clean snapshot of checkout directory - forcing clean checkout for " + dir, true);
+        String message = (reason == null ? "" : reason + ". ")
+          + "Need a clean checkout directory snapshot - forcing clean checkout";
+        myLogger.swabraMessage(message, true);
       }
 
       public void logFailedToDeleteEmptyDirectory(File dir) {

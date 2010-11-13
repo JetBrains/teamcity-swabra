@@ -56,7 +56,7 @@ public class SnapshotGenerator {
 
   public boolean generateSnapshot(@NotNull File snapshot) {
     if (snapshot.exists()) {
-      myLogger.swabraDebug("Snapshot file " + snapshot.getName() + " exists, try deleting");
+      myLogger.swabraDebug("Snapshot file " + snapshot.getName() + " exists, trying to delete");
       if (!FileUtil.delete(snapshot)) {
         myLogger.swabraWarn("Unable to delete " + snapshot.getName());
         return false;
