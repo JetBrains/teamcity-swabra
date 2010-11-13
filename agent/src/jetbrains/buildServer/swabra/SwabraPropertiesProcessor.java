@@ -217,22 +217,20 @@ final class SwabraPropertiesProcessor extends AgentLifeCycleAdapter {
     }));
   }
 
-  public String getSnapshotName(File checkoutDirectory) {
-    return Integer.toHexString(checkoutDirectory.hashCode()) + SNAPSHOT_SUFFIX;
-  }
-
   public File getSnapshotFile(File checkoutDirectory) {
     return new File(myPropertiesFile.getParent(), Integer.toHexString(checkoutDirectory.hashCode()) + SNAPSHOT_SUFFIX);
   }
 
   private static final String DIRTY = "dirty";
   private static final String CLEAN = "clean";
+  private static final String STRICT_CLEAN = "strict_clean";
   private static final String PENDING = "pending";
   private static final String STRICT_PENDING = "strict_pending";
 
   public static enum DirectoryState {
     UNKNOWN,
     CLEAN,
+    STRICT_CLEAN,
     DIRTY,
     PENDING,
     STRICT_PENDING
@@ -245,6 +243,8 @@ final class SwabraPropertiesProcessor extends AgentLifeCycleAdapter {
       return DirectoryState.UNKNOWN;
     if (CLEAN.equals(info))
       return DirectoryState.CLEAN;
+    if (STRICT_CLEAN.equals(info))
+      return DirectoryState.STRICT_CLEAN;
     if (DIRTY.equals(info))
       return DirectoryState.DIRTY;
     if (PENDING.equals(info))
@@ -266,8 +266,8 @@ final class SwabraPropertiesProcessor extends AgentLifeCycleAdapter {
     mark(dir, DIRTY);
   }
 
-  public synchronized void markClean(@NotNull File dir) {
-    mark(dir, CLEAN);
+  public synchronized void markClean(@NotNull File dir, boolean strict) {
+    mark(dir, strict ? STRICT_CLEAN : CLEAN);
   }
 
   public synchronized void markPending(@NotNull File dir, boolean strict) {

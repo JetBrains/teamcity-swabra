@@ -98,9 +98,14 @@ public final class Swabra extends AgentLifeCycleAdapter {
     }
 
     switch (directoryState) {
-      case CLEAN:
+      case STRICT_CLEAN:
         // do nothing
         myLogger.swabraDebug("Checkout directory is clean");
+        return;
+      case CLEAN:
+        if (mySettings.isStrict()) {
+          doCleanup(mySettings.getCheckoutDir(), "Checkout directory may contain newly created, modified or deleted files");
+        }
         return;
       case DIRTY:
         if (mySettings.isStrict()) {
@@ -194,11 +199,7 @@ public final class Swabra extends AgentLifeCycleAdapter {
     filesCollector.collect(myPropertiesProcessor.getSnapshotFile(mySettings.getCheckoutDir()), mySettings.getCheckoutDir(),
       new FilesCollector.CollectionResultHandler() {
         public void success() {
-          if (mySettings.isStrict()) {
-            myPropertiesProcessor.markClean(mySettings.getCheckoutDir());
-          } else {
-            myPropertiesProcessor.markDirty(mySettings.getCheckoutDir());
-          }
+          myPropertiesProcessor.markClean(mySettings.getCheckoutDir(), mySettings.isStrict());
         }
 
         public void error() {
@@ -247,7 +248,7 @@ public final class Swabra extends AgentLifeCycleAdapter {
       public void logCleanStarted(File dir) {
         String message = (reason == null ? "" : reason + ". ")
           + "Need a clean checkout directory snapshot - forcing clean checkout";
-        myLogger.swabraMessage(message, true);
+        myLogger.message(message, true);
       }
 
       public void logFailedToDeleteEmptyDirectory(File dir) {
