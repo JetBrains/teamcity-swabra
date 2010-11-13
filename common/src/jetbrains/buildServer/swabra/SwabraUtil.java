@@ -70,10 +70,6 @@ public class SwabraUtil {
   public static boolean isAfterBuildCleanup(@NotNull final Map<String, String> params) {
     return isAfterBuildCleanup(getCleanupMode(params));
   }
-//
-//  public static void enableSwabra(@NotNull final Map<String, String> params, @NotNull String mode) {
-//    params.put(MODE, mode);
-//  }
 
   public static boolean isVerbose(@NotNull final Map<String, String> params) {
     return params.containsKey(VERBOSE) && isCleanupEnabled(params);
