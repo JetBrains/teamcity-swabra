@@ -25,7 +25,7 @@ package jetbrains.buildServer.swabra;
 import jetbrains.buildServer.agent.*;
 import jetbrains.buildServer.messages.Status;
 import jetbrains.buildServer.messages.serviceMessages.BuildStatus;
-import jetbrains.buildServer.swabra.processes.HandlePidsProvider;
+import jetbrains.buildServer.swabra.processes.HandleProcessesProvider;
 import jetbrains.buildServer.swabra.processes.LockedFileResolver;
 import jetbrains.buildServer.swabra.snapshots.*;
 import jetbrains.buildServer.util.EventDispatcher;
@@ -81,7 +81,7 @@ public final class Swabra extends AgentLifeCycleAdapter {
     waitForUnfinishedThreads(mySettings.getCheckoutDir());
 
     myLockedFileResolver = mySettings.isLockingProcessesDetectionEnabled() ?
-      new LockedFileResolver(new HandlePidsProvider(mySettings.getHandlePath())/*, myProcessTerminator,*/) : null;
+      new LockedFileResolver(new HandleProcessesProvider(mySettings.getHandlePath())/*, myProcessTerminator,*/) : null;
 
     mySnapshotSaved = false;
 

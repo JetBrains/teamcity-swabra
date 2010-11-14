@@ -31,8 +31,8 @@ import java.util.List;
  * Time: 18:26:49
  */
 
-// Provides pids of processes which lock file by running handle.exe and parsing it's output
-public class HandlePidsProvider implements LockedFileResolver.LockingPidsProvider {
+// Provides pids and names of processes which lock file by running handle.exe and parsing it's output
+public class HandleProcessesProvider implements LockedFileResolver.LockingProcessesProvider {
   private static final Logger LOG = Logger.getLogger(LockedFileResolver.class);
 
   private static final String PID = "pid: ";
@@ -40,33 +40,34 @@ public class HandlePidsProvider implements LockedFileResolver.LockingPidsProvide
   @NotNull
   private final String myHandleExePath;
 
-  public HandlePidsProvider(@NotNull String handleExePath) {
+  public HandleProcessesProvider(@NotNull String handleExePath) {
     myHandleExePath = handleExePath;
   }
 
   @NotNull
-  public List<Long> getPids(@NotNull final File file) throws GetPidsException {
+  public List<ProcessInfo> getLockingProcesses(@NotNull final File file) throws GetProcessesException {
     final ExecResult result = ProcessExecutor.runHandleAcceptEula(myHandleExePath, file.getAbsolutePath());
     if (HandleOutputReader.noResult(result.getStdout())) {
       LOG.debug("No matching handles found for " + file.getAbsolutePath());
       return Collections.emptyList();
     } else if (HandleOutputReader.noAdministrativeRights(result.getStdout())) {
-      throw new GetPidsException("Administrative privilege is required to run handle.exe");
+      throw new GetProcessesException("Administrative privilege is required to run handle.exe");
     }
     return getPidsFromStdout(result.getStdout(), file.getAbsolutePath());
   }
 
-  private List<Long> getPidsFromStdout(String stdout, final String path) {
-    final List<Long> pids = new ArrayList<Long>();
+  private List<ProcessInfo> getPidsFromStdout(String stdout, final String path) {
+    final List<ProcessInfo> pids = new ArrayList<ProcessInfo>();
     HandleOutputReader.read(stdout, new HandleOutputReader.LineProcessor() {
       public void processLine(@NotNull String line) {
         final int pathIndex = line.indexOf(path);
         if (pathIndex != -1) {
           line = line.substring(0, pathIndex).replaceAll("\\s+", " ");
+          final int pidStartIndex = line.indexOf(PID);
           final int pidEndIndex = line.indexOf(PID) + PID.length();
-          line = line.substring(pidEndIndex, line.indexOf(" ", pidEndIndex));
           try {
-            pids.add(Long.parseLong(line));
+            pids.add(new ProcessInfo(Long.parseLong(line.substring(pidEndIndex, line.indexOf(" ", pidEndIndex)).trim()),
+              line.substring(0, pidStartIndex).trim()));
           } catch (NumberFormatException e) {
             LOG.warn("Unable to parse pid string " + line, e);
           }

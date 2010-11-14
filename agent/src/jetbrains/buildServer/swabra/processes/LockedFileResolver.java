@@ -36,9 +36,9 @@ public class LockedFileResolver {
 
   private static final int DELETION_TRIES = 10;
 
-  public static interface LockingPidsProvider {
+  public static interface LockingProcessesProvider {
     @NotNull
-    List<Long> getPids(@NotNull File f) throws GetPidsException;
+    List<ProcessInfo> getLockingProcesses(@NotNull File f) throws GetProcessesException;
   }
 
   public static interface Listener {
@@ -48,13 +48,13 @@ public class LockedFileResolver {
   }
 
   @NotNull
-  private final LockingPidsProvider myPidsProvider;
+  private final LockingProcessesProvider myProcessesProvider;
 //  @NotNull
 //  private final ProcessTerminator myProcessTerminator;
 
-  public LockedFileResolver(@NotNull LockingPidsProvider pidsProvider/*,
+  public LockedFileResolver(@NotNull LockingProcessesProvider processesProvider/*,
                             @NotNull ProcessTerminator processTerminator,*/) {
-    myPidsProvider = pidsProvider;
+    myProcessesProvider = processesProvider;
 //    myProcessTerminator = processTerminator;
   }
 
@@ -70,49 +70,47 @@ public class LockedFileResolver {
    *         and all of them were killed if corresponding option was specified)
    */
   public boolean resolve(@NotNull File f, boolean kill, @Nullable Listener listener) {
-    List<Long> pids;
+    List<ProcessInfo> processes;
 
     try {
-      pids = myPidsProvider.getPids(f);
-    } catch (GetPidsException e) {
+      processes = myProcessesProvider.getLockingProcesses(f);
+    } catch (GetProcessesException e) {
       log(e.getMessage(), true, listener);
       return false;
     }
 
-    final String number = getProcessesNumber(pids.size());
-    if (pids.isEmpty()) {
+    final String number = getProcessesNumber(processes.size());
+    if (processes.isEmpty()) {
       log("Found no locking processes for " + f, false, listener);
       return false;
     } else {
-      final StringBuffer message = new StringBuffer("Found locking ").append(number).append(" for ").append(f).append(": ");
-      appendPids(pids, message);
-      log(message.toString(), true, listener);
+      log("Found locking " + number + " for " + f + ": ", true, listener);
+      logProcesses(processes, listener);
     }
 
     if (kill) {
-      for (final long pid : pids) {
-        ProcessTreeTerminator.kill(pid, ProcessFilter.MATCH_ALL);
+      for (final ProcessInfo processInfo : processes) {
+        ProcessTreeTerminator.kill(processInfo.getPid(), ProcessFilter.MATCH_ALL);
       }
 //      for (final long pid : pids) {
-//        myProcessTerminator.kill(pid, ProcessFilter.MATCH_ALL);
+//        myProcessTerminator.kill(processInfo.getPid(), ProcessFilter.MATCH_ALL);
 //      }
 
-      List<Long> alivePids;
+      List<ProcessInfo> aliveProcesses;
 
       try {
-        alivePids = myPidsProvider.getPids(f);
-      } catch (GetPidsException e) {
+        aliveProcesses = myProcessesProvider.getLockingProcesses(f);
+      } catch (GetProcessesException e) {
         log(e.getMessage(), true, listener);
         return false;
       }
 
-      if (alivePids.isEmpty()) {
+      if (aliveProcesses.isEmpty()) {
         log("Killed locking " + number + " for " + f, false, listener);
         return true;
       } else {
-        final StringBuffer message = new StringBuffer("Unable to kill locking " + number + " for ").append(f).append(": ");
-        appendPids(alivePids, message);
-        log(message.toString(), true, listener);
+        log("Unable to kill locking " + number + " for "+ f + ": ", true, listener);
+        logProcesses(aliveProcesses, listener);
         return false;
       }
     }
@@ -146,9 +144,9 @@ public class LockedFileResolver {
     return false;
   }
 
-  private void appendPids(List<Long> processes, StringBuffer message) {
-    for (final long i : processes) {
-      message.append(" [#").append(i).append("] ");
+  private void logProcesses(List<ProcessInfo> processes, Listener listener) {
+    for (final ProcessInfo p : processes) {
+      log("PID:" + p.getPid() + " " + (p.getName() == null ? "" : p.getName()), false, listener);
     }
   }
 

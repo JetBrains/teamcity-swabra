@@ -21,12 +21,12 @@ package jetbrains.buildServer.swabra.processes;
  * Date: 04.05.2010
  * Time: 20:55:13
  */
-public class GetPidsException extends Exception {
-  public GetPidsException(String message, Throwable cause) {
+public class GetProcessesException extends Exception {
+  public GetProcessesException(String message, Throwable cause) {
     super(message, cause);
   }
 
-  public GetPidsException(String message) {
+  public GetProcessesException(String message) {
     super(message);
   }
 }
