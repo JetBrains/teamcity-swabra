@@ -74,11 +74,12 @@ public final class Swabra extends AgentLifeCycleAdapter {
   public void buildStarted(@NotNull final AgentRunningBuild runningBuild) {
 //    System.setProperty(DEBUG_MODE, "true");
 
-    myLogger.setBuildLogger(runningBuild.getBuildLogger());
-
-    mySettings = new SwabraSettings(runningBuild, myLogger);
+    mySettings = new SwabraSettings(runningBuild);
 
     waitForUnfinishedThreads(mySettings.getCheckoutDir());
+
+    myLogger.setBuildLogger(runningBuild.getBuildLogger());
+    mySettings.prepareHandle(myLogger);
 
     myLockedFileResolver = mySettings.isLockingProcessesDetectionEnabled() ?
       new LockedFileResolver(new HandleProcessesProvider(mySettings.getHandlePath())/*, myProcessTerminator,*/) : null;
@@ -215,6 +216,8 @@ public final class Swabra extends AgentLifeCycleAdapter {
     myPropertiesProcessor.deleteRecord(mySettings.getCheckoutDir());
 
     final FilesCollector filesCollector = initFilesCollector();
+
+    myLogger.setBuildLogger(null);
 
     final Thread t = new Thread(new Runnable() {
       public void run() {

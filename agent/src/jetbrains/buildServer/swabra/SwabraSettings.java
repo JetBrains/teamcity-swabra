@@ -53,7 +53,7 @@ public class SwabraSettings {
   private final File myCheckoutDir;
 
 
-  public SwabraSettings(AgentRunningBuild runningBuild, SwabraLogger logger) {
+  public SwabraSettings(AgentRunningBuild runningBuild) {
     final Map<String, String> params = runningBuild.getSharedConfigParameters();
     myCleanupEnabled = SwabraUtil.isCleanupEnabled(params);
     myCleanupMode = SwabraUtil.getCleanupMode(params);
@@ -73,7 +73,6 @@ public class SwabraSettings {
     }
 
     logSettings();
-    prepareHandle(logger);
   }
 
   public void setCleanupEnabled(boolean cleanupEnabled) {
@@ -133,7 +132,7 @@ public class SwabraSettings {
       "', verbose = '" + myVerbose + "'.");
   }
 
-  private void prepareHandle(SwabraLogger logger) {
+  public void prepareHandle(SwabraLogger logger) {
     if (myLockingProcessesKill || myLockingProcessesReport) {
       myHandlePath = System.getProperty(HANDLE_EXE_SYSTEM_PROP);
       if (notDefined(myHandlePath)) {

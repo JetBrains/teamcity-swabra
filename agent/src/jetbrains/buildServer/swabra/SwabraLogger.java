@@ -20,6 +20,7 @@ import jetbrains.buildServer.agent.BuildProgressLogger;
 import org.apache.log4j.Logger;
 import org.jetbrains.annotations.NonNls;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 
 /**
@@ -33,9 +34,10 @@ public final class SwabraLogger {
   private static final String ACTIVITY_NAME = "Swabra";
 
   public static final Logger CLASS_LOGGER = Logger.getLogger(SwabraLogger.class);
+  @Nullable
   private BuildProgressLogger myBuildLogger;
 
-  public void setBuildLogger(@NotNull BuildProgressLogger buildLogger) {
+  public void setBuildLogger(@Nullable BuildProgressLogger buildLogger) {
     myBuildLogger = buildLogger;
   }
 
@@ -78,11 +80,11 @@ public final class SwabraLogger {
   }
 
   public void activityStarted() {
-    myBuildLogger.activityStarted(ACTIVITY_NAME, AGENT_BLOCK);
+    if (myBuildLogger != null) myBuildLogger.activityStarted(ACTIVITY_NAME, AGENT_BLOCK);
   }
 
   public void activityFinished() {
-    myBuildLogger.activityFinished(ACTIVITY_NAME, AGENT_BLOCK);
+    if (myBuildLogger != null) myBuildLogger.activityFinished(ACTIVITY_NAME, AGENT_BLOCK);
   }
 
   private static String prepareMessage(String message) {
