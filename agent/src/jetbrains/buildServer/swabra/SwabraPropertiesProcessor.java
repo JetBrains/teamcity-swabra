@@ -262,15 +262,15 @@ final class SwabraPropertiesProcessor extends AgentLifeCycleAdapter {
     writeProperties();
   }
 
-  public synchronized void markDirty(@NotNull File dir) {
+  public void markDirty(@NotNull File dir) {
     mark(dir, DIRTY);
   }
 
-  public synchronized void markClean(@NotNull File dir, boolean strict) {
+  public void markClean(@NotNull File dir, boolean strict) {
     mark(dir, strict ? STRICT_CLEAN : CLEAN);
   }
 
-  public synchronized void markPending(@NotNull File dir, boolean strict) {
+  public void markPending(@NotNull File dir, boolean strict) {
     mark(dir, strict ? STRICT_PENDING : PENDING);
   }
 }
