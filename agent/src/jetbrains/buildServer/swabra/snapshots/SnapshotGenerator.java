@@ -56,16 +56,15 @@ public class SnapshotGenerator {
 
   public boolean generateSnapshot(@NotNull File snapshot) {
     if (snapshot.exists()) {
-      myLogger.swabraDebug("Snapshot file " + snapshot.getName() + " exists, trying to delete");
+      myLogger.debug("Snapshot file " + snapshot.getName() + " exists, trying to delete");
       if (!FileUtil.delete(snapshot)) {
-        myLogger.swabraWarn("Unable to delete " + snapshot.getName());
+        myLogger.warn("Unable to delete " + snapshot.getName());
         return false;
       }
     }
     mySavedObjects = 0;
-    myLogger.activityStarted();
     myLogger.message("Saving state of checkout directory " + myCheckoutDir +
-      " to snapshot file " + snapshot.getName() + "...", true);
+      " to snapshot file " + snapshot.getName(), true);
 
     BufferedWriter writer = null;
     try {
@@ -77,7 +76,7 @@ public class SnapshotGenerator {
         " to snapshot file " + snapshot.getName() + ", saved " + mySavedObjects + " objects");
     } catch (Exception e) {
       myLogger.warn("Unable to save snapshot of checkout directory '" + myCheckoutDir.getAbsolutePath()
-        + "' to file " + snapshot.getName());
+        + "' to file " + snapshot.getName() + getMessage(e));
       myLogger.exception(e);
       return false;
     } finally {
@@ -88,11 +87,13 @@ public class SnapshotGenerator {
       } catch (IOException e) {
         myLogger.exception(e);
         return false;
-      } finally {
-        myLogger.activityFinished();
       }
     }
     return true;
+  }
+
+  private String getMessage(Exception e) {
+    return e.getMessage() == null ? "" : ": " + e.getMessage();
   }
 
   private void iterateAndBuildSnapshot(final BufferedWriter writer) throws Exception {

@@ -40,7 +40,6 @@ final class SwabraPropertiesProcessor extends AgentLifeCycleAdapter {
   private static final String KEY_VAL_SEPARATOR = "=";
 
   private static final String SNAPSHOT_SUFFIX = ".snapshot";
-  private static final String MARK = "*";
 
   private Map<String, String> myProperties;
   private final SwabraLogger myLogger;
@@ -96,7 +95,7 @@ final class SwabraPropertiesProcessor extends AgentLifeCycleAdapter {
       try {
         myCleanupFinishedSignal.await();
       } catch (InterruptedException e) {
-        myLogger.swabraWarn("Thread interrupted");
+        myLogger.warn("Thread interrupted");
       }
     }
     readPropertiesNoAwait(preserveFile);
@@ -105,7 +104,7 @@ final class SwabraPropertiesProcessor extends AgentLifeCycleAdapter {
   private void readPropertiesNoAwait(boolean preserveFile) {
     myProperties = new HashMap<String, String>();
     if (!myPropertiesFile.isFile()) {
-      myLogger.swabraDebug("Couldn't read checkout directories states from " + myPropertiesFile.getAbsolutePath() + ", no file present");
+      myLogger.debug("Couldn't read checkout directories states from " + myPropertiesFile.getAbsolutePath() + ", no file present");
       return;
     }
     BufferedReader reader = null;
@@ -115,21 +114,21 @@ final class SwabraPropertiesProcessor extends AgentLifeCycleAdapter {
       while (fileRecord != null) {
         final String[] mapElem = fileRecord.split(KEY_VAL_SEPARATOR);
         if (mapElem.length != 2) {
-          myLogger.swabraWarn("Error reading checkout directories states from " + myPropertiesFile.getAbsolutePath() + ", came across illegal record");
+          myLogger.warn("Error reading checkout directories states from " + myPropertiesFile.getAbsolutePath() + ", came across illegal record");
           return;
         }
         myProperties.put(mapElem[0], mapElem[1]);
         fileRecord = reader.readLine();
       }
     } catch (IOException e) {
-      myLogger.swabraWarn("Error reading checkout directories states from " + myPropertiesFile.getAbsolutePath());
+      myLogger.warn("Error reading checkout directories states from " + myPropertiesFile.getAbsolutePath() + getMessage(e));
       myLogger.exception(e);
     } finally {
       if (reader != null) {
         try {
           reader.close();
         } catch (IOException e) {
-          myLogger.swabraWarn("Error closing checkout directories states file " + myPropertiesFile.getAbsolutePath());
+          myLogger.warn("Error closing checkout directories states file " + myPropertiesFile.getAbsolutePath() + getMessage(e));
           myLogger.exception(e);
         }
       }
@@ -137,6 +136,10 @@ final class SwabraPropertiesProcessor extends AgentLifeCycleAdapter {
         deletePropertiesFile();
       }
     }
+  }
+
+  private String getMessage(IOException e) {
+    return e.getMessage() == null ? "" : ": " + e.getMessage();
   }
 
   private void writeProperties() {
@@ -153,14 +156,14 @@ final class SwabraPropertiesProcessor extends AgentLifeCycleAdapter {
         writer.write(e.getKey() + KEY_VAL_SEPARATOR + e.getValue() + "\n");
       }
     } catch (IOException e) {
-      myLogger.swabraWarn("Error saving checkout directories states to " + myPropertiesFile.getAbsolutePath());
+      myLogger.warn("Error saving checkout directories states to " + myPropertiesFile.getAbsolutePath() + getMessage(e));
       myLogger.exception(e);
     } finally {
       if (writer != null) {
         try {
           writer.close();
         } catch (IOException e) {
-          myLogger.swabraWarn("Error closing checkout directories states file " + myPropertiesFile.getAbsolutePath());
+          myLogger.warn("Error closing checkout directories states file " + myPropertiesFile.getAbsolutePath());
           myLogger.exception(e);
         }
       }
@@ -169,7 +172,7 @@ final class SwabraPropertiesProcessor extends AgentLifeCycleAdapter {
 
   private void deletePropertiesFile() {
     if (!FileUtil.delete(myPropertiesFile)) {
-      myLogger.swabraWarn("Error deleting checkout directories states file " + myPropertiesFile.getAbsolutePath());
+      myLogger.warn("Error deleting checkout directories states file " + myPropertiesFile.getAbsolutePath());
     }
   }
 
@@ -257,7 +260,7 @@ final class SwabraPropertiesProcessor extends AgentLifeCycleAdapter {
 
   private synchronized void mark(@NotNull File dir, @NotNull String state) {
     readProperties(false);
-    myLogger.swabraDebug("Marking " + dir.getAbsolutePath() + " as " + state);
+    myLogger.debug("Marking " + dir.getAbsolutePath() + " as " + state);
     myProperties.put(unifyPath(dir), state);
     writeProperties();
   }

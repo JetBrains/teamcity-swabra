@@ -99,10 +99,6 @@ public class SwabraSettings {
     return myLockingProcessesKill;
   }
 
-  public boolean isLockingProcessesReport() {
-    return myLockingProcessesReport;
-  }
-
   public boolean isLockingProcessesDetectionEnabled() {
     return (myLockingProcessesKill || myLockingProcessesReport) && myHandlePath != null;
   }
@@ -136,18 +132,18 @@ public class SwabraSettings {
     if (myLockingProcessesKill || myLockingProcessesReport) {
       myHandlePath = System.getProperty(HANDLE_EXE_SYSTEM_PROP);
       if (notDefined(myHandlePath)) {
-        logger.swabraWarn("Handle path not defined");
+        logger.warn("Handle path not defined");
         myHandlePath = null;
         return;
       }
       if (!SwabraUtil.unifyPath(myHandlePath).endsWith(HANDLE_PATH_SUFFIX)) {
-        logger.swabraWarn("Handle path must end with: " + HANDLE_PATH_SUFFIX);
+        logger.warn("Handle path must end with: " + HANDLE_PATH_SUFFIX);
         myHandlePath = null;
         return;
       }
       final File handleFile = new File(myHandlePath);
       if (!handleFile.isFile()) {
-        logger.swabraWarn("No Handle executable found at " + myHandlePath);
+        logger.warn("No Handle executable found at " + myHandlePath);
         myHandlePath = null;
       }
     } else {

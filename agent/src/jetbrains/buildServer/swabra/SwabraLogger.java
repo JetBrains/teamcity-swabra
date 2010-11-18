@@ -59,35 +59,19 @@ public final class SwabraLogger {
     CLASS_LOGGER.debug(message);
   }
 
-  public void swabraMessage(@NotNull String message, boolean useBuildLog) {
-    message = prepareMessage(message);
-    CLASS_LOGGER.info(message);
-    if (useBuildLog && myBuildLogger != null) myBuildLogger.message(message);
-  }
-
-  public void swabraWarn(@NotNull String message) {
-    message = prepareMessage(message);
-    CLASS_LOGGER.warn(message);
-    if (myBuildLogger != null) myBuildLogger.warning(message);
-  }
-
-  public void swabraDebug(@NotNull String message) {
-    CLASS_LOGGER.debug(prepareMessage(message));
-  }
-
   public void exception(@NotNull Throwable e) {
     CLASS_LOGGER.warn(e.getMessage(), e);
   }
 
   public void activityStarted() {
-    if (myBuildLogger != null) myBuildLogger.activityStarted(ACTIVITY_NAME, AGENT_BLOCK);
+    if (myBuildLogger != null) activityStarted(myBuildLogger);
+  }
+
+  public static void activityStarted(@NotNull BuildProgressLogger logger) {
+    logger.activityStarted(ACTIVITY_NAME, AGENT_BLOCK);
   }
 
   public void activityFinished() {
     if (myBuildLogger != null) myBuildLogger.activityFinished(ACTIVITY_NAME, AGENT_BLOCK);
-  }
-
-  private static String prepareMessage(String message) {
-    return "Swabra: " + message;
   }
 }

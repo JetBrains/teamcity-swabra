@@ -59,8 +59,7 @@ public class FilesCollector {
       return;
     }
 
-    myLogger.activityStarted();
-    myLogger.message("Scanning checkout directory " + checkoutDir + " for newly created, modified and deleted files...", true);
+    myLogger.message("Scanning checkout directory " + checkoutDir + " for newly created, modified and deleted files", true);
 
     try {
       iterateAndCollect(snapshot, checkoutDir);
@@ -69,8 +68,6 @@ public class FilesCollector {
       if (handler != null) handler.error();
       return;
     }
-
-    myLogger.activityFinished();
 
     final FilesCollectionProcessor.Results results = myProcessor.getResults();
 
@@ -83,16 +80,16 @@ public class FilesCollector {
 
     removeSnapshot(snapshot, checkoutDir);
     if (results.detectedNewAndUnableToDelete != 0) {
-      myLogger.swabraWarn(message);
+      myLogger.warn(message);
       if (handler != null) handler.lockedFilesDetected();
       return;
     }
     if (results.detectedDeleted > 0 || results.detectedModified > 0) {
-      myLogger.swabraWarn(message);
+      myLogger.warn(message);
       if (handler != null) handler.dirtyStateDetected();
       return;
     }
-    myLogger.swabraMessage(message, true);
+    myLogger.message(message, true);
     if (handler != null) handler.success();
   }
 
@@ -102,13 +99,13 @@ public class FilesCollector {
 
   private void removeSnapshot(File snapshot, File checkoutDir) {
     if (System.getProperty(NOT_DELETE_SNAPSHOT) != null) {
-      myLogger.swabraDebug("Will not delete " + snapshot.getName()
+      myLogger.debug("Will not delete " + snapshot.getName()
         + " for directory " + checkoutDir.getAbsolutePath() + ", " + NOT_DELETE_SNAPSHOT + "property specified");
     } else if (!FileUtil.delete(snapshot)) {
-      myLogger.swabraWarn("Unable to remove snapshot file " + snapshot.getName()
+      myLogger.warn("Unable to remove snapshot file " + snapshot.getName()
         + " for directory " + checkoutDir.getAbsolutePath());
     } else {
-      myLogger.swabraDebug("Successfully removed snapshot file " + snapshot.getName()
+      myLogger.debug("Successfully removed snapshot file " + snapshot.getName()
         + " for directory " + checkoutDir.getAbsolutePath() + " after files collection");
     }
   }
@@ -119,7 +116,7 @@ public class FilesCollector {
   }
 
   private void logUnableCollect(File snapshot, File checkoutDir, String message, Throwable e) {
-    myLogger.swabraWarn("Unable to collect files in checkout directory " + checkoutDir.getAbsolutePath()
+    myLogger.warn("Unable to collect files in checkout directory " + checkoutDir.getAbsolutePath()
       + " from snapshot file " + snapshot.getName() +
       ((message != null ? ", " + message : "")));
     if (e != null) {
