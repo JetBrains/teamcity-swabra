@@ -36,8 +36,10 @@ public class Rules {
 
   private List<AbstractRule> myRules = new LinkedList<AbstractRule>();
 
-  private static String getPath(String rule) {
-    return SwabraUtil.unifyPath(rule.substring(2).trim(), '/');
+  private static String getPath(String rule, boolean prefixed) {
+    rule = rule.trim();
+    if (prefixed) rule = rule.substring(2);
+    return SwabraUtil.unifyPath(rule, '/');
   }
 
   private static boolean isAntMask(String path) {
@@ -65,9 +67,7 @@ public class Rules {
         prefixed = rule.startsWith(INCLUDE_PREFIX);
       }
 
-      if (prefixed) {
-        rule = getPath(rule);
-      }
+      rule = getPath(rule, prefixed);
 
       myRules.add(createRule(rule, exclude));
     }
