@@ -68,7 +68,7 @@
 
 <tr class="noBorder" id="swabra.rules.container"
     style="${displaySwabraSettings ? '' : 'display: none;'}">
-  <th>Paths to monitor: <bs:help file="" anchor=""/></th>
+  <th>Paths to monitor: </th>
   <td>
       <props:multilineProperty name="swabra.rules" expanded="${not empty propertiesBean.properties['swabra.rules']}" rows="5" cols="40"
                                linkTitle="Edit paths"/>
