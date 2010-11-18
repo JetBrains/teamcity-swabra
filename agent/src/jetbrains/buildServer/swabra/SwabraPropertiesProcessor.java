@@ -22,6 +22,7 @@ import jetbrains.buildServer.agent.BuildAgent;
 import jetbrains.buildServer.util.EventDispatcher;
 import jetbrains.buildServer.util.FileUtil;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.io.*;
 import java.util.*;
@@ -224,38 +225,40 @@ final class SwabraPropertiesProcessor extends AgentLifeCycleAdapter {
     return new File(myPropertiesFile.getParent(), Integer.toHexString(checkoutDirectory.hashCode()) + SNAPSHOT_SUFFIX);
   }
 
-  private static final String DIRTY = "dirty";
-  private static final String CLEAN = "clean";
-  private static final String STRICT_CLEAN = "strict_clean";
-  private static final String PENDING = "pending";
-  private static final String STRICT_PENDING = "strict_pending";
+  static enum DirectoryState {
+    UNKNOWN("unknown"),
+    CLEAN("clean"),
+    STRICT_CLEAN("strict_clean"),
+    DIRTY("dirty"),
+    PENDING("pending"),
+    STRICT_PENDING("strict_pending");
 
-  public static enum DirectoryState {
-    UNKNOWN,
-    CLEAN,
-    STRICT_CLEAN,
-    DIRTY,
-    PENDING,
-    STRICT_PENDING
+    private static final List<DirectoryState> ourStates = Arrays.asList(UNKNOWN, CLEAN, STRICT_CLEAN, DIRTY, PENDING, STRICT_PENDING);
+
+    public static DirectoryState getState(@Nullable String str) {
+      if (str == null) return UNKNOWN;
+      for (final DirectoryState state : ourStates) {
+        if (state.getName().equals(str)) return state;
+      }
+      return UNKNOWN;
+    }
+
+    @NotNull
+    private final String myName;
+
+    private DirectoryState(@NotNull String name) {
+      myName = name;
+    }
+
+    @NotNull
+    public String getName() {
+      return myName;
+    }
   }
 
   public DirectoryState getState(File checkoutDirectory) {
     final String info = myProperties.get(unifyPath(checkoutDirectory));
-
-    if (info == null)
-      return DirectoryState.UNKNOWN;
-    if (CLEAN.equals(info))
-      return DirectoryState.CLEAN;
-    if (STRICT_CLEAN.equals(info))
-      return DirectoryState.STRICT_CLEAN;
-    if (DIRTY.equals(info))
-      return DirectoryState.DIRTY;
-    if (PENDING.equals(info))
-      return DirectoryState.PENDING;
-    if (STRICT_PENDING.equals(info))
-      return DirectoryState.STRICT_PENDING;
-
-    return DirectoryState.UNKNOWN;
+    return DirectoryState.getState(info);
   }
 
   private synchronized void mark(@NotNull File dir, @NotNull String state) {
@@ -266,14 +269,14 @@ final class SwabraPropertiesProcessor extends AgentLifeCycleAdapter {
   }
 
   public void markDirty(@NotNull File dir) {
-    mark(dir, DIRTY);
+    mark(dir, DirectoryState.DIRTY.getName());
   }
 
   public void markClean(@NotNull File dir, boolean strict) {
-    mark(dir, strict ? STRICT_CLEAN : CLEAN);
+    mark(dir, strict ? DirectoryState.STRICT_CLEAN.getName() : DirectoryState.CLEAN.getName());
   }
 
   public void markPending(@NotNull File dir, boolean strict) {
-    mark(dir, strict ? STRICT_PENDING : PENDING);
+    mark(dir, strict ? DirectoryState.STRICT_PENDING.getName() : DirectoryState.PENDING.getName());
   }
 }
