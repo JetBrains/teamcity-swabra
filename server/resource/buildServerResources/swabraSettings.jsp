@@ -27,11 +27,11 @@
 
 <tr>
   <td colspan="2">
-    <em>Swabra build feature cleans files created during the build.</em>
+    <em>Cleans checkout directory by deleting files created during the build.</em>
   </td>
 </tr>
 <tr class="noBorder">
-  <th>Build files cleanup:</th>
+  <th>Files cleanup:</th>
   <td>
     <c:set var="onchange">
       var selectedValue = this.options[this.selectedIndex].value;
@@ -46,15 +46,11 @@
       }
       BS.MultilineProperties.updateVisible();
     </c:set>
-    <%--<props:checkboxProperty name="swabra.enabled" onclick="${onclick}"/>--%>
-    <%--<label for="swabra.enabled">Perform build files cleanup</label>--%>
-    <%--<span class="smallNote">--%>
-      <%--At the build start inspect the checkout directory for files created, modified and deleted during previous build.</span>--%>
     <props:selectProperty name="swabra.enabled" onchange="${onchange}">
       <props:option value=""
                     selected="${empty enabledSelected}">&lt;Do not cleanup&gt;</props:option>
       <props:option value="swabra.before.build"
-                    selected="${not empty enabledSelected && enabledSelected != 'swabra.after.build'}">Before build start</props:option>
+                    selected="${not empty enabledSelected && enabledSelected != 'swabra.after.build'}">Before next build start</props:option>
       <props:option value="swabra.after.build"
                     selected="${enabledSelected == 'swabra.after.build'}">After build finish</props:option>
     </props:selectProperty>
@@ -63,21 +59,19 @@
 
 <tr class="noBorder" id="swabra.strict.container"
     style="${displaySwabraSettings ? '' : 'display: none;'}">
-  <th>Clean checkout directory:</th>
+  <th>Clean checkout:</th>
   <td>
     <props:checkboxProperty name="swabra.strict"/>
-    <label for="swabra.strict">Ensure clean checkout directory</label>
-          <span class="smallNote">
-            Ensure that at the build start the checkout directory corresponds to the sources in the repository, otherwise perform clean checkout.</span>
+    <label for="swabra.strict">Force clean checkout if cannot restore clean directory state</label>
   </td>
 </tr>
 
 <tr class="noBorder" id="swabra.rules.container"
     style="${displaySwabraSettings ? '' : 'display: none;'}">
-  <th>Cleanup rules:</th>
+  <th>Paths to monitor: <bs:help file="" anchor=""/></th>
   <td>
       <props:multilineProperty name="swabra.rules" expanded="${not empty propertiesBean.properties['swabra.rules']}" rows="5" cols="40"
-                               linkTitle="Edit cleanup rules"/>
+                               linkTitle="Edit paths"/>
     <div class="smallNote" style="margin-left: 0;">
       Newline or comma delimited set of <strong>+|-:relative_path</strong> rules.<br/>
       By default all paths are included. Rules on any path should come in order from more abstract to more concrete,
