@@ -76,7 +76,7 @@
 
             <l:settingsGroup title="Load handle.exe">
               <tr>
-                <th><label for="loadType">Load handle.exe:</label></th>
+                <th><label for="loadType">Load handle.exe:</label> <bs:help file="Adding+Swabra+as+a+Build+Feature" anchor="DownloadingHandle"/></th>
                 <td>
                   <c:set var="onclick">
                     if ($('upload').checked) {

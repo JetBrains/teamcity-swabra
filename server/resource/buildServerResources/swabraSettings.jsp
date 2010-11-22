@@ -11,11 +11,11 @@
  <%--WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.--%>
  <%--See the License for the specific language governing permissions and--%>
  <%--limitations under the License.--%>
-
- <%@ taglib prefix="props" tagdir="/WEB-INF/tags/props" %>
+<%@ taglib prefix="props" tagdir="/WEB-INF/tags/props" %>
 <%@ taglib prefix="l" tagdir="/WEB-INF/tags/layout" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ taglib prefix="forms" tagdir="/WEB-INF/tags/forms" %>
+<%@ taglib prefix="bs" tagdir="/WEB-INF/tags" %>
 <jsp:useBean id="propertiesBean" scope="request" type="jetbrains.buildServer.controllers.BasePropertiesBean"/>
 
 <%@ page import="jetbrains.buildServer.swabra.HandleProvider" %>
@@ -27,7 +27,7 @@
 
 <tr>
   <td colspan="2">
-    <em>Cleans checkout directory by deleting files created during the build.</em>
+    <em>Cleans checkout directory by deleting files created during the build.</em><bs:help file="Adding+Swabra+as+a+Build+Feature"/>
   </td>
 </tr>
 <tr class="noBorder">
@@ -68,7 +68,7 @@
 
 <tr class="noBorder" id="swabra.rules.container"
     style="${displaySwabraSettings ? '' : 'display: none;'}">
-  <th>Paths to monitor: </th>
+  <th>Paths to monitor: <bs:help file="Adding+Swabra+as+a+Build+Feature" anchor="ConfiguringSwabraOptions"/></th>
   <td>
       <props:multilineProperty name="swabra.rules" expanded="${not empty propertiesBean.properties['swabra.rules']}" rows="5" cols="40"
                                linkTitle="Edit paths"/>
