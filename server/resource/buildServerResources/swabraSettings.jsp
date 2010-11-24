@@ -48,7 +48,7 @@
     </c:set>
     <props:selectProperty name="swabra.enabled" onchange="${onchange}">
       <props:option value=""
-                    selected="${empty enabledSelected}">&lt;Do not cleanup&gt;</props:option>
+                    selected="${empty enabledSelected}">&lt;Do not clean up&gt;</props:option>
       <props:option value="swabra.before.build"
                     selected="${not empty enabledSelected && enabledSelected != 'swabra.after.build'}">Before next build start</props:option>
       <props:option value="swabra.after.build"
