@@ -150,13 +150,13 @@ public class LockedFileResolver {
     }
   }
 
-  private void log(String m, boolean isWarning, Listener listener) {
+  private void log(@NotNull String m, boolean isWarning, @Nullable Listener listener) {
     if (isWarning) {
       LOG.warn(m);
-      listener.warning(m);
+      if (listener != null) listener.warning(m);
     } else {
       LOG.info(m);
-      listener.message(m);
+      if (listener != null) listener.message(m);
     }
   }
 
