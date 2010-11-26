@@ -55,6 +55,7 @@ public final class Swabra extends AgentLifeCycleAdapter {
   private SwabraSettings mySettings;
 
   private boolean mySnapshotSaved;
+  private boolean myFailureReported;
 
   private Map<File, Thread> myPrevThreads = new HashMap<File, Thread>();
 
@@ -74,6 +75,7 @@ public final class Swabra extends AgentLifeCycleAdapter {
   public void buildStarted(@NotNull final AgentRunningBuild runningBuild) {
 //    System.setProperty(DEBUG_MODE, "true");
     mySnapshotSaved = false;
+    myFailureReported = false;
 
     mySettings = new SwabraSettings(runningBuild);
 
@@ -314,7 +316,12 @@ public final class Swabra extends AgentLifeCycleAdapter {
   }
 
   private void fail() {
+    if (myFailureReported) return;
+
+    myFailureReported = true;
+
     mySettings.setCleanupEnabled(false);
+
     final String message = "Swabra cleanup failed";
     myLogger.error(message + ": some files are locked");
     myLogger.message(new BuildStatus("{build.status.text}; " + message, Status.FAILURE).asString(), true);
