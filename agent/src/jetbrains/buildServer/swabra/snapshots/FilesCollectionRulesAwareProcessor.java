@@ -38,7 +38,7 @@ public class FilesCollectionRulesAwareProcessor extends FilesCollectionProcessor
   public FilesCollectionRulesAwareProcessor(@NotNull SwabraLogger logger,
                                             LockedFileResolver resolver,
                                             SwabraSettings settings) {
-    super(logger, resolver, settings.isVerbose(), settings.isStrict());
+    super(logger, resolver, settings.isVerbose(), settings.isLockingProcessesKill());
 
     myCheckouDir = settings.getCheckoutDir().getAbsolutePath();
     myRules = new Rules(settings.getRules());

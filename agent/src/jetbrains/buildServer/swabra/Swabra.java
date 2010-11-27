@@ -260,7 +260,7 @@ public final class Swabra extends AgentLifeCycleAdapter {
     if (System.getProperty(TEST_LOG) != null) {
       processor = new FilesCollectionProcessorMock(myLogger, myLockedFileResolver, mySettings.isVerbose(), mySettings.isStrict(), System.getProperty(TEST_LOG));
     } else if (mySettings.getRules().isEmpty()) {
-      processor = new FilesCollectionProcessor(myLogger, myLockedFileResolver, mySettings.isVerbose(), mySettings.isStrict());
+      processor = new FilesCollectionProcessor(myLogger, myLockedFileResolver, mySettings.isVerbose(), mySettings.isLockingProcessesKill());
     } else {
       processor = new FilesCollectionRulesAwareProcessor(myLogger, myLockedFileResolver, mySettings);
     }
