@@ -114,7 +114,7 @@
                     <br/>
                     On Windows agents handle.exe is used to determine processes which hold files in the checkout directory.
                     <br/>
-                    handle.exe will be present on agents only after the upgrade process.
+                    handle.exe will be automatically distributed to the agents and the agents will restart.
                   </div>
                 </td>
               </tr>
@@ -139,7 +139,7 @@
                        target="_blank"
                        href="http://technet.microsoft.com/en-us/sysinternals/bb469936.aspx">Sysinternals Software License Terms</a>.
                     <br/>
-                    handle.exe will be present on agents only after the upgrade process.
+                    handle.exe will be automatically distributed to the agents and the agents will restart.
                   </div>
                 </td>
               </tr>
