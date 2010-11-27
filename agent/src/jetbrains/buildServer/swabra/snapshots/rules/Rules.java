@@ -29,7 +29,8 @@ import java.util.List;
  * Time: 19:34:54
  */
 public class Rules {
-  private static final char PATH_SEPARATOR = '/';
+  private static final char PATH_SEPARATOR_CHAR = '/';
+  private static final String PATH_SEPARATOR = "/";
 
   private static final String EXCLUDE_PREFIX = "-:";
   private static final String INCLUDE_PREFIX = "+:";
@@ -39,7 +40,10 @@ public class Rules {
   private static String getPath(String rule, boolean prefixed) {
     rule = rule.trim();
     if (prefixed) rule = rule.substring(2);
-    return SwabraUtil.unifyPath(rule, '/');
+    if (rule.startsWith(".")) rule = rule.substring(1);
+    rule = SwabraUtil.unifyPath(rule, PATH_SEPARATOR_CHAR);
+    if (rule.startsWith(PATH_SEPARATOR)) rule = rule.substring(1);
+    return rule;
   }
 
   private static boolean isAntMask(String path) {
@@ -74,7 +78,7 @@ public class Rules {
   }
 
   public boolean exclude(@NotNull String path) {
-    path = SwabraUtil.unifyPath(path, PATH_SEPARATOR);
+    path = SwabraUtil.unifyPath(path, PATH_SEPARATOR_CHAR);
 
     boolean exclude = false;
     for (final AbstractRule rule : myRules) {
