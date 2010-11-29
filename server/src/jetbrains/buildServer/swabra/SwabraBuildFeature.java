@@ -40,7 +40,7 @@ public class SwabraBuildFeature extends BuildFeature implements BuildStartContex
   @NotNull
   @Override
   public String getDisplayName() {
-    return "Swabra";
+    return "Build files cleaner (Swabra)";
   }
 
   @Override
