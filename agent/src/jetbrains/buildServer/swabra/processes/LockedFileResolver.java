@@ -85,12 +85,14 @@ public class LockedFileResolver {
       return false;
     } else {
       log("Found locking " + number + " for " + f + ": ", true, listener);
-      logProcesses(processes, listener);
+      logProcesses(processes, true, listener);
     }
 
     if (kill) {
-      for (final ProcessInfo processInfo : processes) {
-        ProcessTreeTerminator.kill(processInfo.getPid(), ProcessFilter.MATCH_ALL);
+      log("Killing locking " + number + " in order to unlock " + f, false, listener);
+      for (final ProcessInfo p : processes) {
+        log("Killing " + getProcessString(p), false, listener);
+        ProcessTreeTerminator.kill(p.getPid(), ProcessFilter.MATCH_ALL);
       }
 //      for (final long pid : pids) {
 //        myProcessTerminator.kill(processInfo.getPid(), ProcessFilter.MATCH_ALL);
@@ -110,7 +112,7 @@ public class LockedFileResolver {
         return true;
       } else {
         log("Unable to kill locking " + number + " for "+ f + ": ", true, listener);
-        logProcesses(aliveProcesses, listener);
+        logProcesses(aliveProcesses, true, listener);
         return false;
       }
     }
@@ -130,7 +132,6 @@ public class LockedFileResolver {
     int i = 0;
     while (i < DELETION_TRIES) {
       if (!f.exists() || FileUtil.delete(f)) {
-        log("Deleted " + f + " after resolving", false, listener);
         return true;
       }
       try {
@@ -140,14 +141,17 @@ public class LockedFileResolver {
       }
       ++i;
     }
-    log("Unable to delete " + f, false, listener);
     return false;
   }
 
-  private void logProcesses(List<ProcessInfo> processes, Listener listener) {
+  private void logProcesses(List<ProcessInfo> processes, boolean isWarning, Listener listener) {
     for (final ProcessInfo p : processes) {
-      log("PID:" + p.getPid() + " " + (p.getName() == null ? "" : p.getName()), false, listener);
+      log(getProcessString(p), isWarning, listener);
     }
+  }
+
+  private String getProcessString(@NotNull ProcessInfo p) {
+    return "PID:" + p.getPid() + " " + (p.getName() == null ? "" : p.getName());
   }
 
   private void log(@NotNull String m, boolean isWarning, @Nullable Listener listener) {

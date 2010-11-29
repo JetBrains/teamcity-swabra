@@ -53,6 +53,9 @@ public class FilesCollectionProcessor implements FilesTraversal.ComparisonProces
 
   private Results myResults;
 
+  @NotNull
+  private final DeletionListener myDeletionListener;
+
   public FilesCollectionProcessor(@NotNull SwabraLogger logger,
                                   LockedFileResolver resolver,
                                   boolean verbose,
@@ -64,6 +67,8 @@ public class FilesCollectionProcessor implements FilesTraversal.ComparisonProces
 
     myAddedDirs = new Stack<String>();
     myUnableToDeleteFiles = new ArrayList<File>();
+
+    myDeletionListener = new DeletionListener();
   }
 
   public boolean willProcess(FileInfo info) {
@@ -155,6 +160,16 @@ public class FilesCollectionProcessor implements FilesTraversal.ComparisonProces
     }
   }
 
+  private final class DeletionListener implements LockedFileResolver.Listener {
+    public void message(String m) {
+      myLogger.message(m, true);
+    }
+
+    public void warning(String w) {
+      myLogger.warn(w);
+    }
+  }
+
   protected boolean resolveDelete(File f) {
     if (!f.exists()) {
       return true;
@@ -167,9 +182,9 @@ public class FilesCollectionProcessor implements FilesTraversal.ComparisonProces
     }
     if (myLockedFileResolver != null) {
       if (myStrictDeletion) {
-        return myLockedFileResolver.resolveDelete(f, null);
+        return myLockedFileResolver.resolveDelete(f, myDeletionListener);
       } else {
-        return myLockedFileResolver.resolve(f, false, null);
+        return myLockedFileResolver.resolve(f, false, myDeletionListener);
       }
     }
     return false;
