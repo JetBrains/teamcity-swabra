@@ -75,7 +75,7 @@ public class LockedFileResolver {
     try {
       processes = myProcessesProvider.getLockingProcesses(f);
     } catch (GetProcessesException e) {
-      log(e.getMessage(), true, listener);
+      log("Failed to detect locking processes for " + f + ": " + e.getMessage(), true, listener);
       return false;
     }
 
