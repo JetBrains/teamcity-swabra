@@ -90,9 +90,6 @@ public class BuildProgressLoggerMock implements FlowLogger {
   public void buildFailureDescription(final String message) {
   }
 
-  public void preparationEndMessage() {
-  }
-
   public void internalError(final String type, final String message, final Throwable throwable) {
   }
 
