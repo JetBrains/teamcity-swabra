@@ -75,7 +75,7 @@ public class LockedFileResolver {
     try {
       processes = myProcessesProvider.getLockingProcesses(f);
     } catch (GetProcessesException e) {
-      log("Failed to detect locking processes for " + f + ": " + e.getMessage(), true, listener);
+      log(e.getMessage(), true, listener);
       return false;
     }
 
@@ -84,19 +84,24 @@ public class LockedFileResolver {
       log("Found no locking processes for " + f, false, listener);
       return false;
     } else {
-      log("Found locking " + number + " for " + f + ": ", true, listener);
-      logProcesses(processes, true, listener);
+      final StringBuilder sb = new StringBuilder("Found locking ").append(number).append(" for ").append(f).append(":");
+      appendProcesses(processes, sb);
+      log(sb.toString(), true, listener);
     }
 
     if (kill) {
-      log("Killing locking " + number + " in order to unlock " + f, false, listener);
+      log("Locking processes killing is enabled. Will try to kill locking " + number, false, listener);
       for (final ProcessInfo p : processes) {
-        log("Killing " + getProcessString(p), false, listener);
-        ProcessTreeTerminator.kill(p.getPid(), ProcessFilter.MATCH_ALL);
+        try {
+          if (ProcessTreeTerminator.kill(p.getPid(), ProcessFilter.MATCH_ALL)) {
+            log("Killed process " + getProcessString(p), false, listener);
+          } else {
+            logFailedToKill(p, null, listener);
+          }
+        } catch (Exception e) {
+          logFailedToKill(p, e.getMessage(), listener);
+        }
       }
-//      for (final long pid : pids) {
-//        myProcessTerminator.kill(processInfo.getPid(), ProcessFilter.MATCH_ALL);
-//      }
 
       List<ProcessInfo> aliveProcesses;
 
@@ -108,15 +113,20 @@ public class LockedFileResolver {
       }
 
       if (aliveProcesses.isEmpty()) {
-        log("Killed locking " + number + " for " + f, false, listener);
         return true;
       } else {
-        log("Unable to kill locking " + number + " for "+ f + ": ", true, listener);
-        logProcesses(aliveProcesses, true, listener);
+        final StringBuilder sb
+          = new StringBuilder("Failed to kill locking ").append(getProcessesNumber(aliveProcesses.size())).append(" for ").append(f).append(":");
+        appendProcesses(aliveProcesses, sb);
+        log(sb.toString(), true, listener);
         return false;
       }
     }
     return false;
+  }
+
+  private void logFailedToKill(@NotNull final ProcessInfo p, @Nullable final String message, @Nullable final Listener listener) {
+    log("Failed to kill process " + getProcessString(p) + (message != null ? ": " + message : ""), true, listener);
   }
 
   /**
@@ -144,9 +154,9 @@ public class LockedFileResolver {
     return false;
   }
 
-  private void logProcesses(List<ProcessInfo> processes, boolean isWarning, Listener listener) {
+  private void appendProcesses(List<ProcessInfo> processes, StringBuilder sb) {
     for (final ProcessInfo p : processes) {
-      log(getProcessString(p), isWarning, listener);
+      sb.append("\n").append(getProcessString(p));
     }
   }
 
