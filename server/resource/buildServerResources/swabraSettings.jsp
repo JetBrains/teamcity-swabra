@@ -1,16 +1,16 @@
- <%--Copyright 2000-2010 JetBrains s.r.o.--%>
+<%--Copyright 2000-2010 JetBrains s.r.o.--%>
 
- <%--Licensed under the Apache License, Version 2.0 (the "License");--%>
- <%--you may not use this file except in compliance with the License.--%>
- <%--You may obtain a copy of the License at--%>
+<%--Licensed under the Apache License, Version 2.0 (the "License");--%>
+<%--you may not use this file except in compliance with the License.--%>
+<%--You may obtain a copy of the License at--%>
 
- <%--http://www.apache.org/licenses/LICENSE-2.0--%>
+<%--http://www.apache.org/licenses/LICENSE-2.0--%>
 
- <%--Unless required by applicable law or agreed to in writing, software--%>
- <%--distributed under the License is distributed on an "AS IS" BASIS,--%>
- <%--WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.--%>
- <%--See the License for the specific language governing permissions and--%>
- <%--limitations under the License.--%>
+<%--Unless required by applicable law or agreed to in writing, software--%>
+<%--distributed under the License is distributed on an "AS IS" BASIS,--%>
+<%--WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.--%>
+<%--See the License for the specific language governing permissions and--%>
+<%--limitations under the License.--%>
 <%@ taglib prefix="props" tagdir="/WEB-INF/tags/props" %>
 <%@ taglib prefix="l" tagdir="/WEB-INF/tags/layout" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
@@ -20,7 +20,8 @@
 
 <%@ page import="jetbrains.buildServer.swabra.HandleProvider" %>
 
-<c:set var="handlePresent"><%=HandleProvider.isHandlePresent()%></c:set>
+<c:set var="handlePresent"><%=HandleProvider.isHandlePresent()%>
+</c:set>
 <c:set var="enabledSelected" value="${propertiesBean.properties['swabra.enabled']}"/>
 <c:set var="processesSelected" value="${propertiesBean.properties['swabra.processes']}"/>
 <c:set var="displaySwabraSettings" value="${empty propertiesBean.properties['swabra.enabled'] ? false : true}"/>
@@ -70,8 +71,8 @@
     style="${displaySwabraSettings ? '' : 'display: none;'}">
   <th>Paths to monitor: <bs:help file="Adding+Swabra+as+a+Build+Feature" anchor="ConfiguringSwabraOptions"/></th>
   <td>
-      <props:multilineProperty name="swabra.rules" expanded="${not empty propertiesBean.properties['swabra.rules']}" rows="5" cols="40"
-                               linkTitle="Edit paths"/>
+    <props:multilineProperty name="swabra.rules" expanded="${not empty propertiesBean.properties['swabra.rules']}" rows="5" cols="40"
+                             linkTitle="Edit paths"/>
     <div class="smallNote" style="margin-left: 0;">
       Newline or comma delimited set of <strong>+|-:relative_path</strong> rules.<br/>
       By default all paths are included. Rules on any path should come in order from more abstract to more concrete,
@@ -126,11 +127,6 @@
       Report about such processes in the build log and kill them.
       <br/>
     </span>
-    <c:if test="${not handlePresent}">
-      <span class="smallNote" id="swabra.processes.handle.note" style="${empty processesSelected ? 'display: none;' : ''}">
-        Note that handle.exe is required on agents.
-      </span>
-    </c:if>
   </td>
 </tr>
 
@@ -150,11 +146,16 @@
     <c:set var="actionName" value="Update"/>
   </c:otherwise>
 </c:choose>
-<tr class="noBorder" id="swabra.download.handle.container" style="${empty processesSelected ? 'display: none;' : ''}">
-  <th>
-  </th>
-  <td>
-    <c:url var="handleDownloader" value="/admin/handle.html"/>
-    <a href="${handleDownloader}" target="_blank" showdiscardchangesmessage="false">${actionName} SysInternals handle.exe</a>
+
+<tr class="noBorder" style="${empty processesSelected ? 'display: none;' : ''}" id="swabra.download.handle.container">
+  <td colspan="2">
+    <div class="${not handlePresent ? 'attentionComment' : ''}">
+      <c:if test="${not handlePresent}">
+        Note that for locking processes detection handle.exe tool is required on agents.<br/>
+      </c:if>
+      <c:url var="handleDownloader" value="/admin/handle.html"/>
+      <a href="${handleDownloader}" target="_blank" showdiscardchangesmessage="false">${actionName} SysInternals handle.exe</a>
+    </div>
   </td>
+</tr>
 </tr>
