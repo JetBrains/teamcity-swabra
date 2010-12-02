@@ -31,9 +31,9 @@ import java.util.Map;
  * Time: 19:04:35
  */
 public class SwabraSettings {
-  private static final String RULES_PROPERTY = "swabra.rules";
+  private static final String RULES_CONFIG_PARAM = "swabra.rules";
 
-  private static final String[] DEFAULT_EXCLUDE_RULES = {"-:**/.svn/**", "-:**/.git/**", "-:**/.hg/**", "-:**/CVS/**"};
+  private static final String[] DEFAULT_RULES = {"-:**/.svn", "-:**/.git", "-:**/.hg", "-:**/CVS", "-:.svn", "-:.git", "-:.hg", "-:CVS"};
 
   private static final String HANDLE_PATH_SUFFIX = File.separator + "handle.exe";
   private static final String HANDLE_EXE_SYSTEM_PROP = "handle.exe.path";
@@ -64,13 +64,14 @@ public class SwabraSettings {
     myVerbose = SwabraUtil.isVerbose(params);
     myCheckoutDir = runningBuild.getCheckoutDirectory();
 
-    final Map<String, String> systemProperties = runningBuild.getBuildParameters().getSystemProperties();
     myRules = new ArrayList<String>();
     myRules.addAll(splitRules(SwabraUtil.getRules(params)));
-    if (systemProperties.containsKey(RULES_PROPERTY)) {
-      myRules.addAll(splitRules(systemProperties.get(RULES_PROPERTY)));
+
+    final Map<String, String> configParams = runningBuild.getSharedConfigParameters();
+    if (configParams.containsKey(RULES_CONFIG_PARAM)) {
+      myRules.addAll(splitRules(configParams.get(RULES_CONFIG_PARAM)));
     } else if (runningBuild.isCheckoutOnAgent()) {
-      myRules.addAll(Arrays.asList(DEFAULT_EXCLUDE_RULES));
+      myRules.addAll(Arrays.asList(DEFAULT_RULES));
     }
 
     logSettings();

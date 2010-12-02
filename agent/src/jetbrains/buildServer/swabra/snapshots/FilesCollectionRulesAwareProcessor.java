@@ -20,7 +20,6 @@ import jetbrains.buildServer.swabra.SwabraLogger;
 import jetbrains.buildServer.swabra.SwabraSettings;
 import jetbrains.buildServer.swabra.processes.LockedFileResolver;
 import jetbrains.buildServer.swabra.snapshots.iteration.FileInfo;
-import jetbrains.buildServer.swabra.snapshots.rules.Rules;
 import jetbrains.buildServer.util.FileUtil;
 import org.jetbrains.annotations.NotNull;
 
@@ -33,7 +32,7 @@ import java.io.File;
  */
 public class FilesCollectionRulesAwareProcessor extends FilesCollectionProcessor {
   private final String myCheckouDir;
-  private final Rules myRules;
+  private final SwabraRules myRules;
 
   public FilesCollectionRulesAwareProcessor(@NotNull SwabraLogger logger,
                                             LockedFileResolver resolver,
@@ -41,14 +40,14 @@ public class FilesCollectionRulesAwareProcessor extends FilesCollectionProcessor
     super(logger, resolver, settings.isVerbose(), settings.isLockingProcessesKill());
 
     myCheckouDir = settings.getCheckoutDir().getAbsolutePath();
-    myRules = new Rules(settings.getRules());
+    myRules = new SwabraRules(settings.getRules());
   }
 
   @Override
   public boolean willProcess(FileInfo info) {
     final String path = FileUtil.getRelativePath(myCheckouDir, info.getPath(), File.separatorChar);
 
-    return !myRules.exclude(path);
+    return myRules.shouldInclude(path);
   }
 }
 
