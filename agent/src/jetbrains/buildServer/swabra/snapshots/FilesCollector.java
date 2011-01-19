@@ -59,7 +59,8 @@ public class FilesCollector {
       return;
     }
 
-    myLogger.message("Scanning checkout directory " + checkoutDir + " for newly created, modified and deleted files", true);
+    myLogger.message("Scanning checkout directory " + checkoutDir + " for newly created, modified and deleted files comparing with snapshot " +
+      snapshot.getName(), true);
 
     try {
       iterateAndCollect(snapshot, checkoutDir);
