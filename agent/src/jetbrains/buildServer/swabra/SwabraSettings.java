@@ -20,10 +20,7 @@ import jetbrains.buildServer.agent.AgentRunningBuild;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * User: vbedrosova
@@ -31,7 +28,7 @@ import java.util.Map;
  * Time: 19:04:35
  */
 public class SwabraSettings {
-  private static final String RULES_CONFIG_PARAM = "swabra.rules";
+  private static final String DEFAULT_RULES_CONFIG_PARAM = "swabra.default.rules";
 
   private static final String[] DEFAULT_RULES = {"-:**/.svn", "-:**/.git", "-:**/.hg", "-:**/CVS", "-:.svn", "-:.git", "-:.hg", "-:CVS"};
 
@@ -68,8 +65,8 @@ public class SwabraSettings {
     myRules.addAll(splitRules(SwabraUtil.getRules(params)));
 
     final Map<String, String> configParams = runningBuild.getSharedConfigParameters();
-    if (configParams.containsKey(RULES_CONFIG_PARAM)) {
-      myRules.addAll(splitRules(configParams.get(RULES_CONFIG_PARAM)));
+    if (configParams.containsKey(DEFAULT_RULES_CONFIG_PARAM)) {
+      myRules.addAll(splitRules(configParams.get(DEFAULT_RULES_CONFIG_PARAM)));
     } else if (runningBuild.isCheckoutOnAgent()) {
       myRules.addAll(Arrays.asList(DEFAULT_RULES));
     }
@@ -161,7 +158,7 @@ public class SwabraSettings {
     return (value == null) || ("".equals(value));
   }
 
-  private static List<String> splitRules(String rules) {
-    return Arrays.asList(rules.split(" *[,\n\r] *"));
+  private static List<String> splitRules(@NotNull String rules) {
+    return rules.length() == 0 ? Collections.<String>emptyList() : Arrays.asList(rules.split(" *[,\n\r] *"));
   }
 }
