@@ -47,6 +47,9 @@ public class HandleProcessesProvider implements LockedFileResolver.LockingProces
   @NotNull
   public List<ProcessInfo> getLockingProcesses(@NotNull final File file) throws GetProcessesException {
     final ExecResult result = ProcessExecutor.runHandleAcceptEula(myHandleExePath, file.getAbsolutePath());
+
+    LOG.debug("handle.exe output:\n" + result.getStdout());
+
     if (HandleOutputReader.noResult(result.getStdout())) {
       LOG.debug("No matching handles found for " + file.getAbsolutePath());
       return Collections.emptyList();
