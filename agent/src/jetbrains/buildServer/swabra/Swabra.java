@@ -264,7 +264,7 @@ public final class Swabra extends AgentLifeCycleAdapter {
     } else {
       processor = new FilesCollectionRulesAwareProcessor(myLogger, myLockedFileResolver, mySettings);
     }
-    return new FilesCollector(processor, myLogger);
+    return new FilesCollector(processor, myLogger, mySettings);
   }
 
   private void makeSnapshot() {
