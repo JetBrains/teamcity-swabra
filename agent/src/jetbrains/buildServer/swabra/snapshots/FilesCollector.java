@@ -72,11 +72,11 @@ public class FilesCollector {
     final FilesCollectionProcessor.Results results = myProcessor.getResults();
 
     final int detectedNew = results.detectedNewAndDeleted + results.detectedNewAndUnableToDelete;
-    final String message = "Detected " + results.detectedUnchanged + " unchanged " + getObjectsNumber(results.detectedUnchanged) +
-      ", " + detectedNew + " newly created " + getObjectsNumber(detectedNew) +
-      (detectedNew > 0 ? " (" + results.detectedNewAndDeleted + " of them deleted)" : "") +
-      ", " + results.detectedModified + " modified " + getObjectsNumber(results.detectedModified) +
-      ", " + results.detectedDeleted + " deleted " + getObjectsNumber(results.detectedDeleted);
+    final String message = "Detected " + results.detectedUnchanged + " unchanged, " +
+      detectedNew + " newly created" +
+      (detectedNew > 0 ? " (" + results.detectedNewAndDeleted + " of them deleted), " : ", ") +
+      results.detectedModified + " modified, " +
+      results.detectedDeleted + " deleted files and directories";
 
     removeSnapshot(snapshot, checkoutDir);
     if (results.detectedNewAndUnableToDelete != 0) {
@@ -91,10 +91,6 @@ public class FilesCollector {
     }
     myLogger.message(message, true);
     if (handler != null) handler.success();
-  }
-
-  private String getObjectsNumber(int number) {
-    return number == 1 ? "object" : "objects";
   }
 
   private void removeSnapshot(File snapshot, File checkoutDir) {
