@@ -84,13 +84,13 @@ public class FilesCollectionProcessor implements FilesTraversal.ComparisonProces
   public void processModified(FileInfo info1, FileInfo info2) {
     deleteAddedDirs();
     ++myDetectedModified;
-    myLogger.message("Detected modified " + info1.getPath(), myVerbose);
+    myLogger.warn("Detected modified " + info1.getPath());
   }
 
   public void processDeleted(FileInfo info) {
     deleteAddedDirs();
     ++myDetectedDeleted;
-    myLogger.message("Detected deleted " + info.getPath(), myVerbose);
+    myLogger.warn("Detected deleted " + info.getPath());
   }
 
   public void processAdded(FileInfo info) {
