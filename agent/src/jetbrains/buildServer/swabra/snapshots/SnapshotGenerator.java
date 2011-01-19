@@ -73,7 +73,7 @@ public class SnapshotGenerator {
 
       iterateAndBuildSnapshot(writer);
       myLogger.debug("Successfully finished saving state of checkout directory " + myCheckoutDir +
-        " to snapshot file " + snapshot.getName() + ", saved " + mySavedObjects + " objects");
+        " to snapshot file " + snapshot.getName() + ", saved " + mySavedObjects + " objects (including checkout dir)");
     } catch (Exception e) {
       myLogger.warn("Unable to save snapshot of checkout directory '" + myCheckoutDir.getAbsolutePath()
         + "' to file " + snapshot.getName() + getMessage(e));

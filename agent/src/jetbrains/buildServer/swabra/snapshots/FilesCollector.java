@@ -72,7 +72,7 @@ public class FilesCollector {
     final FilesCollectionProcessor.Results results = myProcessor.getResults();
 
     final int detectedNew = results.detectedNewAndDeleted + results.detectedNewAndUnableToDelete;
-    final String message = "Detected " + results.detectedUnchanged + " unchanged, " +
+    final String message = "Detected " + (results.detectedUnchanged - 1) + " unchanged, " + // -1 not to count checkout dir
       detectedNew + " newly created" +
       (detectedNew > 0 ? " (" + results.detectedNewAndDeleted + " of them deleted), " : ", ") +
       results.detectedModified + " modified, " +
