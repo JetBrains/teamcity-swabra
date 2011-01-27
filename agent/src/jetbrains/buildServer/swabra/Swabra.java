@@ -22,6 +22,9 @@ package jetbrains.buildServer.swabra;
  * Time: 14:10:58
  */
 
+import java.io.File;
+import java.util.HashMap;
+import java.util.Map;
 import jetbrains.buildServer.agent.*;
 import jetbrains.buildServer.messages.Status;
 import jetbrains.buildServer.messages.serviceMessages.BuildStatus;
@@ -31,10 +34,6 @@ import jetbrains.buildServer.swabra.snapshots.*;
 import jetbrains.buildServer.util.EventDispatcher;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-
-import java.io.File;
-import java.util.HashMap;
-import java.util.Map;
 
 
 public final class Swabra extends AgentLifeCycleAdapter {
@@ -117,12 +116,12 @@ public final class Swabra extends AgentLifeCycleAdapter {
           return;
         case CLEAN:
           if (mySettings.isStrict()) {
-            doCleanup(mySettings.getCheckoutDir(), "Checkout directory may contain newly created, modified or deleted files");
+            doCleanup(mySettings.getCheckoutDir(), "Checkout directory may contain newly created, modified or deleted files", runningBuild);
           }
           return;
         case DIRTY:
           if (mySettings.isStrict()) {
-            doCleanup(mySettings.getCheckoutDir(), "Checkout directory contains newly created, modified or deleted files");
+            doCleanup(mySettings.getCheckoutDir(), "Checkout directory contains newly created, modified or deleted files", runningBuild);
             return;
           }
           if (!mySettings.isCleanupBeforeBuild()) {
@@ -131,7 +130,8 @@ public final class Swabra extends AgentLifeCycleAdapter {
           // else fall into next case
         case PENDING:
           if (mySettings.isStrict()) {
-            doCleanup(mySettings.getCheckoutDir(), "Checkout directory snapshot may contain information about newly created, modified or deleted files");
+            doCleanup(mySettings.getCheckoutDir(),
+              "Checkout directory snapshot may contain information about newly created, modified or deleted files", runningBuild);
             return;
           }
           // else fall into next case
@@ -146,7 +146,7 @@ public final class Swabra extends AgentLifeCycleAdapter {
                 }
 
                 public void error() {
-                  doCleanup(mySettings.getCheckoutDir(), "Some error occurred during cleanup");
+                  doCleanup(mySettings.getCheckoutDir(), "Some error occurred during cleanup", runningBuild);
                 }
 
                 public void lockedFilesDetected() {
@@ -154,7 +154,8 @@ public final class Swabra extends AgentLifeCycleAdapter {
                 }
 
                 public void dirtyStateDetected() {
-                  doCleanup(mySettings.getCheckoutDir(), "Checkout directory contains modified files or some files were deleted");
+                  doCleanup(mySettings.getCheckoutDir(),
+                    "Checkout directory contains modified files or some files were deleted", runningBuild);
                 }
               }
               : null
@@ -162,7 +163,7 @@ public final class Swabra extends AgentLifeCycleAdapter {
           return;
         case UNKNOWN:
         default:
-          doCleanup(mySettings.getCheckoutDir(), "Checkout directory state is unknown");
+          doCleanup(mySettings.getCheckoutDir(), "Checkout directory state is unknown", runningBuild);
       }
     } finally {
       myLogger.activityFinished();
@@ -285,7 +286,7 @@ public final class Swabra extends AgentLifeCycleAdapter {
     }
   }
 
-  private void doCleanup(File checkoutDir, final @Nullable String reason) {
+  private void doCleanup(@NotNull File checkoutDir, @Nullable final String reason, @NotNull final AgentRunningBuild build) {
     myDirectoryCleaner.cleanFolder(checkoutDir, new SmartDirectoryCleanerCallback() {
       public void logCleanStarted(File dir) {
         String message = (reason == null ? "" : reason + ". ")
@@ -296,6 +297,7 @@ public final class Swabra extends AgentLifeCycleAdapter {
       public void logFailedToDeleteEmptyDirectory(File dir) {
         myLogger.error("Failed to delete empty directory " + dir.getAbsolutePath());
         fail();
+        ((AgentRunningBuildEx) build).stopBuild("Swabra cleanup failed: some files are locked");
       }
 
       public void logFailedToCleanFilesUnderDirectory(File dir) {

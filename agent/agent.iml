@@ -21,6 +21,7 @@
     <orderEntry type="library" name="IDEA annotations" level="project" />
     <orderEntry type="library" name="TeamCity-processTerminator" level="project" />
     <orderEntry type="library" name="TeamCity-spring" level="project" />
+    <orderEntry type="library" name="TeamCity-agent-non-openapi" level="project" />
   </component>
 </module>
 

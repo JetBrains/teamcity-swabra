@@ -29,8 +29,8 @@
     <exclude name="**/*.hprof/**"/>
     <exclude name="**/_svn/**"/>
     <exclude name="**/.hg/**"/>
-    <exclude name="**/.sbas/**"/>
-    <exclude name="**/.IJI.*/**"/>
+    <exclude name="**/*.lib/**"/>
+    <exclude name="**/*~/**"/>
   </patternset>
   <patternset id="library.patterns">
     <include name="*.zip"/>
@@ -79,6 +79,10 @@
     <pathelement location="${path.variable.teamcitydistribution}/webapps/ROOT/WEB-INF/lib/log4j-1.2.12.jar"/>
   </path>
   
+  <path id="library.teamcity-agent-non-openapi.classpath">
+    <pathelement location="${path.variable.teamcitydistribution}/buildAgent/lib/agent.jar"/>
+  </path>
+  
   <path id="library.teamcity-agent.classpath">
     <pathelement location="${path.variable.teamcitydistribution}/devPackage/agent-api.jar"/>
   </path>
@@ -115,9 +119,6 @@
   <path id="library.teamcity-web.classpath">
     <pathelement location="${path.variable.teamcitydistribution}/webapps/ROOT/WEB-INF/lib/web.jar"/>
   </path>
-  
-  
-  <!-- Global Libraries -->
   
   
   <!-- Application Server Libraries -->
@@ -345,6 +346,7 @@
     <path refid="library.idea_annotations.classpath"/>
     <path refid="library.teamcity-processterminator.classpath"/>
     <path refid="library.teamcity-spring.classpath"/>
+    <path refid="library.teamcity-agent-non-openapi.classpath"/>
   </path>
   
   <path id="agent.runtime.production.module.classpath">
@@ -352,12 +354,13 @@
     <path refid="library.teamcity-agent.classpath"/>
     <path refid="library.teamcity-utils.classpath"/>
     <path refid="library.teamcity-common.classpath"/>
-    <pathelement location="${common.output.dir}"/>
-    <path refid="library.idea_annotations.classpath"/>
+    <path refid="common.runtime.production.module.classpath"/>
     <path refid="library.log4j.classpath"/>
     <path refid="library.intellij_idea_open_api.classpath"/>
+    <path refid="library.idea_annotations.classpath"/>
     <path refid="library.teamcity-processterminator.classpath"/>
     <path refid="library.teamcity-spring.classpath"/>
+    <path refid="library.teamcity-agent-non-openapi.classpath"/>
   </path>
   
   <path id="agent.module.classpath">
@@ -372,6 +375,7 @@
     <path refid="library.idea_annotations.classpath"/>
     <path refid="library.teamcity-processterminator.classpath"/>
     <path refid="library.teamcity-spring.classpath"/>
+    <path refid="library.teamcity-agent-non-openapi.classpath"/>
   </path>
   
   <path id="agent.runtime.module.classpath">
@@ -380,13 +384,13 @@
     <path refid="library.teamcity-agent.classpath"/>
     <path refid="library.teamcity-utils.classpath"/>
     <path refid="library.teamcity-common.classpath"/>
-    <pathelement location="${common.testoutput.dir}"/>
-    <pathelement location="${common.output.dir}"/>
-    <path refid="library.idea_annotations.classpath"/>
+    <path refid="common.runtime.module.classpath"/>
     <path refid="library.log4j.classpath"/>
     <path refid="library.intellij_idea_open_api.classpath"/>
+    <path refid="library.idea_annotations.classpath"/>
     <path refid="library.teamcity-processterminator.classpath"/>
     <path refid="library.teamcity-spring.classpath"/>
+    <path refid="library.teamcity-agent-non-openapi.classpath"/>
   </path>
   
   
@@ -465,7 +469,7 @@
     <pathelement location="${server.output.dir}"/>
     <path refid="library.teamcity-utils.classpath"/>
     <path refid="library.teamcity-server.classpath"/>
-    <pathelement location="${common.output.dir}"/>
+    <path refid="common.runtime.production.module.classpath"/>
     <path refid="library.idea_annotations.classpath"/>
     <path refid="library.teamcity-spring.classpath"/>
     <path refid="library.teamcity-jdom.classpath"/>
@@ -479,8 +483,7 @@
     <pathelement location="${server.output.dir}"/>
     <path refid="library.teamcity-utils.classpath"/>
     <path refid="library.teamcity-server.classpath"/>
-    <pathelement location="${common.testoutput.dir}"/>
-    <pathelement location="${common.output.dir}"/>
+    <path refid="common.runtime.module.classpath"/>
     <path refid="library.idea_annotations.classpath"/>
     <path refid="library.teamcity-spring.classpath"/>
     <path refid="library.teamcity-jdom.classpath"/>
@@ -589,14 +592,12 @@
     <path refid="library.teamcity-agent.classpath"/>
     <path refid="library.teamcity-utils.classpath"/>
     <path refid="library.teamcity-common.classpath"/>
-    <pathelement location="${agent.output.dir}"/>
-    <pathelement location="${common.output.dir}"/>
-    <path refid="library.idea_annotations.classpath"/>
-    <path refid="library.log4j.classpath"/>
-    <path refid="library.intellij_idea_open_api.classpath"/>
-    <path refid="library.teamcity-processterminator.classpath"/>
-    <path refid="library.teamcity-spring.classpath"/>
+    <path refid="agent.runtime.production.module.classpath"/>
     <path refid="library.jmock.classpath"/>
+    <path refid="library.log4j.classpath"/>
+    <path refid="common.runtime.production.module.classpath"/>
+    <path refid="library.idea_annotations.classpath"/>
+    <path refid="library.teamcity-processterminator.classpath"/>
   </path>
   
   <path id="tests.module.classpath">
@@ -622,16 +623,12 @@
     <path refid="library.teamcity-agent.classpath"/>
     <path refid="library.teamcity-utils.classpath"/>
     <path refid="library.teamcity-common.classpath"/>
-    <pathelement location="${agent.testoutput.dir}"/>
-    <pathelement location="${agent.output.dir}"/>
-    <pathelement location="${common.testoutput.dir}"/>
-    <pathelement location="${common.output.dir}"/>
-    <path refid="library.idea_annotations.classpath"/>
-    <path refid="library.log4j.classpath"/>
-    <path refid="library.intellij_idea_open_api.classpath"/>
-    <path refid="library.teamcity-processterminator.classpath"/>
-    <path refid="library.teamcity-spring.classpath"/>
+    <path refid="agent.runtime.module.classpath"/>
     <path refid="library.jmock.classpath"/>
+    <path refid="library.log4j.classpath"/>
+    <path refid="common.runtime.module.classpath"/>
+    <path refid="library.idea_annotations.classpath"/>
+    <path refid="library.teamcity-processterminator.classpath"/>
   </path>
   
   
@@ -703,25 +700,11 @@
   
   <path id="swabra.runtime.production.module.classpath">
     <pathelement location="${swabra.output.dir}"/>
-    <pathelement location="${agent.output.dir}"/>
-    <path refid="library.teamcity-agent.classpath"/>
-    <path refid="library.teamcity-utils.classpath"/>
-    <path refid="library.teamcity-common.classpath"/>
-    <pathelement location="${common.output.dir}"/>
-    <path refid="library.idea_annotations.classpath"/>
-    <path refid="library.log4j.classpath"/>
-    <path refid="library.intellij_idea_open_api.classpath"/>
-    <path refid="library.teamcity-processterminator.classpath"/>
-    <path refid="library.teamcity-spring.classpath"/>
-    <pathelement location="${handle-provider.output.dir}"/>
-    <pathelement location="${server.output.dir}"/>
-    <path refid="library.teamcity-server.classpath"/>
-    <path refid="library.teamcity-jdom.classpath"/>
-    <path refid="library.teamcity-servletapi.classpath"/>
-    <path refid="library.teamcity-web.classpath"/>
-    <pathelement location="${tests.output.dir}"/>
-    <path refid="library.junit.classpath"/>
-    <path refid="library.jmock.classpath"/>
+    <path refid="agent.runtime.production.module.classpath"/>
+    <path refid="common.runtime.production.module.classpath"/>
+    <path refid="handle-provider.runtime.production.module.classpath"/>
+    <path refid="server.runtime.production.module.classpath"/>
+    <path refid="tests.runtime.production.module.classpath"/>
   </path>
   
   <path id="swabra.module.classpath">
@@ -741,30 +724,11 @@
   <path id="swabra.runtime.module.classpath">
     <pathelement location="${swabra.testoutput.dir}"/>
     <pathelement location="${swabra.output.dir}"/>
-    <pathelement location="${agent.testoutput.dir}"/>
-    <pathelement location="${agent.output.dir}"/>
-    <path refid="library.teamcity-agent.classpath"/>
-    <path refid="library.teamcity-utils.classpath"/>
-    <path refid="library.teamcity-common.classpath"/>
-    <pathelement location="${common.testoutput.dir}"/>
-    <pathelement location="${common.output.dir}"/>
-    <path refid="library.idea_annotations.classpath"/>
-    <path refid="library.log4j.classpath"/>
-    <path refid="library.intellij_idea_open_api.classpath"/>
-    <path refid="library.teamcity-processterminator.classpath"/>
-    <path refid="library.teamcity-spring.classpath"/>
-    <pathelement location="${handle-provider.testoutput.dir}"/>
-    <pathelement location="${handle-provider.output.dir}"/>
-    <pathelement location="${server.testoutput.dir}"/>
-    <pathelement location="${server.output.dir}"/>
-    <path refid="library.teamcity-server.classpath"/>
-    <path refid="library.teamcity-jdom.classpath"/>
-    <path refid="library.teamcity-servletapi.classpath"/>
-    <path refid="library.teamcity-web.classpath"/>
-    <pathelement location="${tests.testoutput.dir}"/>
-    <pathelement location="${tests.output.dir}"/>
-    <path refid="library.junit.classpath"/>
-    <path refid="library.jmock.classpath"/>
+    <path refid="agent.runtime.module.classpath"/>
+    <path refid="common.runtime.module.classpath"/>
+    <path refid="handle-provider.runtime.module.classpath"/>
+    <path refid="server.runtime.module.classpath"/>
+    <path refid="tests.runtime.module.classpath"/>
   </path>
   
   
