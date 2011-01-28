@@ -80,11 +80,6 @@ final class SwabraPropertiesProcessor extends AgentLifeCycleAdapter {
     FileUtil.delete(getSnapshotFile(checkoutDir));
   }
 
-  @NotNull
-  public File getPropertiesFile() {
-    return myPropertiesFile;
-  }
-
   public synchronized void deleteRecord(@NotNull File dir) {
     readProperties(false);
     myProperties.remove(unifyPath(dir));
