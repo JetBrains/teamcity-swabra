@@ -18,6 +18,7 @@ package jetbrains.buildServer.swabra.snapshots;
 
 import jetbrains.buildServer.swabra.SwabraLogger;
 import jetbrains.buildServer.swabra.SwabraSettings;
+import jetbrains.buildServer.swabra.SwabraUtil;
 import jetbrains.buildServer.swabra.snapshots.iteration.FileSystemFilesIterator;
 import jetbrains.buildServer.swabra.snapshots.iteration.FilesTraversal;
 import jetbrains.buildServer.swabra.snapshots.iteration.SnapshotFilesIterator;
@@ -26,7 +27,6 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.File;
-import java.util.List;
 
 /**
  * User: vbedrosova
@@ -67,7 +67,7 @@ public class FilesCollector {
     }
 
     myLogger.message("Scanning checkout directory " + checkoutDir + " for newly created, modified and deleted files comparing with snapshot " +
-      snapshot.getName() + getRulesStr(mySettings.getRules()), true);
+      snapshot.getName() + (mySettings.getRules().isEmpty() ? "" : ", paths to monitor are " + SwabraUtil.getRulesStr(mySettings.getRules())), true);
 
     try {
       iterateAndCollect(snapshot, checkoutDir);
@@ -125,35 +125,6 @@ public class FilesCollector {
       ((message != null ? ", " + message : "")));
     if (e != null) {
       myLogger.exception(e);
-    }
-  }
-
-  private static final int RULES_TO_APPEND = 2;
-
-  @NotNull
-  private static String getRulesStr(List<String> rules) {
-    if (rules.isEmpty()) return "";
-
-    final StringBuilder sb = new StringBuilder(", rules are ");
-
-    if (rules.size() <= RULES_TO_APPEND) {
-      appendRules(rules, sb, rules.size());
-    } else {
-      appendRules(rules, sb, RULES_TO_APPEND);
-
-      final int more = rules.size() - RULES_TO_APPEND;
-      sb.append(" and ").append(more).append(" more rule").append(more > 1 ? "s" : "");
-    }
-
-    return sb.toString();
-  }
-
-  private static void appendRules(@NotNull List<String> rules, @NotNull StringBuilder sb, int number) {
-    for (int i = 0 ; i < number; ++i) {
-      if (i != 0) {
-        sb.append(", ");
-      }
-      sb.append(rules.get(i));
     }
   }
 }

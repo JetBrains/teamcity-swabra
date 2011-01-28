@@ -20,8 +20,7 @@ import com.intellij.openapi.util.SystemInfo;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 /**
  * User: vbedrosova
@@ -111,5 +110,38 @@ public class SwabraUtil {
     }
 
     return swabraParams;
+  }
+
+  public static List<String> splitRules(@NotNull String rules) {
+    return rules.length() == 0 ? Collections.<String>emptyList() : Arrays.asList(rules.split(" *[,\n\r] *"));
+  }
+
+  @NotNull
+  public static String getRulesStr(@NotNull List<String> rules) {
+    if (rules.isEmpty()) return "";
+
+    final StringBuilder sb = new StringBuilder();
+
+    if (rules.size() <= RULES_TO_APPEND) {
+      appendRules(rules, sb, rules.size());
+    } else {
+      appendRules(rules, sb, RULES_TO_APPEND);
+
+      final int more = rules.size() - RULES_TO_APPEND;
+      sb.append(" and ").append(more).append(" more path").append(more > 1 ? "s" : "");
+    }
+
+    return sb.toString();
+  }
+
+  private static final int RULES_TO_APPEND = 2;
+
+  private static void appendRules(@NotNull List<String> rules, @NotNull StringBuilder sb, int number) {
+    for (int i = 0 ; i < number; ++i) {
+      if (i != 0) {
+        sb.append(", ");
+      }
+      sb.append(rules.get(i));
+    }
   }
 }

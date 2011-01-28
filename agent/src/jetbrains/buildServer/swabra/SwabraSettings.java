@@ -20,7 +20,10 @@ import jetbrains.buildServer.agent.AgentRunningBuild;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
 
 /**
  * User: vbedrosova
@@ -62,11 +65,11 @@ public class SwabraSettings {
     myCheckoutDir = runningBuild.getCheckoutDirectory();
 
     myRules = new ArrayList<String>();
-    myRules.addAll(splitRules(SwabraUtil.getRules(params)));
+    myRules.addAll(SwabraUtil.splitRules(SwabraUtil.getRules(params)));
 
     final Map<String, String> configParams = runningBuild.getSharedConfigParameters();
     if (configParams.containsKey(DEFAULT_RULES_CONFIG_PARAM)) {
-      myRules.addAll(splitRules(configParams.get(DEFAULT_RULES_CONFIG_PARAM)));
+      myRules.addAll(SwabraUtil.splitRules(configParams.get(DEFAULT_RULES_CONFIG_PARAM)));
     } else if (runningBuild.isCheckoutOnAgent()) {
       myRules.addAll(Arrays.asList(DEFAULT_RULES));
     }
@@ -156,9 +159,5 @@ public class SwabraSettings {
 
   private static boolean notDefined(String value) {
     return (value == null) || ("".equals(value));
-  }
-
-  private static List<String> splitRules(@NotNull String rules) {
-    return rules.length() == 0 ? Collections.<String>emptyList() : Arrays.asList(rules.split(" *[,\n\r] *"));
   }
 }

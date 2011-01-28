@@ -22,6 +22,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class SwabraBuildFeature extends BuildFeature implements BuildStartContextProcessor {
@@ -78,6 +79,13 @@ public class SwabraBuildFeature extends BuildFeature implements BuildStartContex
       } else {
         result.append("Build files cleanup before build enabled\n");
       }
+      final List<String> rules = SwabraUtil.splitRules(SwabraUtil.getRules(params));
+      if (!rules.isEmpty()) {
+        result.append("Paths to monitor are: ").append(SwabraUtil.getRulesStr(rules)).append("\n");
+      }
+      if (SwabraUtil.isStrict(params)) {
+        result.append("Will force clean checkout if cannot restore clean directory state\n");
+      }
     } else {
       result.append("Build files cleanup disabled\n");
     }
@@ -86,6 +94,9 @@ public class SwabraBuildFeature extends BuildFeature implements BuildStartContex
     }
     if (SwabraUtil.isLockingProcessesKill(params)) {
       result.append("Will try to kill processes locking checkout directory\n");
+    }
+    if (SwabraUtil.isVerbose(params)) {
+      result.append("Output is verbose\n");
     }
     return result.toString();
   }
