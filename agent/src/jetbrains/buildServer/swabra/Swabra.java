@@ -22,9 +22,6 @@ package jetbrains.buildServer.swabra;
  * Time: 14:10:58
  */
 
-import java.io.File;
-import java.util.HashMap;
-import java.util.Map;
 import jetbrains.buildServer.agent.*;
 import jetbrains.buildServer.messages.Status;
 import jetbrains.buildServer.messages.serviceMessages.BuildStatus;
@@ -34,6 +31,10 @@ import jetbrains.buildServer.swabra.snapshots.*;
 import jetbrains.buildServer.util.EventDispatcher;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+
+import java.io.File;
+import java.util.HashMap;
+import java.util.Map;
 
 
 public final class Swabra extends AgentLifeCycleAdapter {
@@ -259,9 +260,9 @@ public final class Swabra extends AgentLifeCycleAdapter {
   private FilesCollector initFilesCollector() {
     FilesCollectionProcessor processor;
     if (System.getProperty(TEST_LOG) != null) {
-      processor = new FilesCollectionProcessorMock(myLogger, myLockedFileResolver, mySettings.isVerbose(), mySettings.isStrict(), System.getProperty(TEST_LOG));
+      processor = new FilesCollectionProcessorMock(myLogger, myLockedFileResolver, mySettings.getCheckoutDir(), mySettings.isVerbose(), mySettings.isStrict(), System.getProperty(TEST_LOG));
     } else if (mySettings.getRules().isEmpty()) {
-      processor = new FilesCollectionProcessor(myLogger, myLockedFileResolver, mySettings.isVerbose(), mySettings.isLockingProcessesKill());
+      processor = new FilesCollectionProcessor(myLogger, myLockedFileResolver, mySettings.getCheckoutDir(), mySettings.isVerbose(), mySettings.isStrict());
     } else {
       processor = new FilesCollectionRulesAwareProcessor(myLogger, myLockedFileResolver, mySettings);
     }

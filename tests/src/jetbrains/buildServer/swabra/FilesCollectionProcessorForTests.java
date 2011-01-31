@@ -12,8 +12,11 @@ import java.io.File;
  * Time: 20:04:52
  */
 public class FilesCollectionProcessorForTests extends FilesCollectionProcessor {
-  public FilesCollectionProcessorForTests(@NotNull SwabraLogger logger, LockedFileResolver resolver, boolean verbose, boolean strict) {
-    super(logger, resolver, verbose, strict);
+  public FilesCollectionProcessorForTests(@NotNull SwabraLogger logger,
+                                          LockedFileResolver resolver,
+                                          @NotNull File checkoutDir,
+                                          boolean verbose, boolean strict) {
+    super(logger, resolver, checkoutDir, verbose, strict);
   }
 
   @Override

@@ -21,6 +21,7 @@ import jetbrains.buildServer.swabra.processes.LockedFileResolver;
 import jetbrains.buildServer.swabra.snapshots.iteration.FileInfo;
 import org.jetbrains.annotations.NotNull;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 
@@ -35,10 +36,11 @@ public class FilesCollectionProcessorMock extends FilesCollectionProcessor {
 
   public FilesCollectionProcessorMock(@NotNull SwabraLogger logger,
                                       LockedFileResolver resolver,
+                                      @NotNull File checkoutDir,
                                       boolean verbose,
                                       boolean strict,
                                       String logPath) {
-    super(logger, resolver, verbose, strict);
+    super(logger, resolver, checkoutDir, verbose, strict);
     myLogPath = logPath;
   }
 

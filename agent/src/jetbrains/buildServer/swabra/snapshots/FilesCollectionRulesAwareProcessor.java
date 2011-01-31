@@ -31,23 +31,24 @@ import java.io.File;
  * Time: 15:52:19
  */
 public class FilesCollectionRulesAwareProcessor extends FilesCollectionProcessor {
-  private final String myCheckouDir;
   private final SwabraRules myRules;
 
   public FilesCollectionRulesAwareProcessor(@NotNull SwabraLogger logger,
                                             LockedFileResolver resolver,
                                             SwabraSettings settings) {
-    super(logger, resolver, settings.isVerbose(), settings.isLockingProcessesKill());
+    super(logger, resolver, settings.getCheckoutDir(), settings.isVerbose(), settings.isLockingProcessesKill());
 
-    myCheckouDir = settings.getCheckoutDir().getAbsolutePath();
     myRules = new SwabraRules(settings.getRules());
   }
 
   @Override
   public boolean willProcess(FileInfo info) {
-    final String path = FileUtil.getRelativePath(myCheckouDir, info.getPath(), File.separatorChar);
+    if (super.willProcess(info)) {
+      final String path = FileUtil.getRelativePath(getCheckoutDir(), info.getPath(), File.separatorChar);
 
-    return myRules.shouldInclude(path);
+      return myRules.shouldInclude(path);
+    }
+    return false;
   }
 }
 

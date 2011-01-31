@@ -20,7 +20,7 @@ public class FilesCollectionProcessorTest extends TestCase {
     final SwabraLogger logger = new SwabraLogger();
     logger.setBuildLogger(new BuildProgressLoggerMock(sb));
 
-    final FilesCollectionProcessor processor = new FilesCollectionProcessorForTests(logger, null, true, true);
+    final FilesCollectionProcessor processor = new FilesCollectionProcessorForTests(logger, null, new File(""), true, true);
 
     processor.comparisonStarted();
 
