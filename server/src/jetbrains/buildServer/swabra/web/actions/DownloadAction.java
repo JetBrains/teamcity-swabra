@@ -45,6 +45,7 @@ public class DownloadAction extends BaseAction {
     try {
       myHandleProvider.downloadHandleAndPackPlugin(form.getUrl());
       form.addMessage("Successfully downloaded handle.exe", Status.NORMAL);
+      form.addMessage("Created agent plugin at " + HandleProvider.getPluginFolder(), Status.NORMAL);
       form.addMessage("handle.exe will be present on agents after the upgrade process (will start automatically)", Status.NORMAL);
     } catch (Throwable throwable) {
       form.addMessage("Failed to download handle.exe, please see teamcity-server.log for details", Status.ERROR);

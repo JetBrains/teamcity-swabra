@@ -38,47 +38,57 @@ public class HandleProvider {
   private static final Logger LOG = Logger.getLogger(HandleProvider.class);
 
   private static final String HANDLE_PROVIDER_JAR = "handle-provider.jar";
+  private static final String TEAMCITY_PLUGIN_XML = "teamcity-plugin.xml";
 
-  private static File myPluginFile;
+  private static File ourPluginFolder;
 
   // is used in Spring!
-
-  public static void initPluginFile(@NotNull String pluginsDir) {
-    myPluginFile = new File(pluginsDir + "/update/plugins/handle-provider.zip");
+  public static void initPluginFolder(@NotNull String pluginsDir) {
+    ourPluginFolder = new File(pluginsDir, "handle-provider");
   }
 
   public static boolean isHandlePresent() {
-    return myPluginFile != null && myPluginFile.isFile();
+    if (ourPluginFolder == null) {
+      return false;
+    }
+    final File[] files = ourPluginFolder.listFiles();
+    return files != null && files.length > 0;
+  }
+
+  public static File getPluginFolder() {
+    return ourPluginFolder;
   }
 
   public void downloadHandleAndPackPlugin(@NotNull String url) throws Throwable {
-    final File tmpFile = new File(FileUtil.getTempDirectory(), "handle.exe");
+    LOG.debug("Downloading SysInternals handle.exe from " + url + " and packing it into handle-provider plugin to " + ourPluginFolder);
 
+    final File tmpFile = new File(FileUtil.getTempDirectory(), "handle.exe");
     downloadHandleExe(url, tmpFile);
     packPlugin(tmpFile);
-
     FileUtil.delete(tmpFile);
   }
 
   public void packPlugin(File handleExe) throws IOException {
-    LOG.info("Packing " + handleExe.getAbsolutePath() + " into handle-provider plugin to " + myPluginFile.getAbsolutePath() + "...");
-
-    final File pluginTempFolder = preparePluginTempFolder();
+    final File pluginTempFolder = preparePluginFolder();
     try {
-      final File binFolder = prepareSubFolder(pluginTempFolder, "bin");
-      FileUtil.copy(handleExe, new File(binFolder, "handle.exe"));
+      final File pluginAgentTempFolder = prepareSubFolder(pluginTempFolder, "handle-provider");
+      try {
+        final File binFolder = prepareSubFolder(pluginAgentTempFolder, "bin");
+        FileUtil.copy(handleExe, new File(binFolder, "handle.exe"));
 
-      final File libFolder = prepareSubFolder(pluginTempFolder, "lib");
-      copyOutResource(libFolder, HANDLE_PROVIDER_JAR);
+        final File libFolder = prepareSubFolder(pluginAgentTempFolder, "lib");
+        copyOutResource(libFolder, HANDLE_PROVIDER_JAR);
 
-      if (myPluginFile.isFile()) {
-        LOG.debug(myPluginFile.getAbsolutePath() + " exists, try delete");
-        if (FileUtil.delete(myPluginFile)) {
-          LOG.error("Failed to delete previously packed " + myPluginFile);
-        }
+        final File pluginAgentFolder = prepareSubFolder(pluginTempFolder, "agent");
+        zipPlugin(pluginAgentTempFolder, new File(pluginAgentFolder, "handle-provider.zip"));
+      } finally {
+        FileUtil.delete(pluginAgentTempFolder);
       }
-
-      zipPlugin(pluginTempFolder, myPluginFile);
+      copyOutResource(pluginTempFolder, TEAMCITY_PLUGIN_XML);
+      if (ourPluginFolder.exists()) {
+        FileUtil.delete(ourPluginFolder);
+      }
+      FileUtil.copyDir(pluginTempFolder, ourPluginFolder);
     } finally {
       FileUtil.delete(pluginTempFolder);
     }
@@ -120,24 +130,24 @@ public class HandleProvider {
     URLDownloader.download(new URL(url), dest);
   }
 
-  private static File preparePluginTempFolder() {
+  private static File prepareSubFolder(File baseFolder, String name) {
+    final File binFolder = new File(baseFolder, name);
+    if (!binFolder.mkdirs()) {
+      LOG.debug("Failed to create subfolder " + binFolder.getAbsolutePath() + " for base folder " + baseFolder);
+    }
+    return binFolder;
+  }
+
+  private static File preparePluginFolder() {
     final File pluginFolder = new File(FileUtil.getTempDirectory(), "handle-provider");
     LOG.debug("handle-provider plugin temp folder is " + pluginFolder.getAbsolutePath());
 
     if (pluginFolder.exists()) {
-      LOG.debug("handle-provider plugin folder " + pluginFolder.getAbsolutePath() + " exists, try delete");
+      LOG.debug("handle-provider plugin folder " + pluginFolder.getAbsolutePath() + " exists, trying to delete");
       if (FileUtil.delete(pluginFolder)) {
-        LOG.error("Failed to delete handle-provider plugin folder " + pluginFolder.getAbsolutePath());
+        LOG.debug("Failed to delete handle-provider plugin folder " + pluginFolder.getAbsolutePath());
       }
     }
     return pluginFolder;
-  }
-
-  private static File prepareSubFolder(File baseFolder, String name) {
-    final File binFolder = new File(baseFolder, name);
-    if (!binFolder.mkdirs()) {
-      LOG.error("Failed to create subfolder " + binFolder.getAbsolutePath() + " for base folder " + baseFolder);
-    }
-    return binFolder;
   }
 }

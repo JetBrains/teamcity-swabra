@@ -43,6 +43,7 @@ public class UploadAction extends BaseAction {
     try {
       myHandleProvider.packPlugin(new File(form.getHandleFile()));
       form.addMessage("Successfully uploaded handle.exe", Status.NORMAL);
+      form.addMessage("Created agent plugin at " + HandleProvider.getPluginFolder(), Status.NORMAL);
       form.addMessage("handle.exe will be present on agents after the upgrade process (will start automatically)", Status.NORMAL);
     } catch (Throwable throwable) {
       form.addMessage("Failed to upload handle.exe, please see teamcity-server.log for details", Status.ERROR);
