@@ -16,6 +16,7 @@
 
 package jetbrains.buildServer.swabra.snapshots.iteration;
 
+import java.io.IOException;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -37,7 +38,7 @@ public class FileSystemFilesIterator implements FilesIterator {
   }
 
   @Nullable
-  public FileInfo getNext() {
+  public FileInfo getNext() throws IOException {
     if (myIterators == null) {
       myIterators = new Stack<Iterator<File>>();
       return processFolder(myRootFolder);
@@ -50,8 +51,10 @@ public class FileSystemFilesIterator implements FilesIterator {
       final File next = it.next();
       if (next.isFile()) {
         return createFileInfo(next);
-      } else {
+      } else if (next.isDirectory()) {
         return processFolder(next);
+      } else {
+        throw new IOException("Failed to read " + next);
       }
     } else {
       myIterators.pop();
@@ -62,9 +65,12 @@ public class FileSystemFilesIterator implements FilesIterator {
     }
   }
 
-  private FileInfo processFolder(File folder) {
+  private FileInfo processFolder(File folder) throws IOException{
     final File[] files = folder.listFiles();
-    if (files != null && files.length > 0) {
+    if (files == null) {
+      throw new IOException("Failed to get folder content for: " + folder);
+    }
+    if (files.length > 0) {
       final List<File> filesList = Arrays.asList(files);
       Collections.sort(filesList, new Comparator<File>() {
         public int compare(File o1, File o2) {

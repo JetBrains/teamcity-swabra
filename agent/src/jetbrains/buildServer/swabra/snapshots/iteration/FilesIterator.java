@@ -25,5 +25,5 @@ import org.jetbrains.annotations.Nullable;
  */
 public interface FilesIterator {
   @Nullable
-  FileInfo getNext();
+  FileInfo getNext() throws Exception;
 }
