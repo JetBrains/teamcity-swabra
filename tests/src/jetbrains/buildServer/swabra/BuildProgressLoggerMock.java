@@ -64,6 +64,10 @@ public class BuildProgressLoggerMock implements FlowLogger {
   }
 
   public void activityStarted(final String activityName, final String activityType) {
+    activityStarted(activityName, null, activityType);
+  }
+
+  public void activityStarted(final String activityName, final String activityDescription, final String activityType) {
     myText.append("ACTIVITY STARTED: ");
     myText.append(activityName);
     myText.append("\n");
