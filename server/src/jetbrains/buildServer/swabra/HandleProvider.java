@@ -97,20 +97,20 @@ public class HandleProvider {
   private static void copyOutResource(File libFolder, String resourceName) throws FileNotFoundException {
     final String resourcePath = "/bin/" + resourceName;
     final File handleProviderJar = new File(libFolder, resourceName);
-    LOG.debug("Copying resource " + resourcePath + " out from jar to " + handleProviderJar.getAbsolutePath() + "...");
+    LOG.debug("Copying resource " + resourcePath + " out from jar to " + handleProviderJar + "...");
 
     FileUtil.copyResource(HandleProvider.class, resourcePath, handleProviderJar);
     if (!handleProviderJar.isFile()) {
-      LOG.warn("Unable to copy resource " + resourcePath + " out from jar to " + handleProviderJar + ": " + handleProviderJar + " not found");
+      LOG.warn(
+        "Unable to copy resource " + resourcePath + " out from jar to " + handleProviderJar + ": " + handleProviderJar + " not found");
       throw new FileNotFoundException(handleProviderJar + " not found");
     }
 
-    LOG.debug("Successfully copied " + resourcePath + " out from jar to " + handleProviderJar.getAbsolutePath());
+    LOG.debug("Successfully copied " + resourcePath + " out from jar to " + handleProviderJar);
   }
 
   private static void zipPlugin(File pluginFolder, File pluginZip) throws IOException {
-    LOG.debug("Putting handle-provider plugin from " + pluginFolder + " into zip "
-      + pluginZip.getAbsolutePath() + "...");
+    LOG.debug("Putting handle-provider plugin from " + pluginFolder + " into zip " + pluginZip + "...");
 
     ZipOutputStream zipOutputStream = null;
     try {
@@ -122,8 +122,7 @@ public class HandleProvider {
       }
     }
 
-    LOG.debug("Successfully put handle-provider plugin from " + pluginFolder + " into zip "
-      + pluginZip.getAbsolutePath());
+    LOG.debug("Successfully put handle-provider plugin from " + pluginFolder + " into zip " + pluginZip);
   }
 
   private static void downloadHandleExe(String url, File dest) throws IOException {
@@ -133,19 +132,19 @@ public class HandleProvider {
   private static File prepareSubFolder(File baseFolder, String name) {
     final File binFolder = new File(baseFolder, name);
     if (!binFolder.mkdirs()) {
-      LOG.debug("Failed to create subfolder " + binFolder.getAbsolutePath() + " for base folder " + baseFolder);
+      LOG.debug("Failed to create subfolder " + binFolder + " for base folder " + baseFolder);
     }
     return binFolder;
   }
 
   private static File preparePluginFolder() {
     final File pluginFolder = new File(FileUtil.getTempDirectory(), "handle-provider");
-    LOG.debug("handle-provider plugin temp folder is " + pluginFolder.getAbsolutePath());
+    LOG.debug("handle-provider plugin temp folder is " + pluginFolder);
 
     if (pluginFolder.exists()) {
-      LOG.debug("handle-provider plugin folder " + pluginFolder.getAbsolutePath() + " exists, trying to delete");
+      LOG.debug("handle-provider plugin folder " + pluginFolder + " exists, trying to delete");
       if (FileUtil.delete(pluginFolder)) {
-        LOG.debug("Failed to delete handle-provider plugin folder " + pluginFolder.getAbsolutePath());
+        LOG.debug("Failed to delete handle-provider plugin folder " + pluginFolder);
       }
     }
     return pluginFolder;
