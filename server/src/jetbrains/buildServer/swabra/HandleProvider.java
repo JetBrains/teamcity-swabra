@@ -101,8 +101,8 @@ public class HandleProvider {
 
     FileUtil.copyResource(HandleProvider.class, resourcePath, handleProviderJar);
     if (!handleProviderJar.isFile()) {
-      throw new FileNotFoundException("Unable to copy resource " + resourcePath + " out from jar to "
-        + handleProviderJar.getAbsolutePath());
+      LOG.warn("Unable to copy resource " + resourcePath + " out from jar to " + handleProviderJar + ": " + handleProviderJar + " not found");
+      throw new FileNotFoundException(handleProviderJar + " not found");
     }
 
     LOG.debug("Successfully copied " + resourcePath + " out from jar to " + handleProviderJar.getAbsolutePath());
