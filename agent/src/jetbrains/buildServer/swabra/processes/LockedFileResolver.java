@@ -16,6 +16,7 @@
 
 package jetbrains.buildServer.swabra.processes;
 
+import java.util.Collection;
 import jetbrains.buildServer.processes.ProcessFilter;
 import jetbrains.buildServer.processes.ProcessTreeTerminator;
 import jetbrains.buildServer.util.FileUtil;
@@ -24,7 +25,6 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.File;
-import java.util.List;
 
 /**
  * User: vbedrosova
@@ -38,7 +38,7 @@ public class LockedFileResolver {
 
   public static interface LockingProcessesProvider {
     @NotNull
-    List<ProcessInfo> getLockingProcesses(@NotNull File f) throws GetProcessesException;
+    Collection<ProcessInfo> getLockingProcesses(@NotNull File f) throws GetProcessesException;
   }
 
   public static interface Listener {
@@ -70,7 +70,7 @@ public class LockedFileResolver {
    *         and all of them were killed if corresponding option was specified)
    */
   public boolean resolve(@NotNull File f, boolean kill, @Nullable Listener listener) {
-    List<ProcessInfo> processes;
+    Collection<ProcessInfo> processes;
 
     try {
       processes = myProcessesProvider.getLockingProcesses(f);
@@ -103,7 +103,7 @@ public class LockedFileResolver {
         }
       }
 
-      List<ProcessInfo> aliveProcesses;
+      Collection<ProcessInfo> aliveProcesses;
 
       try {
         aliveProcesses = myProcessesProvider.getLockingProcesses(f);
@@ -154,7 +154,7 @@ public class LockedFileResolver {
     return false;
   }
 
-  private void appendProcesses(List<ProcessInfo> processes, StringBuilder sb) {
+  private void appendProcesses(Collection<ProcessInfo> processes, StringBuilder sb) {
     for (final ProcessInfo p : processes) {
       sb.append("\n").append(getProcessString(p));
     }

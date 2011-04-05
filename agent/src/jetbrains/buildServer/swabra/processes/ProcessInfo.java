@@ -42,4 +42,24 @@ public class ProcessInfo {
   public String getName() {
     return myName;
   }
+
+  @Override
+  public boolean equals(final Object o) {
+    if (this == o) return true;
+    if (o == null || getClass() != o.getClass()) return false;
+
+    final ProcessInfo that = (ProcessInfo)o;
+
+    if (myName != null ? !myName.equals(that.myName) : that.myName != null) return false;
+    if (!myPid.equals(that.myPid)) return false;
+
+    return true;
+  }
+
+  @Override
+  public int hashCode() {
+    int result = myPid.hashCode();
+    result = 31 * result + (myName != null ? myName.hashCode() : 0);
+    return result;
+  }
 }

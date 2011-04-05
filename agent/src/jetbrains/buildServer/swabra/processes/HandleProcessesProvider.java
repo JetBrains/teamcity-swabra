@@ -16,14 +16,12 @@
 
 package jetbrains.buildServer.swabra.processes;
 
+import java.util.*;
 import jetbrains.buildServer.ExecResult;
 import org.apache.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
 
 /**
  * User: vbedrosova
@@ -45,7 +43,7 @@ public class HandleProcessesProvider implements LockedFileResolver.LockingProces
   }
 
   @NotNull
-  public List<ProcessInfo> getLockingProcesses(@NotNull final File file) throws GetProcessesException {
+  public Collection<ProcessInfo> getLockingProcesses(@NotNull final File file) throws GetProcessesException {
     final ExecResult result = ProcessExecutor.runHandleAcceptEula(myHandleExePath, file.getAbsolutePath());
 
     LOG.debug("handle.exe output:\n" + result.getStdout());
@@ -59,8 +57,8 @@ public class HandleProcessesProvider implements LockedFileResolver.LockingProces
     return getPidsFromStdout(result.getStdout(), file.getAbsolutePath());
   }
 
-  private List<ProcessInfo> getPidsFromStdout(String stdout, final String path) {
-    final List<ProcessInfo> pids = new ArrayList<ProcessInfo>();
+  private Collection<ProcessInfo> getPidsFromStdout(String stdout, final String path) {
+    final Set<ProcessInfo> pids = new HashSet<ProcessInfo>();
     HandleOutputReader.read(stdout, new HandleOutputReader.LineProcessor() {
       public void processLine(@NotNull String line) {
         final int pathIndex = line.indexOf(path);
