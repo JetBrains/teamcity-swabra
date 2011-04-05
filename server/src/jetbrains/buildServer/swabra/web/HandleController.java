@@ -54,7 +54,7 @@ public class HandleController extends BaseFormXmlController {
   @NotNull
   private final SecurityContext mySecurityContext;
   @NotNull
-  final List<BaseAction> myActions;
+  private final List<BaseAction> myActions;
 
   public HandleController(@NotNull final PluginDescriptor pluginDescriptor,
                           @NotNull final WebControllerManager webControllerManager,
