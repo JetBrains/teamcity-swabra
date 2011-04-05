@@ -22,6 +22,7 @@ import jetbrains.buildServer.controllers.FormUtil;
 import jetbrains.buildServer.serverSide.auth.AuthUtil;
 import jetbrains.buildServer.serverSide.auth.Permission;
 import jetbrains.buildServer.serverSide.auth.SecurityContext;
+import jetbrains.buildServer.swabra.HandleProvider;
 import jetbrains.buildServer.swabra.web.actions.BaseAction;
 import jetbrains.buildServer.web.openapi.PluginDescriptor;
 import jetbrains.buildServer.web.openapi.WebControllerManager;
@@ -55,15 +56,18 @@ public class HandleController extends BaseFormXmlController {
   private final SecurityContext mySecurityContext;
   @NotNull
   private final List<BaseAction> myActions;
+  private final HandleProvider myProvider;
 
   public HandleController(@NotNull final PluginDescriptor pluginDescriptor,
                           @NotNull final WebControllerManager webControllerManager,
                           @NotNull final SecurityContext securityContext,
-                          @NotNull final List<BaseAction> actions) {
+                          @NotNull final List<BaseAction> actions,
+                          @NotNull final HandleProvider provider) {
     myPluginDescriptor = pluginDescriptor;
     myWebControllerManager = webControllerManager;
     mySecurityContext = securityContext;
     myActions = actions;
+    myProvider = provider;
   }
 
   public void register() {
@@ -77,6 +81,8 @@ public class HandleController extends BaseFormXmlController {
     model.put("handleForm", getForm(request));
     model.put("handlePathPrefix", request.getContextPath() + myPluginDescriptor.getPluginResourcesPath());
     model.put("canLoad", hasPermission());
+    //TODO: Check windows running build agent to report handle.exe.path config paramter
+    model.put("handlePresent", myProvider.isHandlePresent());
 
     return new ModelAndView(myPluginDescriptor.getPluginResourcesPath(MY_JSP), model);
   }

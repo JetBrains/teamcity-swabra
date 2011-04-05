@@ -101,6 +101,7 @@
   
   <path id="library.teamcity-server.classpath">
     <pathelement location="${path.variable.teamcitydistribution}/devPackage/server-api.jar"/>
+    <pathelement location="${path.variable.teamcitydistribution}/webapps/ROOT/WEB-INF/lib/server.jar"/>
   </path>
   
   <path id="library.teamcity-servletapi.classpath">

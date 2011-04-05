@@ -20,11 +20,8 @@
 <%@ taglib prefix="forms" tagdir="/WEB-INF/tags/forms" %>
 <%@ taglib prefix="bs" tagdir="/WEB-INF/tags" %>
 <jsp:useBean id="propertiesBean" scope="request" type="jetbrains.buildServer.controllers.BasePropertiesBean"/>
+<jsp:useBean id="handlePresent" scope="request" type="java.lang.Boolean"/>
 
-<%@ page import="jetbrains.buildServer.swabra.HandleProvider" %>
-
-<c:set var="handlePresent"><%=HandleProvider.isHandlePresent()%>
-</c:set>
 <c:set var="enabledSelected" value="${propertiesBean.properties['swabra.enabled']}"/>
 <c:set var="processesSelected" value="${propertiesBean.properties['swabra.processes']}"/>
 <c:set var="displaySwabraSettings" value="${empty propertiesBean.properties['swabra.enabled'] ? false : true}"/>
@@ -161,4 +158,5 @@
     </div>
   </td>
 </tr>
-</tr>
+
+

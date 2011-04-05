@@ -18,16 +18,15 @@ package jetbrains.buildServer.swabra;
 
 
 import com.intellij.util.io.ZipUtil;
+import java.io.*;
+import java.net.URL;
+import java.util.zip.ZipOutputStream;
+import jetbrains.buildServer.serverSide.AgentDistributionMonitor;
+import jetbrains.buildServer.serverSide.RegisterAgentPluginException;
+import jetbrains.buildServer.serverSide.ServerPaths;
 import jetbrains.buildServer.util.FileUtil;
 import org.apache.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
-
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.net.URL;
-import java.util.zip.ZipOutputStream;
 
 /**
  * User: vbedrosova
@@ -36,31 +35,37 @@ import java.util.zip.ZipOutputStream;
  */
 public class HandleProvider {
   private static final Logger LOG = Logger.getLogger(HandleProvider.class);
+  private static final String PLUGIN_DIR_NAME = "handle-provider";
 
   private static final String HANDLE_PROVIDER_JAR = "handle-provider.jar";
   private static final String TEAMCITY_PLUGIN_XML = "teamcity-plugin.xml";
 
-  private static File ourPluginFolder;
+  private final File myPluginFolder;
+  private final AgentDistributionMonitor myAgentManager;
 
-  // is used in Spring!
-  public static void initPluginFolder(@NotNull String pluginsDir) {
-    ourPluginFolder = new File(pluginsDir, "handle-provider");
+  public HandleProvider(@NotNull final AgentDistributionMonitor agentManager,
+                        @NotNull final ServerPaths paths) {
+    myAgentManager = agentManager;
+    myPluginFolder = new File(paths.getPluginsDir(), PLUGIN_DIR_NAME);
   }
 
-  public static boolean isHandlePresent() {
-    if (ourPluginFolder == null) {
+  public boolean isHandlePresent() {
+    //TODO: Check windows running build agent to report handle.exe.path config paramter
+
+    if (myPluginFolder == null) {
       return false;
     }
-    final File[] files = ourPluginFolder.listFiles();
+    final File[] files = myPluginFolder.listFiles();
     return files != null && files.length > 0;
   }
 
-  public static File getPluginFolder() {
-    return ourPluginFolder;
+  @NotNull
+  public File getPluginFolder() {
+    return myPluginFolder;
   }
 
   public void downloadHandleAndPackPlugin(@NotNull String url) throws Throwable {
-    LOG.debug("Downloading SysInternals handle.exe from " + url + " and packing it into handle-provider plugin to " + ourPluginFolder);
+    LOG.debug("Downloading SysInternals handle.exe from " + url + " and packing it into handle-provider plugin to " + myPluginFolder);
 
     final File tmpFile = new File(FileUtil.getTempDirectory(), "handle.exe");
     downloadHandleExe(url, tmpFile);
@@ -69,9 +74,10 @@ public class HandleProvider {
   }
 
   public void packPlugin(File handleExe) throws IOException {
+
     final File pluginTempFolder = preparePluginFolder();
     try {
-      final File pluginAgentTempFolder = prepareSubFolder(pluginTempFolder, "handle-provider");
+      final File pluginAgentTempFolder = prepareSubFolder(pluginTempFolder, PLUGIN_DIR_NAME);
       try {
         final File binFolder = prepareSubFolder(pluginAgentTempFolder, "bin");
         FileUtil.copy(handleExe, new File(binFolder, "handle.exe"));
@@ -85,12 +91,32 @@ public class HandleProvider {
         FileUtil.delete(pluginAgentTempFolder);
       }
       copyOutResource(pluginTempFolder, TEAMCITY_PLUGIN_XML);
-      if (ourPluginFolder.exists()) {
-        FileUtil.delete(ourPluginFolder);
+      if (myPluginFolder.exists()) {
+        FileUtil.delete(myPluginFolder);
       }
-      FileUtil.copyDir(pluginTempFolder, ourPluginFolder);
+      FileUtil.copyDir(pluginTempFolder, myPluginFolder);
     } finally {
       FileUtil.delete(pluginTempFolder);
+    }
+
+    registerAgentPlugin(myPluginFolder);
+  }
+
+  private void registerAgentPlugin(@NotNull final File handleServerPlugin) {
+    final File[] plugins = new File(handleServerPlugin, "agent").listFiles(new FileFilter() {
+      public boolean accept(final File pathname) {
+        return pathname.isFile() && pathname.getPath().endsWith(".zip");
+      }
+    });
+    if (plugins == null || plugins.length == 0) return;
+
+    for (File plugin : plugins) {
+      try {
+        myAgentManager.registerAgentPlugin(plugin);
+      } catch (RegisterAgentPluginException e) {
+        LOG.warn("Failed to register handle-provider agent plugin: " + e.getLocalizedMessage());
+        LOG.debug(e.getMessage(), e);
+      }
     }
   }
 

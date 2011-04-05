@@ -17,6 +17,7 @@
 package jetbrains.buildServer.swabra;
 
 import jetbrains.buildServer.agent.AgentRunningBuild;
+import jetbrains.buildServer.util.StringUtil;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
@@ -39,7 +40,7 @@ public class SwabraSettings {
   private static final String HANDLE_EXE_SYSTEM_PROP = "handle.exe.path";
 
   private boolean myCleanupEnabled;
-  private String myCleanupMode;
+  private final String myCleanupMode;
   private final boolean myStrict;
 
   private final boolean myLockingProcessesKill;
@@ -130,10 +131,10 @@ public class SwabraSettings {
       "', verbose = '" + myVerbose + "'.");
   }
 
-  public void prepareHandle(SwabraLogger logger) {
+  public void prepareHandle(SwabraLogger logger, final AgentRunningBuild runningBuild) {
     if (myLockingProcessesKill || myLockingProcessesReport) {
-      myHandlePath = System.getProperty(HANDLE_EXE_SYSTEM_PROP);
-      if (notDefined(myHandlePath)) {
+      myHandlePath = runningBuild.getSharedConfigParameters().get(HANDLE_EXE_SYSTEM_PROP);
+      if (StringUtil.isEmptyOrSpaces(myHandlePath)) {
         logDetectionDisabled("Path to handle.exe tool is not defined. Use Swabra settings to install handle.exe", logger);
         myHandlePath = null;
         return;
@@ -155,9 +156,5 @@ public class SwabraSettings {
 
   private void logDetectionDisabled(@NotNull String details, @NotNull SwabraLogger logger) {
    logger.warn("Disabling locking processes detection. " + details);
-  }
-
-  private static boolean notDefined(String value) {
-    return (value == null) || ("".equals(value));
   }
 }

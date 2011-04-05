@@ -16,20 +16,41 @@
 
 package jetbrains.buildServer.swabra;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import jetbrains.buildServer.controllers.BaseController;
 import jetbrains.buildServer.serverSide.*;
 import jetbrains.buildServer.web.openapi.PluginDescriptor;
+import jetbrains.buildServer.web.openapi.WebControllerManager;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import org.springframework.web.servlet.ModelAndView;
 
 public class SwabraBuildFeature extends BuildFeature implements BuildStartContextProcessor {
   private final String myEditUrl;
 
-  public SwabraBuildFeature(@NotNull final PluginDescriptor descriptor) {
-    myEditUrl = descriptor.getPluginResourcesPath("swabraSettings.jsp");
+  public SwabraBuildFeature(@NotNull final PluginDescriptor descriptor,
+                            @NotNull final WebControllerManager web,
+                            @NotNull final HandleProvider handleProvider) {
+
+    final String jsp = descriptor.getPluginResourcesPath("swabraSettings.jsp");
+    final String html = descriptor.getPluginResourcesPath("swabraSettings.html");
+
+    web.registerController(html, new BaseController() {
+      @Override
+      protected ModelAndView doHandle(final HttpServletRequest request, final HttpServletResponse response) throws Exception {
+        ModelAndView mv = new ModelAndView(jsp);
+        //noinspection unchecked
+        mv.getModel().put("handlePresent", handleProvider.isHandlePresent());
+        return mv;
+      }
+    });
+
+    myEditUrl = html;
   }
 
   @NotNull
