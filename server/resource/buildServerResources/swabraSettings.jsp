@@ -28,7 +28,7 @@
 
 <tr>
   <td colspan="2">
-    <em>Cleans checkout directory by deleting files created during the build.</em><bs:help file="Adding+Swabra+as+a+Build+Feature"/>
+    <em>Cleans checkout directory by deleting files created during the build.</em><bs:help file="Build+Files+Cleaner+(Swabra)"/>
   </td>
 </tr>
 <tr class="noBorder">
