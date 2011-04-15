@@ -71,7 +71,7 @@ public class SwabraUtil {
   }
 
   public static boolean isVerbose(@NotNull final Map<String, String> params) {
-    return params.containsKey(VERBOSE) && isCleanupEnabled(params);
+    return Boolean.parseBoolean(params.get(VERBOSE)) && isCleanupEnabled(params);
   }
 
   public static boolean isLockingProcessesKill(@NotNull final Map<String, String> params) {
@@ -79,7 +79,7 @@ public class SwabraUtil {
   }
 
   public static boolean isStrict(@NotNull final Map<String, String> params) {
-    return params.containsKey(STRICT) && isCleanupEnabled(params);
+    return Boolean.parseBoolean(params.get(STRICT)) && isCleanupEnabled(params);
   }
 
   public static boolean isLockingProcessesReport(@NotNull final Map<String, String> params) {
