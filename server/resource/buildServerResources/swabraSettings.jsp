@@ -71,8 +71,7 @@
     style="${displaySwabraSettings ? '' : 'display: none;'}">
   <th>Paths to monitor: <bs:help file="Adding+Swabra+as+a+Build+Feature" anchor="ConfiguringSwabraOptions"/></th>
   <td>
-    <props:multilineProperty name="swabra.rules" expanded="${not empty propertiesBean.properties['swabra.rules']}" rows="5" cols="40"
-                             linkTitle="Edit paths"/>
+    <props:multilineProperty name="swabra.rules" rows="5" cols="40" linkTitle="Edit paths"/>
     <div class="smallNote" style="margin-left: 0;">
       Newline or comma delimited set of <strong>+|-:relative_path</strong> rules.<br/>
       By default all paths are included. Rules on any path should come in order from more abstract to more concrete,
