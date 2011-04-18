@@ -57,8 +57,6 @@ public final class Swabra extends AgentLifeCycleAdapter {
   private boolean mySnapshotSaved;
   private boolean myFailureReported;
 
-  private final Map<File, Thread> myPrevThreads = new HashMap<File, Thread>();
-
   public Swabra(@NotNull final EventDispatcher<AgentLifeCycleListener> agentDispatcher,
                 @NotNull final SmartDirectoryCleaner directoryCleaner,
                 @NotNull final SwabraLogger logger,
@@ -78,15 +76,10 @@ public final class Swabra extends AgentLifeCycleAdapter {
     myFailureReported = false;
 
     mySettings = new SwabraSettings(runningBuild);
-
-    // setBuildLogger will be invoked later to avoid messages from prev build appearing in current build log
-    SwabraLogger.activityStarted(runningBuild.getBuildLogger());
+    myLogger.setBuildLogger(runningBuild.getBuildLogger());
+    myLogger.activityStarted();
 
     try {
-      waitForUnfinishedThreads(mySettings.getCheckoutDir(), runningBuild.getBuildLogger());
-
-      myLogger.setBuildLogger(runningBuild.getBuildLogger());
-
       mySettings.prepareHandle(myLogger, runningBuild);
 
       myLockedFileResolver = mySettings.isLockingProcessesDetectionEnabled() ?
@@ -171,19 +164,6 @@ public final class Swabra extends AgentLifeCycleAdapter {
     }
   }
 
-  private void waitForUnfinishedThreads(@NotNull File checkoutDir, @NotNull BuildProgressLogger logger) {
-    final Thread t = myPrevThreads.get(checkoutDir);
-    if ((t != null) && t.isAlive()) {
-      logger.message("Waiting for build files cleanup started at previous build finish");
-      try {
-        t.join();
-      } catch (InterruptedException e) {
-        logger.message("Thread interrupted");
-      }
-    }
-    myPrevThreads.remove(checkoutDir);
-  }
-
   @Override
   public void sourcesUpdated(@NotNull AgentRunningBuild runningBuild) {
     makeSnapshot();
@@ -196,14 +176,10 @@ public final class Swabra extends AgentLifeCycleAdapter {
 
   @Override
   public void beforeBuildFinish(@NotNull AgentRunningBuild build, @NotNull BuildFinishedStatus buildStatus) {
+    if (!mySettings.isLockingProcessesDetectionEnabled()) return;
+
     myLogger.activityStarted();
     try {
-      if (mySettings.isCleanupAfterBuild()) {
-        myLogger.message("Cleanup will be performed after the build. Please refer to teamcity-agent.log for details", true);
-      }
-
-      if (!mySettings.isLockingProcessesDetectionEnabled()) return;
-
       myLockedFileResolver.resolve(mySettings.getCheckoutDir(), mySettings.isLockingProcessesKill(), new LockedFileResolver.Listener() {
         public void message(String m) {
           myLogger.message(m, true);
@@ -219,7 +195,7 @@ public final class Swabra extends AgentLifeCycleAdapter {
   }
 
   @Override
-  public void buildFinished(@NotNull AgentRunningBuild build, @NotNull BuildFinishedStatus buildStatus) {
+  public void afterAtrifactsPublished(@NotNull final AgentRunningBuild runningBuild, @NotNull final BuildFinishedStatus status) {
     if (!mySettings.isCleanupAfterBuild()) return;
 
     myLogger.debug("Cleanup is performed after build");
@@ -228,33 +204,30 @@ public final class Swabra extends AgentLifeCycleAdapter {
 
     final FilesCollector filesCollector = initFilesCollector();
 
-    myLogger.setBuildLogger(null);
+    myLogger.activityStarted();
+    try {
+      filesCollector.collect(myPropertiesProcessor.getSnapshotFile(mySettings.getCheckoutDir()), mySettings.getCheckoutDir(),
+                             new FilesCollector.CollectionResultHandler() {
+                               public void success() {
+                                 myPropertiesProcessor.markClean(mySettings.getCheckoutDir(), mySettings.isStrict());
+                               }
 
-    final Thread t = new Thread(new Runnable() {
-      public void run() {
-        filesCollector.collect(myPropertiesProcessor.getSnapshotFile(mySettings.getCheckoutDir()), mySettings.getCheckoutDir(),
-          new FilesCollector.CollectionResultHandler() {
-            public void success() {
-              myPropertiesProcessor.markClean(mySettings.getCheckoutDir(), mySettings.isStrict());
-            }
+                               public void error() {
+                                 myPropertiesProcessor.markDirty(mySettings.getCheckoutDir());
+                               }
 
-            public void error() {
-              myPropertiesProcessor.markDirty(mySettings.getCheckoutDir());
-            }
+                               public void lockedFilesDetected() {
+                                 myPropertiesProcessor.markPending(mySettings.getCheckoutDir(), mySettings.isStrict());
+                               }
 
-            public void lockedFilesDetected() {
-              myPropertiesProcessor.markPending(mySettings.getCheckoutDir(), mySettings.isStrict());
-            }
-
-            public void dirtyStateDetected() {
-              myPropertiesProcessor.markDirty(mySettings.getCheckoutDir());
-            }
-          }
-        );
-      }
-    });
-    myPrevThreads.put(mySettings.getCheckoutDir(), t);
-    t.start();
+                               public void dirtyStateDetected() {
+                                 myPropertiesProcessor.markDirty(mySettings.getCheckoutDir());
+                               }
+                             }
+      );
+    } finally {
+      myLogger.activityFinished();
+    }
   }
 
   private FilesCollector initFilesCollector() {

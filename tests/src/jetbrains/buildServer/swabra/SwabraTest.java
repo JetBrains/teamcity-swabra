@@ -211,7 +211,7 @@ public class SwabraTest extends TestCase {
 
     FileUtil.copyDir(getTestData(dirName + File.separator + AFTER_BUILD, null), myCheckoutDir);
     FileUtil.delete(new File(checkoutDirPath + File.separator + ".svn"));
-    dispatcher.getMulticaster().buildFinished(build, BuildFinishedStatus.FINISHED_SUCCESS);
+    dispatcher.getMulticaster().afterAtrifactsPublished(build, BuildFinishedStatus.FINISHED_SUCCESS);
     Thread.sleep(100);
 
     myContext.assertIsSatisfied();
