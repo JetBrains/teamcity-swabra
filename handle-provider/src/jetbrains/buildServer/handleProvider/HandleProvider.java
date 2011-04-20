@@ -34,7 +34,7 @@ import org.jetbrains.annotations.NotNull;
  */
 public class HandleProvider {
   private static final Logger LOG = Logger.getInstance(HandleProvider.class.getName());
-  public static final String HANDLE_EXE_PATH = "handle.exe.path";
+  public static final String HANDLE_EXE_PATH = "swabra.handle.exe.path";
 
 
   public HandleProvider(@NotNull final EventDispatcher<AgentLifeCycleListener> agentDispatcher,
@@ -54,7 +54,7 @@ public class HandleProvider {
         }
 
         LOG.info("Registering handle.exe path: " + pluginHandle);
-        config.addSystemProperty(HANDLE_EXE_PATH, pluginHandle.getPath());
+        config.addConfigurationParameter(HANDLE_EXE_PATH, pluginHandle.getPath());
 
         agentDispatcher.removeListener(this);
       }

@@ -17,6 +17,7 @@
     <orderEntry type="module" module-name="common" />
     <orderEntry type="library" name="IDEA annotations" level="project" />
     <orderEntry type="library" name="TeamCity-processTerminator" level="project" />
+    <orderEntry type="module" module-name="handle-provider" />
   </component>
 </module>
 

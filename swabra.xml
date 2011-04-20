@@ -583,6 +583,7 @@
     <path refid="library.jmock.classpath"/>
     <path refid="library.log4j.classpath"/>
     <pathelement location="${common.output.dir}"/>
+    <pathelement location="${handle-provider.output.dir}"/>
     <path refid="library.idea_annotations.classpath"/>
     <path refid="library.teamcity-processterminator.classpath"/>
   </path>
@@ -597,6 +598,7 @@
     <path refid="library.jmock.classpath"/>
     <path refid="library.log4j.classpath"/>
     <path refid="common.runtime.production.module.classpath"/>
+    <path refid="handle-provider.production.module.classpath"/>
     <path refid="library.idea_annotations.classpath"/>
     <path refid="library.teamcity-processterminator.classpath"/>
   </path>
@@ -613,6 +615,7 @@
     <path refid="library.log4j.classpath"/>
     <pathelement location="${common.testoutput.dir}"/>
     <pathelement location="${common.output.dir}"/>
+    <pathelement location="${handle-provider.output.dir}"/>
     <path refid="library.idea_annotations.classpath"/>
     <path refid="library.teamcity-processterminator.classpath"/>
   </path>
@@ -620,6 +623,7 @@
   <path id="tests.runtime.module.classpath">
     <pathelement location="${tests.testoutput.dir}"/>
     <pathelement location="${tests.output.dir}"/>
+    <pathelement location="${handle-provider.output.dir}"/>
     <path refid="library.junit.classpath"/>
     <path refid="library.teamcity-agent.classpath"/>
     <path refid="library.teamcity-utils.classpath"/>

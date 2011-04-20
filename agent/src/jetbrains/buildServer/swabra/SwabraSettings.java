@@ -16,15 +16,13 @@
 
 package jetbrains.buildServer.swabra;
 
-import jetbrains.buildServer.agent.AgentRunningBuild;
-import jetbrains.buildServer.util.StringUtil;
-import org.jetbrains.annotations.NotNull;
-
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import jetbrains.buildServer.agent.AgentRunningBuild;
+import jetbrains.buildServer.swabra.processes.HandlePathProvider;
 
 /**
  * User: vbedrosova
@@ -36,8 +34,6 @@ public class SwabraSettings {
 
   private static final String[] DEFAULT_RULES = {"-:**/.svn", "-:**/.git", "-:**/.hg", "-:**/CVS", "-:.svn", "-:.git", "-:.hg", "-:CVS"};
 
-  private static final String HANDLE_PATH_SUFFIX = File.separator + "handle.exe";
-  private static final String HANDLE_EXE_SYSTEM_PROP = "handle.exe.path";
 
   private boolean myCleanupEnabled;
   private final String myCleanupMode;
@@ -48,7 +44,7 @@ public class SwabraSettings {
 
   private final boolean myVerbose;
 
-  private String myHandlePath;
+  private File myHandlePath;
 
   private final List<String> myRules;
 
@@ -107,7 +103,7 @@ public class SwabraSettings {
   }
 
   public String getHandlePath() {
-    return myHandlePath;
+    return myHandlePath.getPath();
   }
 
   public List<String> getRules() {
@@ -133,28 +129,10 @@ public class SwabraSettings {
 
   public void prepareHandle(SwabraLogger logger, final AgentRunningBuild runningBuild) {
     if (myLockingProcessesKill || myLockingProcessesReport) {
-      myHandlePath = runningBuild.getSharedConfigParameters().get(HANDLE_EXE_SYSTEM_PROP);
-      if (StringUtil.isEmptyOrSpaces(myHandlePath)) {
-        logDetectionDisabled("Path to handle.exe tool is not defined. Use Swabra settings to install handle.exe", logger);
-        myHandlePath = null;
-        return;
-      }
-      if (!SwabraUtil.unifyPath(myHandlePath).endsWith(HANDLE_PATH_SUFFIX)) {
-        logDetectionDisabled("Path to handle.exe tool must end with: " + HANDLE_PATH_SUFFIX, logger);
-        myHandlePath = null;
-        return;
-      }
-      final File handleFile = new File(myHandlePath);
-      if (!handleFile.isFile()) {
-        logDetectionDisabled("No executable found at " + myHandlePath, logger);
-        myHandlePath = null;
-      }
+      final HandlePathProvider handlePathProvider = new HandlePathProvider(logger, runningBuild);
+      myHandlePath = handlePathProvider.getHandlePath();
     } else {
       myHandlePath = null;
     }
-  }
-
-  private void logDetectionDisabled(@NotNull String details, @NotNull SwabraLogger logger) {
-   logger.warn("Disabling locking processes detection. " + details);
   }
 }

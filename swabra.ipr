@@ -180,115 +180,27 @@
     <module2copyright />
     <LanguageOptions name="CSS">
       <option name="fileTypeOverride" value="1" />
-      <option name="relativeBefore" value="true" />
-      <option name="addBlankAfter" value="true" />
-      <option name="fileLocation" value="1" />
-      <option name="block" value="true" />
-      <option name="separateBefore" value="false" />
-      <option name="separateAfter" value="false" />
-      <option name="prefixLines" value="true" />
-      <option name="lenBefore" value="80" />
-      <option name="lenAfter" value="80" />
-      <option name="box" value="false" />
-      <option name="filler" value=" " />
     </LanguageOptions>
     <LanguageOptions name="GSP">
       <option name="fileTypeOverride" value="1" />
-      <option name="relativeBefore" value="true" />
-      <option name="addBlankAfter" value="true" />
-      <option name="fileLocation" value="1" />
-      <option name="block" value="true" />
-      <option name="separateBefore" value="false" />
-      <option name="separateAfter" value="false" />
-      <option name="prefixLines" value="true" />
-      <option name="lenBefore" value="80" />
-      <option name="lenAfter" value="80" />
-      <option name="box" value="false" />
-      <option name="filler" value=" " />
     </LanguageOptions>
     <LanguageOptions name="Groovy">
       <option name="fileTypeOverride" value="1" />
-      <option name="relativeBefore" value="true" />
-      <option name="addBlankAfter" value="true" />
-      <option name="fileLocation" value="1" />
-      <option name="block" value="true" />
-      <option name="separateBefore" value="false" />
-      <option name="separateAfter" value="false" />
-      <option name="prefixLines" value="true" />
-      <option name="lenBefore" value="80" />
-      <option name="lenAfter" value="80" />
-      <option name="box" value="false" />
-      <option name="filler" value=" " />
     </LanguageOptions>
     <LanguageOptions name="HTML">
       <option name="fileTypeOverride" value="1" />
-      <option name="relativeBefore" value="true" />
-      <option name="addBlankAfter" value="true" />
-      <option name="fileLocation" value="1" />
-      <option name="block" value="true" />
-      <option name="separateBefore" value="false" />
-      <option name="separateAfter" value="false" />
-      <option name="prefixLines" value="true" />
-      <option name="lenBefore" value="80" />
-      <option name="lenAfter" value="80" />
-      <option name="box" value="false" />
-      <option name="filler" value=" " />
     </LanguageOptions>
     <LanguageOptions name="JSPX">
       <option name="fileTypeOverride" value="1" />
-      <option name="relativeBefore" value="true" />
-      <option name="addBlankAfter" value="true" />
-      <option name="fileLocation" value="1" />
-      <option name="block" value="true" />
-      <option name="separateBefore" value="false" />
-      <option name="separateAfter" value="false" />
-      <option name="prefixLines" value="true" />
-      <option name="lenBefore" value="80" />
-      <option name="lenAfter" value="80" />
-      <option name="box" value="false" />
-      <option name="filler" value=" " />
     </LanguageOptions>
     <LanguageOptions name="JavaScript">
       <option name="fileTypeOverride" value="1" />
-      <option name="relativeBefore" value="true" />
-      <option name="addBlankAfter" value="true" />
-      <option name="fileLocation" value="1" />
-      <option name="block" value="true" />
-      <option name="separateBefore" value="false" />
-      <option name="separateAfter" value="false" />
-      <option name="prefixLines" value="true" />
-      <option name="lenBefore" value="80" />
-      <option name="lenAfter" value="80" />
-      <option name="box" value="false" />
-      <option name="filler" value=" " />
     </LanguageOptions>
     <LanguageOptions name="Properties">
       <option name="fileTypeOverride" value="1" />
-      <option name="relativeBefore" value="true" />
-      <option name="addBlankAfter" value="true" />
-      <option name="fileLocation" value="1" />
-      <option name="block" value="true" />
-      <option name="separateBefore" value="false" />
-      <option name="separateAfter" value="false" />
-      <option name="prefixLines" value="true" />
-      <option name="lenBefore" value="80" />
-      <option name="lenAfter" value="80" />
-      <option name="box" value="false" />
-      <option name="filler" value=" " />
     </LanguageOptions>
     <LanguageOptions name="XML">
       <option name="fileTypeOverride" value="1" />
-      <option name="relativeBefore" value="true" />
-      <option name="addBlankAfter" value="true" />
-      <option name="fileLocation" value="1" />
-      <option name="block" value="true" />
-      <option name="separateBefore" value="false" />
-      <option name="separateAfter" value="false" />
-      <option name="prefixLines" value="true" />
-      <option name="lenBefore" value="80" />
-      <option name="lenAfter" value="80" />
-      <option name="box" value="false" />
-      <option name="filler" value=" " />
     </LanguageOptions>
   </component>
   <component name="DependenciesAnalyzeManager">
@@ -547,14 +459,14 @@
   <component name="libraryTable">
     <library name="IDEA annotations">
       <CLASSES>
-        <root url="jar://$TeamCityDistribution$/webapps/ROOT/WEB-INF/lib/annotations.jar!/" />
+        <root url="jar://F:/Ref/TeamCity.17072/webapps/ROOT/WEB-INF/lib/annotations.jar!/" />
       </CLASSES>
       <JAVADOC />
       <SOURCES />
     </library>
     <library name="IntelliJ IDEA open API">
       <CLASSES>
-        <root url="jar://$TeamCityDistribution$/webapps/ROOT/WEB-INF/lib/openapi.jar!/" />
+        <root url="jar://F:/Ref/TeamCity.17072/webapps/ROOT/WEB-INF/lib/openapi.jar!/" />
       </CLASSES>
       <JAVADOC />
       <SOURCES />
@@ -577,91 +489,91 @@
     </library>
     <library name="Log4J">
       <CLASSES>
-        <root url="jar://$TeamCityDistribution$/webapps/ROOT/WEB-INF/lib/log4j-1.2.12.jar!/" />
+        <root url="jar://F:/Ref/TeamCity.17072/webapps/ROOT/WEB-INF/lib/log4j-1.2.12.jar!/" />
       </CLASSES>
       <JAVADOC />
       <SOURCES />
     </library>
     <library name="TeamCity-agent">
       <CLASSES>
-        <root url="jar://$TeamCityDistribution$/devPackage/agent-api.jar!/" />
+        <root url="jar://F:/Ref/TeamCity.17072/devPackage/agent-api.jar!/" />
       </CLASSES>
       <JAVADOC>
-        <root url="jar://$TeamCityDistribution$/devPackage/javadoc/openApi-help.jar!/" />
+        <root url="jar://F:/Ref/TeamCity.17072/devPackage/javadoc/openApi-help.jar!/" />
       </JAVADOC>
       <SOURCES>
-        <root url="jar://$TeamCityDistribution$/devPackage/src/openApi-source.jar!/" />
+        <root url="jar://F:/Ref/TeamCity.17072/devPackage/src/openApi-source.jar!/" />
       </SOURCES>
     </library>
     <library name="TeamCity-agent-non-openapi">
       <CLASSES>
-        <root url="jar://$TeamCityDistribution$/buildAgent/lib/agent.jar!/" />
+        <root url="jar://F:/Ref/TeamCity.17072/buildAgent/lib/agent.jar!/" />
       </CLASSES>
       <JAVADOC />
       <SOURCES />
     </library>
     <library name="TeamCity-common">
       <CLASSES>
-        <root url="jar://$TeamCityDistribution$/devPackage/common-api.jar!/" />
+        <root url="jar://F:/Ref/TeamCity.17072/devPackage/common-api.jar!/" />
       </CLASSES>
       <JAVADOC>
-        <root url="jar://$TeamCityDistribution$/devPackage/javadoc/openApi-help.jar!/" />
+        <root url="jar://F:/Ref/TeamCity.17072/devPackage/javadoc/openApi-help.jar!/" />
       </JAVADOC>
       <SOURCES>
-        <root url="jar://$TeamCityDistribution$/devPackage/src/openApi-source.jar!/" />
+        <root url="jar://F:/Ref/TeamCity.17072/devPackage/src/openApi-source.jar!/" />
       </SOURCES>
     </library>
     <library name="TeamCity-jdom">
       <CLASSES>
-        <root url="jar://$TeamCityDistribution$/webapps/ROOT/WEB-INF/lib/jdom.jar!/" />
+        <root url="jar://F:/Ref/TeamCity.17072/webapps/ROOT/WEB-INF/lib/jdom.jar!/" />
       </CLASSES>
       <JAVADOC />
       <SOURCES />
     </library>
     <library name="TeamCity-processTerminator">
       <CLASSES>
-        <root url="jar://$TeamCityDistribution$/webapps/ROOT/WEB-INF/lib/processesTerminator.jar!/" />
+        <root url="jar://F:/Ref/TeamCity.17072/webapps/ROOT/WEB-INF/lib/processesTerminator.jar!/" />
       </CLASSES>
       <JAVADOC />
       <SOURCES />
     </library>
     <library name="TeamCity-server">
       <CLASSES>
-        <root url="jar://$TeamCityDistribution$/devPackage/server-api.jar!/" />
-        <root url="jar://$TeamCityDistribution$/webapps/ROOT/WEB-INF/lib/server.jar!/" />
+        <root url="jar://F:/Ref/TeamCity.17072/devPackage/server-api.jar!/" />
+        <root url="jar://F:/Ref/TeamCity.17072/webapps/ROOT/WEB-INF/lib/server.jar!/" />
       </CLASSES>
       <JAVADOC>
-        <root url="jar://$TeamCityDistribution$/devPackage/javadoc/openApi-help.jar!/" />
+        <root url="jar://F:/Ref/TeamCity.17072/devPackage/javadoc/openApi-help.jar!/" />
       </JAVADOC>
       <SOURCES>
-        <root url="jar://$TeamCityDistribution$/devPackage/src/openApi-source.jar!/" />
+        <root url="jar://F:/Ref/TeamCity.17072/devPackage/src/openApi-source.jar!/" />
       </SOURCES>
     </library>
     <library name="TeamCity-servletApi">
       <CLASSES>
-        <root url="jar://$TeamCityDistribution$/lib/servlet-api.jar!/" />
+        <root url="jar://F:/Ref/TeamCity.17072/lib/servlet-api.jar!/" />
       </CLASSES>
       <JAVADOC />
       <SOURCES />
     </library>
     <library name="TeamCity-spring">
       <CLASSES>
-        <root url="jar://$TeamCityDistribution$/webapps/ROOT/WEB-INF/lib/spring.jar!/" />
-        <root url="jar://$TeamCityDistribution$/webapps/ROOT/WEB-INF/lib/spring-webmvc.jar!/" />
+        <root url="jar://F:/Ref/TeamCity.17072/webapps/ROOT/WEB-INF/lib/spring.jar!/" />
+        <root url="jar://F:/Ref/TeamCity.17072/webapps/ROOT/WEB-INF/lib/spring-webmvc.jar!/" />
       </CLASSES>
       <JAVADOC />
       <SOURCES />
     </library>
     <library name="TeamCity-utils">
       <CLASSES>
-        <root url="jar://$TeamCityDistribution$/webapps/ROOT/WEB-INF/lib/util.jar!/" />
+        <root url="jar://F:/Ref/TeamCity.17072/webapps/ROOT/WEB-INF/lib/util.jar!/" />
       </CLASSES>
       <JAVADOC />
       <SOURCES />
     </library>
     <library name="TeamCity-web">
       <CLASSES>
-        <root url="jar://$TeamCityDistribution$/webapps/ROOT/WEB-INF/lib/web.jar!/" />
+        <root url="jar://F:/Ref/TeamCity.17072/webapps/ROOT/WEB-INF/lib/web.jar!/" />
       </CLASSES>
       <JAVADOC />
       <SOURCES />
