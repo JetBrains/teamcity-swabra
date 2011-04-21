@@ -23,6 +23,7 @@ import java.util.List;
 import java.util.Map;
 import jetbrains.buildServer.agent.AgentRunningBuild;
 import jetbrains.buildServer.swabra.processes.HandlePathProvider;
+import jetbrains.buildServer.swabra.snapshots.SwabraRules;
 
 /**
  * User: vbedrosova
@@ -46,7 +47,7 @@ public class SwabraSettings {
 
   private File myHandlePath;
 
-  private final List<String> myRules;
+  private final SwabraRules myRules;
 
   private final File myCheckoutDir;
 
@@ -61,15 +62,16 @@ public class SwabraSettings {
     myVerbose = SwabraUtil.isVerbose(params);
     myCheckoutDir = runningBuild.getCheckoutDirectory();
 
-    myRules = new ArrayList<String>();
-    myRules.addAll(SwabraUtil.splitRules(SwabraUtil.getRules(params)));
+    final List<String> rules = new ArrayList<String>();
+    rules.addAll(SwabraUtil.splitRules(SwabraUtil.getRules(params)));
 
     final Map<String, String> configParams = runningBuild.getSharedConfigParameters();
     if (configParams.containsKey(DEFAULT_RULES_CONFIG_PARAM)) {
-      myRules.addAll(SwabraUtil.splitRules(configParams.get(DEFAULT_RULES_CONFIG_PARAM)));
+      rules.addAll(SwabraUtil.splitRules(configParams.get(DEFAULT_RULES_CONFIG_PARAM)));
     } else if (runningBuild.isCheckoutOnAgent()) {
-      myRules.addAll(Arrays.asList(DEFAULT_RULES));
+      rules.addAll(Arrays.asList(DEFAULT_RULES));
     }
+    myRules = new SwabraRules(myCheckoutDir, rules);
 
     logSettings();
   }
@@ -106,7 +108,7 @@ public class SwabraSettings {
     return myHandlePath.getPath();
   }
 
-  public List<String> getRules() {
+  public SwabraRules getRules() {
     return myRules;
   }
 

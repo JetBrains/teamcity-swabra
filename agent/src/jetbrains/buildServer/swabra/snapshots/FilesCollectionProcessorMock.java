@@ -36,11 +36,11 @@ public class FilesCollectionProcessorMock extends FilesCollectionProcessor {
 
   public FilesCollectionProcessorMock(@NotNull SwabraLogger logger,
                                       LockedFileResolver resolver,
-                                      @NotNull File checkoutDir,
+                                      @NotNull File dir,
                                       boolean verbose,
                                       boolean strict,
                                       String logPath) {
-    super(logger, resolver, checkoutDir, verbose, strict);
+    super(logger, resolver, dir, verbose, strict);
     myLogPath = logPath;
   }
 

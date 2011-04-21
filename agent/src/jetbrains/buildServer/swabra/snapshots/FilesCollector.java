@@ -16,6 +16,7 @@
 
 package jetbrains.buildServer.swabra.snapshots;
 
+import java.util.List;
 import jetbrains.buildServer.swabra.SwabraLogger;
 import jetbrains.buildServer.swabra.SwabraSettings;
 import jetbrains.buildServer.swabra.SwabraUtil;
@@ -59,20 +60,21 @@ public class FilesCollector {
     mySettings = settings;
   }
 
-  public void collect(@NotNull File snapshot, @NotNull File checkoutDir, @Nullable CollectionResultHandler handler) {
+  public void collect(@NotNull File snapshot, @NotNull File dir, @Nullable CollectionResultHandler handler) {
     if (!snapshot.exists() || (snapshot.length() == 0)) {
-      logUnableCollect(snapshot, checkoutDir, "file doesn't exist", null);
+      logUnableCollect(snapshot, dir, "file doesn't exist", null);
       if (handler != null) handler.error();
       return;
     }
 
-    myLogger.message("Scanning checkout directory " + checkoutDir + " for newly created, modified and deleted files comparing with snapshot " +
-      snapshot.getName() + (mySettings.getRules().isEmpty() ? "" : ", paths to monitor are " + SwabraUtil.getRulesStr(mySettings.getRules())), true);
+    final List<String> rules = mySettings.getRules().getRulesForPath(dir);
+    myLogger.message("Scanning directory " + dir + " for newly created, modified and deleted files comparing with snapshot " +
+      snapshot.getName() + (rules.size() == 1 ? "" : ", paths to monitor are " + SwabraUtil.getRulesStr(rules)), true);
 
     try {
-      iterateAndCollect(snapshot, checkoutDir);
+      iterateAndCollect(snapshot, dir);
     } catch (Exception e) {
-      logUnableCollect(snapshot, checkoutDir, "Exception occurred: " + e.getMessage(), e);
+      logUnableCollect(snapshot, dir, "Exception occurred: " + e.getMessage(), e);
       if (handler != null) handler.error();
       return;
     }
@@ -80,13 +82,13 @@ public class FilesCollector {
     final FilesCollectionProcessor.Results results = myProcessor.getResults();
 
     final int detectedNew = results.detectedNewAndDeleted + results.detectedNewAndUnableToDelete;
-    final String message = "Detected " + (results.detectedUnchanged >= 1 ? results.detectedUnchanged - 1 : 0) + " unchanged, " + // -1 not to count checkout dir
+    final String message = "Detected " + (results.detectedUnchanged >= 1 ? results.detectedUnchanged - 1 : 0) + " unchanged, " + // -1 not to count dir
       detectedNew + " newly created" +
       (detectedNew > 0 ? " (" + results.detectedNewAndDeleted + " of them deleted), " : ", ") +
       results.detectedModified + " modified, " +
       results.detectedDeleted + " deleted files and directories";
 
-    removeSnapshot(snapshot, checkoutDir);
+    removeSnapshot(snapshot, dir);
     if (results.detectedNewAndUnableToDelete != 0) {
       myLogger.warn(message);
       if (handler != null) handler.lockedFilesDetected();
@@ -101,26 +103,26 @@ public class FilesCollector {
     if (handler != null) handler.success();
   }
 
-  private void removeSnapshot(File snapshot, File checkoutDir) {
+  private void removeSnapshot(File snapshot, File dir) {
     if (System.getProperty(NOT_DELETE_SNAPSHOT) != null) {
       myLogger.debug("Will not delete " + snapshot.getName()
-        + " for directory " + checkoutDir.getAbsolutePath() + ", " + NOT_DELETE_SNAPSHOT + "property specified");
+        + " for directory " + dir.getAbsolutePath() + ", " + NOT_DELETE_SNAPSHOT + "property specified");
     } else if (!FileUtil.delete(snapshot)) {
       myLogger.warn("Unable to remove snapshot file " + snapshot.getName()
-        + " for directory " + checkoutDir.getAbsolutePath());
+        + " for directory " + dir.getAbsolutePath());
     } else {
       myLogger.debug("Successfully removed snapshot file " + snapshot.getName()
-        + " for directory " + checkoutDir.getAbsolutePath() + " after files collection");
+        + " for directory " + dir.getAbsolutePath() + " after files collection");
     }
   }
 
-  private void iterateAndCollect(File snapshot, File checkoutDir) throws Exception {
+  private void iterateAndCollect(File snapshot, File dir) throws Exception {
     final FilesTraversal traversal = new FilesTraversal();
-    traversal.traverseCompare(new SnapshotFilesIterator(snapshot), new FileSystemFilesIterator(checkoutDir), myProcessor);
+    traversal.traverseCompare(new SnapshotFilesIterator(snapshot), new FileSystemFilesIterator(dir), myProcessor);
   }
 
-  private void logUnableCollect(File snapshot, File checkoutDir, String message, Throwable e) {
-    myLogger.warn("Unable to collect files in checkout directory " + checkoutDir.getAbsolutePath()
+  private void logUnableCollect(File snapshot, File dir, String message, Throwable e) {
+    myLogger.warn("Unable to collect files in directory " + dir.getAbsolutePath()
       + " from snapshot file " + snapshot.getName() +
       ((message != null ? ", " + message : "")));
     if (e != null) {

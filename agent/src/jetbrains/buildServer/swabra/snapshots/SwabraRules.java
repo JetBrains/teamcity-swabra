@@ -16,42 +16,150 @@
 
 package jetbrains.buildServer.swabra.snapshots;
 
+import com.intellij.openapi.util.SystemInfo;
+import java.io.File;
+import java.util.*;
+import jetbrains.buildServer.util.FileUtil;
 import jetbrains.buildServer.vcs.FileRule;
 import jetbrains.buildServer.vcs.FileRuleSet;
 
-import java.util.List;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 /**
  * User: vbedrosova
  * Date: 02.12.10
  * Time: 15:16
  */
-public class SwabraRules extends FileRuleSet<FileRule, FileRule> {
-  public SwabraRules(List<String> body) {
-    super(body);
+public class SwabraRules {
+  @Nullable
+  private final File myBaseDir;
+  @NotNull
+  private final RuleSet myRuleSet;
+  private List<File> myRootPaths;
+
+  public SwabraRules(@NotNull Collection<String> body) {
+    this(null, body);
   }
 
-  @Override
-  protected void doPostInitProcess(List<FileRule> includeRules, List<FileRule> excludeRules) {
+  public SwabraRules(@Nullable File baseDir, @NotNull Collection<String> body) {
+    myBaseDir = baseDir;
+
+    final ArrayList<String> rules = new ArrayList<String>(body);
+    addAsRule(myBaseDir, rules);
+
+    myRuleSet = new RuleSet(rules);
   }
 
-  @Override
-  protected FileRule createNewIncludeRule(String rule) {
-    return new FileRule<SwabraRules>(rule, this, true);
+  private static void addAsRule(@Nullable File baseDir, @NotNull Collection<String> body) {
+    if (baseDir != null) body.add(baseDir.getPath());
   }
 
-  @Override
-  protected FileRule createExcludeRule(String line) {
-    return new FileRule<SwabraRules>(line, this, false);
+  @NotNull
+  private static String resolvePath(@NotNull String path, @Nullable File baseDir) {
+    if (baseDir != null) {
+      return FileUtil.resolvePath(baseDir, path).getPath();
+    }
+    return path;
   }
 
-  @Override
-  protected FileRule createNewIncludeRule(FileRule includeRule) {
-    return createNewIncludeRule(includeRule.getFrom());
+  public List<File> getPaths() {
+    return myRootPaths;
   }
 
-  @Override
-  protected FileRule createNewExcludeRule(FileRule excludeRule) {
-    return createExcludeRule(excludeRule.getFrom());
+  public boolean shouldInclude(@NotNull String path) {
+    return myRuleSet.shouldInclude(path);
+  }
+
+  public List<String> getRulesForPath(@NotNull File pathFile) {
+    return myRuleSet.getForPath(pathFile.getPath());
+  }
+
+  private final class RuleSet extends FileRuleSet<FileRule, FileRule> {
+    public RuleSet(List<String> body) {
+      super(body);
+    }
+
+    @Override
+    protected void doPostInitProcess(final List<FileRule> includeRules, final List<FileRule> excludeRules) {
+      sortByFrom(includeRules, true);
+      sortByFrom(excludeRules, true);
+      initRootIncludePaths();
+    }
+
+    @Override
+    protected FileRule createNewIncludeRule(final String line) {
+      return createRule(line, true);
+    }
+
+    @Override
+    protected FileRule createExcludeRule(final String line) {
+      return createRule(line, false);
+    }
+
+    @Override
+    protected FileRule createNewIncludeRule(final FileRule includeRule) {
+      return createNewIncludeRule(includeRule.getFrom());
+    }
+
+    @Override
+    protected FileRule createNewExcludeRule(final FileRule excludeRule) {
+      return createExcludeRule(excludeRule.getFrom());
+    }
+
+    private FileRule createRule(@NotNull String line, boolean isInclude) {
+      return new FileRule(resolvePath(line, myBaseDir), null, this, isInclude);
+    }
+
+    private void initRootIncludePaths() {
+      final ArrayList<FileRule> resultRules = new ArrayList<FileRule>();
+      resultRules.addAll(getIncludeRules());
+
+      final Set<FileRule> processedRules = new HashSet<FileRule>();
+
+      for (Iterator<FileRule> iterator = resultRules.iterator(); iterator.hasNext();) {
+        FileRule rule = iterator.next();
+
+        if (!shouldInclude(rule.getFrom())) {
+          iterator.remove();
+          continue;
+        }
+
+        for (FileRule processed : processedRules) {
+          if (isSubDir(rule.getFrom(), processed.getFrom())) {
+            iterator.remove();
+            break;
+          }
+        }
+
+        processedRules.add(rule);
+      }
+
+      myRootPaths = new ArrayList<File>();
+      for (FileRule rule : resultRules) {
+        //noinspection ConstantConditions
+        myRootPaths.add(new File((SystemInfo.isWindows ? "" : "/") + rule.getFrom()));
+      }
+    }
+
+    public List<String> getForPath(@NotNull String path) {
+      path = preparePath(path);
+
+      final ArrayList<String> rules = new ArrayList<String>();
+      for (FileRule rule : getAllRulesSorted()) {
+        if (isSubDir(rule.getFrom(), path)) {
+          rules.add(rule.getFrom());
+        }
+      }
+      return rules;
+    }
+
+    private List<FileRule> getAllRulesSorted() {
+      final ArrayList<FileRule> allRules = new ArrayList<FileRule>(getIncludeRules().size() + getExcludeRules().size());
+      allRules.addAll(getIncludeRules());
+      allRules.addAll(getExcludeRules());
+      sortByFrom(allRules, true);
+      return allRules;
+    }
   }
 }

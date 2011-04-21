@@ -22,6 +22,7 @@ package jetbrains.buildServer.swabra;
  * Time: 14:10:58
  */
 
+import java.util.Collection;
 import jetbrains.buildServer.agent.*;
 import jetbrains.buildServer.messages.Status;
 import jetbrains.buildServer.messages.serviceMessages.BuildStatus;
@@ -33,8 +34,6 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.File;
-import java.util.HashMap;
-import java.util.Map;
 
 
 public final class Swabra extends AgentLifeCycleAdapter {
@@ -57,6 +56,8 @@ public final class Swabra extends AgentLifeCycleAdapter {
   private boolean mySnapshotSaved;
   private boolean myFailureReported;
 
+  private AgentRunningBuild myRunningBuild;
+
   public Swabra(@NotNull final EventDispatcher<AgentLifeCycleListener> agentDispatcher,
                 @NotNull final SmartDirectoryCleaner directoryCleaner,
                 @NotNull final SwabraLogger logger,
@@ -72,93 +73,28 @@ public final class Swabra extends AgentLifeCycleAdapter {
   @Override
   public void buildStarted(@NotNull final AgentRunningBuild runningBuild) {
 //    System.setProperty(DEBUG_MODE, "true");
+    myRunningBuild = runningBuild;
     mySnapshotSaved = false;
     myFailureReported = false;
 
     mySettings = new SwabraSettings(runningBuild);
     myLogger.setBuildLogger(runningBuild.getBuildLogger());
-    myLogger.activityStarted();
 
+    myLogger.activityStarted();
     try {
       mySettings.prepareHandle(myLogger, runningBuild);
 
       myLockedFileResolver = mySettings.isLockingProcessesDetectionEnabled() ?
         new LockedFileResolver(new HandleProcessesProvider(mySettings.getHandlePath())/*, myProcessTerminator,*/) : null;
 
-      final SwabraPropertiesProcessor.DirectoryState directoryState;
-      try {
-        if (!mySettings.isCleanupEnabled()) {
-          myLogger.message("Swabra cleanup is disabled", false);
-          return;
-        }
-
-        if (runningBuild.isCleanBuild() || !mySettings.getCheckoutDir().isDirectory()) {
-          myLogger.message("Clean build. No need to cleanup", false);
-          return;
-        }
-
-        directoryState = myPropertiesProcessor.getState(mySettings.getCheckoutDir());
-        myLogger.message("Checkout directory state is " + directoryState, false);
-      } finally {
-        myPropertiesProcessor.deleteRecord(mySettings.getCheckoutDir());
+      if (!mySettings.isCleanupEnabled()) {
+        myLogger.message("Swabra cleanup is disabled", false);
+        myPropertiesProcessor.deleteRecords(mySettings.getRules().getPaths());
+        return;
       }
 
-      switch (directoryState) {
-        case STRICT_CLEAN:
-          // do nothing
-          myLogger.debug("Checkout directory is clean");
-          return;
-        case CLEAN:
-          if (mySettings.isStrict()) {
-            doCleanup(mySettings.getCheckoutDir(), "Checkout directory may contain newly created, modified or deleted files", runningBuild);
-          }
-          return;
-        case DIRTY:
-          if (mySettings.isStrict()) {
-            doCleanup(mySettings.getCheckoutDir(), "Checkout directory contains newly created, modified or deleted files", runningBuild);
-            return;
-          }
-          if (!mySettings.isCleanupBeforeBuild()) {
-            return;
-          }
-          // else fall into next case
-        case PENDING:
-          if (mySettings.isStrict()) {
-            doCleanup(mySettings.getCheckoutDir(),
-              "Checkout directory snapshot may contain information about newly created, modified or deleted files", runningBuild);
-            return;
-          }
-          // else fall into next case
-        case STRICT_PENDING:
-          myLogger.debug("Cleanup is performed before build");
-          final FilesCollector filesCollector = initFilesCollector();
-          filesCollector.collect(myPropertiesProcessor.getSnapshotFile(mySettings.getCheckoutDir()), mySettings.getCheckoutDir(),
-            mySettings.isStrict() ?
-              new FilesCollector.CollectionResultHandler() {
-                public void success() {
-                  myLogger.message("Successfully performed cleanup", false);
-                }
+      processDirs(mySettings.getRules().getPaths());
 
-                public void error() {
-                  doCleanup(mySettings.getCheckoutDir(), "Some error occurred during cleanup", runningBuild);
-                }
-
-                public void lockedFilesDetected() {
-                  fail();
-                }
-
-                public void dirtyStateDetected() {
-                  doCleanup(mySettings.getCheckoutDir(),
-                    "Checkout directory contains modified files or some files were deleted", runningBuild);
-                }
-              }
-              : null
-          );
-          return;
-        case UNKNOWN:
-        default:
-          doCleanup(mySettings.getCheckoutDir(), "Checkout directory state is unknown", runningBuild);
-      }
     } finally {
       myLogger.activityFinished();
     }
@@ -166,12 +102,12 @@ public final class Swabra extends AgentLifeCycleAdapter {
 
   @Override
   public void sourcesUpdated(@NotNull AgentRunningBuild runningBuild) {
-    makeSnapshot();
+    makeSnapshots(mySettings.getRules().getPaths());
   }
 
   @Override
   public void beforeRunnerStart(@NotNull BuildRunnerContext runner) {
-    makeSnapshot();
+    makeSnapshots(mySettings.getRules().getPaths());
   }
 
   @Override
@@ -200,49 +136,152 @@ public final class Swabra extends AgentLifeCycleAdapter {
 
     myLogger.debug("Cleanup is performed after build");
 
-    myPropertiesProcessor.deleteRecord(mySettings.getCheckoutDir());
-
-    final FilesCollector filesCollector = initFilesCollector();
-
     myLogger.activityStarted();
     try {
-      filesCollector.collect(myPropertiesProcessor.getSnapshotFile(mySettings.getCheckoutDir()), mySettings.getCheckoutDir(),
-                             new FilesCollector.CollectionResultHandler() {
-                               public void success() {
-                                 myPropertiesProcessor.markClean(mySettings.getCheckoutDir(), mySettings.isStrict());
-                               }
-
-                               public void error() {
-                                 myPropertiesProcessor.markDirty(mySettings.getCheckoutDir());
-                               }
-
-                               public void lockedFilesDetected() {
-                                 myPropertiesProcessor.markPending(mySettings.getCheckoutDir(), mySettings.isStrict());
-                               }
-
-                               public void dirtyStateDetected() {
-                                 myPropertiesProcessor.markDirty(mySettings.getCheckoutDir());
-                               }
-                             }
-      );
+      collectFiles(mySettings.getRules().getPaths());
     } finally {
       myLogger.activityFinished();
     }
   }
 
-  private FilesCollector initFilesCollector() {
+  @Override
+  public void buildFinished(@NotNull final AgentRunningBuild build, @NotNull final BuildFinishedStatus buildStatus) {
+    myRunningBuild = null;
+  }
+
+  private void processDirs(@NotNull Collection<File> dirs) {
+    for (File dir : dirs) {
+      processDir(dir);
+    }
+  }
+
+  private void processDir(@NotNull File dir) {
+    if (dir.equals(mySettings.getCheckoutDir())) {
+      processCheckoutDir(dir);
+    } else {
+      processNonCheckoutDir(dir);
+    }
+  }
+
+  private void processCheckoutDir(@NotNull final File checkoutDir) {
+    final SwabraPropertiesProcessor.DirectoryState directoryState = getAndCleanDirectoryState(checkoutDir);
+
+    if (myRunningBuild.isCleanBuild() || !checkoutDir.isDirectory()) {
+      myLogger.message("Clean build. No need to clean up in checkout directory ", false);
+      return;
+    }
+
+    switch (directoryState) {
+      case STRICT_CLEAN:
+        // do nothing
+        return;
+      case CLEAN:
+        if (mySettings.isStrict()) {
+          doCleanup(checkoutDir, "Checkout directory may contain newly created, modified or deleted files", myRunningBuild);
+        }
+        return;
+      case DIRTY:
+        if (mySettings.isStrict()) {
+          doCleanup(checkoutDir, "Checkout directory contains newly created, modified or deleted files", myRunningBuild);
+        } else if (mySettings.isCleanupBeforeBuild()) {
+          myLogger.debug("Checkout directory cleanup is performed before build");
+          collectFilesInCheckoutDir(checkoutDir);
+        }
+        return;
+      case PENDING:
+        if (mySettings.isStrict()) {
+          doCleanup(checkoutDir, "Checkout directory snapshot may contain information about newly created, modified or deleted files",
+                    myRunningBuild);
+        } else{
+          myLogger.debug("Checkout directory cleanup is performed before build");
+          collectFilesInCheckoutDir(checkoutDir);
+        }
+        return;
+      case STRICT_PENDING:
+        myLogger.debug("Checkout directory cleanup is performed before build");
+        collectFilesInCheckoutDir(checkoutDir);
+        return;
+      case UNKNOWN:
+      default:
+        doCleanup(checkoutDir, "Checkout directory state is unknown", myRunningBuild);
+    }
+  }
+
+  private void collectFilesInCheckoutDir(@NotNull final File checkoutDir) {
+    collectFiles(checkoutDir,
+                 mySettings.isStrict() ?
+                 new FilesCollector.CollectionResultHandler() {
+                   public void success() {
+                     myLogger.message("Successfully performed checkout directory cleanup", false);
+                   }
+
+                   public void error() {
+                     doCleanup(checkoutDir, "Some error occurred during checkout directory cleanup", myRunningBuild);
+                   }
+
+                   public void lockedFilesDetected() {
+                     fail();
+                   }
+
+                   public void dirtyStateDetected() {
+                     doCleanup(checkoutDir,
+                               "Checkout directory contains modified files or some files were deleted", myRunningBuild);
+                   }
+                 }
+                                       : null
+    );
+  }
+
+  private void processNonCheckoutDir(@NotNull File dir) {
+    final SwabraPropertiesProcessor.DirectoryState directoryState = getAndCleanDirectoryState(dir);
+
+    switch (directoryState) {
+      case STRICT_CLEAN:
+      case CLEAN:
+        // do nothing
+        return;
+      case DIRTY:
+        if (mySettings.isCleanupBeforeBuild()) {
+          myLogger.debug(dir + " cleanup is performed before build");
+          collectFiles(dir, null);
+        }
+        return;
+      case PENDING:
+      case STRICT_PENDING:
+        myLogger.debug(dir + " cleanup is performed before build");
+        collectFiles(dir, null);
+        return;
+      case UNKNOWN:
+      default:
+        myLogger.debug(dir + " directory state is unknown");
+    }
+  }
+
+  private SwabraPropertiesProcessor.DirectoryState getAndCleanDirectoryState(@NotNull File dir) {
+    final SwabraPropertiesProcessor.DirectoryState directoryState = myPropertiesProcessor.getState(dir);
+    myLogger.message(dir + " directory state is " + directoryState, false);
+    myPropertiesProcessor.deleteRecord(dir);
+    return directoryState;
+  }
+
+  private void collectFiles(@NotNull File dir, @Nullable FilesCollector.CollectionResultHandler handler) {
+    final FilesCollector filesCollector = initFilesCollector(dir);
+    filesCollector.collect(myPropertiesProcessor.getSnapshotFile(dir), dir, handler);
+  }
+
+  private FilesCollector initFilesCollector(@NotNull File dir) {
     FilesCollectionProcessor processor;
     if (System.getProperty(TEST_LOG) != null) {
-      processor = new FilesCollectionProcessorMock(myLogger, myLockedFileResolver, mySettings.getCheckoutDir(), mySettings.isVerbose(), mySettings.isStrict(), System.getProperty(TEST_LOG));
-    } else if (mySettings.getRules().isEmpty()) {
-      processor = new FilesCollectionProcessor(myLogger, myLockedFileResolver, mySettings.getCheckoutDir(), mySettings.isVerbose(), mySettings.isStrict());
+      processor = new FilesCollectionProcessorMock(myLogger, myLockedFileResolver, dir, mySettings.isVerbose(), mySettings.isStrict(), System.getProperty(TEST_LOG));
+    } else if (mySettings.getRules().getRulesForPath(dir).size() == 1) {
+      processor = new FilesCollectionProcessor(myLogger, myLockedFileResolver, dir, mySettings.isVerbose(), mySettings.isStrict());
     } else {
-      processor = new FilesCollectionRulesAwareProcessor(myLogger, myLockedFileResolver, mySettings);
+      processor = new FilesCollectionRulesAwareProcessor(myLogger, myLockedFileResolver, dir, mySettings);
     }
     return new FilesCollector(processor, myLogger, mySettings);
   }
 
-  private void makeSnapshot() {
+  private void makeSnapshots(@NotNull Collection<File> dirs) {
     if (!mySettings.isCleanupEnabled()) return;
     if (mySnapshotSaved) return;
 
@@ -250,14 +289,50 @@ public final class Swabra extends AgentLifeCycleAdapter {
 
     myLogger.activityStarted();
     try {
-      if (!new SnapshotGenerator(mySettings.getCheckoutDir(), myLogger).generateSnapshot(myPropertiesProcessor.getSnapshotFile(mySettings.getCheckoutDir()))) {
-        mySettings.setCleanupEnabled(false);
-      } else {
-        myPropertiesProcessor.markPending(mySettings.getCheckoutDir(), mySettings.isStrict());
+      for (File dir : dirs) {
+        makeSnapshot(dir);
       }
     } finally {
       myLogger.activityFinished();
     }
+  }
+
+  private void makeSnapshot(@NotNull File dir) {
+    if (!new SnapshotGenerator(dir, myLogger).generateSnapshot(myPropertiesProcessor.getSnapshotFile(dir))) {
+      mySettings.setCleanupEnabled(false);
+    } else {
+      myPropertiesProcessor.markPending(dir, mySettings.isStrict());
+    }
+  }
+
+  private void collectFiles(@NotNull Collection<File> dirs) {
+   for (File dir : dirs) {
+     collectFiles(dir);
+   }
+  }
+
+  private void collectFiles(@NotNull final File dir) {
+    myPropertiesProcessor.deleteRecord(dir);
+
+    collectFiles(dir,
+                 new FilesCollector.CollectionResultHandler() {
+                   public void success() {
+                     myPropertiesProcessor.markClean(dir, mySettings.isStrict());
+                   }
+
+                   public void error() {
+                     myPropertiesProcessor.markDirty(dir);
+                   }
+
+                   public void lockedFilesDetected() {
+                     myPropertiesProcessor.markPending(dir, mySettings.isStrict());
+                   }
+
+                   public void dirtyStateDetected() {
+                     myPropertiesProcessor.markDirty(dir);
+                   }
+                 }
+    );
   }
 
   private void doCleanup(@NotNull File checkoutDir, @Nullable final String reason, @NotNull final AgentRunningBuild build) {

@@ -38,18 +38,18 @@ import static jetbrains.buildServer.swabra.snapshots.SnapshotUtil.getSnapshotHea
  * Time: 14:04:16
  */
 public class SnapshotGenerator {
-  private final File myCheckoutDir;
-  private String myCheckoutDirParent;
+  private final File myRootDir;
+  private String myRootDirParent;
   private int mySavedObjects;
 
   private final SwabraLogger myLogger;
 
-  public SnapshotGenerator(@NotNull File checkoutDir,
+  public SnapshotGenerator(@NotNull File dir,
                            @NotNull SwabraLogger logger) {
-    myCheckoutDir = checkoutDir;
-    myCheckoutDirParent = SwabraUtil.unifyPath(checkoutDir.getParent());
-    if (myCheckoutDirParent.endsWith(File.separator)) {
-      myCheckoutDirParent = myCheckoutDirParent.substring(0, myCheckoutDirParent.length() - 1);
+    myRootDir = dir;
+    myRootDirParent = SwabraUtil.unifyPath(dir.getParent());
+    if (myRootDirParent.endsWith(File.separator)) {
+      myRootDirParent = myRootDirParent.substring(0, myRootDirParent.length() - 1);
     }
     myLogger = logger;
   }
@@ -63,20 +63,20 @@ public class SnapshotGenerator {
       }
     }
     mySavedObjects = 0;
-    myLogger.message("Saving state of checkout directory " + myCheckoutDir +
-      " to snapshot file " + snapshot.getName(), true);
+    myLogger.message("Saving " + myRootDir +
+      " directory state to snapshot file " + snapshot.getName(), true);
 
     BufferedWriter writer = null;
     try {
       writer = new BufferedWriter(new FileWriter(snapshot));
-      writer.write(getSnapshotHeader(myCheckoutDirParent));
+      writer.write(getSnapshotHeader(myRootDirParent));
 
       iterateAndBuildSnapshot(writer);
-      myLogger.debug("Successfully finished saving state of checkout directory " + myCheckoutDir +
-        " to snapshot file " + snapshot.getName() + ", saved " + mySavedObjects + " objects (including checkout dir)");
+      myLogger.debug("Successfully finished saving " + myRootDir +
+        " directory state to snapshot file " + snapshot.getName() + ", saved " + mySavedObjects + " objects (including root dir)");
     } catch (Exception e) {
-      myLogger.warn("Unable to save snapshot of checkout directory '" + myCheckoutDir.getAbsolutePath()
-        + "' to file " + snapshot.getName() + getMessage(e));
+      myLogger.warn("Unable to save " + myRootDir.getAbsolutePath()
+        + " directory state to snapshot file " + snapshot.getName() + getMessage(e));
       myLogger.exception(e);
       return false;
     } finally {
@@ -98,9 +98,9 @@ public class SnapshotGenerator {
 
   private void iterateAndBuildSnapshot(final BufferedWriter writer) throws Exception {
     final FilesTraversal tr = new FilesTraversal();
-    tr.traverse(new FileSystemFilesIterator(myCheckoutDir), new FilesTraversal.SimpleProcessor() {
+    tr.traverse(new FileSystemFilesIterator(myRootDir), new FilesTraversal.SimpleProcessor() {
       public void process(FileInfo file) throws Exception {
-        writer.write(getSnapshotEntry(file, myCheckoutDirParent));
+        writer.write(getSnapshotEntry(file, myRootDirParent));
         ++mySavedObjects;
       }
     });

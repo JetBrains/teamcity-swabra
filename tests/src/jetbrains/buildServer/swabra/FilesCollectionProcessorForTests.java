@@ -30,9 +30,9 @@ import java.io.File;
 public class FilesCollectionProcessorForTests extends FilesCollectionProcessor {
   public FilesCollectionProcessorForTests(@NotNull SwabraLogger logger,
                                           LockedFileResolver resolver,
-                                          @NotNull File checkoutDir,
+                                          @NotNull File dir,
                                           boolean verbose, boolean strict) {
-    super(logger, resolver, checkoutDir, verbose, strict);
+    super(logger, resolver, dir, verbose, strict);
   }
 
   @Override

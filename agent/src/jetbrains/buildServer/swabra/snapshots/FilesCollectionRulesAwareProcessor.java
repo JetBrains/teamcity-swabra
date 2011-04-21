@@ -35,18 +35,17 @@ public class FilesCollectionRulesAwareProcessor extends FilesCollectionProcessor
 
   public FilesCollectionRulesAwareProcessor(@NotNull SwabraLogger logger,
                                             LockedFileResolver resolver,
+                                            @NotNull File dir,
                                             SwabraSettings settings) {
-    super(logger, resolver, settings.getCheckoutDir(), settings.isVerbose(), settings.isLockingProcessesKill());
+    super(logger, resolver, dir, settings.isVerbose(), settings.isLockingProcessesKill());
 
-    myRules = new SwabraRules(settings.getRules());
+    myRules = settings.getRules();
   }
 
   @Override
   public boolean willProcess(FileInfo info) {
     if (super.willProcess(info)) {
-      final String path = FileUtil.getRelativePath(getCheckoutDir(), info.getPath(), File.separatorChar);
-
-      return myRules.shouldInclude(path);
+      return myRules.shouldInclude(info.getPath());
     }
     return false;
   }

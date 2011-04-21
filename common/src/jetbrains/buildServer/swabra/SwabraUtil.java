@@ -131,7 +131,7 @@ public class SwabraUtil {
       sb.append(" and ").append(more).append(" more path").append(more > 1 ? "s" : "");
     }
 
-    return sb.toString();
+    return sb.toString().replace("\\", File.separator).replace("/", File.separator);
   }
 
   private static final int RULES_TO_APPEND = 2;

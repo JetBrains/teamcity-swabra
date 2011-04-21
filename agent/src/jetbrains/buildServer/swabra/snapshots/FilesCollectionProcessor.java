@@ -56,16 +56,16 @@ public class FilesCollectionProcessor implements FilesTraversal.ComparisonProces
   @NotNull
   private final DeletionListener myDeletionListener;
 
-  @NotNull private final String myCheckoutDir;
+  @NotNull private final String myDir;
 
   public FilesCollectionProcessor(@NotNull SwabraLogger logger,
                                   LockedFileResolver resolver,
-                                  @NotNull File checkoutDir,
+                                  @NotNull File dir,
                                   boolean verbose,
                                   boolean strict) {
     myLogger = logger;
     myLockedFileResolver = resolver;
-    myCheckoutDir = checkoutDir.getAbsolutePath();
+    myDir = dir.getAbsolutePath();
     myVerbose = verbose;
     myStrictDeletion = strict;
 
@@ -76,7 +76,7 @@ public class FilesCollectionProcessor implements FilesTraversal.ComparisonProces
   }
 
   public boolean willProcess(FileInfo info) {
-    return !myCheckoutDir.equals(info.getPath());
+    return !myDir.equals(info.getPath());
   }
 
   public void processUnchanged(FileInfo info) {
@@ -175,8 +175,8 @@ public class FilesCollectionProcessor implements FilesTraversal.ComparisonProces
   }
 
   @NotNull
-  protected String getCheckoutDir() {
-    return myCheckoutDir;
+  protected String getDir() {
+    return myDir;
   }
 
   protected boolean resolveDelete(File f) {

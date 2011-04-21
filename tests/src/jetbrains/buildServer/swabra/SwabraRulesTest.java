@@ -16,8 +16,11 @@
 
 package jetbrains.buildServer.swabra;
 
+import java.io.File;
 import jetbrains.buildServer.swabra.snapshots.SwabraRules;
+import jetbrains.buildServer.util.FileUtil;
 import junit.framework.TestCase;
+import org.jetbrains.annotations.NotNull;
 import org.junit.Test;
 
 import java.util.Arrays;
@@ -30,6 +33,10 @@ import java.util.Arrays;
 public class SwabraRulesTest extends TestCase {
   private SwabraRules createRules(String... rules) {
     return new SwabraRules(Arrays.asList(rules));
+  }
+
+  private SwabraRules createRules(File baseDir, String... rules) {
+    return new SwabraRules(baseDir, Arrays.asList(rules));
   }
 
   @Test
@@ -264,6 +271,35 @@ public class SwabraRulesTest extends TestCase {
     assertFalse(rules.shouldInclude("another/content"));
     assertTrue(rules.shouldInclude("some/path"));
     assertTrue(rules.shouldInclude("some/path/content"));
+  }
+
+  @Test
+  public void test_misc_with_absolute() {
+    final File baseDir = new File("baseDir");
+    final File outerDir = new File("outerDir");
+    final SwabraRules rules = createRules(baseDir, "-:some/path", "+:some/path/content/inner/**", resolve("some/path", outerDir), "-:" + resolve("some/path/content", outerDir));
+
+    assertFalse(rules.shouldInclude(baseDir.getPath()));
+
+    assertFalse(rules.shouldInclude(resolve("some/path", baseDir)));
+    assertFalse(rules.shouldInclude(resolve("some/path/content", baseDir)));
+    assertFalse(rules.shouldInclude(resolve("some/path/another/path", baseDir)));
+
+    assertFalse(rules.shouldInclude(resolve("some/path/content/inner", baseDir)));
+    assertTrue(rules.shouldInclude(resolve("some/path/content/inner/another/path", baseDir)));
+
+    assertFalse(rules.shouldInclude(outerDir.getPath()));
+
+    assertTrue(rules.shouldInclude(resolve("some/path", outerDir)));
+    assertTrue(rules.shouldInclude(resolve("some/path/another/path", outerDir)));
+
+    assertFalse(rules.shouldInclude(resolve("some/path/content", outerDir)));
+    assertFalse(rules.shouldInclude(resolve("some/path/content/inner", outerDir)));
+  }
+
+  @NotNull
+  private String resolve(@NotNull String path, @NotNull File baseDir) {
+    return FileUtil.resolvePath(baseDir, path).getPath();
   }
 
 //  @Test
