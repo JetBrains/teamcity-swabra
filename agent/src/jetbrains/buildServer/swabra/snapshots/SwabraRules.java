@@ -148,7 +148,7 @@ public class SwabraRules {
       final ArrayList<String> rules = new ArrayList<String>();
       for (FileRule rule : getAllRulesSorted()) {
         if (isSubDir(rule.getFrom(), path)) {
-          rules.add(rule.getFrom());
+          rules.add(rule.toString());
         }
       }
       return rules;
@@ -158,7 +158,7 @@ public class SwabraRules {
       final ArrayList<FileRule> allRules = new ArrayList<FileRule>(getIncludeRules().size() + getExcludeRules().size());
       allRules.addAll(getIncludeRules());
       allRules.addAll(getExcludeRules());
-      sortByFrom(allRules, true);
+      sortByFrom(allRules, false);
       return allRules;
     }
   }
