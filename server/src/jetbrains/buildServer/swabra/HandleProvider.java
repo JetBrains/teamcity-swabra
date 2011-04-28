@@ -64,15 +64,6 @@ public class HandleProvider {
     return myPluginFolder;
   }
 
-  public void downloadHandleAndPackPlugin(@NotNull String url) throws Throwable {
-    LOG.debug("Downloading SysInternals handle.exe from " + url + " and packing it into handle-provider plugin to " + myPluginFolder);
-
-    final File tmpFile = new File(FileUtil.getTempDirectory(), "handle.exe");
-    downloadHandleExe(url, tmpFile);
-    packPlugin(tmpFile);
-    FileUtil.delete(tmpFile);
-  }
-
   public void packPlugin(File handleExe) throws IOException {
 
     final File pluginTempFolder = preparePluginFolder();
@@ -149,10 +140,6 @@ public class HandleProvider {
     }
 
     LOG.debug("Successfully put handle-provider plugin from " + pluginFolder + " into zip " + pluginZip);
-  }
-
-  private static void downloadHandleExe(String url, File dest) throws IOException {
-    URLDownloader.download(new URL(url), dest);
   }
 
   private static File prepareSubFolder(File baseFolder, String name) {

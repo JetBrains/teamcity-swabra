@@ -126,7 +126,7 @@
       <c:if test="${not handlePresent}">
         Note that for locking processes detection handle.exe tool is required on agents.<br/>
       </c:if>
-      <c:url var="handleDownloader" value="/admin/handle.html"/>
+      <c:url var="handleDownloader" value="/admin/serverConfig.html?init=1&tab=toolLoadTab&toolType=handleTool"/>
       <a href="${handleDownloader}" target="_blank" showdiscardchangesmessage="false">${actionName} SysInternals handle.exe</a>
     </div>
   </td>

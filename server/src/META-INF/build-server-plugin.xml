@@ -5,11 +5,9 @@
                            http://www.springframework.org/schema/beans/spring-beans-2.5.xsd"
        default-autowire="constructor">
 
-  <bean class="jetbrains.buildServer.swabra.web.actions.UploadAction"/>
-  <bean class="jetbrains.buildServer.swabra.web.actions.DownloadAction"/>
-
-  <bean class="jetbrains.buildServer.swabra.web.HandleController" init-method="register"/>
-
   <bean class="jetbrains.buildServer.swabra.HandleProvider"/>
   <bean class="jetbrains.buildServer.swabra.SwabraBuildFeature"/>
+
+  <bean class="jetbrains.buildServer.swabra.HandleTool"/>
+  <bean class="jetbrains.buildServer.swabra.HandleToolServerProcessor"/>
 </beans>
