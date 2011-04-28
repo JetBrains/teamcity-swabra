@@ -27,8 +27,9 @@
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="module" module-name="swabra-common-internal" />
     <orderEntry type="module" module-name="server-openapi" />
-    <orderEntry type="module" module-name="web-openapi" />
     <orderEntry type="module" module-name="server" />
+    <orderEntry type="module" module-name="web-openapi" />
+    <orderEntry type="module" module-name="toolLoader-server" />
   </component>
 </module>
 
