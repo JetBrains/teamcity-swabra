@@ -113,6 +113,10 @@
     <pathelement location="${path.variable.teamcitydistribution}/webapps/ROOT/WEB-INF/lib/spring.jar"/>
   </path>
   
+  <path id="library.teamcity-toolloader.classpath">
+    <pathelement location="${path.variable.teamcitydistribution}/webapps/ROOT/WEB-INF/lib/toolLoader.jar"/>
+  </path>
+  
   <path id="library.teamcity-utils.classpath">
     <pathelement location="${path.variable.teamcitydistribution}/webapps/ROOT/WEB-INF/lib/util.jar"/>
   </path>
@@ -464,6 +468,7 @@
     <path refid="library.teamcity-web.classpath"/>
     <path refid="library.teamcity-common.classpath"/>
     <path refid="library.log4j.classpath"/>
+    <path refid="library.teamcity-toolloader.classpath"/>
   </path>
   
   <path id="server.runtime.production.module.classpath">
@@ -478,24 +483,10 @@
     <path refid="library.teamcity-web.classpath"/>
     <path refid="library.teamcity-common.classpath"/>
     <path refid="library.log4j.classpath"/>
+    <path refid="library.teamcity-toolloader.classpath"/>
   </path>
   
   <path id="server.module.classpath">
-    <pathelement location="${server.output.dir}"/>
-    <path refid="library.teamcity-utils.classpath"/>
-    <path refid="library.teamcity-server.classpath"/>
-    <path refid="common.runtime.module.classpath"/>
-    <path refid="library.idea_annotations.classpath"/>
-    <path refid="library.teamcity-spring.classpath"/>
-    <path refid="library.teamcity-jdom.classpath"/>
-    <path refid="library.teamcity-servletapi.classpath"/>
-    <path refid="library.teamcity-web.classpath"/>
-    <path refid="library.teamcity-common.classpath"/>
-    <path refid="library.log4j.classpath"/>
-  </path>
-  
-  <path id="server.runtime.module.classpath">
-    <pathelement location="${server.testoutput.dir}"/>
     <pathelement location="${server.output.dir}"/>
     <path refid="library.teamcity-utils.classpath"/>
     <path refid="library.teamcity-server.classpath"/>
@@ -508,6 +499,23 @@
     <path refid="library.teamcity-web.classpath"/>
     <path refid="library.teamcity-common.classpath"/>
     <path refid="library.log4j.classpath"/>
+    <path refid="library.teamcity-toolloader.classpath"/>
+  </path>
+  
+  <path id="server.runtime.module.classpath">
+    <pathelement location="${server.testoutput.dir}"/>
+    <pathelement location="${server.output.dir}"/>
+    <path refid="library.teamcity-utils.classpath"/>
+    <path refid="library.teamcity-server.classpath"/>
+    <path refid="common.runtime.module.classpath"/>
+    <path refid="library.idea_annotations.classpath"/>
+    <path refid="library.teamcity-spring.classpath"/>
+    <path refid="library.teamcity-jdom.classpath"/>
+    <path refid="library.teamcity-servletapi.classpath"/>
+    <path refid="library.teamcity-web.classpath"/>
+    <path refid="library.teamcity-common.classpath"/>
+    <path refid="library.log4j.classpath"/>
+    <path refid="library.teamcity-toolloader.classpath"/>
   </path>
   
   
@@ -583,9 +591,9 @@
     <path refid="library.jmock.classpath"/>
     <path refid="library.log4j.classpath"/>
     <pathelement location="${common.output.dir}"/>
-    <pathelement location="${handle-provider.output.dir}"/>
     <path refid="library.idea_annotations.classpath"/>
     <path refid="library.teamcity-processterminator.classpath"/>
+    <pathelement location="${handle-provider.output.dir}"/>
   </path>
   
   <path id="tests.runtime.production.module.classpath">
@@ -598,9 +606,9 @@
     <path refid="library.jmock.classpath"/>
     <path refid="library.log4j.classpath"/>
     <path refid="common.runtime.production.module.classpath"/>
-    <path refid="handle-provider.production.module.classpath"/>
     <path refid="library.idea_annotations.classpath"/>
     <path refid="library.teamcity-processterminator.classpath"/>
+    <path refid="handle-provider.runtime.production.module.classpath"/>
   </path>
   
   <path id="tests.module.classpath">
@@ -615,15 +623,15 @@
     <path refid="library.log4j.classpath"/>
     <pathelement location="${common.testoutput.dir}"/>
     <pathelement location="${common.output.dir}"/>
-    <pathelement location="${handle-provider.output.dir}"/>
     <path refid="library.idea_annotations.classpath"/>
     <path refid="library.teamcity-processterminator.classpath"/>
+    <pathelement location="${handle-provider.testoutput.dir}"/>
+    <pathelement location="${handle-provider.output.dir}"/>
   </path>
   
   <path id="tests.runtime.module.classpath">
     <pathelement location="${tests.testoutput.dir}"/>
     <pathelement location="${tests.output.dir}"/>
-    <pathelement location="${handle-provider.output.dir}"/>
     <path refid="library.junit.classpath"/>
     <path refid="library.teamcity-agent.classpath"/>
     <path refid="library.teamcity-utils.classpath"/>
@@ -634,6 +642,7 @@
     <path refid="common.runtime.module.classpath"/>
     <path refid="library.idea_annotations.classpath"/>
     <path refid="library.teamcity-processterminator.classpath"/>
+    <path refid="handle-provider.runtime.module.classpath"/>
   </path>
   
   
@@ -654,7 +663,7 @@
   
   <target name="compile.module.tests" depends="compile.module.tests.production,compile.module.tests.tests" description="Compile module tests"/>
   
-  <target name="compile.module.tests.production" depends="register.custom.compilers,compile.module.agent,compile.module.common" description="Compile module tests; production classes"/>
+  <target name="compile.module.tests.production" depends="register.custom.compilers,compile.module.agent,compile.module.common,compile.module.handle-provider" description="Compile module tests; production classes"/>
   
   <target name="compile.module.tests.tests" depends="register.custom.compilers,compile.module.tests.production" description="compile module tests; test classes" unless="skip.tests">
     <mkdir dir="${tests.testoutput.dir}"/>
