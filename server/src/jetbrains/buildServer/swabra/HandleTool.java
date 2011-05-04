@@ -44,16 +44,6 @@ public class HandleTool extends ToolTypeExtension {
   }
 
   @Override
-  public String getTeamCityHelpFile() {
-    return "Adding+Swabra+as+a+Build+Feature";
-  }
-
-  @Override
-  public String getTeamCityHelpAnchor() {
-    return "DownloadingHandle";
-  }
-
-  @Override
   public String getToolSiteUrl() {
     return "http://technet.microsoft.com/en-us/sysinternals/bb469936.aspx";
   }
