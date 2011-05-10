@@ -61,7 +61,7 @@ public class HandleProcessesProvider implements LockedFileResolver.LockingProces
     final Set<ProcessInfo> pids = new HashSet<ProcessInfo>();
     HandleOutputReader.read(stdout, new HandleOutputReader.LineProcessor() {
       public void processLine(@NotNull String line) {
-        final int pathIndex = line.indexOf(path);
+        final int pathIndex = getPathIndex(path, line);
         if (pathIndex != -1) {
           line = line.substring(0, pathIndex).replaceAll("\\s+", " ");
           final int pidStartIndex = line.indexOf(PID);
@@ -76,5 +76,26 @@ public class HandleProcessesProvider implements LockedFileResolver.LockingProces
       }
     });
     return pids;
+  }
+
+  private static int getPathIndex(@NotNull String path, @NotNull String line) {
+    if (line.contains(path)) return line.indexOf(path);
+    path = capitalizeDiskDrive(path);
+    return line.indexOf(path);
+  }
+
+  @NotNull
+  private static String capitalizeDiskDrive(@NotNull String path) {
+    return getDiskDrive(path).toUpperCase() + getPathOnDisk(path);
+  }
+
+  @NotNull
+  private static String getDiskDrive(@NotNull String path) {
+    return path.substring(0, 3); // path starts with C:\\
+  }
+
+  @NotNull
+  private static String getPathOnDisk(@NotNull String path) {
+    return path.substring(3);
   }
 }

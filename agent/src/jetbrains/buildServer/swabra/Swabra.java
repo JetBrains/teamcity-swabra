@@ -116,15 +116,17 @@ public final class Swabra extends AgentLifeCycleAdapter {
 
     myLogger.activityStarted();
     try {
-      myLockedFileResolver.resolve(mySettings.getCheckoutDir(), mySettings.isLockingProcessesKill(), new LockedFileResolver.Listener() {
-        public void message(String m) {
-          myLogger.message(m, true);
-        }
+      for (File dir : mySettings.getRules().getPaths()) {
+        myLockedFileResolver.resolve(dir, mySettings.isLockingProcessesKill(), new LockedFileResolver.Listener() {
+          public void message(String m) {
+            myLogger.message(m, true);
+          }
 
-        public void warning(String w) {
-          myLogger.warn(w);
-        }
-      });
+          public void warning(String w) {
+            myLogger.warn(w);
+          }
+        });
+      }
     } finally {
       myLogger.activityFinished();
     }
