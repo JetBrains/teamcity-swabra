@@ -42,7 +42,7 @@
       <props:option value="swabra.before.build"
                     selected="${not empty enabledSelected && enabledSelected != 'swabra.after.build'}">Before next build start</props:option>
       <props:option value="swabra.after.build"
-                    selected="${enabledSelected == 'swabra.after.build'}">After build finish</props:option>
+                    selected="${enabledSelected eq 'swabra.after.build'}">After build finish</props:option>
     </props:selectProperty>
   </td>
 </tr>
@@ -84,19 +84,19 @@
       <props:option value=""
                     selected="${empty processesSelected}">&lt;Do not detect&gt;</props:option>
       <props:option value="report"
-                    selected="${processesSelected == 'report'}">Report</props:option>
+                    selected="${processesSelected eq 'report'}">Report</props:option>
       <props:option value="kill"
-                    selected="${processesSelected == 'kill'}">Kill</props:option>
+                    selected="${processesSelected eq 'kill'}">Kill</props:option>
     </props:selectProperty>
 
     <span class="smallNote" id="swabra.processes.note" style="${empty processesSelected ? 'display: none;' : ''}">
       Before the end of the build inspect the checkout directory for processes locking files in this directory.
     </span>
-    <span class="smallNote" id="swabra.processes.report.note" style="${processesSelected == 'report' ? '' : 'display: none;'}">
+    <span class="smallNote" id="swabra.processes.report.note" style="${processesSelected eq 'report' ? '' : 'display: none;'}">
       Report about such processes in the build log.
       <br/>
     </span>
-    <span class="smallNote" id="swabra.processes.kill.note" style="${processesSelected == 'kill' ? '' : 'display: none;'}">
+    <span class="smallNote" id="swabra.processes.kill.note" style="${processesSelected eq 'kill' ? '' : 'display: none;'}">
       Report about such processes in the build log and kill them.
       <br/>
     </span>
