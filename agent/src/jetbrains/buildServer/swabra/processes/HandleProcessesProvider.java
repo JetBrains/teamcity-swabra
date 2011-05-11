@@ -54,17 +54,15 @@ public class HandleProcessesProvider implements LockedFileResolver.LockingProces
     } else if (HandleOutputReader.noAdministrativeRights(result.getStdout())) {
       throw new GetProcessesException("Administrative privilege is required to run handle.exe");
     }
-    return getPidsFromStdout(result.getStdout(), file.getAbsolutePath());
+    return getPidsFromStdout(result.getStdout());
   }
 
-  private Collection<ProcessInfo> getPidsFromStdout(String stdout, final String path) {
+  private Collection<ProcessInfo> getPidsFromStdout(String stdout) {
     final Set<ProcessInfo> pids = new HashSet<ProcessInfo>();
     HandleOutputReader.read(stdout, new HandleOutputReader.LineProcessor() {
       public void processLine(@NotNull String line) {
-        final int pathIndex = getPathIndex(path, line);
-        if (pathIndex != -1) {
-          line = line.substring(0, pathIndex).replaceAll("\\s+", " ");
-          final int pidStartIndex = line.indexOf(PID);
+        final int pidStartIndex = line.indexOf(PID);
+        if (pidStartIndex != -1) {
           final int pidEndIndex = line.indexOf(PID) + PID.length();
           try {
             pids.add(new ProcessInfo(Long.parseLong(line.substring(pidEndIndex, line.indexOf(" ", pidEndIndex)).trim()),
@@ -76,26 +74,5 @@ public class HandleProcessesProvider implements LockedFileResolver.LockingProces
       }
     });
     return pids;
-  }
-
-  private static int getPathIndex(@NotNull String path, @NotNull String line) {
-    if (line.contains(path)) return line.indexOf(path);
-    path = capitalizeDiskDrive(path);
-    return line.indexOf(path);
-  }
-
-  @NotNull
-  private static String capitalizeDiskDrive(@NotNull String path) {
-    return getDiskDrive(path).toUpperCase() + getPathOnDisk(path);
-  }
-
-  @NotNull
-  private static String getDiskDrive(@NotNull String path) {
-    return path.substring(0, 3); // path starts with C:\\
-  }
-
-  @NotNull
-  private static String getPathOnDisk(@NotNull String path) {
-    return path.substring(3);
   }
 }
