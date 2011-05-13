@@ -16,6 +16,7 @@
 
 package jetbrains.buildServer.swabra;
 
+import com.intellij.openapi.util.SystemInfo;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -57,8 +58,8 @@ public class SwabraSettings {
     myCleanupEnabled = SwabraUtil.isCleanupEnabled(params);
     myCleanupMode = SwabraUtil.getCleanupMode(params);
     myStrict = SwabraUtil.isStrict(params);
-    myLockingProcessesKill = SwabraUtil.isLockingProcessesKill(params);
-    myLockingProcessesReport = SwabraUtil.isLockingProcessesReport(params);
+    myLockingProcessesKill = SystemInfo.isWindows && SwabraUtil.isLockingProcessesKill(params);
+    myLockingProcessesReport = SystemInfo.isWindows && SwabraUtil.isLockingProcessesReport(params);
     myVerbose = SwabraUtil.isVerbose(params);
     myCheckoutDir = runningBuild.getCheckoutDirectory();
 

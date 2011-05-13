@@ -26,7 +26,9 @@
 
 <c:set var="enabledSelected" value="${propertiesBean.properties['swabra.enabled']}"/>
 <c:set var="processesSelected" value="${propertiesBean.properties['swabra.processes']}"/>
-<c:set var="displaySwabraSettings" value="${empty propertiesBean.properties['swabra.enabled'] ? false : true}"/>
+
+<c:set var="displayCleanupSettings" value="${empty propertiesBean.properties['swabra.enabled'] ? false : true}"/>
+<c:set var="displayProcessesSettings" value="${empty propertiesBean.properties['swabra.processes'] ? false : true}"/>
 
 <tr>
   <td colspan="2">
@@ -55,26 +57,12 @@
 </tr>
 
 <tr class="noBorder" id="swabra.strict.container"
-    style="${displaySwabraSettings ? '' : 'display: none;'}">
+    style="${displayCleanupSettings ? '' : 'display: none;'}">
   <th>Clean checkout:</th>
   <td>
     <props:checkboxProperty name="swabra.strict" onclick="BS.Swabra.onStrictChange()"/>
     <label for="swabra.strict">Force clean checkout if cannot restore clean directory state</label>
   </td>
-</tr>
-
-<tr class="noBorder" id="swabra.rules.container"
-    style="${displaySwabraSettings ? '' : 'display: none;'}">
-  <th>Paths to monitor: <bs:help file="Adding+Swabra+as+a+Build+Feature" anchor="ConfiguringSwabraOptions"/></th>
-  <td>
-    <props:multilineProperty name="swabra.rules" rows="5" cols="40" linkTitle="Edit paths"/>
-    <div class="smallNote" style="margin-left: 0;">
-      Newline or comma delimited set of <strong>+|-:relative_path</strong> rules.<br/>
-      By default all paths are included. Rules on any path should come in order from more abstract to more concrete,
-      e.g. use <strong>-:**/dir/**</strong> to exclude all <strong>dir</strong> folders and their content,
-      or <strong>-:some/dir, +:some/dir/inner</strong> to exclude <strong>some/dir</strong> folder and all it's content
-      except <strong>inner</strong> subfolder and it's content.<br/>
-    </div>
 </tr>
 
 <tr class="noBorder">
@@ -103,8 +91,18 @@
   </td>
 </tr>
 
+<tr class="noBorder" id="swabra.rules.container"
+    style="${displayCleanupSettings or displayProcessesSettings? '' : 'display: none;'}">
+  <th>Paths to monitor: <bs:help file="Adding+Swabra+as+a+Build+Feature" anchor="ConfiguringSwabraOptions"/></th>
+  <td>
+    <props:multilineProperty name="swabra.rules" rows="5" cols="40" linkTitle="Edit paths"/>
+    <span class="smallNote" style="margin-left: 0;">
+      Newline or comma delimited set of <strong>+|-:path</strong> rules.<br/>
+    </span>
+</tr>
+
 <tr class="noBorder" id="swabra.verbose.container"
-    style="${displaySwabraSettings ? '' : 'display: none;'}">
+    style="${displayCleanupSettings ? '' : 'display: none;'}">
   <th><label for="swabra.verbose">Verbose output:</label></th>
   <td>
     <props:checkboxProperty name="swabra.verbose"/>
@@ -164,12 +162,18 @@
 
     onEnabledChange: function() {
       var enabledEl = $('swabra.enabled');
-      var selectedValue = enabledEl.options[enabledEl.selectedIndex].value;
+      var enabledSelectedValue = enabledEl.options[enabledEl.selectedIndex].value;
 
-      if (selectedValue == '') {
+      if (enabledSelectedValue == '') {
         BS.Util.hide($('swabra.strict.container'));
         BS.Util.hide($('swabra.verbose.container'));
-        BS.Util.hide($('swabra.rules.container'));
+
+        var processesEl = $('swabra.processes');
+        var processesSelectedValue = processesEl.options[processesEl.selectedIndex].value;
+
+        if (processesSelectedValue == '') {
+          BS.Util.hide($('swabra.rules.container'));
+        }
       } else {
         BS.Util.show($('swabra.strict.container'));
         BS.Util.show($('swabra.verbose.container'));
@@ -178,27 +182,36 @@
 
       BS.MultilineProperties.updateVisible();
 
-      this.updateClashing(selectedValue, $('swabra.strict').checked, $('swabra.rules').value);
+      this.updateClashing(enabledSelectedValue, $('swabra.strict').checked, $('swabra.rules').value);
     },
 
     onProcessesChange: function() {
       var processesEl = $('swabra.processes');
-      var selectedValue = processesEl.options[processesEl.selectedIndex].value;
+      var processesSelectedValue = processesEl.options[processesEl.selectedIndex].value;
 
-      if (selectedValue == '') {
+      if (processesSelectedValue == '') {
         BS.Util.hide($('swabra.processes.note'));
         BS.Util.hide($('swabra.processes.report.note'));
         BS.Util.hide($('swabra.processes.kill.note'));
         BS.Util.hide($('swabra.processes.handle.note'));
         BS.Util.hide($('swabra.download.handle.container'));
+
+        var enabledEl = $('swabra.enabled');
+        var enabledSelectedValue = enabledEl.options[enabledEl.selectedIndex].value;
+
+        if (enabledSelectedValue == '') {
+          BS.Util.hide($('swabra.rules.container'));
+        }
       } else {
         BS.Util.show($('swabra.processes.note'));
         BS.Util.show($('swabra.processes.handle.note'));
         BS.Util.show($('swabra.download.handle.container'));
-        if (selectedValue == 'report') {
+        BS.Util.show($('swabra.rules.container'));
+
+        if (processesSelectedValue == 'report') {
           BS.Util.show($('swabra.processes.report.note'));
           BS.Util.hide($('swabra.processes.kill.note'));
-        } else if (selectedValue == 'kill') {
+        } else if (processesSelectedValue == 'kill') {
           BS.Util.hide($('swabra.processes.report.note'));
           BS.Util.show($('swabra.processes.kill.note'));
         }

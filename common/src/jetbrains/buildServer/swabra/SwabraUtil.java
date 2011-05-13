@@ -75,19 +75,23 @@ public class SwabraUtil {
   }
 
   public static boolean isLockingProcessesKill(@NotNull final Map<String, String> params) {
-    return SystemInfo.isWindows && (params.containsKey(LOCKING_PROCESS_KILL) || "kill".equals(params.get(LOCKING_PROCESS)));
+    return params.containsKey(LOCKING_PROCESS_KILL) || "kill".equals(params.get(LOCKING_PROCESS));
   }
 
   public static boolean isStrict(@NotNull final Map<String, String> params) {
     return Boolean.parseBoolean(params.get(STRICT)) && isCleanupEnabled(params);
   }
 
+  public static boolean isLockingProcessesDetectionEnabled(@NotNull final Map<String, String> params) {
+    return isLockingProcessesReport(params) || isLockingProcessesReport(params);
+  }
+
   public static boolean isLockingProcessesReport(@NotNull final Map<String, String> params) {
-    return SystemInfo.isWindows && (params.containsKey(LOCKING_PROCESS_DETECTION) || "report".equals(params.get(LOCKING_PROCESS)));
+    return params.containsKey(LOCKING_PROCESS_DETECTION) || "report".equals(params.get(LOCKING_PROCESS));
   }
 
   public static String getRules(@NotNull final Map<String, String> params) {
-    return isCleanupEnabled(params) && params.containsKey(RULES) ? params.get(RULES) : "";
+    return (isCleanupEnabled(params) || isLockingProcessesDetectionEnabled(params)) && params.containsKey(RULES) ? params.get(RULES) : "";
   }
 
   public static String unifyPath(String path) {
