@@ -50,4 +50,14 @@ public class HandleTool extends ToolTypeExtension {
   public String getToolLicenseUrl() {
     return "http://technet.microsoft.com/en-us/sysinternals/bb469936.aspx";
   }
+
+  @Override
+  public String getTeamCityHelpFile() {
+    return "Build+Files+Cleaner+%28Swabra%29";
+  }
+
+  @Override
+  public String getTeamCityHelpAnchor() {
+    return "DownloadingHandle";
+  }
 }
