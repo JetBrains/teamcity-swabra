@@ -20,6 +20,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
 import java.util.*;
+import org.jetbrains.annotations.Nullable;
 
 /**
  * User: vbedrosova
@@ -161,8 +162,8 @@ public class SwabraUtil {
   }
 
   @NotNull
-  public static List<String> fromString(@NotNull String s) {
-    if (s.length() == 0) return Collections.emptyList();
+  public static List<String> fromString(@Nullable String s) {
+    if (s == null || s.length() == 0) return Collections.emptyList();
     return Arrays.asList(s.split(";"));
   }
 }
