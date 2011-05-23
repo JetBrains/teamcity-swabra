@@ -23,7 +23,7 @@ public class HandleTool extends ToolTypeExtension {
   @Override
   public String getDescription() {
     return "On Windows agents handle.exe is used to determine processes which hold files in the checkout directory. " +
-           "handle.exe will be automatically distributed to the agents and the agents will restart.";
+           "handle.exe will be automatically distributed to the agents and the agents will restart";
   }
 
   @Override
