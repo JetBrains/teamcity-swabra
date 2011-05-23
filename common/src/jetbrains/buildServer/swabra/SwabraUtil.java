@@ -16,7 +16,6 @@
 
 package jetbrains.buildServer.swabra;
 
-import jetbrains.buildServer.util.StringUtil;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
