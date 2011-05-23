@@ -83,8 +83,10 @@ public class SwabraBuildFeature extends BuildFeature implements BuildStartContex
   }
 
   private List<String> getClashingConfigurations(@NotNull final HttpServletRequest request) {
-    final String buildTypeId = getBuildTypeId(request);
+    return getClashingConfigurations(getBuildTypeId(request), isCleanupEnabled(request), isStrict(request));
+  }
 
+  private List<String> getClashingConfigurations(@Nullable final String buildTypeId, final boolean isCleanupEnabled, final boolean isStrict) {
     if (buildTypeId == null) return Collections.emptyList();
 
     final List<String> clashingConfigurations = new ArrayList<String>();
@@ -109,14 +111,14 @@ public class SwabraBuildFeature extends BuildFeature implements BuildStartContex
               for (SBuildFeatureDescriptor feature : bt.getBuildFeatures()) {
                 if (getType().equals(feature.getType())) {
                   swabraPresent = true;
-                  if (isCleanupEnabled(request) != SwabraUtil.isCleanupEnabled(feature.getParameters()) ||
-                      isStrict(request) != SwabraUtil.isStrict(feature.getParameters())) {
+                  if (isCleanupEnabled != SwabraUtil.isCleanupEnabled(feature.getParameters()) ||
+                      isStrict != SwabraUtil.isStrict(feature.getParameters())) {
                     clashingConfigurations.add(bt.getFullName());
                   }
                   break;
                 }
               }
-              if (!swabraPresent && isCleanupEnabled(request)) clashingConfigurations.add(bt.getFullName());
+              if (!swabraPresent && isCleanupEnabled) clashingConfigurations.add(bt.getFullName());
             }
           }
         }
@@ -183,6 +185,9 @@ public class SwabraBuildFeature extends BuildFeature implements BuildStartContex
             context.addSharedParameter(param.getKey(), param.getValue());
           }
         }
+        context.addSharedParameter(SwabraUtil.CLASHING, SwabraUtil.toString(
+          getClashingConfigurations(buildType.getBuildTypeId(), SwabraUtil.isCleanupEnabled(context.getSharedParameters()),
+                                    SwabraUtil.isStrict(context.getSharedParameters()))));
       }
     }
   }

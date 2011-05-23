@@ -16,7 +16,7 @@
 
 package jetbrains.buildServer.swabra;
 
-import com.intellij.openapi.util.SystemInfo;
+import jetbrains.buildServer.util.StringUtil;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
@@ -53,6 +53,8 @@ public class SwabraUtil {
     SWABRA_MODES.put(AFTER_BUILD, "After build");
     SWABRA_MODES.put(BEFORE_BUILD, "Before next build");
   }
+
+  public static final String CLASHING = "swabra.clashing";
 
   public static boolean isCleanupEnabled(@NotNull final Map<String, String> params) {
     return params.containsKey(ENABLED);
@@ -147,5 +149,21 @@ public class SwabraUtil {
       }
       sb.append(rules.get(i));
     }
+  }
+
+  @NotNull
+  public static String toString(@NotNull List<String> list) {
+    if (list.isEmpty()) return "";
+    final StringBuilder result = new StringBuilder();
+    for (String s : list) {
+      result.append(s).append(";");
+    }
+    return result.toString();
+  }
+
+  @NotNull
+  public static List<String> fromString(@NotNull String s) {
+    if (s.length() == 0) return Collections.emptyList();
+    return StringUtil.split(s, ";");
   }
 }

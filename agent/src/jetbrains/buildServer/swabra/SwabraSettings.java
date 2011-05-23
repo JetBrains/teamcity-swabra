@@ -52,6 +52,8 @@ public class SwabraSettings {
 
   private final File myCheckoutDir;
 
+  private final List<String> myClashingConfigurations;
+
 
   public SwabraSettings(AgentRunningBuild runningBuild) {
     final Map<String, String> params = runningBuild.getSharedConfigParameters();
@@ -66,13 +68,13 @@ public class SwabraSettings {
     final List<String> rules = new ArrayList<String>();
     rules.addAll(SwabraUtil.splitRules(SwabraUtil.getRules(params)));
 
-    final Map<String, String> configParams = runningBuild.getSharedConfigParameters();
-    if (configParams.containsKey(DEFAULT_RULES_CONFIG_PARAM)) {
-      rules.addAll(SwabraUtil.splitRules(configParams.get(DEFAULT_RULES_CONFIG_PARAM)));
+    if (params.containsKey(DEFAULT_RULES_CONFIG_PARAM)) {
+      rules.addAll(SwabraUtil.splitRules(params.get(DEFAULT_RULES_CONFIG_PARAM)));
     } else if (runningBuild.isCheckoutOnAgent()) {
       rules.addAll(Arrays.asList(DEFAULT_RULES));
     }
     myRules = new SwabraRules(myCheckoutDir, rules);
+    myClashingConfigurations = SwabraUtil.fromString(params.get(SwabraUtil.CLASHING));
 
     logSettings();
   }
@@ -119,6 +121,10 @@ public class SwabraSettings {
 
   public boolean isVerbose() {
     return myVerbose;
+  }
+
+  public List<String> getClashingConfigurations() {
+    return myClashingConfigurations;
   }
 
   private void logSettings() {
