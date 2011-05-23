@@ -164,6 +164,6 @@ public class SwabraUtil {
   @NotNull
   public static List<String> fromString(@NotNull String s) {
     if (s.length() == 0) return Collections.emptyList();
-    return StringUtil.split(s, ";");
+    return Arrays.asList(s.split(";"));
   }
 }
