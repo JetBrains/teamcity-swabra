@@ -116,7 +116,7 @@ public class SwabraBuildFeature extends BuildFeature implements BuildStartContex
                   break;
                 }
               }
-              if (!swabraPresent && SwabraUtil.isCleanupEnabled(request.getParameterMap())) clashingConfigurations.add(bt.getFullName());
+              if (!swabraPresent && isCleanupEnabled(request)) clashingConfigurations.add(bt.getFullName());
             }
           }
         }
