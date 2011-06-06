@@ -18,7 +18,9 @@
 <%@ taglib prefix="l" tagdir="/WEB-INF/tags/layout" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ taglib prefix="forms" tagdir="/WEB-INF/tags/forms" %>
+<%@ taglib prefix="authz" tagdir="/WEB-INF/tags/authz" %>
 <%@ taglib prefix="bs" tagdir="/WEB-INF/tags" %>
+<%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
 <jsp:useBean id="propertiesBean" scope="request" type="jetbrains.buildServer.controllers.BasePropertiesBean"/>
 <jsp:useBean id="handlePresent" scope="request" type="java.lang.Boolean"/>
 <jsp:useBean id="requestUrl" type="java.lang.String" scope="request"/>
@@ -124,8 +126,15 @@
       <c:if test="${not handlePresent}">
         Note that for locking processes detection handle.exe tool is required on agents.<br/>
       </c:if>
-      <c:url var="handleDownloader" value="/admin/serverConfig.html?init=1&tab=toolLoadTab&toolType=handleTool"/>
-      <a href="${handleDownloader}" target="_blank" showdiscardchangesmessage="false">${actionName} Sysinternals handle.exe</a>
+      <authz:authorize allPermissions="CHANGE_SERVER_SETTINGS">
+        <jsp:attribute name="ifAccessGranted">
+          <c:url var="handleDownloader" value="/admin/serverConfig.html?init=1&tab=toolLoadTab&toolType=handleTool"/>
+          <a href="${handleDownloader}" target="_blank" showdiscardchangesmessage="false">${actionName} Sysinternals handle.exe</a>
+        </jsp:attribute>
+        <jsp:attribute name="ifAccessDenied">
+          Please ask your System Administrator to ${fn:toLowerCase(actionName)} Sysinternals handle.exe using Administration -> Server Configurations -> Tools page.
+        </jsp:attribute>
+      </authz:authorize>
     </div>
   </td>
 </tr>
