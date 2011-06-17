@@ -19,7 +19,6 @@
     <orderEntry type="module" module-name="runtime-util" />
     <orderEntry type="module" module-name="processesTerminator" />
     <orderEntry type="module" module-name="common-runtime" />
-    <orderEntry type="library" name="Spring" level="project" />
     <orderEntry type="module" module-name="agent" />
   </component>
 </module>
