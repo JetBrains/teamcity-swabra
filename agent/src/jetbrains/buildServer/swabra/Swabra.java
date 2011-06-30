@@ -22,10 +22,10 @@ package jetbrains.buildServer.swabra;
  * Time: 14:10:58
  */
 
+import java.io.File;
 import java.util.Collection;
 import java.util.List;
 import jetbrains.buildServer.agent.*;
-import jetbrains.buildServer.messages.Status;
 import jetbrains.buildServer.messages.serviceMessages.BuildStatus;
 import jetbrains.buildServer.swabra.processes.HandleProcessesProvider;
 import jetbrains.buildServer.swabra.processes.LockedFileResolver;
@@ -33,8 +33,6 @@ import jetbrains.buildServer.swabra.snapshots.*;
 import jetbrains.buildServer.util.EventDispatcher;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-
-import java.io.File;
 
 
 public final class Swabra extends AgentLifeCycleAdapter {
@@ -395,6 +393,6 @@ public final class Swabra extends AgentLifeCycleAdapter {
 
     final String message = "Swabra cleanup failed";
     myLogger.error(message + ": some files are locked");
-    myLogger.message(new BuildStatus("{build.status.text}; " + message, Status.FAILURE).asString(), true);
+    myLogger.message(new BuildStatus("{build.status.text}; " + message, "FAILURE").asString(), true);
   }
 }
