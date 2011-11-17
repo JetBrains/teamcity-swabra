@@ -108,7 +108,7 @@ public class SwabraBuildFeature extends BuildFeature implements BuildStartContex
             if (checkoutDir != null && checkoutDir.equals(bt.getResolvedSettings().getCheckoutDirectory()) ||
                 vcsSettingsHash.equals(bt.getVcsSettingsHash())) {
               boolean swabraPresent = false;
-              for (SBuildFeatureDescriptor feature : bt.getBuildFeatures()) {
+              for (SBuildFeatureDescriptor feature : bt.getResolvedSettings().getBuildFeatures()) {
                 if (getType().equals(feature.getType())) {
                   swabraPresent = true;
                   if (isCleanupEnabled != SwabraUtil.isCleanupEnabled(feature.getParameters()) ||
@@ -177,7 +177,7 @@ public class SwabraBuildFeature extends BuildFeature implements BuildStartContex
   public void updateParameters(@NotNull BuildStartContext context) {
     SBuildType buildType = context.getBuild().getBuildType();
     if (buildType == null) return;
-    Collection<SBuildFeatureDescriptor> buildFeatures = buildType.getBuildFeatures();
+    Collection<SBuildFeatureDescriptor> buildFeatures = buildType.getResolvedSettings().getBuildFeatures();
     for (SBuildFeatureDescriptor bf : buildFeatures) {
       if (bf.getType().equals(getType())) {
         for (final Map.Entry<String, String> param : bf.getParameters().entrySet()) {
