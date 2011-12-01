@@ -142,7 +142,7 @@
 <script type="text/javascript">
   BS.Swabra = {
     updateClashing: function(enabled, strict, rules) {
-      BS.ajaxRequest(base_uri + '${requestUrl}', {
+      BS.ajaxRequest(window['base_uri'] + '${requestUrl}', {
         parameters: 'id=${buildTypeId}' + '&updateClashing=true' +
                     (enabled.length > 0 ? '&swabra.enabled=' + encodeURIComponent(enabled): '') +
                     '&swabra.strict=' + (strict ? strict : 'false') +
