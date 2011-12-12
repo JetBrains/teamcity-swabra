@@ -19,13 +19,9 @@ package jetbrains.buildServer.swabra;
 
 import com.intellij.util.io.ZipUtil;
 import java.io.*;
-import java.net.URL;
-import java.util.zip.ZipOutputStream;
-import jetbrains.buildServer.serverSide.AgentDistributionMonitor;
-import jetbrains.buildServer.serverSide.RegisterAgentPluginException;
+import jetbrains.buildServer.serverSide.AgentToolManager;
 import jetbrains.buildServer.serverSide.ServerPaths;
 import jetbrains.buildServer.util.FileUtil;
-import org.apache.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
 
 /**
@@ -34,132 +30,77 @@ import org.jetbrains.annotations.NotNull;
  * Time: 15:48:35
  */
 public class HandleProvider {
-  private static final Logger LOG = Logger.getLogger(HandleProvider.class);
-  private static final String PLUGIN_DIR_NAME = "handle-provider";
+  private static final org.apache.log4j.Logger LOG = org.apache.log4j.Logger.getLogger(HandleProvider.class.getName());
 
-  private static final String HANDLE_PROVIDER_JAR = "handle-provider.jar";
-  private static final String TEAMCITY_PLUGIN_XML = "teamcity-plugin.xml";
+  private static final String HANDLE_TOOL = "SysinternalsHandle";
 
-  private final File myPluginFolder;
-  private final AgentDistributionMonitor myAgentManager;
+  @NotNull
+  private final ServerPaths myServerPaths;
+  
+  @NotNull
+  private final AgentToolManager myToolManager;
 
-  public HandleProvider(@NotNull final AgentDistributionMonitor agentManager,
-                        @NotNull final ServerPaths paths) {
-    myAgentManager = agentManager;
-    myPluginFolder = new File(paths.getPluginsDir(), PLUGIN_DIR_NAME);
+  public HandleProvider(@NotNull final ServerPaths paths,
+                        @NotNull final AgentToolManager toolManager) {
+    myServerPaths = paths;
+    myToolManager = toolManager;
+
+    convertOldHandlePlugin();
   }
 
   public boolean isHandlePresent() {
-    //TODO: Check windows running build agent to report handle.exe.path config paramter
-
-    if (myPluginFolder == null) {
-      return false;
-    }
-    final File[] files = myPluginFolder.listFiles();
-    return files != null && files.length > 0;
+    return myToolManager.isToolRegistered(HANDLE_TOOL);
   }
 
   @NotNull
-  public File getPluginFolder() {
-    return myPluginFolder;
+  public File getHandleExe() {
+    return new File(myToolManager.getRegisteredToolPath(HANDLE_TOOL), "handle.exe");
   }
 
-  public void packPlugin(File handleExe) throws IOException {
+  public void packHandleTool(@NotNull File handleTool) throws IOException {
+    if (myToolManager.isToolRegistered(HANDLE_TOOL)) {
+      LOG.debug("Updating " + handleTool + " tool");
+      FileUtil.delete(getHandleExe());
+      FileUtil.copyDir(handleTool, myToolManager.getRegisteredToolPath(HANDLE_TOOL));
+    } else {
+      LOG.debug("Packaging " + handleTool + " as tool");
+      myToolManager.registerSharedTool(HANDLE_TOOL, handleTool);
+    }
+  }
 
-    final File pluginTempFolder = preparePluginFolder();
-    try {
-      final File pluginAgentTempFolder = prepareSubFolder(pluginTempFolder, PLUGIN_DIR_NAME);
+  private void convertOldHandlePlugin() {
+    final File oldPlugin1 = new File(myServerPaths.getPluginsDir(), "handle-provider");
+    if (oldPlugin1.exists()) {
+      LOG.debug("Detected old handle-provider plugin " + oldPlugin1);
       try {
-        final File binFolder = prepareSubFolder(pluginAgentTempFolder, "bin");
-        FileUtil.copy(handleExe, new File(binFolder, "handle.exe"));
+        if (!getHandleExe().isFile()) {
+          LOG.debug("Converting old handle-provider plugin " + oldPlugin1 + " into tool");
+          final File agentPlugin = new File(oldPlugin1, "agent/handle-provider.zip");
+          if (agentPlugin.isFile()) {
+            final File temp = new File(FileUtil.getTempDirectory(), "handle-provider");
+            try {
+              ZipUtil.extract(agentPlugin, temp, null);
 
-        final File libFolder = prepareSubFolder(pluginAgentTempFolder, "lib");
-        copyOutResource(libFolder, HANDLE_PROVIDER_JAR);
-
-        final File pluginAgentFolder = prepareSubFolder(pluginTempFolder, "agent");
-        zipPlugin(pluginAgentTempFolder, new File(pluginAgentFolder, "handle-provider.zip"));
+              final File handleExe = new File(temp, "handle-provider/bin/handle.exe");
+              if (handleExe.isFile()) {
+                packHandleTool(handleExe.getParentFile());
+              } else {
+                LOG.warn("No handle.exe detected in " + oldPlugin1);
+              }
+            } finally {
+              FileUtil.delete(temp);
+            }
+          } else {
+            LOG.warn("No agent plugin detected in " + oldPlugin1);
+          }
+        }
+      } catch (IOException e) {
+        LOG.warn("Failed to convert " + oldPlugin1, e);
       } finally {
-        FileUtil.delete(pluginAgentTempFolder);
-      }
-      copyOutResource(pluginTempFolder, TEAMCITY_PLUGIN_XML);
-      if (myPluginFolder.exists()) {
-        FileUtil.delete(myPluginFolder);
-      }
-      FileUtil.copyDir(pluginTempFolder, myPluginFolder);
-    } finally {
-      FileUtil.delete(pluginTempFolder);
-    }
-
-    registerAgentPlugin(myPluginFolder);
-  }
-
-  private void registerAgentPlugin(@NotNull final File handleServerPlugin) {
-    final File[] plugins = new File(handleServerPlugin, "agent").listFiles(new FileFilter() {
-      public boolean accept(final File pathname) {
-        return pathname.isFile() && pathname.getPath().endsWith(".zip");
-      }
-    });
-    if (plugins == null || plugins.length == 0) return;
-
-    for (File plugin : plugins) {
-      try {
-        myAgentManager.registerAgentPlugin(plugin);
-      } catch (RegisterAgentPluginException e) {
-        LOG.warn("Failed to register handle-provider agent plugin: " + e.getLocalizedMessage());
-        LOG.debug(e.getMessage(), e);
+        LOG.debug("Deleting old handle-provider plugin " + oldPlugin1);
+        FileUtil.delete(oldPlugin1);
       }
     }
-  }
-
-  private static void copyOutResource(File libFolder, String resourceName) throws FileNotFoundException {
-    final String resourcePath = "/bin/" + resourceName;
-    final File handleProviderJar = new File(libFolder, resourceName);
-    LOG.debug("Copying resource " + resourcePath + " out from jar to " + handleProviderJar + "...");
-
-    FileUtil.copyResource(HandleProvider.class, resourcePath, handleProviderJar);
-    if (!handleProviderJar.isFile()) {
-      LOG.warn(
-        "Unable to copy resource " + resourcePath + " out from jar to " + handleProviderJar + ": " + handleProviderJar + " not found");
-      throw new FileNotFoundException(handleProviderJar + " not found");
-    }
-
-    LOG.debug("Successfully copied " + resourcePath + " out from jar to " + handleProviderJar);
-  }
-
-  private static void zipPlugin(File pluginFolder, File pluginZip) throws IOException {
-    LOG.debug("Putting handle-provider plugin from " + pluginFolder + " into zip " + pluginZip + "...");
-
-    ZipOutputStream zipOutputStream = null;
-    try {
-      zipOutputStream = new ZipOutputStream(new FileOutputStream(pluginZip));
-      ZipUtil.addDirToZipRecursively(zipOutputStream, pluginZip, pluginFolder, pluginFolder.getName(), null, null);
-    } finally {
-      if (zipOutputStream != null) {
-        zipOutputStream.close();
-      }
-    }
-
-    LOG.debug("Successfully put handle-provider plugin from " + pluginFolder + " into zip " + pluginZip);
-  }
-
-  private static File prepareSubFolder(File baseFolder, String name) {
-    final File binFolder = new File(baseFolder, name);
-    if (!binFolder.mkdirs()) {
-      LOG.debug("Failed to create subfolder " + binFolder + " for base folder " + baseFolder);
-    }
-    return binFolder;
-  }
-
-  private static File preparePluginFolder() {
-    final File pluginFolder = new File(FileUtil.getTempDirectory(), "handle-provider");
-    LOG.debug("handle-provider plugin temp folder is " + pluginFolder);
-
-    if (pluginFolder.exists()) {
-      LOG.debug("handle-provider plugin folder " + pluginFolder + " exists, trying to delete");
-      if (FileUtil.delete(pluginFolder)) {
-        LOG.debug("Failed to delete handle-provider plugin folder " + pluginFolder);
-      }
-    }
-    return pluginFolder;
+    FileUtil.delete(new File(myServerPaths.getPluginDataDirectory(), "handle-provider.zip"));
   }
 }

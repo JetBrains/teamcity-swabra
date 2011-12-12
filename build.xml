@@ -24,16 +24,7 @@
     <property name="plugin.version" value="${build.number}"/>
   </target>
 
-  <target name="prepare.handle-provider" depends="artifact.handle-provider">
-    <property name="handle-provider.resources" value="${server.output.dir}/bin"/>
-    <mkdir dir="${handle-provider.resources}"/>
-    <copy file="${basedir}/handle-provider-teamcity-plugin.xml"
-          tofile="${handle-provider.resources}/teamcity-plugin.xml"/>
-    <copy file="${artifact.output.handle-provider}/handle-provider.jar" todir="${handle-provider.resources}"/>
-  </target>
-
-
-  <target name="dist" depends="all, define.version, prepare.handle-provider">
+  <target name="dist" depends="all, define.version">
     <delete dir="dist" quiet="true"/>
     <package.teamcity.plugin name="${plugin.name}" server.output="${server.output.dir}"
                              agent.output="${agent.output.dir}"

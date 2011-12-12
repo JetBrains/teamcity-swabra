@@ -46,6 +46,8 @@ public final class Swabra extends AgentLifeCycleAdapter {
   private final SwabraLogger myLogger;
   @NotNull
   private final SwabraPropertiesProcessor myPropertiesProcessor;
+  @NotNull
+  private final BundledToolsRegistry myToolsRegistry;
 //  @NotNull
 //  private ProcessTerminator myProcessTerminator;
 
@@ -60,12 +62,14 @@ public final class Swabra extends AgentLifeCycleAdapter {
   public Swabra(@NotNull final EventDispatcher<AgentLifeCycleListener> agentDispatcher,
                 @NotNull final SmartDirectoryCleaner directoryCleaner,
                 @NotNull final SwabraLogger logger,
-                @NotNull final SwabraPropertiesProcessor propertiesProcessor
+                @NotNull final SwabraPropertiesProcessor propertiesProcessor,
+                @NotNull final BundledToolsRegistry toolsRegistry
                 /*,@NotNull ProcessTerminator processTerminator*/) {
     agentDispatcher.addListener(this);
     myDirectoryCleaner = directoryCleaner;
     myLogger = logger;
     myPropertiesProcessor = propertiesProcessor;
+    myToolsRegistry = toolsRegistry;
 //    myProcessTerminator = processTerminator;
   }
 
@@ -81,7 +85,7 @@ public final class Swabra extends AgentLifeCycleAdapter {
 
     myLogger.activityStarted();
     try {
-      mySettings.prepareHandle(myLogger, runningBuild);
+      mySettings.prepareHandle(myLogger, myToolsRegistry);
 
       myLockedFileResolver = mySettings.isLockingProcessesDetectionEnabled() ?
         new LockedFileResolver(new HandleProcessesProvider(mySettings.getHandlePath())/*, myProcessTerminator,*/) : null;

@@ -1,9 +1,9 @@
 package jetbrains.buildServer.swabra;
 
 import java.io.File;
-import java.io.IOException;
 import jetbrains.buildServer.messages.Status;
 import jetbrains.buildServer.tools.ServerToolProcessor;
+import org.apache.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
 
 /**
@@ -12,6 +12,8 @@ import org.jetbrains.annotations.NotNull;
  * Time: 22:10
  */
 public class HandleToolServerProcessor implements ServerToolProcessor {
+  private static final Logger LOG = Logger.getLogger(HandleToolServerProcessor.class.getName());
+
   @NotNull
   private final HandleProvider myHandleProvider;
 
@@ -26,11 +28,13 @@ public class HandleToolServerProcessor implements ServerToolProcessor {
 
   public void processTool(@NotNull final File tool, @NotNull final ServerToolProcessorCallback callback) {
     try {
-      myHandleProvider.packPlugin(tool);
-      callback.progress("Created agent plugin at " + myHandleProvider.getPluginFolder(), Status.NORMAL);
+      myHandleProvider.packHandleTool(tool);
+      callback.progress("Saved " + myHandleProvider.getHandleExe(), Status.NORMAL);
       callback.progress("handle.exe will be present on agents after the upgrade process (will start automatically)", Status.NORMAL);
     } catch (Throwable throwable) {
-      callback.progress("Failed to create agent plugin at " + myHandleProvider.getPluginFolder() + ", please see teamcity-server.log for details", Status.ERROR);
+      final String err = "Failed to save " + myHandleProvider.getHandleExe();
+      LOG.error(err, throwable);
+      callback.progress("Failed to save " + myHandleProvider.getHandleExe() + ", please see teamcity-server.log for details", Status.ERROR);
     }
   }
 }

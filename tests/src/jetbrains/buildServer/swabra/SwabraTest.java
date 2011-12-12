@@ -163,7 +163,11 @@ public class SwabraTest extends TestCase {
     final EventDispatcher<AgentLifeCycleListener> dispatcher = EventDispatcher.create(AgentLifeCycleListener.class);
     final SwabraLogger swabraLogger = new SwabraLogger();
     final Swabra swabra = new Swabra(dispatcher, createSmartDirectoryCleaner(), new SwabraLogger(),
-      new SwabraPropertiesProcessor(dispatcher, swabraLogger)/*, new ProcessTerminator()*/);
+      new SwabraPropertiesProcessor(dispatcher, swabraLogger), new BundledToolsRegistry() {
+      public BundledTool findTool(@NotNull final String name) {
+        return null;
+      }
+    }/*, new ProcessTerminator()*/);
 
 //    final File pttTemp = new File(TEST_DATA_PATH, "ptt");
 //    System.setProperty(ProcessTreeTerminator.TEMP_PATH_SYSTEM_PROPERTY, pttTemp.getAbsolutePath());

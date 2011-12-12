@@ -19,14 +19,6 @@
       <properties />
     </buildFile>
   </component>
-  <component name="ArtifactManager">
-    <artifact type="jar" name="handle-provider">
-      <output-path>$PROJECT_DIR$/out/artifacts/handle_provider</output-path>
-      <root id="archive" name="handle-provider.jar">
-        <element id="module-output" name="handle-provider" />
-      </root>
-    </artifact>
-  </component>
   <component name="BuildJarProjectSettings">
     <option name="BUILD_JARS_ON_MAKE" value="false" />
   </component>
@@ -270,7 +262,11 @@
     <option name="myDefaultNotNull" value="org.jetbrains.annotations.NotNull" />
     <option name="myNullables">
       <value>
-        <list size="0" />
+        <list size="3">
+          <item index="0" class="java.lang.String" itemvalue="org.jetbrains.annotations.Nullable" />
+          <item index="1" class="java.lang.String" itemvalue="javax.annotation.Nullable" />
+          <item index="2" class="java.lang.String" itemvalue="edu.umd.cs.findbugs.annotations.Nullable" />
+        </list>
       </value>
     </option>
     <option name="myNotNulls">
@@ -404,6 +400,70 @@
       </item>
     </group>
   </component>
+  <component name="ProjectCodeStyleSettingsManager">
+    <option name="PER_PROJECT_SETTINGS">
+      <value>
+        <option name="OTHER_INDENT_OPTIONS">
+          <value>
+            <option name="INDENT_SIZE" value="2" />
+            <option name="CONTINUATION_INDENT_SIZE" value="8" />
+            <option name="TAB_SIZE" value="4" />
+            <option name="USE_TAB_CHARACTER" value="false" />
+            <option name="SMART_TABS" value="false" />
+            <option name="LABEL_INDENT_SIZE" value="0" />
+            <option name="LABEL_INDENT_ABSOLUTE" value="false" />
+            <option name="USE_RELATIVE_INDENTS" value="false" />
+          </value>
+        </option>
+        <option name="FIELD_NAME_PREFIX" value="my" />
+        <option name="RIGHT_MARGIN" value="140" />
+        <XML>
+          <option name="XML_LEGACY_SETTINGS_IMPORTED" value="true" />
+        </XML>
+        <ADDITIONAL_INDENT_OPTIONS fileType="gsp">
+          <option name="INDENT_SIZE" value="2" />
+        </ADDITIONAL_INDENT_OPTIONS>
+        <ADDITIONAL_INDENT_OPTIONS fileType="jsp">
+          <option name="INDENT_SIZE" value="2" />
+          <option name="CONTINUATION_INDENT_SIZE" value="4" />
+          <option name="TAB_SIZE" value="8" />
+        </ADDITIONAL_INDENT_OPTIONS>
+        <ADDITIONAL_INDENT_OPTIONS fileType="sass">
+          <option name="INDENT_SIZE" value="2" />
+        </ADDITIONAL_INDENT_OPTIONS>
+        <ADDITIONAL_INDENT_OPTIONS fileType="sql">
+          <option name="INDENT_SIZE" value="2" />
+        </ADDITIONAL_INDENT_OPTIONS>
+        <ADDITIONAL_INDENT_OPTIONS fileType="yml">
+          <option name="INDENT_SIZE" value="2" />
+        </ADDITIONAL_INDENT_OPTIONS>
+        <codeStyleSettings language="Groovy">
+          <indentOptions>
+            <option name="INDENT_SIZE" value="2" />
+          </indentOptions>
+        </codeStyleSettings>
+        <codeStyleSettings language="JAVA">
+          <indentOptions>
+            <option name="INDENT_SIZE" value="2" />
+            <option name="CONTINUATION_INDENT_SIZE" value="2" />
+          </indentOptions>
+        </codeStyleSettings>
+        <codeStyleSettings language="JavaScript">
+          <indentOptions>
+            <option name="INDENT_SIZE" value="2" />
+          </indentOptions>
+        </codeStyleSettings>
+        <codeStyleSettings language="XML">
+          <indentOptions>
+            <option name="INDENT_SIZE" value="2" />
+            <option name="CONTINUATION_INDENT_SIZE" value="4" />
+            <option name="TAB_SIZE" value="8" />
+          </indentOptions>
+        </codeStyleSettings>
+      </value>
+    </option>
+    <option name="USE_PER_PROJECT_SETTINGS" value="true" />
+  </component>
   <component name="ProjectDetails">
     <option name="projectName" value="swabra" />
   </component>
@@ -436,15 +496,6 @@
         <entry key="$PROJECT_DIR$">
           <value>
             <SvnBranchConfiguration>
-              <option name="branchMap">
-                <map>
-                  <entry key="http://svn.jetbrains.org/teamcity/plugins/swabra/branches">
-                    <value>
-                      <list />
-                    </value>
-                  </entry>
-                </map>
-              </option>
               <option name="branchUrls">
                 <list>
                   <option value="http://svn.jetbrains.org/teamcity/plugins/swabra/branches" />
@@ -457,15 +508,6 @@
         <entry key="$PROJECT_DIR$/server">
           <value>
             <SvnBranchConfiguration>
-              <option name="branchMap">
-                <map>
-                  <entry key="http://svn.jetbrains.org/teamcity/plugins/swabra/branches">
-                    <value>
-                      <list />
-                    </value>
-                  </entry>
-                </map>
-              </option>
               <option name="branchUrls">
                 <list>
                   <option value="http://svn.jetbrains.org/teamcity/plugins/swabra/branches" />

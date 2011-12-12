@@ -18,6 +18,7 @@
     <exclude name="**/CVS/**"/>
     <exclude name="**/SCCS/**"/>
     <exclude name="**/RCS/**"/>
+    <exclude name="**/rcs/**"/>
     <exclude name="**/.DS_Store/**"/>
     <exclude name="**/.svn/**"/>
     <exclude name="**/.pyc/**"/>
@@ -32,11 +33,11 @@
     <exclude name="**/*~/**"/>
     <exclude name="**/__pycache__/**"/>
     <exclude name="**/.bundle/**"/>
-    <exclude name="**/vssver.scc/**"/>
-    <exclude name="**/vssver2.scc/**"/>
+    <exclude name="**/*.rbc/**"/>
   </patternset>
   <patternset id="library.patterns">
     <include name="*.zip"/>
+    <include name="*.apk"/>
     <include name="*.war"/>
     <include name="*.egg"/>
     <include name="*.ear"/>
@@ -230,105 +231,6 @@
   <target name="clean.module.common" description="cleanup module">
     <delete dir="${common.output.dir}"/>
     <delete dir="${common.testoutput.dir}"/>
-  </target>
-  
-  
-  <!-- Module handle-provider -->
-  
-  <dirname property="module.handle-provider.basedir" file="${ant.file}"/>
-  
-  
-  
-  <property name="compiler.args.handle-provider" value="${compiler.args}"/>
-  
-  <property name="handle-provider.output.dir" value="${module.handle-provider.basedir}/out/production/handle-provider"/>
-  <property name="handle-provider.testoutput.dir" value="${module.handle-provider.basedir}/out/test/handle-provider"/>
-  
-  <path id="handle-provider.module.bootclasspath">
-    <!-- Paths to be included in compilation bootclasspath -->
-  </path>
-  
-  <path id="handle-provider.module.production.classpath">
-    <path refid="library.teamcity-agent.classpath"/>
-    <path refid="library.idea_annotations.classpath"/>
-    <path refid="library.log4j.classpath"/>
-    <path refid="library.teamcity-utils.classpath"/>
-    <path refid="library.intellij_idea_open_api.classpath"/>
-    <path refid="library.teamcity-common.classpath"/>
-  </path>
-  
-  <path id="handle-provider.runtime.production.module.classpath">
-    <pathelement location="${handle-provider.output.dir}"/>
-    <path refid="library.teamcity-agent.classpath"/>
-    <path refid="library.idea_annotations.classpath"/>
-    <path refid="library.log4j.classpath"/>
-    <path refid="library.teamcity-utils.classpath"/>
-    <path refid="library.intellij_idea_open_api.classpath"/>
-    <path refid="library.teamcity-common.classpath"/>
-  </path>
-  
-  <path id="handle-provider.module.classpath">
-    <pathelement location="${handle-provider.output.dir}"/>
-    <path refid="library.teamcity-agent.classpath"/>
-    <path refid="library.idea_annotations.classpath"/>
-    <path refid="library.log4j.classpath"/>
-    <path refid="library.teamcity-utils.classpath"/>
-    <path refid="library.intellij_idea_open_api.classpath"/>
-    <path refid="library.teamcity-common.classpath"/>
-  </path>
-  
-  <path id="handle-provider.runtime.module.classpath">
-    <pathelement location="${handle-provider.testoutput.dir}"/>
-    <pathelement location="${handle-provider.output.dir}"/>
-    <path refid="library.teamcity-agent.classpath"/>
-    <path refid="library.idea_annotations.classpath"/>
-    <path refid="library.log4j.classpath"/>
-    <path refid="library.teamcity-utils.classpath"/>
-    <path refid="library.intellij_idea_open_api.classpath"/>
-    <path refid="library.teamcity-common.classpath"/>
-  </path>
-  
-  
-  <patternset id="excluded.from.module.handle-provider">
-    <patternset refid="ignored.files"/>
-  </patternset>
-  
-  <patternset id="excluded.from.compilation.handle-provider">
-    <patternset refid="excluded.from.module.handle-provider"/>
-  </patternset>
-  
-  <path id="handle-provider.module.sourcepath">
-    <dirset dir="${module.handle-provider.basedir}/handle-provider">
-      <include name="src"/>
-    </dirset>
-  </path>
-  
-  
-  <target name="compile.module.handle-provider" depends="compile.module.handle-provider.production,compile.module.handle-provider.tests" description="Compile module handle-provider"/>
-  
-  <target name="compile.module.handle-provider.production" depends="register.custom.compilers" description="Compile module handle-provider; production classes">
-    <mkdir dir="${handle-provider.output.dir}"/>
-    <javac2 destdir="${handle-provider.output.dir}" debug="${compiler.debug}" nowarn="${compiler.generate.no.warnings}" memorymaximumsize="${compiler.max.memory}" fork="true">
-      <compilerarg line="${compiler.args.handle-provider}"/>
-      <bootclasspath refid="handle-provider.module.bootclasspath"/>
-      <classpath refid="handle-provider.module.production.classpath"/>
-      <src refid="handle-provider.module.sourcepath"/>
-      <patternset refid="excluded.from.compilation.handle-provider"/>
-    </javac2>
-    
-    <copy todir="${handle-provider.output.dir}">
-      <fileset dir="${module.handle-provider.basedir}/handle-provider/src">
-        <patternset refid="compiler.resources"/>
-        <type type="file"/>
-      </fileset>
-    </copy>
-  </target>
-  
-  <target name="compile.module.handle-provider.tests" depends="register.custom.compilers,compile.module.handle-provider.production" description="compile module handle-provider; test classes" unless="skip.tests"/>
-  
-  <target name="clean.module.handle-provider" description="cleanup module">
-    <delete dir="${handle-provider.output.dir}"/>
-    <delete dir="${handle-provider.testoutput.dir}"/>
   </target>
   
   
@@ -599,7 +501,7 @@
     <pathelement location="${common.output.dir}"/>
     <path refid="library.idea_annotations.classpath"/>
     <path refid="library.teamcity-processterminator.classpath"/>
-    <pathelement location="${handle-provider.output.dir}"/>
+    <path refid="library.teamcity-agent-non-openapi.classpath"/>
   </path>
   
   <path id="tests.runtime.production.module.classpath">
@@ -614,7 +516,7 @@
     <path refid="common.runtime.production.module.classpath"/>
     <path refid="library.idea_annotations.classpath"/>
     <path refid="library.teamcity-processterminator.classpath"/>
-    <path refid="handle-provider.runtime.production.module.classpath"/>
+    <path refid="library.teamcity-agent-non-openapi.classpath"/>
   </path>
   
   <path id="tests.module.classpath">
@@ -631,8 +533,7 @@
     <pathelement location="${common.output.dir}"/>
     <path refid="library.idea_annotations.classpath"/>
     <path refid="library.teamcity-processterminator.classpath"/>
-    <pathelement location="${handle-provider.testoutput.dir}"/>
-    <pathelement location="${handle-provider.output.dir}"/>
+    <path refid="library.teamcity-agent-non-openapi.classpath"/>
   </path>
   
   <path id="tests.runtime.module.classpath">
@@ -648,7 +549,7 @@
     <path refid="common.runtime.module.classpath"/>
     <path refid="library.idea_annotations.classpath"/>
     <path refid="library.teamcity-processterminator.classpath"/>
-    <path refid="handle-provider.runtime.module.classpath"/>
+    <path refid="library.teamcity-agent-non-openapi.classpath"/>
   </path>
   
   
@@ -669,7 +570,7 @@
   
   <target name="compile.module.tests" depends="compile.module.tests.production,compile.module.tests.tests" description="Compile module tests"/>
   
-  <target name="compile.module.tests.production" depends="register.custom.compilers,compile.module.agent,compile.module.common,compile.module.handle-provider" description="Compile module tests; production classes"/>
+  <target name="compile.module.tests.production" depends="register.custom.compilers,compile.module.agent,compile.module.common" description="Compile module tests; production classes"/>
   
   <target name="compile.module.tests.tests" depends="register.custom.compilers,compile.module.tests.production" description="compile module tests; test classes" unless="skip.tests">
     <mkdir dir="${tests.testoutput.dir}"/>
@@ -713,7 +614,6 @@
   <path id="swabra.module.production.classpath">
     <pathelement location="${agent.output.dir}"/>
     <pathelement location="${common.output.dir}"/>
-    <pathelement location="${handle-provider.output.dir}"/>
     <pathelement location="${server.output.dir}"/>
     <pathelement location="${tests.output.dir}"/>
   </path>
@@ -722,7 +622,6 @@
     <pathelement location="${swabra.output.dir}"/>
     <path refid="agent.runtime.production.module.classpath"/>
     <path refid="common.runtime.production.module.classpath"/>
-    <path refid="handle-provider.runtime.production.module.classpath"/>
     <path refid="server.runtime.production.module.classpath"/>
     <path refid="tests.runtime.production.module.classpath"/>
   </path>
@@ -733,8 +632,6 @@
     <pathelement location="${agent.output.dir}"/>
     <pathelement location="${common.testoutput.dir}"/>
     <pathelement location="${common.output.dir}"/>
-    <pathelement location="${handle-provider.testoutput.dir}"/>
-    <pathelement location="${handle-provider.output.dir}"/>
     <pathelement location="${server.testoutput.dir}"/>
     <pathelement location="${server.output.dir}"/>
     <pathelement location="${tests.testoutput.dir}"/>
@@ -746,7 +643,6 @@
     <pathelement location="${swabra.output.dir}"/>
     <path refid="agent.runtime.module.classpath"/>
     <path refid="common.runtime.module.classpath"/>
-    <path refid="handle-provider.runtime.module.classpath"/>
     <path refid="server.runtime.module.classpath"/>
     <path refid="tests.runtime.module.classpath"/>
   </path>
@@ -763,7 +659,7 @@
   
   <target name="compile.module.swabra" depends="compile.module.swabra.production,compile.module.swabra.tests" description="Compile module swabra"/>
   
-  <target name="compile.module.swabra.production" depends="register.custom.compilers,compile.module.agent,compile.module.common,compile.module.handle-provider,compile.module.server,compile.module.tests" description="Compile module swabra; production classes"/>
+  <target name="compile.module.swabra.production" depends="register.custom.compilers,compile.module.agent,compile.module.common,compile.module.server,compile.module.tests" description="Compile module swabra; production classes"/>
   
   <target name="compile.module.swabra.tests" depends="register.custom.compilers,compile.module.swabra.production" description="compile module swabra; test classes" unless="skip.tests"/>
   
@@ -776,35 +672,9 @@
     <!-- Perform any build initialization in this target -->
   </target>
   
-  <target name="clean" depends="clean.module.common, clean.module.handle-provider, clean.module.agent, clean.module.server, clean.module.tests, clean.module.swabra" description="cleanup all"/>
+  <target name="clean" depends="clean.module.common, clean.module.agent, clean.module.server, clean.module.tests, clean.module.swabra" description="cleanup all"/>
   
-  <target name="build.modules" depends="init, clean, compile.module.common, compile.module.handle-provider, compile.module.agent, compile.module.server, compile.module.tests, compile.module.swabra" description="build all modules"/>
+  <target name="build.modules" depends="init, clean, compile.module.common, compile.module.agent, compile.module.server, compile.module.tests, compile.module.swabra" description="build all modules"/>
   
-  <target name="init.artifacts">
-    <property name="artifacts.temp.dir" value="${basedir}/__artifacts_temp"/>
-    <property name="artifact.output.handle-provider" value="${basedir}/out/artifacts/handle_provider"/>
-    <mkdir dir="${artifacts.temp.dir}"/>
-    <property name="temp.jar.path.handle-provider.jar" value="${artifacts.temp.dir}/handle-provider.jar"/>
-  </target>
-  
-  <target name="artifact.handle-provider" depends="init.artifacts, compile.module.handle-provider" description="Build &apos;handle-provider&apos; artifact">
-    <property name="artifact.temp.output.handle-provider" value="${artifacts.temp.dir}/handle_provider"/>
-    <mkdir dir="${artifact.temp.output.handle-provider}"/>
-    <jar destfile="${temp.jar.path.handle-provider.jar}" duplicate="preserve" filesetmanifest="mergewithoutmain">
-      <zipfileset dir="${handle-provider.output.dir}"/>
-    </jar>
-    <copy file="${temp.jar.path.handle-provider.jar}" tofile="${artifact.temp.output.handle-provider}/handle-provider.jar"/>
-  </target>
-  
-  <target name="build.all.artifacts" depends="artifact.handle-provider" description="Build all artifacts">
-    <mkdir dir="${artifact.output.handle-provider}"/>
-    <copy todir="${artifact.output.handle-provider}">
-      <fileset dir="${artifact.temp.output.handle-provider}"/>
-    </copy>
-    
-    <!-- Delete temporary files -->
-    <delete dir="${artifacts.temp.dir}"/>
-  </target>
-  
-  <target name="all" depends="build.modules, build.all.artifacts" description="build all"/>
+  <target name="all" depends="build.modules" description="build all"/>
 </project>

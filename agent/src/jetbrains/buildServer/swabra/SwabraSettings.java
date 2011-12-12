@@ -23,8 +23,10 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import jetbrains.buildServer.agent.AgentRunningBuild;
+import jetbrains.buildServer.agent.BundledToolsRegistry;
 import jetbrains.buildServer.swabra.processes.HandlePathProvider;
 import jetbrains.buildServer.swabra.snapshots.SwabraRules;
+import org.jetbrains.annotations.NotNull;
 
 /**
  * User: vbedrosova
@@ -136,9 +138,9 @@ public class SwabraSettings {
       "', verbose = '" + myVerbose + "'.");
   }
 
-  public void prepareHandle(SwabraLogger logger, final AgentRunningBuild runningBuild) {
+  public void prepareHandle(SwabraLogger logger, @NotNull BundledToolsRegistry toolsRegistry) {
     if (myLockingProcessesKill || myLockingProcessesReport) {
-      final HandlePathProvider handlePathProvider = new HandlePathProvider(logger, runningBuild);
+      final HandlePathProvider handlePathProvider = new HandlePathProvider(logger, toolsRegistry.findTool("SysinternalsHandle"));
       myHandlePath = handlePathProvider.getHandlePath();
     } else {
       myHandlePath = null;
