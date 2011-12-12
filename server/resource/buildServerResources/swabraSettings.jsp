@@ -128,7 +128,7 @@
       </c:if>
       <authz:authorize allPermissions="CHANGE_SERVER_SETTINGS">
         <jsp:attribute name="ifAccessGranted">
-          <c:url var="handleDownloader" value="/admin/serverConfig.html?init=1&tab=toolLoadTab&toolType=handleTool"/>
+          <c:url var="handleDownloader" value="/admin/admin.html?item=toolLoadTab&toolType=handleTool"/>
           <a href="${handleDownloader}" target="_blank" showdiscardchangesmessage="false">${actionName} Sysinternals handle.exe</a>
         </jsp:attribute>
         <jsp:attribute name="ifAccessDenied">
