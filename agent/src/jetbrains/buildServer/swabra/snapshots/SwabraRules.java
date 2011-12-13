@@ -93,7 +93,7 @@ public class SwabraRules {
     }
 
     @Override
-    protected FileRule createExcludeRule(final String line) {
+    protected FileRule createNewExcludeRule(final String line) {
       return createRule(line, false);
     }
 
@@ -104,7 +104,7 @@ public class SwabraRules {
 
     @Override
     protected FileRule createNewExcludeRule(final FileRule excludeRule) {
-      return createExcludeRule(excludeRule.getFrom());
+      return createNewExcludeRule(excludeRule.getFrom());
     }
 
     private FileRule createRule(@NotNull String line, boolean isInclude) {
