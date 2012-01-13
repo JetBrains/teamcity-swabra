@@ -160,10 +160,10 @@
                        ' the same checkout directory, but different Swabra cleanup settings.' +
                        ' This may lead to extra clean checkouts. Probably these configurations should have identical Swabra cleanup settings';
             $('clashing.warning').update(message);
-            BS.Util.show($('swabra.clashing.warning.container'));
+            BS.Util.show('swabra.clashing.warning.container');
           } else {
             $('clashing.warning').update();
-            BS.Util.hide($('swabra.clashing.warning.container'));
+            BS.Util.hide('swabra.clashing.warning.container');
           }
         }
       });
@@ -174,19 +174,19 @@
       var enabledSelectedValue = enabledEl.options[enabledEl.selectedIndex].value;
 
       if (enabledSelectedValue == '') {
-        BS.Util.hide($('swabra.strict.container'));
-        BS.Util.hide($('swabra.verbose.container'));
+        BS.Util.hide('swabra.strict.container');
+        BS.Util.hide('swabra.verbose.container');
 
         var processesEl = $('swabra.processes');
         var processesSelectedValue = processesEl.options[processesEl.selectedIndex].value;
 
         if (processesSelectedValue == '') {
-          BS.Util.hide($('swabra.rules.container'));
+          BS.Util.hide('swabra.rules.container');
         }
       } else {
-        BS.Util.show($('swabra.strict.container'));
-        BS.Util.show($('swabra.verbose.container'));
-        BS.Util.show($('swabra.rules.container'));
+        BS.Util.show('swabra.strict.container');
+        BS.Util.show('swabra.verbose.container');
+        BS.Util.show('swabra.rules.container');
       }
 
       BS.MultilineProperties.updateVisible();
@@ -199,30 +199,30 @@
       var processesSelectedValue = processesEl.options[processesEl.selectedIndex].value;
 
       if (processesSelectedValue == '') {
-        BS.Util.hide($('swabra.processes.note'));
-        BS.Util.hide($('swabra.processes.report.note'));
-        BS.Util.hide($('swabra.processes.kill.note'));
-        BS.Util.hide($('swabra.processes.handle.note'));
-        BS.Util.hide($('swabra.download.handle.container'));
+        BS.Util.hide('swabra.processes.note');
+        BS.Util.hide('swabra.processes.report.note');
+        BS.Util.hide('swabra.processes.kill.note');
+        BS.Util.hide('swabra.processes.handle.note');
+        BS.Util.hide('swabra.download.handle.container');
 
         var enabledEl = $('swabra.enabled');
         var enabledSelectedValue = enabledEl.options[enabledEl.selectedIndex].value;
 
         if (enabledSelectedValue == '') {
-          BS.Util.hide($('swabra.rules.container'));
+          BS.Util.hide('swabra.rules.container');
         }
       } else {
-        BS.Util.show($('swabra.processes.note'));
-        BS.Util.show($('swabra.processes.handle.note'));
-        BS.Util.show($('swabra.download.handle.container'));
-        BS.Util.show($('swabra.rules.container'));
+        BS.Util.show('swabra.processes.note');
+        BS.Util.show('swabra.processes.handle.note');
+        BS.Util.show('swabra.download.handle.container');
+        BS.Util.show('swabra.rules.container');
 
         if (processesSelectedValue == 'report') {
-          BS.Util.show($('swabra.processes.report.note'));
-          BS.Util.hide($('swabra.processes.kill.note'));
+          BS.Util.show('swabra.processes.report.note');
+          BS.Util.hide('swabra.processes.kill.note');
         } else if (processesSelectedValue == 'kill') {
-          BS.Util.hide($('swabra.processes.report.note'));
-          BS.Util.show($('swabra.processes.kill.note'));
+          BS.Util.hide('swabra.processes.report.note');
+          BS.Util.show('swabra.processes.kill.note');
         }
       }
       BS.MultilineProperties.updateVisible();
