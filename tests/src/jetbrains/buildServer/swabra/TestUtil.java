@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2011 JetBrains s.r.o.
+ * Copyright 2000-2012 JetBrains s.r.o.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,12 +16,11 @@
 
 package jetbrains.buildServer.swabra;
 
-import jetbrains.buildServer.util.FileUtil;
-import org.jetbrains.annotations.Nullable;
-
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.List;
+import jetbrains.buildServer.util.FileUtil;
+import org.jetbrains.annotations.Nullable;
 
 /**
  * User: vbedrosova

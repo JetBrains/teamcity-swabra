@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2011 JetBrains s.r.o.
+ * Copyright 2000-2012 JetBrains s.r.o.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,13 +17,12 @@
 package jetbrains.buildServer.swabra;
 
 import java.io.File;
+import java.util.Arrays;
 import jetbrains.buildServer.swabra.snapshots.SwabraRules;
 import jetbrains.buildServer.util.FileUtil;
 import junit.framework.TestCase;
 import org.jetbrains.annotations.NotNull;
 import org.junit.Test;
-
-import java.util.Arrays;
 
 /**
  * User: vbedrosova

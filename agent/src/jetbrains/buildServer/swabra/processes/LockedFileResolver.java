@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2011 JetBrains s.r.o.
+ * Copyright 2000-2012 JetBrains s.r.o.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 
 package jetbrains.buildServer.swabra.processes;
 
+import java.io.File;
 import java.util.Collection;
 import jetbrains.buildServer.processes.ProcessFilter;
 import jetbrains.buildServer.processes.ProcessTreeTerminator;
@@ -23,8 +24,6 @@ import jetbrains.buildServer.util.FileUtil;
 import org.apache.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-
-import java.io.File;
 
 /**
  * User: vbedrosova
