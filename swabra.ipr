@@ -480,7 +480,7 @@
   <component name="ProjectResources">
     <default-html-doctype>http://www.w3.org/1999/xhtml</default-html-doctype>
   </component>
-  <component name="ProjectRootManager" version="2" languageLevel="JDK_1_5" assert-keyword="true" jdk-15="true" project-jdk-name="1.5" project-jdk-type="JavaSDK">
+  <component name="ProjectRootManager" version="2" languageLevel="JDK_1_5" assert-keyword="true" jdk-15="true" project-jdk-name="1.6" project-jdk-type="JavaSDK">
     <output url="file://$PROJECT_DIR$/out" />
   </component>
   <component name="ResourceManagerContainer">
@@ -527,21 +527,50 @@
   </component>
   <component name="WebServicesPlugin" addRequiredLibraries="true" />
   <component name="libraryTable">
-    <library name="IDEA annotations">
+    <library name="buildAgent-agent">
       <CLASSES>
-        <root url="jar://$TeamCityDistribution$/webapps/ROOT/WEB-INF/lib/annotations.jar!/" />
+        <root url="jar://$TeamCityDistribution$/buildAgent/lib/agent.jar!/" />
       </CLASSES>
       <JAVADOC />
       <SOURCES />
     </library>
-    <library name="IntelliJ IDEA open API">
+    <library name="devPackage-agent-api">
       <CLASSES>
-        <root url="jar://$TeamCityDistribution$/webapps/ROOT/WEB-INF/lib/openapi.jar!/" />
+        <root url="jar://$TeamCityDistribution$/devPackage/agent-api.jar!/" />
+      </CLASSES>
+      <JAVADOC>
+        <root url="jar://$TeamCityDistribution$/devPackage/javadoc/openApi-help.jar!/" />
+      </JAVADOC>
+      <SOURCES>
+        <root url="jar://$TeamCityDistribution$/devPackage/src/openApi-source.jar!/" />
+      </SOURCES>
+    </library>
+    <library name="devPackage-common-api">
+      <CLASSES>
+        <root url="jar://$TeamCityDistribution$/devPackage/common-api.jar!/" />
       </CLASSES>
       <JAVADOC />
       <SOURCES />
     </library>
-    <library name="JMock">
+    <library name="devPackage-server-api">
+      <CLASSES>
+        <root url="jar://$TeamCityDistribution$/devPackage/server-api.jar!/" />
+      </CLASSES>
+      <JAVADOC>
+        <root url="jar://$TeamCityDistribution$/devPackage/javadoc/openApi-help.jar!/" />
+      </JAVADOC>
+      <SOURCES>
+        <root url="jar://$TeamCityDistribution$/devPackage/src/openApi-source.jar!/" />
+      </SOURCES>
+    </library>
+    <library name="devPackage-tests-support">
+      <CLASSES>
+        <root url="jar://$TeamCityDistribution$/devPackage/tests/tests-support.jar!/" />
+      </CLASSES>
+      <JAVADOC />
+      <SOURCES />
+    </library>
+    <library name="jmock">
       <CLASSES>
         <root url="jar://$PROJECT_DIR$/tests/lib/jmock-2.5.1.jar!/" />
         <root url="jar://$PROJECT_DIR$/tests/lib/jmock-junit4-2.5.1.jar!/" />
@@ -557,41 +586,19 @@
       <JAVADOC />
       <SOURCES />
     </library>
-    <library name="Log4J">
+    <library name="servlet-api">
       <CLASSES>
-        <root url="jar://$TeamCityDistribution$/webapps/ROOT/WEB-INF/lib/log4j-1.2.12.jar!/" />
+        <root url="jar://$TeamCityDistribution$/lib/servlet-api.jar!/" />
       </CLASSES>
       <JAVADOC />
       <SOURCES />
     </library>
-    <library name="TeamCity-agent">
+    <library name="TeamCity-annotations">
       <CLASSES>
-        <root url="jar://$TeamCityDistribution$/devPackage/agent-api.jar!/" />
-      </CLASSES>
-      <JAVADOC>
-        <root url="jar://$TeamCityDistribution$/devPackage/javadoc/openApi-help.jar!/" />
-      </JAVADOC>
-      <SOURCES>
-        <root url="jar://$TeamCityDistribution$/devPackage/src/openApi-source.jar!/" />
-      </SOURCES>
-    </library>
-    <library name="TeamCity-agent-non-openapi">
-      <CLASSES>
-        <root url="jar://$TeamCityDistribution$/buildAgent/lib/agent.jar!/" />
+        <root url="jar://$TeamCityDistribution$/webapps/ROOT/WEB-INF/lib/annotations.jar!/" />
       </CLASSES>
       <JAVADOC />
       <SOURCES />
-    </library>
-    <library name="TeamCity-common">
-      <CLASSES>
-        <root url="jar://$TeamCityDistribution$/devPackage/common-api.jar!/" />
-      </CLASSES>
-      <JAVADOC>
-        <root url="jar://$TeamCityDistribution$/devPackage/javadoc/openApi-help.jar!/" />
-      </JAVADOC>
-      <SOURCES>
-        <root url="jar://$TeamCityDistribution$/devPackage/src/openApi-source.jar!/" />
-      </SOURCES>
     </library>
     <library name="TeamCity-jdom">
       <CLASSES>
@@ -600,7 +607,21 @@
       <JAVADOC />
       <SOURCES />
     </library>
-    <library name="TeamCity-processTerminator">
+    <library name="TeamCity-log4j">
+      <CLASSES>
+        <root url="jar://$TeamCityDistribution$/webapps/ROOT/WEB-INF/lib/log4j-1.2.12.jar!/" />
+      </CLASSES>
+      <JAVADOC />
+      <SOURCES />
+    </library>
+    <library name="TeamCity-openapi">
+      <CLASSES>
+        <root url="jar://$TeamCityDistribution$/webapps/ROOT/WEB-INF/lib/openapi.jar!/" />
+      </CLASSES>
+      <JAVADOC />
+      <SOURCES />
+    </library>
+    <library name="TeamCity-processesTerminator">
       <CLASSES>
         <root url="jar://$TeamCityDistribution$/webapps/ROOT/WEB-INF/lib/processesTerminator.jar!/" />
       </CLASSES>
@@ -609,30 +630,15 @@
     </library>
     <library name="TeamCity-server">
       <CLASSES>
-        <root url="jar://$TeamCityDistribution$/devPackage/server-api.jar!/" />
         <root url="jar://$TeamCityDistribution$/webapps/ROOT/WEB-INF/lib/server.jar!/" />
-      </CLASSES>
-      <JAVADOC>
-        <root url="jar://$TeamCityDistribution$/devPackage/javadoc/openApi-help.jar!/" />
-      </JAVADOC>
-      <SOURCES>
-        <root url="jar://$TeamCityDistribution$/devPackage/src/openApi-source.jar!/" />
-      </SOURCES>
-    </library>
-    <library name="TeamCity-servletApi">
-      <CLASSES>
-        <root url="jar://$TeamCityDistribution$/lib/servlet-api.jar!/" />
       </CLASSES>
       <JAVADOC />
       <SOURCES />
     </library>
     <library name="TeamCity-spring">
       <CLASSES>
-        <root url="jar://$TeamCityDistribution$/webapps/ROOT/WEB-INF/lib/org.springframework.core-3.0.5.RELEASE.jar!/" />
-        <root url="jar://$TeamCityDistribution$/webapps/ROOT/WEB-INF/lib/org.springframework.context-3.0.5.RELEASE.jar!/" />
-        <root url="jar://$TeamCityDistribution$/webapps/ROOT/WEB-INF/lib/org.springframework.beans-3.0.5.RELEASE.jar!/" />
-        <root url="jar://$TeamCityDistribution$/webapps/ROOT/WEB-INF/lib/org.springframework.web.servlet-3.0.5.RELEASE.jar!/" />
-        <root url="jar://$TeamCityDistribution$/webapps/ROOT/WEB-INF/lib/org.springframework.web-3.0.5.RELEASE.jar!/" />
+        <root url="jar://$TeamCityDistribution$/webapps/ROOT/WEB-INF/lib/spring.jar!/" />
+        <root url="jar://$TeamCityDistribution$/webapps/ROOT/WEB-INF/lib/spring-webmvc.jar!/" />
       </CLASSES>
       <JAVADOC />
       <SOURCES />
@@ -644,7 +650,7 @@
       <JAVADOC />
       <SOURCES />
     </library>
-    <library name="TeamCity-utils">
+    <library name="TeamCity-util">
       <CLASSES>
         <root url="jar://$TeamCityDistribution$/webapps/ROOT/WEB-INF/lib/util.jar!/" />
       </CLASSES>

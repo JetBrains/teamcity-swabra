@@ -8,16 +8,17 @@
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="library" name="junit" level="project" />
-    <orderEntry type="library" name="TeamCity-agent" level="project" />
-    <orderEntry type="library" name="TeamCity-utils" level="project" />
-    <orderEntry type="library" name="TeamCity-common" level="project" />
+    <orderEntry type="library" name="devPackage-agent-api" level="project" />
+    <orderEntry type="library" name="TeamCity-util" level="project" />
     <orderEntry type="module" module-name="agent" />
-    <orderEntry type="library" name="JMock" level="project" />
-    <orderEntry type="library" name="Log4J" level="project" />
+    <orderEntry type="library" name="jmock" level="project" />
+    <orderEntry type="library" name="TeamCity-log4j" level="project" />
     <orderEntry type="module" module-name="common" />
-    <orderEntry type="library" name="IDEA annotations" level="project" />
-    <orderEntry type="library" name="TeamCity-processTerminator" level="project" />
-    <orderEntry type="library" name="TeamCity-agent-non-openapi" level="project" />
+    <orderEntry type="library" name="TeamCity-annotations" level="project" />
+    <orderEntry type="library" name="TeamCity-processesTerminator" level="project" />
+    <orderEntry type="library" name="buildAgent-agent" level="project" />
+    <orderEntry type="library" name="devPackage-tests-support" level="project" />
+    <orderEntry type="library" name="devPackage-common-api" level="project" />
   </component>
 </module>
 

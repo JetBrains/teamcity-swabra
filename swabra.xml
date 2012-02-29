@@ -61,12 +61,24 @@
   
   <!-- Project Libraries -->
   
-  <path id="library.idea_annotations.classpath">
-    <pathelement location="${path.variable.teamcitydistribution}/webapps/ROOT/WEB-INF/lib/annotations.jar"/>
+  <path id="library.buildagent-agent.classpath">
+    <pathelement location="${path.variable.teamcitydistribution}/buildAgent/lib/agent.jar"/>
   </path>
   
-  <path id="library.intellij_idea_open_api.classpath">
-    <pathelement location="${path.variable.teamcitydistribution}/webapps/ROOT/WEB-INF/lib/openapi.jar"/>
+  <path id="library.devpackage-agent-api.classpath">
+    <pathelement location="${path.variable.teamcitydistribution}/devPackage/agent-api.jar"/>
+  </path>
+  
+  <path id="library.devpackage-common-api.classpath">
+    <pathelement location="${path.variable.teamcitydistribution}/devPackage/common-api.jar"/>
+  </path>
+  
+  <path id="library.devpackage-server-api.classpath">
+    <pathelement location="${path.variable.teamcitydistribution}/devPackage/server-api.jar"/>
+  </path>
+  
+  <path id="library.devpackage-tests-support.classpath">
+    <pathelement location="${path.variable.teamcitydistribution}/devPackage/tests/tests-support.jar"/>
   </path>
   
   <path id="library.jmock.classpath">
@@ -79,49 +91,44 @@
     <pathelement location="${basedir}/tests/lib/junit-4.5.jar"/>
   </path>
   
-  <path id="library.log4j.classpath">
-    <pathelement location="${path.variable.teamcitydistribution}/webapps/ROOT/WEB-INF/lib/log4j-1.2.12.jar"/>
+  <path id="library.servlet-api.classpath">
+    <pathelement location="${path.variable.teamcitydistribution}/lib/servlet-api.jar"/>
   </path>
   
-  <path id="library.teamcity-agent-non-openapi.classpath">
-    <pathelement location="${path.variable.teamcitydistribution}/buildAgent/lib/agent.jar"/>
-  </path>
-  
-  <path id="library.teamcity-agent.classpath">
-    <pathelement location="${path.variable.teamcitydistribution}/devPackage/agent-api.jar"/>
-  </path>
-  
-  <path id="library.teamcity-common.classpath">
-    <pathelement location="${path.variable.teamcitydistribution}/devPackage/common-api.jar"/>
+  <path id="library.teamcity-annotations.classpath">
+    <pathelement location="${path.variable.teamcitydistribution}/webapps/ROOT/WEB-INF/lib/annotations.jar"/>
   </path>
   
   <path id="library.teamcity-jdom.classpath">
     <pathelement location="${path.variable.teamcitydistribution}/webapps/ROOT/WEB-INF/lib/jdom.jar"/>
   </path>
   
-  <path id="library.teamcity-processterminator.classpath">
+  <path id="library.teamcity-log4j.classpath">
+    <pathelement location="${path.variable.teamcitydistribution}/webapps/ROOT/WEB-INF/lib/log4j-1.2.12.jar"/>
+  </path>
+  
+  <path id="library.teamcity-openapi.classpath">
+    <pathelement location="${path.variable.teamcitydistribution}/webapps/ROOT/WEB-INF/lib/openapi.jar"/>
+  </path>
+  
+  <path id="library.teamcity-processesterminator.classpath">
     <pathelement location="${path.variable.teamcitydistribution}/webapps/ROOT/WEB-INF/lib/processesTerminator.jar"/>
   </path>
   
   <path id="library.teamcity-server.classpath">
-    <pathelement location="${path.variable.teamcitydistribution}/devPackage/server-api.jar"/>
     <pathelement location="${path.variable.teamcitydistribution}/webapps/ROOT/WEB-INF/lib/server.jar"/>
   </path>
   
-  <path id="library.teamcity-servletapi.classpath">
-    <pathelement location="${path.variable.teamcitydistribution}/lib/servlet-api.jar"/>
-  </path>
-  
   <path id="library.teamcity-spring.classpath">
-    <pathelement location="${path.variable.teamcitydistribution}/webapps/ROOT/WEB-INF/lib/spring.jar"/>
     <pathelement location="${path.variable.teamcitydistribution}/webapps/ROOT/WEB-INF/lib/spring-webmvc.jar"/>
+    <pathelement location="${path.variable.teamcitydistribution}/webapps/ROOT/WEB-INF/lib/spring.jar"/>
   </path>
   
   <path id="library.teamcity-toolloader.classpath">
     <pathelement location="${path.variable.teamcitydistribution}/webapps/ROOT/WEB-INF/lib/toolLoader.jar"/>
   </path>
   
-  <path id="library.teamcity-utils.classpath">
+  <path id="library.teamcity-util.classpath">
     <pathelement location="${path.variable.teamcitydistribution}/webapps/ROOT/WEB-INF/lib/util.jar"/>
   </path>
   
@@ -164,27 +171,27 @@
   </path>
   
   <path id="common.module.production.classpath">
-    <path refid="library.teamcity-utils.classpath"/>
-    <path refid="library.idea_annotations.classpath"/>
+    <path refid="library.teamcity-util.classpath"/>
+    <path refid="library.teamcity-annotations.classpath"/>
   </path>
   
   <path id="common.runtime.production.module.classpath">
     <pathelement location="${common.output.dir}"/>
-    <path refid="library.teamcity-utils.classpath"/>
-    <path refid="library.idea_annotations.classpath"/>
+    <path refid="library.teamcity-util.classpath"/>
+    <path refid="library.teamcity-annotations.classpath"/>
   </path>
   
   <path id="common.module.classpath">
     <pathelement location="${common.output.dir}"/>
-    <path refid="library.teamcity-utils.classpath"/>
-    <path refid="library.idea_annotations.classpath"/>
+    <path refid="library.teamcity-util.classpath"/>
+    <path refid="library.teamcity-annotations.classpath"/>
   </path>
   
   <path id="common.runtime.module.classpath">
     <pathelement location="${common.testoutput.dir}"/>
     <pathelement location="${common.output.dir}"/>
-    <path refid="library.teamcity-utils.classpath"/>
-    <path refid="library.idea_annotations.classpath"/>
+    <path refid="library.teamcity-util.classpath"/>
+    <path refid="library.teamcity-annotations.classpath"/>
   </path>
   
   
@@ -247,60 +254,60 @@
   </path>
   
   <path id="agent.module.production.classpath">
-    <path refid="library.teamcity-agent.classpath"/>
-    <path refid="library.teamcity-utils.classpath"/>
-    <path refid="library.teamcity-common.classpath"/>
+    <path refid="library.devpackage-agent-api.classpath"/>
+    <path refid="library.teamcity-util.classpath"/>
     <pathelement location="${common.output.dir}"/>
-    <path refid="library.log4j.classpath"/>
-    <path refid="library.intellij_idea_open_api.classpath"/>
-    <path refid="library.idea_annotations.classpath"/>
-    <path refid="library.teamcity-processterminator.classpath"/>
+    <path refid="library.teamcity-log4j.classpath"/>
+    <path refid="library.teamcity-openapi.classpath"/>
+    <path refid="library.teamcity-annotations.classpath"/>
+    <path refid="library.teamcity-processesterminator.classpath"/>
     <path refid="library.teamcity-spring.classpath"/>
-    <path refid="library.teamcity-agent-non-openapi.classpath"/>
+    <path refid="library.buildagent-agent.classpath"/>
+    <path refid="library.devpackage-common-api.classpath"/>
   </path>
   
   <path id="agent.runtime.production.module.classpath">
     <pathelement location="${agent.output.dir}"/>
-    <path refid="library.teamcity-agent.classpath"/>
-    <path refid="library.teamcity-utils.classpath"/>
-    <path refid="library.teamcity-common.classpath"/>
+    <path refid="library.devpackage-agent-api.classpath"/>
+    <path refid="library.teamcity-util.classpath"/>
     <path refid="common.runtime.production.module.classpath"/>
-    <path refid="library.log4j.classpath"/>
-    <path refid="library.intellij_idea_open_api.classpath"/>
-    <path refid="library.idea_annotations.classpath"/>
-    <path refid="library.teamcity-processterminator.classpath"/>
+    <path refid="library.teamcity-log4j.classpath"/>
+    <path refid="library.teamcity-openapi.classpath"/>
+    <path refid="library.teamcity-annotations.classpath"/>
+    <path refid="library.teamcity-processesterminator.classpath"/>
     <path refid="library.teamcity-spring.classpath"/>
-    <path refid="library.teamcity-agent-non-openapi.classpath"/>
+    <path refid="library.buildagent-agent.classpath"/>
+    <path refid="library.devpackage-common-api.classpath"/>
   </path>
   
   <path id="agent.module.classpath">
     <pathelement location="${agent.output.dir}"/>
-    <path refid="library.teamcity-agent.classpath"/>
-    <path refid="library.teamcity-utils.classpath"/>
-    <path refid="library.teamcity-common.classpath"/>
+    <path refid="library.devpackage-agent-api.classpath"/>
+    <path refid="library.teamcity-util.classpath"/>
     <pathelement location="${common.testoutput.dir}"/>
     <pathelement location="${common.output.dir}"/>
-    <path refid="library.log4j.classpath"/>
-    <path refid="library.intellij_idea_open_api.classpath"/>
-    <path refid="library.idea_annotations.classpath"/>
-    <path refid="library.teamcity-processterminator.classpath"/>
+    <path refid="library.teamcity-log4j.classpath"/>
+    <path refid="library.teamcity-openapi.classpath"/>
+    <path refid="library.teamcity-annotations.classpath"/>
+    <path refid="library.teamcity-processesterminator.classpath"/>
     <path refid="library.teamcity-spring.classpath"/>
-    <path refid="library.teamcity-agent-non-openapi.classpath"/>
+    <path refid="library.buildagent-agent.classpath"/>
+    <path refid="library.devpackage-common-api.classpath"/>
   </path>
   
   <path id="agent.runtime.module.classpath">
     <pathelement location="${agent.testoutput.dir}"/>
     <pathelement location="${agent.output.dir}"/>
-    <path refid="library.teamcity-agent.classpath"/>
-    <path refid="library.teamcity-utils.classpath"/>
-    <path refid="library.teamcity-common.classpath"/>
+    <path refid="library.devpackage-agent-api.classpath"/>
+    <path refid="library.teamcity-util.classpath"/>
     <path refid="common.runtime.module.classpath"/>
-    <path refid="library.log4j.classpath"/>
-    <path refid="library.intellij_idea_open_api.classpath"/>
-    <path refid="library.idea_annotations.classpath"/>
-    <path refid="library.teamcity-processterminator.classpath"/>
+    <path refid="library.teamcity-log4j.classpath"/>
+    <path refid="library.teamcity-openapi.classpath"/>
+    <path refid="library.teamcity-annotations.classpath"/>
+    <path refid="library.teamcity-processesterminator.classpath"/>
     <path refid="library.teamcity-spring.classpath"/>
-    <path refid="library.teamcity-agent-non-openapi.classpath"/>
+    <path refid="library.buildagent-agent.classpath"/>
+    <path refid="library.devpackage-common-api.classpath"/>
   </path>
   
   
@@ -363,64 +370,68 @@
   </path>
   
   <path id="server.module.production.classpath">
-    <path refid="library.teamcity-utils.classpath"/>
-    <path refid="library.teamcity-server.classpath"/>
+    <path refid="library.teamcity-util.classpath"/>
+    <path refid="library.devpackage-server-api.classpath"/>
     <pathelement location="${common.output.dir}"/>
-    <path refid="library.idea_annotations.classpath"/>
+    <path refid="library.teamcity-annotations.classpath"/>
     <path refid="library.teamcity-spring.classpath"/>
     <path refid="library.teamcity-jdom.classpath"/>
-    <path refid="library.teamcity-servletapi.classpath"/>
+    <path refid="library.servlet-api.classpath"/>
     <path refid="library.teamcity-web.classpath"/>
-    <path refid="library.teamcity-common.classpath"/>
-    <path refid="library.log4j.classpath"/>
+    <path refid="library.teamcity-log4j.classpath"/>
     <path refid="library.teamcity-toolloader.classpath"/>
+    <path refid="library.teamcity-server.classpath"/>
+    <path refid="library.devpackage-common-api.classpath"/>
   </path>
   
   <path id="server.runtime.production.module.classpath">
     <pathelement location="${server.output.dir}"/>
-    <path refid="library.teamcity-utils.classpath"/>
-    <path refid="library.teamcity-server.classpath"/>
+    <path refid="library.teamcity-util.classpath"/>
+    <path refid="library.devpackage-server-api.classpath"/>
     <path refid="common.runtime.production.module.classpath"/>
-    <path refid="library.idea_annotations.classpath"/>
+    <path refid="library.teamcity-annotations.classpath"/>
     <path refid="library.teamcity-spring.classpath"/>
     <path refid="library.teamcity-jdom.classpath"/>
-    <path refid="library.teamcity-servletapi.classpath"/>
+    <path refid="library.servlet-api.classpath"/>
     <path refid="library.teamcity-web.classpath"/>
-    <path refid="library.teamcity-common.classpath"/>
-    <path refid="library.log4j.classpath"/>
+    <path refid="library.teamcity-log4j.classpath"/>
     <path refid="library.teamcity-toolloader.classpath"/>
+    <path refid="library.teamcity-server.classpath"/>
+    <path refid="library.devpackage-common-api.classpath"/>
   </path>
   
   <path id="server.module.classpath">
     <pathelement location="${server.output.dir}"/>
-    <path refid="library.teamcity-utils.classpath"/>
-    <path refid="library.teamcity-server.classpath"/>
+    <path refid="library.teamcity-util.classpath"/>
+    <path refid="library.devpackage-server-api.classpath"/>
     <pathelement location="${common.testoutput.dir}"/>
     <pathelement location="${common.output.dir}"/>
-    <path refid="library.idea_annotations.classpath"/>
+    <path refid="library.teamcity-annotations.classpath"/>
     <path refid="library.teamcity-spring.classpath"/>
     <path refid="library.teamcity-jdom.classpath"/>
-    <path refid="library.teamcity-servletapi.classpath"/>
+    <path refid="library.servlet-api.classpath"/>
     <path refid="library.teamcity-web.classpath"/>
-    <path refid="library.teamcity-common.classpath"/>
-    <path refid="library.log4j.classpath"/>
+    <path refid="library.teamcity-log4j.classpath"/>
     <path refid="library.teamcity-toolloader.classpath"/>
+    <path refid="library.teamcity-server.classpath"/>
+    <path refid="library.devpackage-common-api.classpath"/>
   </path>
   
   <path id="server.runtime.module.classpath">
     <pathelement location="${server.testoutput.dir}"/>
     <pathelement location="${server.output.dir}"/>
-    <path refid="library.teamcity-utils.classpath"/>
-    <path refid="library.teamcity-server.classpath"/>
+    <path refid="library.teamcity-util.classpath"/>
+    <path refid="library.devpackage-server-api.classpath"/>
     <path refid="common.runtime.module.classpath"/>
-    <path refid="library.idea_annotations.classpath"/>
+    <path refid="library.teamcity-annotations.classpath"/>
     <path refid="library.teamcity-spring.classpath"/>
     <path refid="library.teamcity-jdom.classpath"/>
-    <path refid="library.teamcity-servletapi.classpath"/>
+    <path refid="library.servlet-api.classpath"/>
     <path refid="library.teamcity-web.classpath"/>
-    <path refid="library.teamcity-common.classpath"/>
-    <path refid="library.log4j.classpath"/>
+    <path refid="library.teamcity-log4j.classpath"/>
     <path refid="library.teamcity-toolloader.classpath"/>
+    <path refid="library.teamcity-server.classpath"/>
+    <path refid="library.devpackage-common-api.classpath"/>
   </path>
   
   
@@ -489,64 +500,68 @@
   
   <path id="tests.module.production.classpath">
     <path refid="library.junit.classpath"/>
-    <path refid="library.teamcity-agent.classpath"/>
-    <path refid="library.teamcity-utils.classpath"/>
-    <path refid="library.teamcity-common.classpath"/>
+    <path refid="library.devpackage-agent-api.classpath"/>
+    <path refid="library.teamcity-util.classpath"/>
     <pathelement location="${agent.output.dir}"/>
     <path refid="library.jmock.classpath"/>
-    <path refid="library.log4j.classpath"/>
+    <path refid="library.teamcity-log4j.classpath"/>
     <pathelement location="${common.output.dir}"/>
-    <path refid="library.idea_annotations.classpath"/>
-    <path refid="library.teamcity-processterminator.classpath"/>
-    <path refid="library.teamcity-agent-non-openapi.classpath"/>
+    <path refid="library.teamcity-annotations.classpath"/>
+    <path refid="library.teamcity-processesterminator.classpath"/>
+    <path refid="library.buildagent-agent.classpath"/>
+    <path refid="library.devpackage-tests-support.classpath"/>
+    <path refid="library.devpackage-common-api.classpath"/>
   </path>
   
   <path id="tests.runtime.production.module.classpath">
     <pathelement location="${tests.output.dir}"/>
     <path refid="library.junit.classpath"/>
-    <path refid="library.teamcity-agent.classpath"/>
-    <path refid="library.teamcity-utils.classpath"/>
-    <path refid="library.teamcity-common.classpath"/>
+    <path refid="library.devpackage-agent-api.classpath"/>
+    <path refid="library.teamcity-util.classpath"/>
     <path refid="agent.runtime.production.module.classpath"/>
     <path refid="library.jmock.classpath"/>
-    <path refid="library.log4j.classpath"/>
+    <path refid="library.teamcity-log4j.classpath"/>
     <path refid="common.runtime.production.module.classpath"/>
-    <path refid="library.idea_annotations.classpath"/>
-    <path refid="library.teamcity-processterminator.classpath"/>
-    <path refid="library.teamcity-agent-non-openapi.classpath"/>
+    <path refid="library.teamcity-annotations.classpath"/>
+    <path refid="library.teamcity-processesterminator.classpath"/>
+    <path refid="library.buildagent-agent.classpath"/>
+    <path refid="library.devpackage-tests-support.classpath"/>
+    <path refid="library.devpackage-common-api.classpath"/>
   </path>
   
   <path id="tests.module.classpath">
     <pathelement location="${tests.output.dir}"/>
     <path refid="library.junit.classpath"/>
-    <path refid="library.teamcity-agent.classpath"/>
-    <path refid="library.teamcity-utils.classpath"/>
-    <path refid="library.teamcity-common.classpath"/>
+    <path refid="library.devpackage-agent-api.classpath"/>
+    <path refid="library.teamcity-util.classpath"/>
     <pathelement location="${agent.testoutput.dir}"/>
     <pathelement location="${agent.output.dir}"/>
     <path refid="library.jmock.classpath"/>
-    <path refid="library.log4j.classpath"/>
+    <path refid="library.teamcity-log4j.classpath"/>
     <pathelement location="${common.testoutput.dir}"/>
     <pathelement location="${common.output.dir}"/>
-    <path refid="library.idea_annotations.classpath"/>
-    <path refid="library.teamcity-processterminator.classpath"/>
-    <path refid="library.teamcity-agent-non-openapi.classpath"/>
+    <path refid="library.teamcity-annotations.classpath"/>
+    <path refid="library.teamcity-processesterminator.classpath"/>
+    <path refid="library.buildagent-agent.classpath"/>
+    <path refid="library.devpackage-tests-support.classpath"/>
+    <path refid="library.devpackage-common-api.classpath"/>
   </path>
   
   <path id="tests.runtime.module.classpath">
     <pathelement location="${tests.testoutput.dir}"/>
     <pathelement location="${tests.output.dir}"/>
     <path refid="library.junit.classpath"/>
-    <path refid="library.teamcity-agent.classpath"/>
-    <path refid="library.teamcity-utils.classpath"/>
-    <path refid="library.teamcity-common.classpath"/>
+    <path refid="library.devpackage-agent-api.classpath"/>
+    <path refid="library.teamcity-util.classpath"/>
     <path refid="agent.runtime.module.classpath"/>
     <path refid="library.jmock.classpath"/>
-    <path refid="library.log4j.classpath"/>
+    <path refid="library.teamcity-log4j.classpath"/>
     <path refid="common.runtime.module.classpath"/>
-    <path refid="library.idea_annotations.classpath"/>
-    <path refid="library.teamcity-processterminator.classpath"/>
-    <path refid="library.teamcity-agent-non-openapi.classpath"/>
+    <path refid="library.teamcity-annotations.classpath"/>
+    <path refid="library.teamcity-processesterminator.classpath"/>
+    <path refid="library.buildagent-agent.classpath"/>
+    <path refid="library.devpackage-tests-support.classpath"/>
+    <path refid="library.devpackage-common-api.classpath"/>
   </path>
   
   
