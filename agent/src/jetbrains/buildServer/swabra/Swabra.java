@@ -368,7 +368,7 @@ public final class Swabra extends AgentLifeCycleAdapter {
       public void logFailedToDeleteEmptyDirectory(File dir) {
         myLogger.error("Failed to delete empty directory " + dir.getAbsolutePath());
         fail();
-        ((AgentRunningBuildEx) build).stopBuild("Swabra cleanup failed: some files are locked");
+        build.stopBuild("Swabra cleanup failed: some files are locked");
       }
 
       public void logFailedToCleanFilesUnderDirectory(File dir) {
