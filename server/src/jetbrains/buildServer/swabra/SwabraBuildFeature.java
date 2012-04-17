@@ -51,9 +51,8 @@ public class SwabraBuildFeature extends BuildFeature implements BuildStartContex
     final String html = descriptor.getPluginResourcesPath("swabraSettings.html");
 
     web.registerController(html, new BaseController() {
-      @SuppressWarnings({"unchecked"})
       @Override
-      protected ModelAndView doHandle(final HttpServletRequest request, final HttpServletResponse response) throws Exception {
+      protected ModelAndView doHandle(@NotNull final HttpServletRequest request, @NotNull final HttpServletResponse response) throws Exception {
         if (Boolean.parseBoolean(request.getParameter("updateClashing"))) {
           new AjaxRequestProcessor().processRequest(request, response, new AjaxRequestProcessor.RequestHandler() {
             public void handleRequest(@NotNull final HttpServletRequest request,
@@ -93,7 +92,6 @@ public class SwabraBuildFeature extends BuildFeature implements BuildStartContex
 
     try {
       myServer.getSecurityContext().runAsSystem(new SecurityContextEx.RunAsAction() {
-        @SuppressWarnings({"unchecked"})
         public void run() throws Throwable {
           final SBuildType buildType = myServer.getProjectManager().findBuildTypeById(buildTypeId);
 
