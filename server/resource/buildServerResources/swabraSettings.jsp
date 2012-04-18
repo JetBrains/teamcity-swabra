@@ -51,13 +51,6 @@
   </td>
 </tr>
 
-<tr class="noBorder" id="swabra.clashing.warning.container" style="display:none;">
-    <td colspan="2">
-        <div class="attentionComment" id="clashing.warning">
-        </div>
-    </td>
-</tr>
-
 <tr class="noBorder" id="swabra.strict.container"
     style="${displayCleanupSettings ? '' : 'display: none;'}">
   <th>Clean checkout:</th>
@@ -141,34 +134,6 @@
 
 <script type="text/javascript">
   BS.Swabra = {
-    updateClashing: function(enabled, strict, rules) {
-      BS.ajaxRequest(window['base_uri'] + '${requestUrl}', {
-        parameters: 'id=${buildTypeId}' + '&updateClashing=true' +
-                    (enabled.length > 0 ? '&swabra.enabled=' + encodeURIComponent(enabled): '') +
-                    '&swabra.strict=' + (strict ? strict : 'false') +
-                    (rules.length > 0 ? '&swabra.rules=' + encodeURIComponent(rules) : ''),
-        method : 'get',
-        onComplete: function(transport) {
-          var xml = transport.responseXML;
-          var buildTypes = xml.firstChild.getElementsByTagName("buildType");
-          if (buildTypes && buildTypes.length > 0) {
-            var message = 'Build configuration' + (buildTypes.length > 1 ? 's' : '') + ' <b>';
-            for (var i = 0; i < buildTypes.length; ++i) {
-              message += buildTypes[i].firstChild.nodeValue + (i == buildTypes.length - 1 ? '' : ', ');
-            }
-            message += '</b> ha' + (buildTypes.length > 1 ? 've' : 's') +
-                       ' the same checkout directory, but different Swabra cleanup settings.' +
-                       ' This may lead to extra clean checkouts. Probably these configurations should have identical Swabra cleanup settings';
-            $('clashing.warning').update(message);
-            BS.Util.show('swabra.clashing.warning.container');
-          } else {
-            $('clashing.warning').update();
-            BS.Util.hide('swabra.clashing.warning.container');
-          }
-        }
-      });
-    },
-
     onEnabledChange: function() {
       var enabledEl = $('swabra.enabled');
       var enabledSelectedValue = enabledEl.options[enabledEl.selectedIndex].value;
@@ -190,8 +155,6 @@
       }
 
       BS.MultilineProperties.updateVisible();
-
-      this.updateClashing(enabledSelectedValue, $('swabra.strict').checked, $('swabra.rules').value);
     },
 
     onProcessesChange: function() {
@@ -226,14 +189,8 @@
         }
       }
       BS.MultilineProperties.updateVisible();
-    },
-
-    onStrictChange: function() {
-      this.updateClashing($('swabra.enabled').value, $('swabra.strict').checked, $('swabra.rules').value);
     }
   };
-
-  BS.Swabra.updateClashing('${enabledSelected}', '${propertiesBean.properties['swabra.strict']}', '${propertiesBean.properties['swabra.rules']}');
 </script>
 
 

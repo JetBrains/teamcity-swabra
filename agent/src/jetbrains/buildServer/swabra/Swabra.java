@@ -24,7 +24,6 @@ package jetbrains.buildServer.swabra;
 
 import java.io.File;
 import java.util.Collection;
-import java.util.List;
 import jetbrains.buildServer.agent.*;
 import jetbrains.buildServer.messages.serviceMessages.BuildStatus;
 import jetbrains.buildServer.swabra.processes.HandleProcessesProvider;
@@ -96,27 +95,10 @@ public final class Swabra extends AgentLifeCycleAdapter {
         return;
       }
 
-      logClashing();
-
       processDirs(mySettings.getRules().getPaths());
 
     } finally {
       myLogger.activityFinished();
-    }
-  }
-
-  private void logClashing() {
-    final List<String> clashing = mySettings.getClashingConfigurations();
-    if (!clashing.isEmpty()) {
-      final StringBuilder sb = new StringBuilder("Build configuration").append(clashing.size() > 1 ? "s" : "").append(" ");
-      for (int i = 0; i < clashing.size(); ++i) {
-        sb.append(clashing.get(i)).append(i == clashing.size() - 1 ? "" : ", ");
-      }
-      sb.append(" ha").append(clashing.size() > 1 ? "ve" : "s").append(
-        " the same checkout directory, but different Swabra cleanup settings." +
-        " This may lead to extra clean checkouts." +
-        " Probably these configurations should have identical Swabra cleanup settings");
-      myLogger.warn(sb.toString());
     }
   }
 
