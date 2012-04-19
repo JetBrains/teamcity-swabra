@@ -17,6 +17,7 @@
 package jetbrains.buildServer.swabra;
 
 import java.util.Date;
+import jetbrains.buildServer.BuildProblemData;
 import jetbrains.buildServer.agent.FlowLogger;
 import jetbrains.buildServer.messages.BuildMessage1;
 import org.jetbrains.annotations.NotNull;
@@ -171,5 +172,8 @@ public class BuildProgressLoggerMock implements FlowLogger {
   }
 
   public void disposeFlow() {
+  }
+
+  public void logBuildProblem(final BuildProblemData buildProblem) {
   }
 }
