@@ -53,8 +53,6 @@ public class SwabraUtil {
     SWABRA_MODES.put(BEFORE_BUILD, "Before next build");
   }
 
-  public static final String CLASHING = "swabra.clashing";
-
   public static boolean isCleanupEnabled(@NotNull final Map<String, String> params) {
     return params.containsKey(ENABLED);
   }
