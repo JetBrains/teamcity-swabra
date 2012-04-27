@@ -17,6 +17,7 @@
 package jetbrains.buildServer.swabra;
 
 import java.io.File;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -59,8 +60,8 @@ public class SwabraTest extends TestCase {
 
     myContext.checking(new Expectations() {
       {
-        allowing(build).getSharedConfigParameters();
-        will(returnValue(runParams));
+        allowing(build).getBuildFeaturesOfType(with("swabra"));
+        will(returnValue(createBuildFeatures(runParams)));
         allowing(build).getBuildLogger();
         will(returnValue(logger));
         allowing(build).getCheckoutDirectory();
@@ -78,6 +79,22 @@ public class SwabraTest extends TestCase {
 
     return build;
   }
+
+  @NotNull
+  private Collection<AgentBuildFeature> createBuildFeatures(@NotNull final Map<String, String> runParams) {
+    return Collections.<AgentBuildFeature>singletonList(new AgentBuildFeature() {
+      @NotNull
+      public String getType() {
+        return "swabra";
+      }
+
+      @NotNull
+      public Map<String, String> getParameters() {
+        return runParams;
+      }
+    });
+  }
+
   private BuildAgentConfiguration createBuildAgentConf(@NotNull final File cachesDir) {
     final BuildAgentConfiguration conf = myContext.mock(BuildAgentConfiguration.class);
     myContext.checking(new Expectations() {
