@@ -18,10 +18,8 @@ package jetbrains.buildServer.swabra;
 
 import com.intellij.openapi.util.SystemInfo;
 import java.io.File;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import jetbrains.buildServer.agent.AgentBuildFeature;
 import jetbrains.buildServer.agent.AgentRunningBuild;
 import jetbrains.buildServer.agent.BundledToolsRegistry;
 import jetbrains.buildServer.swabra.processes.HandlePathProvider;
@@ -56,7 +54,14 @@ public class SwabraSettings {
 
 
   public SwabraSettings(AgentRunningBuild runningBuild) {
-    final Map<String, String> params = runningBuild.getSharedConfigParameters();
+    final Collection<AgentBuildFeature> features = runningBuild.getBuildFeaturesOfType("swabra");
+    final Map<String, String> params;
+    if (features.isEmpty()) {
+      params = Collections.emptyMap();
+    } else {
+      params = features.iterator().next().getParameters();
+    }
+
     myCleanupEnabled = SwabraUtil.isCleanupEnabled(params);
     myCleanupMode = SwabraUtil.getCleanupMode(params);
     myStrict = SwabraUtil.isStrict(params);
