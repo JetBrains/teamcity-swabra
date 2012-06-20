@@ -55,7 +55,7 @@
     style="${displayCleanupSettings ? '' : 'display: none;'}">
   <th>Clean checkout:</th>
   <td>
-    <props:checkboxProperty name="swabra.strict" onclick="BS.Swabra.onStrictChange()"/>
+    <props:checkboxProperty name="swabra.strict"/>
     <label for="swabra.strict">Force clean checkout if cannot restore clean directory state</label>
   </td>
 </tr>
