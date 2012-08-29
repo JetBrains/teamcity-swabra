@@ -22,6 +22,7 @@ import java.io.File;
 import java.io.IOException;
 import jetbrains.buildServer.serverSide.AgentToolManager;
 import jetbrains.buildServer.serverSide.ServerPaths;
+import jetbrains.buildServer.util.ArchiveUtil;
 import jetbrains.buildServer.util.FileUtil;
 import org.jetbrains.annotations.NotNull;
 
@@ -80,7 +81,7 @@ public class HandleProvider {
           if (agentPlugin.isFile()) {
             final File temp = new File(FileUtil.getTempDirectory(), "handle-provider");
             try {
-              ZipUtil.extract(agentPlugin, temp, null);
+              ArchiveUtil.unpackZip(agentPlugin, "", temp);
 
               final File handleExe = new File(temp, "handle-provider/bin/handle.exe");
               if (handleExe.isFile()) {
