@@ -17,7 +17,6 @@
 package jetbrains.buildServer.swabra;
 
 
-import com.intellij.util.io.ZipUtil;
 import java.io.File;
 import java.io.IOException;
 import jetbrains.buildServer.serverSide.AgentToolManager;
