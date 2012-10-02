@@ -51,7 +51,7 @@ public class ProcessExecutor {
 //  }
 
   private static ExecResult run(final GeneralCommandLine commandLine) {
-    return SimpleCommandLineProcessRunner.runCommand(commandLine, null, new SimpleCommandLineProcessRunner.RunCommandEvents() {
+    return SimpleCommandLineProcessRunner.runCommand(commandLine, null, new SimpleCommandLineProcessRunner.ProcessRunCallback() {
 
       public void onProcessStarted(Process ps) {
         LOG.debug("Started " + commandLine.getCommandLineString());
@@ -63,6 +63,10 @@ public class ProcessExecutor {
 
       public Integer getOutputIdleSecondsTimeout() {
         return TIMEOUT;
+      }
+
+      public Integer getMaxAcceptedOutputSize() {
+        return null;
       }
     });
   }
