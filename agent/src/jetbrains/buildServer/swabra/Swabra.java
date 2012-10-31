@@ -374,11 +374,7 @@ public final class Swabra extends AgentLifeCycleAdapter {
     if (myFailureReported) return;
 
     myFailureReported = true;
-
     mySettings.setCleanupEnabled(false);
-
-    final String message = "Swabra cleanup failed";
-    myLogger.error(message + ": some files are locked");
-    myLogger.message(new BuildStatus("{build.status.text}; " + message, "FAILURE").asString(), true);
+    myLogger.failBuild();
   }
 }

@@ -16,6 +16,7 @@
 
 package jetbrains.buildServer.swabra;
 
+import jetbrains.buildServer.BuildProblemData;
 import jetbrains.buildServer.agent.BuildProgressLogger;
 import org.apache.log4j.Logger;
 import org.jetbrains.annotations.NonNls;
@@ -73,5 +74,13 @@ public final class SwabraLogger {
 
   public void activityFinished() {
     if (myBuildLogger != null) myBuildLogger.activityFinished(ACTIVITY_NAME, AGENT_BLOCK);
+  }
+
+  public void failBuild() {
+    if (myBuildLogger == null) return;
+
+    final String message = "Swabra cleanup failed";
+    myBuildLogger.error(message + ": some files are locked");
+    myBuildLogger.logBuildProblem(BuildProblemData.createSingletonBuildProblem("swabra", message));
   }
 }
