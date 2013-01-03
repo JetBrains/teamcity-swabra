@@ -91,7 +91,7 @@
   <th>Paths to monitor:  <bs:help file="Build+Files+Cleaner+(Swabra)"/></th>
   <td>
     <props:multilineProperty name="swabra.rules" rows="5" cols="40" linkTitle="Edit paths"/>
-    <span class="smallNote" style="margin-left: 0;">
+    <span class="grayNote">
       Newline or comma delimited set of <strong>+|-:path</strong> rules.<br/>
     </span>
 </tr>
