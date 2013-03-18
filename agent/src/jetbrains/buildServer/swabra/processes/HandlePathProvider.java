@@ -48,7 +48,7 @@ public class HandlePathProvider {
 
 
   private static void logDetectionDisabled(@NotNull String details, @NotNull SwabraLogger logger) {
-   logger.warn("Disabling locking processes detection. " + details);
+   logger.warn("Cannot perform locking processes detection. " + details);
   }
 
   @NotNull
