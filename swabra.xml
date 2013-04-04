@@ -130,6 +130,7 @@
   
   <path id="library.teamcity-util.classpath">
     <pathelement location="${path.variable.teamcitydistribution}/webapps/ROOT/WEB-INF/lib/util.jar"/>
+    <pathelement location="${path.variable.teamcitydistribution}/webapps/ROOT/WEB-INF/lib/openapi.jar"/>
   </path>
   
   <path id="library.teamcity-web.classpath">
