@@ -19,6 +19,8 @@
     <orderEntry type="library" name="buildAgent-agent" level="project" />
     <orderEntry type="library" name="devPackage-tests-support" level="project" />
     <orderEntry type="library" name="devPackage-common-api" level="project" />
+    <orderEntry type="module" module-name="server" />
+    <orderEntry type="library" name="devPackage-server-api" level="project" />
   </component>
 </module>
 

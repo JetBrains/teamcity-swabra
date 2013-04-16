@@ -34,15 +34,17 @@
     <exclude name="**/__pycache__/**"/>
     <exclude name="**/.bundle/**"/>
     <exclude name="**/*.rbc/**"/>
+    <exclude name="**/*.orig/**"/>
   </patternset>
   <patternset id="library.patterns">
-    <include name="*.zip"/>
-    <include name="*.apk"/>
-    <include name="*.war"/>
-    <include name="*.egg"/>
-    <include name="*.ear"/>
-    <include name="*.swc"/>
     <include name="*.jar"/>
+    <include name="*.war"/>
+    <include name="*.ear"/>
+    <include name="*.apk"/>
+    <include name="*.zip"/>
+    <include name="*.swc"/>
+    <include name="*.ane"/>
+    <include name="*.egg"/>
   </patternset>
   <patternset id="compiler.resources">
     <include name="**/?*.properties"/>
@@ -129,8 +131,8 @@
   </path>
   
   <path id="library.teamcity-util.classpath">
-    <pathelement location="${path.variable.teamcitydistribution}/webapps/ROOT/WEB-INF/lib/util.jar"/>
     <pathelement location="${path.variable.teamcitydistribution}/webapps/ROOT/WEB-INF/lib/openapi.jar"/>
+    <pathelement location="${path.variable.teamcitydistribution}/webapps/ROOT/WEB-INF/lib/util.jar"/>
   </path>
   
   <path id="library.teamcity-web.classpath">
@@ -144,8 +146,7 @@
   <path id="javac2.classpath">
     <pathelement location="${javac2.home}/javac2.jar"/>
     <pathelement location="${javac2.home}/jdom.jar"/>
-    <pathelement location="${javac2.home}/asm.jar"/>
-    <pathelement location="${javac2.home}/asm-commons.jar"/>
+    <pathelement location="${javac2.home}/asm4-all.jar"/>
     <pathelement location="${javac2.home}/jgoodies-forms.jar"/>
   </path>
   <target name="register.custom.compilers">
@@ -512,6 +513,8 @@
     <path refid="library.buildagent-agent.classpath"/>
     <path refid="library.devpackage-tests-support.classpath"/>
     <path refid="library.devpackage-common-api.classpath"/>
+    <pathelement location="${server.output.dir}"/>
+    <path refid="library.devpackage-server-api.classpath"/>
   </path>
   
   <path id="tests.runtime.production.module.classpath">
@@ -528,6 +531,8 @@
     <path refid="library.buildagent-agent.classpath"/>
     <path refid="library.devpackage-tests-support.classpath"/>
     <path refid="library.devpackage-common-api.classpath"/>
+    <path refid="server.runtime.production.module.classpath"/>
+    <path refid="library.devpackage-server-api.classpath"/>
   </path>
   
   <path id="tests.module.classpath">
@@ -546,6 +551,9 @@
     <path refid="library.buildagent-agent.classpath"/>
     <path refid="library.devpackage-tests-support.classpath"/>
     <path refid="library.devpackage-common-api.classpath"/>
+    <pathelement location="${server.testoutput.dir}"/>
+    <pathelement location="${server.output.dir}"/>
+    <path refid="library.devpackage-server-api.classpath"/>
   </path>
   
   <path id="tests.runtime.module.classpath">
@@ -563,6 +571,8 @@
     <path refid="library.buildagent-agent.classpath"/>
     <path refid="library.devpackage-tests-support.classpath"/>
     <path refid="library.devpackage-common-api.classpath"/>
+    <path refid="server.runtime.module.classpath"/>
+    <path refid="library.devpackage-server-api.classpath"/>
   </path>
   
   
@@ -583,7 +593,7 @@
   
   <target name="compile.module.tests" depends="compile.module.tests.production,compile.module.tests.tests" description="Compile module tests"/>
   
-  <target name="compile.module.tests.production" depends="register.custom.compilers,compile.module.agent,compile.module.common" description="Compile module tests; production classes"/>
+  <target name="compile.module.tests.production" depends="register.custom.compilers,compile.module.agent,compile.module.common,compile.module.server" description="Compile module tests; production classes"/>
   
   <target name="compile.module.tests.tests" depends="register.custom.compilers,compile.module.tests.production" description="compile module tests; test classes" unless="skip.tests">
     <mkdir dir="${tests.testoutput.dir}"/>
