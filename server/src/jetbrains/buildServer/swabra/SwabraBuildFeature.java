@@ -29,6 +29,8 @@ import org.jetbrains.annotations.NotNull;
 import org.springframework.web.servlet.ModelAndView;
 
 public class SwabraBuildFeature extends BuildFeature {
+  public static final String FEATURE_TYPE = "swabra";
+
   private final String myEditUrl;
 
   public SwabraBuildFeature(@NotNull final PluginDescriptor descriptor,
@@ -58,7 +60,7 @@ public class SwabraBuildFeature extends BuildFeature {
   @NotNull
   @Override
   public String getType() {
-    return "swabra";
+    return FEATURE_TYPE;
   }
 
   @NotNull

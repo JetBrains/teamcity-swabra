@@ -43,6 +43,8 @@
     </orderEntry>
     <orderEntry type="module" module-name="test-api" scope="TEST" />
     <orderEntry type="module" module-name="agent" />
+    <orderEntry type="module" module-name="swabra-server-internal" />
+    <orderEntry type="module" module-name="server-openapi" />
   </component>
 </module>
 
