@@ -17,7 +17,8 @@ import org.jetbrains.annotations.NotNull;
 public class SwabraFrequentCleanCheckoutReport extends HealthStatusReport {
   private static final String SWABRA_FREQUENT_CLEAN_CHECKOUT_TYPE = "swabraFrequentCleanCheckout";
   private static final String SWABRA_CLASHING_BUILD_TYPES = "swabraClashingBuildTypes";
-  private static final ItemCategory CATEGORY = new ItemCategory(SWABRA_FREQUENT_CLEAN_CHECKOUT_TYPE, "Same checkout directory but different Build files cleaner (Swabra) settings", ItemSeverity.INFO);
+  private static final ItemCategory CATEGORY =
+    new ItemCategory(SWABRA_FREQUENT_CLEAN_CHECKOUT_TYPE, "Same checkout directory but different Build files cleaner (Swabra) settings", ItemSeverity.INFO);
 
   @NotNull
   @Override
