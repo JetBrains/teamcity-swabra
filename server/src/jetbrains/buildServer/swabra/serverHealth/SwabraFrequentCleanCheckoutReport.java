@@ -5,6 +5,9 @@ import java.util.Collections;
 import java.util.List;
 import jetbrains.buildServer.serverSide.SBuildType;
 import jetbrains.buildServer.serverSide.healthStatus.*;
+import jetbrains.buildServer.web.openapi.PagePlaces;
+import jetbrains.buildServer.web.openapi.PluginDescriptor;
+import jetbrains.buildServer.web.openapi.healthStatus.HealthStatusItemPageExtension;
 import org.jetbrains.annotations.NotNull;
 
 /**
@@ -16,9 +19,16 @@ import org.jetbrains.annotations.NotNull;
  */
 public class SwabraFrequentCleanCheckoutReport extends HealthStatusReport {
   private static final String SWABRA_FREQUENT_CLEAN_CHECKOUT_TYPE = "swabraFrequentCleanCheckout";
-  private static final String SWABRA_CLASHING_BUILD_TYPES = "swabraClashingBuildTypes";
+  public static final String SWABRA_CLASHING_BUILD_TYPES = "swabraClashingBuildTypes";
   private static final ItemCategory CATEGORY =
-    new ItemCategory(SWABRA_FREQUENT_CLEAN_CHECKOUT_TYPE, "Same checkout directory but different Build files cleaner (Swabra) settings", ItemSeverity.INFO);
+    new ItemCategory(SWABRA_FREQUENT_CLEAN_CHECKOUT_TYPE, "Same checkout directory but different Swabra settings", ItemSeverity.INFO);
+
+  public SwabraFrequentCleanCheckoutReport(@NotNull PluginDescriptor descriptor, @NotNull final PagePlaces pagePlaces) {
+    final HealthStatusItemPageExtension pageExtension = new HealthStatusItemPageExtension(SWABRA_FREQUENT_CLEAN_CHECKOUT_TYPE, pagePlaces);
+
+    pageExtension.setIncludeUrl(descriptor.getPluginResourcesPath("swabraClashingBuildTypes.jsp"));
+    pageExtension.register();
+  }
 
   @NotNull
   @Override
