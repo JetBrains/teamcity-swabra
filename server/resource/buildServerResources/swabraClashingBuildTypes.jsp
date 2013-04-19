@@ -10,7 +10,7 @@
 
 <c:if test="<%=(showMode == HealthStatusItemDisplayMode.GLOBAL)%>">
   <div>
-    Build configurations have the same checkout directory but different Swabra settings <bs:help file="Build+Files+Cleaner+(Swabra)"/>
+    Build configurations have the same checkout directory but different Swabra settings:
   </div>
   <div>
     <ul>
