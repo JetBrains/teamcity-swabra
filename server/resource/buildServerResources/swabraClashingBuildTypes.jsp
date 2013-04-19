@@ -16,21 +16,16 @@
     <c:forEach items="${groups}" var="group">
       <ul>
         <c:forEach items="${group.buildTypes}" var="bt">
-          <c:choose>
-            <c:when test="${afn:permissionGrantedForBuildType(bt, 'VIEW_PROJECT')}">
-              <li>
-                <admin:editBuildTypeLink buildTypeId="${bt.externalId}" step="runType" cameFromUrl="${pageUrl}"><c:out value="${bt.fullName}"/></admin:editBuildTypeLink>
-                <i>(<c:if test="${group.settings.featurePresent}"
-                      ><c:if test="${group.settings.cleanupEnabled}">cleanup enabled, ${group.settings.strict ? "strict" : "non-strict"}</c:if
-                      ><c:if test="${not group.settings.cleanupEnabled}">cleanup disabled</c:if
-                      ></c:if
-                    ><c:if test="${not group.settings.featurePresent}">no build feature</c:if>)</i>
-              </li>
-            </c:when>
-            <c:otherwise>
-              <li><em>Inaccessible build configuration</em></li>
-            </c:otherwise>
-          </c:choose>
+          <c:if test="${afn:permissionGrantedForBuildType(bt, 'VIEW_PROJECT')}">
+            <li>
+              <admin:editBuildTypeLink buildTypeId="${bt.externalId}" step="runType" cameFromUrl="${pageUrl}"><c:out value="${bt.fullName}"/></admin:editBuildTypeLink>
+              <i>(<c:if test="${group.settings.featurePresent}"
+                    ><c:if test="${group.settings.cleanupEnabled}">cleanup enabled, ${group.settings.strict ? "strict" : "non-strict"}</c:if
+                    ><c:if test="${not group.settings.cleanupEnabled}">cleanup disabled</c:if
+                    ></c:if
+                  ><c:if test="${not group.settings.featurePresent}">no build feature</c:if>)</i>
+            </li>
+          </c:if>
         </c:forEach>
       </ul>
     </c:forEach>

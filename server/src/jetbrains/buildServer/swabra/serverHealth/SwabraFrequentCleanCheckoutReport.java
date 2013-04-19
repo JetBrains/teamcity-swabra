@@ -4,12 +4,16 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import javax.servlet.http.HttpServletRequest;
 import jetbrains.buildServer.serverSide.SBuildType;
 import jetbrains.buildServer.serverSide.WebLinks;
+import jetbrains.buildServer.serverSide.auth.Permission;
 import jetbrains.buildServer.serverSide.healthStatus.*;
+import jetbrains.buildServer.users.SUser;
 import jetbrains.buildServer.web.openapi.PagePlaces;
 import jetbrains.buildServer.web.openapi.PluginDescriptor;
 import jetbrains.buildServer.web.openapi.healthStatus.HealthStatusItemPageExtension;
+import jetbrains.buildServer.web.util.SessionUser;
 import org.jetbrains.annotations.NotNull;
 
 /**
@@ -29,7 +33,24 @@ public class SwabraFrequentCleanCheckoutReport extends HealthStatusReport {
   public SwabraFrequentCleanCheckoutReport(@NotNull final PluginDescriptor descriptor,
                                            @NotNull final PagePlaces pagePlaces,
                                            @NotNull final WebLinks webLinks) {
-    final HealthStatusItemPageExtension pageExtension = new HealthStatusItemPageExtension(SWABRA_FREQUENT_CLEAN_CHECKOUT_TYPE, pagePlaces);
+    final HealthStatusItemPageExtension pageExtension = new HealthStatusItemPageExtension(SWABRA_FREQUENT_CLEAN_CHECKOUT_TYPE, pagePlaces) {
+      @Override
+      public boolean isAvailable(@NotNull final HttpServletRequest request) {
+        if (super.isAvailable(request)) {
+          final SUser user = SessionUser.getUser(request);
+          if (user != null) {
+            final HealthStatusItem item = getStatusItem(request);
+            //noinspection unchecked
+            for (SBuildType bt : getBuildTypes((List<SwabraSettingsGroup>)item.getAdditionalData().get(SWABRA_CLASHING_BUILD_TYPES)) ){
+              if (user.getPermissionsGrantedForProject(bt.getProjectId()).contains(Permission.EDIT_PROJECT)) {
+                return true;
+              }
+            }
+          }
+        }
+        return false;
+      }
+    };
 
     pageExtension.setIncludeUrl(descriptor.getPluginResourcesPath("swabraClashingBuildTypes.jsp"));
     pageExtension.register();
