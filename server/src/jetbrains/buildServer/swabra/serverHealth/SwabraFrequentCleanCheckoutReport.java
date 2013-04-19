@@ -1,5 +1,6 @@
 package jetbrains.buildServer.swabra.serverHealth;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -61,23 +62,35 @@ public class SwabraFrequentCleanCheckoutReport extends HealthStatusReport {
   public void report(@NotNull final HealthStatusScope scope, @NotNull final HealthStatusItemConsumer resultConsumer) {
     if (!scope.isItemWithSeverityAccepted(ItemSeverity.INFO)) return;
 
-    final List<List<SBuildType>> result = new SwabraClashingConfigurationsDetector().getClashingConfigurations(scope.getBuildTypes());
+    final List<List<SwabraSettingsGroup>> result = new SwabraClashingConfigurationsDetector().getClashingConfigurationsGroups(scope.getBuildTypes());
 
-    for (final List<SBuildType> group: result) {
+    for (final List<SwabraSettingsGroup> group : result) {
       if(group.isEmpty()) continue;
 
-      final HealthStatusItem item = new HealthStatusItem(signature(group), myCategory, Collections.<String, Object>singletonMap(SWABRA_CLASHING_BUILD_TYPES, group));
+      final HealthStatusItem item =
+        new HealthStatusItem(signature(group), myCategory, Collections.<String, Object>singletonMap(SWABRA_CLASHING_BUILD_TYPES, group));
 
-      for(SBuildType affectedBuildType: group) {
+      for(SBuildType affectedBuildType: getBuildTypes(group)) {
         resultConsumer.consumeForBuildType(affectedBuildType, item);
       }
     }
   }
 
   @NotNull
-  private String signature(@NotNull List<SBuildType> buildTypes) {
+  private List<SBuildType> getBuildTypes(@NotNull List<SwabraSettingsGroup> group) {
+    final List<SBuildType> res = new ArrayList<SBuildType>();
+    for (SwabraSettingsGroup g : group) {
+      for (SBuildType bt : g.getBuildTypes()) {
+        res.add(bt);
+      }
+    }
+    return res;
+  }
+
+  @NotNull
+  private String signature(@NotNull List<SwabraSettingsGroup> group) {
     StringBuilder sb = new StringBuilder();
-    for (SBuildType bt: buildTypes) {
+    for (SBuildType bt : getBuildTypes(group)) {
       sb.append(bt.getBuildTypeId());
     }
     return sb.toString();

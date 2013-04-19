@@ -155,6 +155,27 @@ public class SwabraClashingConfigurationsDetectorTest extends TestCase {
                                               createBT("sixth", null, "vcsSettingsHash2", true, true, true)).size());
   }
 
+  @Test
+  public void testSeveralBTGrouping1() throws Exception {
+    final List<List<SwabraSettingsGroup>> clashingConfigurationsGroups =
+      createDetector().getClashingConfigurationsGroups(
+        asList(createBT("first", null, "vcsSettingsHash1", false, false, false),
+               createBT("second", null, "vcsSettingsHash2", false, false, false),
+               createBT("third", null, "vcsSettingsHash3", false, false, false),
+               createBT("fourth", null, "vcsSettingsHash4", true, true, true),
+               createBT("fifth", null, "vcsSettingsHash1", true, true, true),
+               createBT("sixth", null, "vcsSettingsHash2", true, true, true)));
+
+    assertEquals(2, clashingConfigurationsGroups.size());
+
+    for (List<SwabraSettingsGroup> group : clashingConfigurationsGroups) {
+      assertEquals(2, group.size());
+      for (SwabraSettingsGroup g : group) {
+        assertEquals(1, g.getBuildTypes().size());
+      }
+    }
+  }
+
   private void assertClashingConfigurations(@NotNull String[] expectedNames, @NotNull SBuildType... buildTypes) {
     final List<SBuildType> clashing = toSingleList(getClashingConfigurations(buildTypes));
     assertEquals(expectedNames.length, clashing.size());
@@ -180,7 +201,11 @@ public class SwabraClashingConfigurationsDetectorTest extends TestCase {
 
   @NotNull
   public List<List<SBuildType>> getClashingConfigurations(@NotNull SBuildType... buildTypes) {
-    return createDetector().getClashingConfigurations(Arrays.asList(buildTypes));
+    return createDetector().getClashingConfigurations(asList(buildTypes));
+  }
+
+  @NotNull List<SBuildType> asList(@NotNull SBuildType... buildTypes) {
+    return Arrays.asList(buildTypes);
   }
 
   @NotNull
