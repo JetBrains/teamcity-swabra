@@ -39,7 +39,7 @@ public class SwabraFrequentCleanCheckoutReport extends HealthStatusReport {
   @NotNull
   @Override
   public String getDisplayName() {
-    return "Detect Build files cleaner (Swabra) settings which may cause frequent clean checkout";
+    return "Detect Swabra settings which may cause frequent clean checkout";
   }
 
   @NotNull
