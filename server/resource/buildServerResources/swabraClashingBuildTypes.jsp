@@ -17,7 +17,7 @@
       <c:forEach items="${differentSettingsBuildTypes}" var="bt">
         <c:choose>
           <c:when test="${afn:permissionGrantedForBuildType(bt, 'VIEW_PROJECT')}">
-            <li><admin:editBuildTypeLink buildTypeId="${bt.externalId}" step="vcsRoots" cameFromUrl="${pageUrl}"><c:out value="${bt.fullName}"/></admin:editBuildTypeLink></li>
+            <li><admin:editBuildTypeLink buildTypeId="${bt.externalId}" step="runType" cameFromUrl="${pageUrl}"><c:out value="${bt.fullName}"/></admin:editBuildTypeLink></li>
           </c:when>
           <c:otherwise>
             <li><em>Inaccessible build configuration</em></li>
