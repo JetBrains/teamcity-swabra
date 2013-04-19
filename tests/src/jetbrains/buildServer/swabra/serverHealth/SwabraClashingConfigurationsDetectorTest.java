@@ -164,7 +164,8 @@ public class SwabraClashingConfigurationsDetectorTest extends TestCase {
                createBT("third", null, "vcsSettingsHash3", false, false, false),
                createBT("fourth", null, "vcsSettingsHash4", true, true, true),
                createBT("fifth", null, "vcsSettingsHash1", true, true, true),
-               createBT("sixth", null, "vcsSettingsHash2", true, true, true)));
+               createBT("sixth", null, "vcsSettingsHash2", true, true, true),
+               createBT("seventh", null, "vcsSettingsHash3", true, false, false)));
 
     assertEquals(2, clashingConfigurationsGroups.size());
 
