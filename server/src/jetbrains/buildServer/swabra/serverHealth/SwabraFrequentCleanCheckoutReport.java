@@ -1,9 +1,6 @@
 package jetbrains.buildServer.swabra.serverHealth;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 import javax.servlet.http.HttpServletRequest;
 import jetbrains.buildServer.serverSide.SBuildType;
 import jetbrains.buildServer.serverSide.WebLinks;
@@ -85,8 +82,16 @@ public class SwabraFrequentCleanCheckoutReport extends HealthStatusReport {
 
     final List<List<SwabraSettingsGroup>> result = new SwabraClashingConfigurationsDetector().getClashingConfigurationsGroups(scope.getBuildTypes());
 
-    for (final List<SwabraSettingsGroup> group : result) {
+    for (List<SwabraSettingsGroup> group : result) {
       if(group.isEmpty()) continue;
+
+      group = new ArrayList<SwabraSettingsGroup>(group);
+
+      Collections.sort(group, new Comparator<SwabraSettingsGroup>() {
+        public int compare(final SwabraSettingsGroup o1, final SwabraSettingsGroup o2) {
+          return o1.getBuildTypes().size() - o2.getBuildTypes().size();
+        }
+      });
 
       final HealthStatusItem item =
         new HealthStatusItem(signature(group), myCategory, Collections.<String, Object>singletonMap(SWABRA_CLASHING_BUILD_TYPES, group));
