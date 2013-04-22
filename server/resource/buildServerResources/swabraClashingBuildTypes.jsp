@@ -8,26 +8,17 @@
 <c:set var="groups" value="<%=healthStatusItem.getAdditionalData().get(SwabraFrequentCleanCheckoutReport.SWABRA_CLASHING_BUILD_TYPES)%>"/>
 <c:set var="inplaceMode" value="<%=HealthStatusItemDisplayMode.IN_PLACE%>"/>
 
-<c:if test="<%=(showMode == HealthStatusItemDisplayMode.GLOBAL)%>">
-  <div>
-    Build configurations have the same checkout directory but different Swabra settings:
-  </div>
-  <div>
-    <c:forEach items="${groups}" var="group">
-      <ul>
-        <c:forEach items="${group.buildTypes}" var="bt">
-          <c:if test="${afn:permissionGrantedForBuildType(bt, 'VIEW_PROJECT')}">
-            <li>
-              <admin:editBuildTypeLink buildTypeId="${bt.externalId}" step="runType" cameFromUrl="${pageUrl}"><c:out value="${bt.fullName}"/></admin:editBuildTypeLink>
-              <i>(<c:if test="${group.settings.featurePresent}"
-                    ><c:if test="${group.settings.cleanupEnabled}">cleanup enabled, ${group.settings.strict ? "strict" : "non-strict"}</c:if
-                    ><c:if test="${not group.settings.cleanupEnabled}">cleanup disabled</c:if
-                    ></c:if
-                  ><c:if test="${not group.settings.featurePresent}">no build feature</c:if>)</i>
-            </li>
-          </c:if>
-        </c:forEach>
-      </ul>
-    </c:forEach>
-  </div>
-</c:if>
+<div>
+  Build configurations have the same checkout directory but different Swabra settings:
+</div>
+<div>
+  <c:forEach items="${groups}" var="group">
+    <c:if test="<%=(showMode == HealthStatusItemDisplayMode.GLOBAL)%>"><%@ include file="clashingGroup.jspf"%></c:if>
+    <c:if test="<%=(showMode == HealthStatusItemDisplayMode.IN_PLACE)%>">
+      <c:forEach items="${group.buildTypes}" var="bt">
+        <c:if test="${bt.id eq buildTypeId}"><c:set var="insideClashingGroup" value="${true}"/></c:if>
+      </c:forEach>
+      <c:if test="${insideClashingGroup}"><%@ include file="clashingGroup.jspf"%></c:if>
+    </c:if>
+  </c:forEach>
+</div>
