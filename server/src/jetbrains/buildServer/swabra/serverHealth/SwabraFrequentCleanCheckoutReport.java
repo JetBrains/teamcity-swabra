@@ -23,6 +23,8 @@ import org.jetbrains.annotations.NotNull;
 public class SwabraFrequentCleanCheckoutReport extends HealthStatusReport {
   private static final String SWABRA_FREQUENT_CLEAN_CHECKOUT_TYPE = "swabraFrequentCleanCheckout";
   public static final String SWABRA_CLASHING_BUILD_TYPES = "swabraClashingBuildTypes";
+  public static final String CATEGORY_NAME = "Possible frequent clean checkout (Swabra case)";
+  public static final String CATEGORY_DESCRIPTION = "Presents build configurations whith same checkout directory but different Swabra settings";
 
   @NotNull
   private final ItemCategory myCategory;
@@ -52,9 +54,7 @@ public class SwabraFrequentCleanCheckoutReport extends HealthStatusReport {
     pageExtension.setIncludeUrl(descriptor.getPluginResourcesPath("swabraClashingBuildTypes.jsp"));
     pageExtension.register();
 
-    myCategory = new ItemCategory(SWABRA_FREQUENT_CLEAN_CHECKOUT_TYPE,
-                                  "Same checkout directory but different Swabra settings",
-                                  ItemSeverity.INFO,
+    myCategory = new ItemCategory(SWABRA_FREQUENT_CLEAN_CHECKOUT_TYPE, CATEGORY_NAME, ItemSeverity.INFO, CATEGORY_DESCRIPTION,
                                   webLinks.getHelp("Build+Files+Cleaner+(Swabra)"));
   }
 
