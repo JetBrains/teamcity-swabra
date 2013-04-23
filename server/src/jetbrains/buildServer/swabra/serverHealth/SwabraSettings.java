@@ -20,7 +20,7 @@ public class SwabraSettings {
   private final boolean myStrict;
 
   public SwabraSettings(@NotNull SBuildType bt) {
-    final SBuildFeatureDescriptor feature = getSwabtaBuildFeature(bt);
+    final SBuildFeatureDescriptor feature = getSwabraBuildFeature(bt);
     myFeaturePresent = feature != null;
     if (myFeaturePresent) {
       final Map<String, String> parameters = feature.getParameters();
@@ -73,7 +73,7 @@ public class SwabraSettings {
   }
 
   @Nullable
-  private static SBuildFeatureDescriptor getSwabtaBuildFeature(@NotNull SBuildType bt) {
+  private static SBuildFeatureDescriptor getSwabraBuildFeature(@NotNull SBuildType bt) {
     for (SBuildFeatureDescriptor feature : bt.getBuildFeatures()) {
       if (SwabraBuildFeature.FEATURE_TYPE.equals(feature.getType()) && bt.isEnabled(feature.getId())) {
        return feature;
