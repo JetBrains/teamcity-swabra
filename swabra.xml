@@ -50,6 +50,7 @@
     <include name="**/?*.properties"/>
     <include name="**/?*.xml"/>
     <include name="**/?*.jsp"/>
+    <include name="**/?*.jspf"/>
     <include name="**/?*.js"/>
     <include name="**/?*.gif"/>
     <include name="**/?*.png"/>
