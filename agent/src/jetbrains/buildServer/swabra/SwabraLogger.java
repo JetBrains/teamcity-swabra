@@ -81,6 +81,6 @@ public final class SwabraLogger {
 
     final String message = "Swabra cleanup failed";
     myBuildLogger.error(message + ": some files are locked");
-    myBuildLogger.logBuildProblem(BuildProblemData.createSingletonBuildProblem("swabra", message));
+    myBuildLogger.logBuildProblem(BuildProblemData.createBuildProblem(ACTIVITY_NAME, ACTIVITY_NAME, message));
   }
 }
