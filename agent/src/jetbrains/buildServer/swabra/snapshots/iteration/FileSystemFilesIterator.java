@@ -64,6 +64,10 @@ public class FileSystemFilesIterator implements FilesIterator {
     }
   }
 
+  public void stopIterator() {
+    // do nothing
+  }
+
   private FileInfo processFolder(File folder) throws IOException{
     final File[] files = folder.listFiles();
     if (files == null) {

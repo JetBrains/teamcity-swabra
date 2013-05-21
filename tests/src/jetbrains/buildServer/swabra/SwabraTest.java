@@ -17,12 +17,19 @@
 package jetbrains.buildServer.swabra;
 
 import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
 import jetbrains.buildServer.TempFiles;
 import jetbrains.buildServer.agent.*;
+import jetbrains.buildServer.swabra.snapshots.iteration.FileInfo;
 import jetbrains.buildServer.util.EventDispatcher;
 import jetbrains.buildServer.util.FileUtil;
 import junit.framework.TestCase;
@@ -74,6 +81,8 @@ public class SwabraTest extends TestCase {
         will(returnValue(false));
         allowing(build).isCheckoutOnServer();
         will(returnValue(true));
+        allowing(build).getInterruptReason();
+        will(returnValue(null));
       }
     });
 
@@ -468,5 +477,101 @@ public class SwabraTest extends TestCase {
 
     runTest("oneCreatedOneModifiedOneNotChanged", "oneCreatedOneModifiedOneNotChanged_b_3",
       firstCallParams, secondCallParams, thirdCallParams);
+  }
+
+  public void testBuildInterruptedDuringCleanup() throws Exception {
+    try {
+      System.setProperty(Swabra.TEST_LOG, "true");
+      final File[] files = myCheckoutDir.listFiles();
+      for (File file : files) {
+        file.delete(); //delete useless files
+      }
+
+      new File(myCheckoutDir, "test1").createNewFile();
+      new File(myCheckoutDir, "test2").createNewFile();
+      new File(myCheckoutDir, "test3").createNewFile();
+      new File(myCheckoutDir, "test4").createNewFile();
+      new File(myCheckoutDir, "test5").createNewFile();
+
+      final StringBuilder results = new StringBuilder();
+
+      final SimpleBuildLogger logger = new BuildProgressLoggerMock(results);
+      final EventDispatcher<AgentLifeCycleListener> dispatcher = EventDispatcher.create(AgentLifeCycleListener.class);
+      final SwabraLogger swabraLogger = new SwabraLogger();
+      final SwabraPropertiesProcessor propertiesProcessor = new SwabraPropertiesProcessor(dispatcher, swabraLogger) {
+        @Override
+        public DirectoryState getState(final File dir) {
+          return dir.equals(myCheckoutDir) ? DirectoryState.PENDING : DirectoryState.UNKNOWN;
+        }
+
+        @Override
+        public File getSnapshotFile(final File dir) {
+          FileWriter writer  = null;
+          File snapshotFile = null;
+          try {
+            snapshotFile = File.createTempFile("swabraInterrupter", "snapshot");
+            writer = new FileWriter(snapshotFile);
+            writer.write(dir.getAbsolutePath());
+          } catch (IOException e) {
+          } finally {
+            if (writer != null){
+              try {writer.close();} catch (IOException e) {}
+            }
+          }
+          return snapshotFile;
+        }
+      };
+
+      final Swabra swabra = new Swabra(dispatcher, createSmartDirectoryCleaner(), new SwabraLogger(),
+                                       propertiesProcessor, new BundledToolsRegistry() {
+        public BundledTool findTool(@NotNull final String name) {
+          return null;
+        }
+      }/*, new ProcessTerminator()*/);
+
+      final CountDownLatch latch = new CountDownLatch(2);
+      final AtomicBoolean interruptedFlag = new AtomicBoolean(false);
+      final AtomicInteger numberFilesProcessed = new AtomicInteger(0);
+
+      swabra.setInternalProcessor(new FilesCollectionProcessorForTests(swabraLogger, null, myCheckoutDir, true, true, interruptedFlag) {
+        @Override
+        public boolean willProcess(final FileInfo info) throws InterruptedException {
+          numberFilesProcessed.incrementAndGet();
+          latch.countDown();
+          Thread.sleep(500);
+          return super.willProcess(info);
+        }
+      },
+                                  interruptedFlag);
+
+      final BuildAgent agent = createBuildAgent(myCheckoutDir.getParentFile());
+      dispatcher.getMulticaster().afterAgentConfigurationLoaded(agent);
+      dispatcher.getMulticaster().agentStarted(agent);
+
+      final Map<String, String> runParams = new HashMap<String, String>();
+      final AgentRunningBuild build = createBuild(runParams, myCheckoutDir, logger, createBuildParametersMap());
+
+      final Thread interruptThread = new Thread(new Runnable() {
+        public void run() {
+          try {
+            latch.await(10, TimeUnit.SECONDS);
+            dispatcher.getMulticaster().beforeBuildInterrupted(build, BuildInterruptReason.SERVER_STOP_BUILD);
+          } catch (InterruptedException e) {
+          }
+        }
+      });
+      interruptThread.start();
+
+      final Map<String, String> map = new HashMap<String, String>();
+      map.put(SwabraUtil.ENABLED, SwabraUtil.TRUE);
+      runParams.putAll(map);
+
+      dispatcher.getMulticaster().buildStarted(build);
+
+      // processed 2 of 5 files
+      assertEquals(2, numberFilesProcessed.get());
+    } finally {
+      System.getProperties().remove(Swabra.TEST_LOG);
+    }
   }
 }

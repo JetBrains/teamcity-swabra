@@ -24,6 +24,7 @@ package jetbrains.buildServer.swabra;
 
 import java.io.File;
 import java.util.Collection;
+import java.util.concurrent.atomic.AtomicBoolean;
 import jetbrains.buildServer.agent.*;
 import jetbrains.buildServer.swabra.processes.HandleProcessesProvider;
 import jetbrains.buildServer.swabra.processes.LockedFileResolver;
@@ -55,7 +56,12 @@ public final class Swabra extends AgentLifeCycleAdapter {
   private boolean mySnapshotSaved;
   private boolean myFailureReported;
 
+  // this field is used in tests only
+  private FilesCollectionProcessor myInternalProcessor;
+
   private AgentRunningBuild myRunningBuild;
+
+  private AtomicBoolean myBuildInterrupted = new AtomicBoolean(false);
 
   public Swabra(@NotNull final EventDispatcher<AgentLifeCycleListener> agentDispatcher,
                 @NotNull final SmartDirectoryCleaner directoryCleaner,
@@ -77,6 +83,9 @@ public final class Swabra extends AgentLifeCycleAdapter {
     myRunningBuild = runningBuild;
     mySnapshotSaved = false;
     myFailureReported = false;
+    if (myRunningBuild.getInterruptReason() == null){
+      myBuildInterrupted.set(false);
+    }
 
     mySettings = new SwabraSettings(runningBuild);
     myLogger.setBuildLogger(runningBuild.getBuildLogger());
@@ -150,6 +159,17 @@ public final class Swabra extends AgentLifeCycleAdapter {
   @Override
   public void buildFinished(@NotNull final AgentRunningBuild build, @NotNull final BuildFinishedStatus buildStatus) {
     myRunningBuild = null;
+  }
+
+  @Override
+  public void beforeBuildInterrupted(@NotNull final AgentRunningBuild runningBuild, @NotNull final BuildInterruptReason reason) {
+    myBuildInterrupted.set(true);
+  }
+
+  // for test purposes only
+  /*package local*/ void setInternalProcessor(FilesCollectionProcessor processor, AtomicBoolean buildInterruptedFlag){
+    myInternalProcessor = processor;
+    myBuildInterrupted = buildInterruptedFlag;
   }
 
   private void processDirs(@NotNull Collection<File> dirs) {
@@ -230,8 +250,18 @@ public final class Swabra extends AgentLifeCycleAdapter {
                      doCleanup(checkoutDir,
                                "Checkout directory contains modified files or some files were deleted", myRunningBuild);
                    }
+
+                   public void interrupted() {
+                     myPropertiesProcessor.markPending(checkoutDir, mySettings.isStrict());
+                   }
                  }
-                                       : null
+                                       :
+                 new FilesCollector.SimpleCollectionResultHandler() {
+                   @Override
+                   public void interrupted() {
+                     myPropertiesProcessor.markPending(checkoutDir, mySettings.isStrict());
+                   }
+                 }
     );
   }
 
@@ -275,11 +305,14 @@ public final class Swabra extends AgentLifeCycleAdapter {
   private FilesCollector initFilesCollector(@NotNull File dir) {
     FilesCollectionProcessor processor;
     if (System.getProperty(TEST_LOG) != null) {
-      processor = new FilesCollectionProcessorMock(myLogger, myLockedFileResolver, dir, mySettings.isVerbose(), mySettings.isStrict(), System.getProperty(TEST_LOG));
+      if (myInternalProcessor!= null)
+        processor = myInternalProcessor;
+      else
+        processor = new FilesCollectionProcessorMock(myLogger, myLockedFileResolver, dir, mySettings.isVerbose(), mySettings.isStrict(), System.getProperty(TEST_LOG), myBuildInterrupted);
     } else if (mySettings.getRules().getRulesForPath(dir).size() == 1) {
-      processor = new FilesCollectionProcessor(myLogger, myLockedFileResolver, dir, mySettings.isVerbose(), mySettings.isStrict());
+      processor = new FilesCollectionProcessor(myLogger, myLockedFileResolver, dir, mySettings.isVerbose(), mySettings.isStrict(), myBuildInterrupted);
     } else {
-      processor = new FilesCollectionRulesAwareProcessor(myLogger, myLockedFileResolver, dir, mySettings);
+      processor = new FilesCollectionRulesAwareProcessor(myLogger, myLockedFileResolver, dir, mySettings, myBuildInterrupted);
     }
     return new FilesCollector(processor, myLogger, mySettings);
   }
@@ -333,6 +366,10 @@ public final class Swabra extends AgentLifeCycleAdapter {
 
                    public void dirtyStateDetected() {
                      myPropertiesProcessor.markDirty(dir);
+                   }
+
+                   public void interrupted() {
+                     myPropertiesProcessor.markPending(dir, mySettings.isStrict());
                    }
                  }
     );

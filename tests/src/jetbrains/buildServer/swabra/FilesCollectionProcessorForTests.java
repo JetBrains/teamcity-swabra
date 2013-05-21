@@ -17,6 +17,7 @@
 package jetbrains.buildServer.swabra;
 
 import java.io.File;
+import java.util.concurrent.atomic.AtomicBoolean;
 import jetbrains.buildServer.swabra.processes.LockedFileResolver;
 import jetbrains.buildServer.swabra.snapshots.FilesCollectionProcessor;
 import org.jetbrains.annotations.NotNull;
@@ -30,8 +31,9 @@ public class FilesCollectionProcessorForTests extends FilesCollectionProcessor {
   public FilesCollectionProcessorForTests(@NotNull SwabraLogger logger,
                                           LockedFileResolver resolver,
                                           @NotNull File dir,
-                                          boolean verbose, boolean strict) {
-    super(logger, resolver, dir, verbose, strict);
+                                          boolean verbose, boolean strict,
+                                          @NotNull AtomicBoolean interruptedFlag) {
+    super(logger, resolver, dir, verbose, strict, interruptedFlag);
   }
 
   @Override

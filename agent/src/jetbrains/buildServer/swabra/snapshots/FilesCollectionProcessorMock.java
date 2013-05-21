@@ -19,6 +19,7 @@ package jetbrains.buildServer.swabra.snapshots;
 import java.io.File;
 import java.io.IOException;
 import java.io.RandomAccessFile;
+import java.util.concurrent.atomic.AtomicBoolean;
 import jetbrains.buildServer.swabra.SwabraLogger;
 import jetbrains.buildServer.swabra.processes.LockedFileResolver;
 import jetbrains.buildServer.swabra.snapshots.iteration.FileInfo;
@@ -38,8 +39,9 @@ public class FilesCollectionProcessorMock extends FilesCollectionProcessor {
                                       @NotNull File dir,
                                       boolean verbose,
                                       boolean strict,
-                                      String logPath) {
-    super(logger, resolver, dir, verbose, strict);
+                                      String logPath,
+                                      AtomicBoolean buildInterruped) {
+    super(logger, resolver, dir, verbose, strict, buildInterruped);
     myLogPath = logPath;
   }
 

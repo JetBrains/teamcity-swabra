@@ -41,6 +41,15 @@ public class FilesCollector {
     void error();
     void lockedFilesDetected();
     void dirtyStateDetected();
+    void interrupted();
+  }
+
+  public static class SimpleCollectionResultHandler implements CollectionResultHandler{
+    public void success() {}
+    public void error() {}
+    public void lockedFilesDetected() {}
+    public void dirtyStateDetected() {}
+    public void interrupted() {}
   }
 
   @NotNull
@@ -59,10 +68,12 @@ public class FilesCollector {
     mySettings = settings;
   }
 
-  public void collect(@NotNull File snapshot, @NotNull File dir, @Nullable CollectionResultHandler handler) {
+  public void collect(@NotNull File snapshot,
+                      @NotNull File dir,
+                      @NotNull CollectionResultHandler handler) {
     if (!snapshot.exists() || (snapshot.length() == 0)) {
       logUnableCollect(snapshot, dir, "file doesn't exist", null);
-      if (handler != null) handler.error();
+      handler.error();
       return;
     }
 
@@ -72,9 +83,13 @@ public class FilesCollector {
 
     try {
       iterateAndCollect(snapshot, dir);
+    } catch (InterruptedException e) {
+      myLogger.warn("Swabra process interrupted. Gracefully finishing...");
+      handler.interrupted();
+      return;
     } catch (Exception e) {
       logUnableCollect(snapshot, dir, "Exception occurred: " + e.getMessage(), e);
-      if (handler != null) handler.error();
+      handler.error();
       return;
     }
 
@@ -90,16 +105,16 @@ public class FilesCollector {
     removeSnapshot(snapshot, dir);
     if (results.detectedNewAndUnableToDelete != 0) {
       myLogger.warn(message);
-      if (handler != null) handler.lockedFilesDetected();
+      handler.lockedFilesDetected();
       return;
     }
     if (results.detectedDeleted > 0 || results.detectedModified > 0) {
       myLogger.warn(message);
-      if (handler != null) handler.dirtyStateDetected();
+      handler.dirtyStateDetected();
       return;
     }
     myLogger.message(message, true);
-    if (handler != null) handler.success();
+    handler.success();
   }
 
   private void removeSnapshot(File snapshot, File dir) {

@@ -17,6 +17,7 @@
 package jetbrains.buildServer.swabra;
 
 import java.io.File;
+import java.util.concurrent.atomic.AtomicBoolean;
 import jetbrains.buildServer.swabra.snapshots.FilesCollectionProcessor;
 import jetbrains.buildServer.swabra.snapshots.iteration.FileChangeType;
 import jetbrains.buildServer.swabra.snapshots.iteration.FileInfo;
@@ -35,7 +36,7 @@ public class FilesCollectionProcessorTest extends TestCase {
     final SwabraLogger logger = new SwabraLogger();
     logger.setBuildLogger(new BuildProgressLoggerMock(sb));
 
-    final FilesCollectionProcessor processor = new FilesCollectionProcessorForTests(logger, null, new File(""), true, true);
+    final FilesCollectionProcessor processor = new FilesCollectionProcessorForTests(logger, null, new File(""), true, true, new AtomicBoolean(false));
 
     processor.comparisonStarted();
 
@@ -126,5 +127,56 @@ public class FilesCollectionProcessorTest extends TestCase {
       new FileChangeInfo(FileChangeType.ADDED, "a", false),
       new FileChangeInfo(FileChangeType.MODIFIED, "d", true)
     );
+  }
+
+  @Test
+  public void test_interruption() throws Exception {
+    FileChangeInfo[] changes = new FileChangeInfo[]{
+      new FileChangeInfo(FileChangeType.ADDED, "a", false),
+      new FileChangeInfo(FileChangeType.MODIFIED, "d", true)
+    };
+
+    final StringBuilder sb = new StringBuilder();
+    final SwabraLogger logger = new SwabraLogger();
+    logger.setBuildLogger(new BuildProgressLoggerMock(sb));
+
+    final AtomicBoolean interruptedFlag = new AtomicBoolean(false);
+    boolean wasActuallyInterrupted = false;
+    int entriesProcessed = 0;
+
+    final FilesCollectionProcessor processor = new FilesCollectionProcessorForTests(logger, null, new File(""), true, true, interruptedFlag);
+
+    processor.comparisonStarted();
+    try {
+      for (final FileChangeInfo changeInfo : changes) {
+        final FileInfo fileInfo = new FileInfo(changeInfo.path, 0, 0, changeInfo.isFile);
+        if (processor.willProcess(fileInfo)) {
+          switch (changeInfo.type) {
+            case UNCHANGED:
+              processor.processUnchanged(fileInfo);
+              break;
+            case ADDED:
+              processor.processAdded(fileInfo);
+              break;
+            case MODIFIED:
+              processor.processModified(fileInfo, fileInfo);
+              break;
+            case DELETED:
+              processor.processDeleted(fileInfo);
+              break;
+          }
+        }
+        entriesProcessed++;
+        if (!interruptedFlag.get()) {
+          interruptedFlag.set(true);
+        }
+      }
+    } catch (InterruptedException ex) {
+      wasActuallyInterrupted = true;
+    }
+
+    processor.comparisonFinished();
+    assertTrue(wasActuallyInterrupted);
+    assertEquals(1, entriesProcessed);
   }
 }

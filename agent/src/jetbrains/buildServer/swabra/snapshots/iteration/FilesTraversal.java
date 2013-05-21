@@ -33,7 +33,7 @@ public class FilesTraversal {
 
     void comparisonFinished();
 
-    boolean willProcess(FileInfo info);
+    boolean willProcess(FileInfo info) throws InterruptedException;
 
     void processModified(FileInfo info1, FileInfo info2);
 
@@ -55,39 +55,45 @@ public class FilesTraversal {
   public void traverseCompare(@NotNull FilesIterator it1,
                               @NotNull FilesIterator it2,
                               @NotNull ComparisonProcessor processor) throws Exception {
-    processor.comparisonStarted();
+    try {
+      processor.comparisonStarted();
 
-    FileInfo info1 = it1.getNext();
-    FileInfo info2 = it2.getNext();
+      FileInfo info1 = it1.getNext();
+      FileInfo info2 = it2.getNext();
 
-    while (info1 != null && info2 != null) {
-      final int comparisonResult = FilesComparator.compare(info1, info2);
-
-      if (fileAdded(comparisonResult)) {
-        process(info2, null, FileChangeType.ADDED, processor);
-        info2 = it2.getNext();
-      } else if (fileDeleted(comparisonResult)) {
+      while (info1 != null && info2 != null) {
+        final int comparisonResult = FilesComparator.compare(info1, info2);
+        if (fileAdded(comparisonResult)) {
+          process(info2, null, FileChangeType.ADDED, processor);
+          info2 = it2.getNext();
+        } else if (fileDeleted(comparisonResult)) {
+          process(info1, null, FileChangeType.DELETED, processor);
+          info1 = it1.getNext();
+        } else {
+          if (fileModified(info1, info2)) {
+            process(info1, info2, FileChangeType.MODIFIED, processor);
+          } else {
+            process(info1, null, FileChangeType.UNCHANGED, processor);
+          }
+          info1 = it1.getNext();
+          info2 = it2.getNext();
+        }
+      }
+      while (info1 != null) {
         process(info1, null, FileChangeType.DELETED, processor);
         info1 = it1.getNext();
-      } else {
-        if (fileModified(info1, info2)) {
-          process(info1, info2, FileChangeType.MODIFIED, processor);
-        } else {
-          process(info1, null, FileChangeType.UNCHANGED, processor);
-        }
-        info1 = it1.getNext();
+      }
+      while (info2 != null) {
+        process(info2, null, FileChangeType.ADDED, processor);
         info2 = it2.getNext();
       }
+      processor.comparisonFinished();
+    } catch (InterruptedException ex) {
+      throw ex;
+    } finally {
+      it1.stopIterator();
+      it2.stopIterator();
     }
-    while (info1 != null) {
-      process(info1, null, FileChangeType.DELETED, processor);
-      info1 = it1.getNext();
-    }
-    while (info2 != null) {
-      process(info2, null, FileChangeType.ADDED, processor);
-      info2 = it2.getNext();
-    }
-    processor.comparisonFinished();
   }
 
   private static boolean fileAdded(int comparisonResult) {
@@ -103,7 +109,7 @@ public class FilesTraversal {
       && (was.getLength() != is.getLength() || was.getLastModified() != is.getLastModified());
   }
 
-  private static void process(FileInfo info1, FileInfo info2, FileChangeType changeType, ComparisonProcessor processor) {
+  private static void process(FileInfo info1, FileInfo info2, FileChangeType changeType, ComparisonProcessor processor) throws InterruptedException {
     if (processor.willProcess(info1)) {
       switch (changeType) {
         case ADDED:

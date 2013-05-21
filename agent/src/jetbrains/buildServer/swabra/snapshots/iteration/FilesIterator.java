@@ -26,4 +26,10 @@ import org.jetbrains.annotations.Nullable;
 public interface FilesIterator {
   @Nullable
   FileInfo getNext() throws Exception;
+
+  /**
+   * stops iterators and closes all opened resources and handles
+   * @throws Exception
+   */
+  void stopIterator();
 }

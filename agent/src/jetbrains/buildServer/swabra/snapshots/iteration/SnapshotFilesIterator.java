@@ -56,7 +56,7 @@ public class SnapshotFilesIterator implements FilesIterator {
       return processNextRecord();
     } catch (IOException e) {
       LOG.error("Error occurred when reading from input stream", e);
-      closeReader();
+      stopIterator();
       return null;
     }
   }
@@ -79,7 +79,7 @@ public class SnapshotFilesIterator implements FilesIterator {
     return null;
   }
 
-  private void closeReader() {
+  public void stopIterator() {
     if (myReader == null) {
       return;
     }

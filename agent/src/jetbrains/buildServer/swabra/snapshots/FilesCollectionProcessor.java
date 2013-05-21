@@ -20,6 +20,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Stack;
+import java.util.concurrent.atomic.AtomicBoolean;
 import jetbrains.buildServer.swabra.Swabra;
 import jetbrains.buildServer.swabra.SwabraLogger;
 import jetbrains.buildServer.swabra.processes.LockedFileResolver;
@@ -55,13 +56,18 @@ public class FilesCollectionProcessor implements FilesTraversal.ComparisonProces
   @NotNull
   private final DeletionListener myDeletionListener;
 
+  @NotNull
+  private final AtomicBoolean myBuildInterrupted;
+
   @NotNull private final String myDir;
 
   public FilesCollectionProcessor(@NotNull SwabraLogger logger,
                                   LockedFileResolver resolver,
                                   @NotNull File dir,
                                   boolean verbose,
-                                  boolean strict) {
+                                  boolean strict,
+                                  @NotNull AtomicBoolean buildInterruptedFlag) {
+    myBuildInterrupted = buildInterruptedFlag;
     myLogger = logger;
     myLockedFileResolver = resolver;
     myDir = dir.getAbsolutePath();
@@ -74,7 +80,11 @@ public class FilesCollectionProcessor implements FilesTraversal.ComparisonProces
     myDeletionListener = new DeletionListener();
   }
 
-  public boolean willProcess(FileInfo info) {
+  public boolean willProcess(FileInfo info) throws InterruptedException {
+    if (myBuildInterrupted.get()){
+      throw new InterruptedException();
+    }
+
     return !myDir.equals(info.getPath());
   }
 

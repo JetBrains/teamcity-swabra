@@ -35,7 +35,7 @@ import static jetbrains.buildServer.swabra.SwabraUtil.unifyPath;
  * Time: 16:50:49
  */
 
-public final class SwabraPropertiesProcessor extends AgentLifeCycleAdapter {
+public class SwabraPropertiesProcessor extends AgentLifeCycleAdapter {
   private static final String FILE_NAME = "snapshot.map";
   private static final String KEY_VAL_SEPARATOR = "=";
 
