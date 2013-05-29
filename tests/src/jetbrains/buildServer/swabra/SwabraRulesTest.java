@@ -20,6 +20,7 @@ import java.io.File;
 import java.util.Arrays;
 import jetbrains.buildServer.swabra.snapshots.SwabraRules;
 import jetbrains.buildServer.util.FileUtil;
+import jetbrains.buildServer.util.TestFor;
 import junit.framework.TestCase;
 import org.jetbrains.annotations.NotNull;
 import org.junit.Test;
@@ -61,8 +62,8 @@ public class SwabraRulesTest extends TestCase {
     assertTrue(rules.shouldInclude("another/path"));
   }
 
-  //http://youtrack.jetbrains.net/issue/TW-14666
   @Test
+  @TestFor(issues = "TW-14666")
   public void test_path_exclude_1() {
     final SwabraRules rules = createRules("-:.", "+:some/path");
 
@@ -255,8 +256,8 @@ public class SwabraRulesTest extends TestCase {
     assertTrue(rules.shouldInclude("some/path/content"));
   }
 
-  //http://youtrack.jetbrains.net/issue/TW-14668
   @Test
+  @TestFor(issues = "TW-14668")
   public void test_misc_with_dots() {
     final SwabraRules rules = createRules("-:./**/some/**", "+:./some/path");
 
