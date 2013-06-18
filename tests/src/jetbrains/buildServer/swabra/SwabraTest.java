@@ -39,6 +39,7 @@ import org.jmock.Mockery;
 import org.jmock.integration.junit4.JUnit4Mockery;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Test;
 
 import static jetbrains.buildServer.swabra.TestUtil.getTestData;
 import static jetbrains.buildServer.swabra.TestUtil.getTestDataPath;
@@ -573,5 +574,22 @@ public class SwabraTest extends TestCase {
     } finally {
       System.getProperties().remove(Swabra.TEST_LOG);
     }
+  }
+
+  // TW-29332
+  public void testUnicodeFileNames_unchanged() throws Exception {
+    final Map<String, String> firstCallParams = new HashMap<String, String>();
+    firstCallParams.put(SwabraUtil.ENABLED, SwabraUtil.AFTER_BUILD);
+    firstCallParams.put(SwabraUtil.VERBOSE, SwabraUtil.TRUE);
+
+    final Map<String, String> secondCallParams = new HashMap<String, String>();
+    secondCallParams.put(SwabraUtil.ENABLED, SwabraUtil.AFTER_BUILD);
+    secondCallParams.put(SwabraUtil.VERBOSE, SwabraUtil.TRUE);
+
+    final Map<String, String> thirdCallParams = new HashMap<String, String>();
+    thirdCallParams.put(SwabraUtil.ENABLED, SwabraUtil.AFTER_BUILD);
+    thirdCallParams.put(SwabraUtil.VERBOSE, SwabraUtil.TRUE);
+
+    runTest("unicodeFileNames_unchanged", "unicodeFileNames_unchanged", firstCallParams, secondCallParams, thirdCallParams);
   }
 }

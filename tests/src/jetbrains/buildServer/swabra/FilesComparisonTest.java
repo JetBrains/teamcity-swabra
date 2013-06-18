@@ -94,4 +94,10 @@ public class FilesComparisonTest extends TestCase {
   public void test2() throws Exception {
     runTest("filesCompare2");
   }
+
+  // TW-29332
+  @org.junit.Test
+  public void testUnicodeFileNames() throws Exception {
+    runTest("unicodeFileNames");
+  }
 }

@@ -16,10 +16,7 @@
 
 package jetbrains.buildServer.swabra.snapshots;
 
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
+import java.io.*;
 import jetbrains.buildServer.swabra.SwabraLogger;
 import jetbrains.buildServer.swabra.SwabraUtil;
 import jetbrains.buildServer.swabra.snapshots.iteration.FileInfo;
@@ -67,7 +64,7 @@ public class SnapshotGenerator {
 
     BufferedWriter writer = null;
     try {
-      writer = new BufferedWriter(new FileWriter(snapshot));
+      writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(snapshot), "UTF-8"));
       writer.write(getSnapshotHeader(myRootDirParent));
 
       iterateAndBuildSnapshot(writer);

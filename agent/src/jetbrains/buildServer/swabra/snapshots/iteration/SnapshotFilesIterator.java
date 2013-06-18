@@ -16,10 +16,7 @@
 
 package jetbrains.buildServer.swabra.snapshots.iteration;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
-import java.io.IOException;
+import java.io.*;
 import org.apache.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -49,7 +46,7 @@ public class SnapshotFilesIterator implements FilesIterator {
   public FileInfo getNext() {
     try {
       if (myReader == null) {
-        myReader = new BufferedReader(new FileReader(mySnapshot));
+        myReader = new BufferedReader(new InputStreamReader(new FileInputStream(mySnapshot), "UTF-8"));
         myRootFolder = myReader.readLine();
         myCurrentDir = "";
       }
