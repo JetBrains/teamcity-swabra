@@ -2,7 +2,7 @@
   <c:forEach items="${group.buildTypes}" var="bt">
     <c:if test="${afn:permissionGrantedForBuildType(bt, 'VIEW_PROJECT')}">
       <li>
-        <admin:editBuildTypeLink buildTypeId="${bt.externalId}" step="runType" cameFromUrl="${pageUrl}"><c:out value="${bt.fullName}"/></admin:editBuildTypeLink>
+        <admin:editBuildTypeLink buildTypeId="${bt.externalId}" step="runType" cameFromUrl="${healthStatusReportUrl}"><c:out value="${bt.fullName}"/></admin:editBuildTypeLink>
         <i>(<c:if test="${group.settings.featurePresent}"
               ><c:if test="${group.settings.cleanupEnabled}">cleanup enabled, ${group.settings.strict ? "strict" : "non-strict"}</c:if
               ><c:if test="${not group.settings.cleanupEnabled}">cleanup disabled</c:if
