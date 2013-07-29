@@ -70,7 +70,7 @@ public class FilesCollector {
 
   public void collect(@NotNull File snapshot,
                       @NotNull File dir,
-                      @NotNull CollectionResultHandler handler) {
+                      @Nullable CollectionResultHandler handler) {
     if (!snapshot.exists() || (snapshot.length() == 0)) {
       logUnableCollect(snapshot, dir, "file doesn't exist", null);
       handler.error();

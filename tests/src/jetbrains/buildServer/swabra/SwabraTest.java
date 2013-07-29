@@ -19,10 +19,7 @@ package jetbrains.buildServer.swabra;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -177,6 +174,11 @@ public class SwabraTest extends TestCase {
 
   private void runTest(final String dirName, final String resultsFileName,
                        Map<String, String>... params) throws Exception {
+    runTest(dirName, resultsFileName, null, null, params);
+  }
+  private void runTest(final String dirName, final String resultsFileName,
+                       Runnable afterBuildActions, List<File> extraDirs,
+                       Map<String, String>... params) throws Exception {
     final String goldFile = getTestDataPath(resultsFileName + ".gold", null);
     final String resultsFile = goldFile.replace(".gold", ".tmp");
     System.setProperty(Swabra.TEST_LOG, resultsFile);
@@ -213,9 +215,18 @@ public class SwabraTest extends TestCase {
       runParams.clear();
       runParams.putAll(param);
       runBuild(dirName, dispatcher, build, runner, checkoutDirPath);
+      if (afterBuildActions != null) {
+        afterBuildActions.run();
+      }
     }
 
-    final String actual = FileUtil.readText(new File(resultsFile)).trim().replace(myCheckoutDir.getAbsolutePath(), "##CHECKOUT_DIR##").replace("/", "\\");
+    final String baseText = FileUtil.readText(new File(resultsFile)).trim();
+    String actual = baseText.replace(myCheckoutDir.getAbsolutePath(), "##CHECKOUT_DIR##").replace("/", "\\");
+    if (extraDirs!= null) {
+      for (int i = 0; i < extraDirs.size(); i++) {
+        actual = baseText.replace(extraDirs.get(i).getAbsolutePath(), "##EXTRA_DIR_" + (i + 1) + "##");
+      }
+    }
     final String expected = FileUtil.readText(new File(goldFile)).trim();
     assertEquals(actual, expected, actual);
 //    FileUtil.delete(pttTemp);
@@ -578,6 +589,22 @@ public class SwabraTest extends TestCase {
 
   // TW-29332
   public void testUnicodeFileNames_unchanged() throws Exception {
+    // need to manually set lastModified for all files to the same value in all folders;
+    Map<String, Long> modifiedDates = new HashMap<String, Long>();
+    final File beforeBuildDir = new File(getTestDataPath("unicodeFileNames_unchanged", null), "beforeBuild");
+    final File[] files = beforeBuildDir.listFiles();
+    for (File file : files) {
+      modifiedDates.put(file.getName(), file.lastModified());
+    }
+
+    for (String directory : Arrays.asList("afterBuild", "afterCheckout")){
+      File dir = new File(getTestDataPath("unicodeFileNames_unchanged", null), directory);
+      final File[] dirFiles = dir.listFiles();
+      for (File file : dirFiles) {
+        file.setLastModified(modifiedDates.get(file.getName()));
+      }
+    }
+
     final Map<String, String> firstCallParams = new HashMap<String, String>();
     firstCallParams.put(SwabraUtil.ENABLED, SwabraUtil.AFTER_BUILD);
     firstCallParams.put(SwabraUtil.VERBOSE, SwabraUtil.TRUE);
@@ -592,4 +619,39 @@ public class SwabraTest extends TestCase {
 
     runTest("unicodeFileNames_unchanged", "unicodeFileNames_unchanged", firstCallParams, secondCallParams, thirdCallParams);
   }
+
+  // TW-31015
+  // Actually inpassing null CollectionResultHandler to jetbrains.buildServer.swabra.snapshots.FilesCollector.collect()
+  public void testCleanNonCheckoutDir() throws Exception {
+    final Map<String, String> firstCallParams = new HashMap<String, String>();
+    firstCallParams.put(SwabraUtil.ENABLED, SwabraUtil.BEFORE_BUILD);
+    firstCallParams.put(SwabraUtil.VERBOSE, SwabraUtil.TRUE);
+
+    final File tmpNonCheckoutDir = myTempFiles.createTempDir();
+    final File tempFileInDir = new File(tmpNonCheckoutDir, "ttt.txt");
+    firstCallParams.put(SwabraUtil.RULES, tmpNonCheckoutDir.getAbsolutePath());
+
+
+    final Map<String, String> secondCallParams = new HashMap<String, String>();
+    secondCallParams.put(SwabraUtil.ENABLED, SwabraUtil.BEFORE_BUILD);
+    secondCallParams.put(SwabraUtil.VERBOSE, SwabraUtil.TRUE);
+    secondCallParams.put(SwabraUtil.RULES, tmpNonCheckoutDir.getAbsolutePath());
+
+    final AtomicInteger runCount = new AtomicInteger(0);
+
+
+    runTest("emptyCheckoutDir", "nonCheckoutDir", new Runnable() {
+      public void run() {
+        if (runCount.incrementAndGet() == 1){
+          try {
+            tempFileInDir.createNewFile();
+          } catch (IOException e) {e.printStackTrace();}
+        }
+      }
+    }, Arrays.asList(tmpNonCheckoutDir), firstCallParams, secondCallParams);
+
+    assertFalse(tempFileInDir.exists());
+  }
+
+
 }
