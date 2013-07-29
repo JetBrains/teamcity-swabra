@@ -221,12 +221,13 @@ public class SwabraTest extends TestCase {
     }
 
     final String baseText = FileUtil.readText(new File(resultsFile)).trim();
-    String actual = baseText.replace(myCheckoutDir.getAbsolutePath(), "##CHECKOUT_DIR##").replace("/", "\\");
+    String actual = baseText.replace(myCheckoutDir.getAbsolutePath(), "##CHECKOUT_DIR##");
     if (extraDirs!= null) {
       for (int i = 0; i < extraDirs.size(); i++) {
         actual = baseText.replace(extraDirs.get(i).getAbsolutePath(), "##EXTRA_DIR_" + (i + 1) + "##");
       }
     }
+    actual = actual.replace("/", "\\");
     final String expected = FileUtil.readText(new File(goldFile)).trim();
     assertEquals(actual, expected, actual);
 //    FileUtil.delete(pttTemp);
