@@ -76,6 +76,18 @@ public class SwabraRulesTest extends TestCase {
   }
 
   @Test
+  public void test_path_exclude_stars() {
+    final SwabraRules rules = createRules("-:**", "+:some/path");
+
+    assertFalse(rules.shouldInclude("."));
+
+    assertTrue(rules.shouldInclude("some/path"));
+    assertTrue(rules.shouldInclude("some/path/content"));
+
+    assertFalse(rules.shouldInclude("another/some/path"));
+  }
+
+  @Test
   public void test_path_include_1() {
     final SwabraRules rules = createRules("+:some/path");
 
