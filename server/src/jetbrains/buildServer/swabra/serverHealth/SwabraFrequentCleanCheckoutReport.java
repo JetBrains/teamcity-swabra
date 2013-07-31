@@ -24,7 +24,7 @@ public class SwabraFrequentCleanCheckoutReport extends HealthStatusReport {
   private static final String SWABRA_FREQUENT_CLEAN_CHECKOUT_TYPE = "swabraFrequentCleanCheckout";
   public static final String SWABRA_CLASHING_BUILD_TYPES = "swabraClashingBuildTypes";
   public static final String CATEGORY_NAME = "Possible frequent clean checkout (Swabra case)";
-  public static final String CATEGORY_DESCRIPTION = "Build configurations with same checkout directory but different Swabra settings";
+  public static final String CATEGORY_DESCRIPTION = "Build configurations with the same checkout directory but different Swabra settings";
 
   @NotNull
   private final ItemCategory myCategory;
