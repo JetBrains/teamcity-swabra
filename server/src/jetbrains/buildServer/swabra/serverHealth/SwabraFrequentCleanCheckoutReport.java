@@ -2,6 +2,7 @@ package jetbrains.buildServer.swabra.serverHealth;
 
 import java.util.*;
 import javax.servlet.http.HttpServletRequest;
+import jetbrains.buildServer.serverSide.ProjectManager;
 import jetbrains.buildServer.serverSide.SBuildType;
 import jetbrains.buildServer.serverSide.WebLinks;
 import jetbrains.buildServer.serverSide.auth.Permission;
@@ -26,12 +27,13 @@ public class SwabraFrequentCleanCheckoutReport extends HealthStatusReport {
   public static final String CATEGORY_NAME = "Possible frequent clean checkout (Swabra case)";
   public static final String CATEGORY_DESCRIPTION = "Build configurations with the same checkout directory but different Swabra settings";
 
-  @NotNull
-  private final ItemCategory myCategory;
+  @NotNull private final ProjectManager myProjectManager;
+  @NotNull private final ItemCategory myCategory;
 
   public SwabraFrequentCleanCheckoutReport(@NotNull final PluginDescriptor descriptor,
                                            @NotNull final PagePlaces pagePlaces,
-                                           @NotNull final WebLinks webLinks) {
+                                           @NotNull final WebLinks webLinks,
+                                           @NotNull ProjectManager projectManager) {
     final HealthStatusItemPageExtension pageExtension = new HealthStatusItemPageExtension(SWABRA_FREQUENT_CLEAN_CHECKOUT_TYPE, pagePlaces) {
       @Override
       public boolean isAvailable(@NotNull final HttpServletRequest request) {
@@ -54,8 +56,8 @@ public class SwabraFrequentCleanCheckoutReport extends HealthStatusReport {
     pageExtension.setIncludeUrl(descriptor.getPluginResourcesPath("swabraClashingBuildTypes.jsp"));
     pageExtension.register();
 
-    myCategory = new ItemCategory(SWABRA_FREQUENT_CLEAN_CHECKOUT_TYPE, CATEGORY_NAME, ItemSeverity.INFO, CATEGORY_DESCRIPTION,
-                                  webLinks.getHelp("Build+Files+Cleaner+(Swabra)"));
+    myCategory = new ItemCategory(SWABRA_FREQUENT_CLEAN_CHECKOUT_TYPE, CATEGORY_NAME, ItemSeverity.INFO, CATEGORY_DESCRIPTION, webLinks.getHelp("Build+Files+Cleaner+(Swabra)"));
+    myProjectManager = projectManager;
   }
 
   @NotNull
@@ -80,7 +82,8 @@ public class SwabraFrequentCleanCheckoutReport extends HealthStatusReport {
   public void report(@NotNull final HealthStatusScope scope, @NotNull final HealthStatusItemConsumer resultConsumer) {
     if (!scope.isItemWithSeverityAccepted(ItemSeverity.INFO)) return;
 
-    final List<List<SwabraSettingsGroup>> result = new SwabraClashingConfigurationsDetector().getClashingConfigurationsGroups(scope.getBuildTypes());
+    final List<List<SwabraSettingsGroup>> result =
+      new SwabraClashingConfigurationsDetector().getClashingConfigurationsGroups(myProjectManager.getActiveBuildTypes(), scope.getBuildTypes());
 
     for (List<SwabraSettingsGroup> group : result) {
       if(group.isEmpty()) continue;

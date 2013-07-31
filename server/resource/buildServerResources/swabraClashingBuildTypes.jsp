@@ -14,12 +14,6 @@
 </div>
 <div>
   <c:forEach items="${groups}" var="group">
-    <c:if test="<%=(showMode == HealthStatusItemDisplayMode.GLOBAL)%>"><%@ include file="clashingGroup.jspf"%></c:if>
-    <c:if test="<%=(showMode == HealthStatusItemDisplayMode.IN_PLACE)%>">
-      <c:forEach items="${group.buildTypes}" var="bt">
-        <c:if test="${bt.id eq buildTypeId}"><c:set var="insideClashingGroup" value="${true}"/></c:if>
-      </c:forEach>
-      <c:if test="${insideClashingGroup}"><%@ include file="clashingGroup.jspf"%></c:if>
-    </c:if>
+    <%@ include file="clashingGroup.jspf"%>
   </c:forEach>
 </div>

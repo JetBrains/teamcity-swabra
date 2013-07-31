@@ -157,15 +157,15 @@ public class SwabraClashingConfigurationsDetectorTest extends TestCase {
 
   @Test
   public void testSeveralBTGrouping1() throws Exception {
+    final List<SBuildType> buildTypes = asList(createBT("first", null, "vcsSettingsHash1", false, false, false),
+                                               createBT("second", null, "vcsSettingsHash2", false, false, false),
+                                               createBT("third", null, "vcsSettingsHash3", false, false, false),
+                                               createBT("fourth", null, "vcsSettingsHash4", true, true, true),
+                                               createBT("fifth", null, "vcsSettingsHash1", true, true, true),
+                                               createBT("sixth", null, "vcsSettingsHash2", true, true, true),
+                                               createBT("seventh", null, "vcsSettingsHash3", true, false, false));
     final List<List<SwabraSettingsGroup>> clashingConfigurationsGroups =
-      createDetector().getClashingConfigurationsGroups(
-        asList(createBT("first", null, "vcsSettingsHash1", false, false, false),
-               createBT("second", null, "vcsSettingsHash2", false, false, false),
-               createBT("third", null, "vcsSettingsHash3", false, false, false),
-               createBT("fourth", null, "vcsSettingsHash4", true, true, true),
-               createBT("fifth", null, "vcsSettingsHash1", true, true, true),
-               createBT("sixth", null, "vcsSettingsHash2", true, true, true),
-               createBT("seventh", null, "vcsSettingsHash3", true, false, false)));
+      createDetector().getClashingConfigurationsGroups(buildTypes, buildTypes);
 
     assertEquals(2, clashingConfigurationsGroups.size());
 
@@ -175,6 +175,18 @@ public class SwabraClashingConfigurationsDetectorTest extends TestCase {
         assertEquals(1, g.getBuildTypes().size());
       }
     }
+  }
+
+  @Test
+  public void testSeveralBTGrouping2() throws Exception {
+    final SBuildType scopeBuildType = createBT("first", null, "vcsSettingsHash1", false, false, false);
+    final List<SBuildType> buildTypes = asList(scopeBuildType,
+                                               createBT("second", null, "vcsSettingsHash2", false, false, false),
+                                               createBT("third", null, "vcsSettingsHash3", false, false, false),
+                                               createBT("fourth", null, "vcsSettingsHash4", true, true, true),
+                                               createBT("fifth", null, "vcsSettingsHash1", true, true, true),
+                                               createBT("sixth", null, "vcsSettingsHash2", true, true, true));
+    assertEquals(1, getClashingConfigurations(buildTypes, Collections.singletonList(scopeBuildType)).size());
   }
 
   private void assertClashingConfigurations(@NotNull String[] expectedNames, @NotNull SBuildType... buildTypes) {
@@ -202,7 +214,12 @@ public class SwabraClashingConfigurationsDetectorTest extends TestCase {
 
   @NotNull
   public List<List<SBuildType>> getClashingConfigurations(@NotNull SBuildType... buildTypes) {
-    return createDetector().getClashingConfigurations(asList(buildTypes));
+    return getClashingConfigurations(asList(buildTypes), asList(buildTypes));
+  }
+
+  @NotNull
+  public List<List<SBuildType>> getClashingConfigurations(@NotNull List<SBuildType> buildTypes, @NotNull List<SBuildType> scopeBuildTypes) {
+    return createDetector().getClashingConfigurations(buildTypes, scopeBuildTypes);
   }
 
   @NotNull List<SBuildType> asList(@NotNull SBuildType... buildTypes) {
