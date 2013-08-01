@@ -23,11 +23,18 @@ import org.junit.Test;
 public class SwabraClashingConfigurationsDetectorTest extends TestCase {
   @NotNull
   private Mockery myContext;
+  @NotNull
+  private SBuildAgent myAgent;
 
   @Override
   protected void setUp() throws Exception {
     super.setUp();
     myContext = new JUnit4Mockery();
+
+    myAgent = myContext.mock(SBuildAgent.class, "agent_one");
+    myContext.checking(new Expectations() {{
+      allowing(myAgent).getAgentTypeId(); will(returnValue(1));
+    }});
   }
 
   @Test
@@ -245,6 +252,7 @@ public class SwabraClashingConfigurationsDetectorTest extends TestCase {
                               final boolean swabraIsStrict) {
     final SBuildType bt = myContext.mock(SBuildType.class, name);
     myContext.checking(new Expectations() {{
+      allowing(bt).getCompatibleAgents(); will(returnValue(Collections.singleton(myAgent)));
       allowing(bt).getName(); will(returnValue(name));
       allowing(bt).isEnabled(with(any(String.class))); will(returnValue(true));
       allowing(bt).getCheckoutDirectory(); will(returnValue(checkoutDir));

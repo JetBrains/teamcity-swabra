@@ -10,7 +10,7 @@
 <c:set var="inplaceMode" value="<%=HealthStatusItemDisplayMode.IN_PLACE%>"/>
 
 <div>
-  Build configurations have the same checkout directory but different Swabra settings:
+  Build configurations run on the same agent in the same checkout directory but have different Swabra settings:
 </div>
 <div>
   <c:forEach items="${groups}" var="group">
