@@ -54,6 +54,7 @@ public class SwabraFrequentCleanCheckoutReport extends HealthStatusReport {
     };
 
     pageExtension.setIncludeUrl(descriptor.getPluginResourcesPath("swabraClashingBuildTypes.jsp"));
+    pageExtension.setVisibleOutsideAdminArea(true);
     pageExtension.register();
 
     myCategory = new ItemCategory(SWABRA_FREQUENT_CLEAN_CHECKOUT_TYPE, CATEGORY_NAME, ItemSeverity.INFO, CATEGORY_DESCRIPTION, webLinks.getHelp("Build+Files+Cleaner+(Swabra)"));
