@@ -74,8 +74,8 @@ public class SwabraSettings {
 
   @Nullable
   private static SBuildFeatureDescriptor getSwabraBuildFeature(@NotNull SBuildType bt) {
-    for (SBuildFeatureDescriptor feature : bt.getBuildFeatures()) {
-      if (SwabraBuildFeature.FEATURE_TYPE.equals(feature.getType()) && bt.isEnabled(feature.getId())) {
+    for (SBuildFeatureDescriptor feature : bt.getBuildFeaturesOfType(SwabraBuildFeature.FEATURE_TYPE)) {
+      if (bt.isEnabled(feature.getId())) {
        return feature;
       }
     }
