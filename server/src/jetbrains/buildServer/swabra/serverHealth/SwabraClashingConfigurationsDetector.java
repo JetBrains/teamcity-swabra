@@ -20,55 +20,23 @@ public class SwabraClashingConfigurationsDetector {
   public List<List<SwabraSettingsGroup>> getClashingConfigurationsGroups(@NotNull Collection<SBuildType> buildTypes, @NotNull Collection<SBuildType> scopeBuildTypes) {
     final List<List<SwabraSettingsGroup>> res = new ArrayList<List<SwabraSettingsGroup>>();
     for (Collection<SBuildType> group : groupBuildTypesByCheckoutDir(buildTypes)) {
-      final Set<SBuildType> clashing = new HashSet<SBuildType>();
-
       if (group.size() > 1 && buildTypesAccepted(group, scopeBuildTypes)) {
-        for (Collection<SBuildType> agentGroup : groupBuildTypesByAgents(group)) {
-          if (agentGroup.size() > 1 && buildTypesAccepted(agentGroup, scopeBuildTypes)) {
-            final Map<SwabraSettings, List<SBuildType>> clashed = CollectionsUtil.groupBy(agentGroup, new Converter<SwabraSettings, SBuildType>() {
-              public SwabraSettings createFrom(@NotNull final SBuildType bt) {
-                return new SwabraSettings(bt);
-              }
-            });
-
-            if (clashed.size() > 1) clashing.addAll(agentGroup);
+        final Map<SwabraSettings, List<SBuildType>> clashed = CollectionsUtil.groupBy(group, new Converter<SwabraSettings, SBuildType>() {
+          public SwabraSettings createFrom(@NotNull final SBuildType bt) {
+            return new SwabraSettings(bt);
           }
-        }
-
-        if (clashing.size() > 1) {
-          final Map<SwabraSettings, List<SBuildType>> clashed = CollectionsUtil.groupBy(clashing, new Converter<SwabraSettings, SBuildType>() {
-            public SwabraSettings createFrom(@NotNull final SBuildType bt) {
-              return new SwabraSettings(bt);
-            }
-          });
-          if (clashed.size() > 1) {
-            res.add(CollectionsUtil
-                      .convertCollection(clashed.entrySet(), new Converter<SwabraSettingsGroup, Map.Entry<SwabraSettings, List<SBuildType>>>() {
-                        public SwabraSettingsGroup createFrom(@NotNull final Map.Entry<SwabraSettings, List<SBuildType>> source) {
-                          return new SwabraSettingsGroup(source.getKey(), source.getValue());
-                        }
-                      }));
-          }
+        });
+        if (clashed.size() > 1) {
+          res.add(CollectionsUtil
+                    .convertCollection(clashed.entrySet(), new Converter<SwabraSettingsGroup, Map.Entry<SwabraSettings, List<SBuildType>>>() {
+                      public SwabraSettingsGroup createFrom(@NotNull final Map.Entry<SwabraSettings, List<SBuildType>> source) {
+                        return new SwabraSettingsGroup(source.getKey(), source.getValue());
+                      }
+                    }));
         }
       }
     }
     return res;
-  }
-
-  @NotNull
-  private Collection<List<SBuildType>> groupBuildTypesByAgents(@NotNull Collection<SBuildType> buildTypes) {
-    final Map<Integer, List<SBuildType>> res = new HashMap<Integer, List<SBuildType>>();
-    for (SBuildType buildType : buildTypes) {
-      for (SBuildAgent agent : buildType.getCompatibleAgents()) {
-        List<SBuildType> group = res.get(agent.getAgentTypeId());
-        if (group == null) {
-          group = new ArrayList<SBuildType>();
-          res.put(agent.getAgentTypeId(), group);
-        }
-        group.add(buildType);
-      }
-    }
-    return res.values();
   }
 
   private static boolean buildTypesAccepted(@NotNull Collection<SBuildType> buildTypes, @NotNull final Collection<SBuildType> scopeBuildTypes) {
