@@ -3,7 +3,6 @@ package jetbrains.buildServer.swabra.serverHealth;
 import com.intellij.openapi.util.text.StringUtil;
 import java.util.*;
 import jetbrains.buildServer.parameters.ReferencesResolverUtil;
-import jetbrains.buildServer.serverSide.SBuildAgent;
 import jetbrains.buildServer.serverSide.SBuildType;
 import jetbrains.buildServer.util.CollectionsUtil;
 import jetbrains.buildServer.util.Converter;

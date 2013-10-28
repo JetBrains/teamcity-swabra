@@ -36,7 +36,6 @@ import org.jmock.Mockery;
 import org.jmock.integration.junit4.JUnit4Mockery;
 import org.junit.After;
 import org.junit.Before;
-import org.junit.Test;
 
 import static jetbrains.buildServer.swabra.TestUtil.getTestData;
 import static jetbrains.buildServer.swabra.TestUtil.getTestDataPath;
