@@ -24,7 +24,7 @@ import java.io.File;
  * Time: 13:22:24
  */
 class FilesComparator {
-  private static String SEPARATOR_REGEX = "/".equals(File.separator) ? "/" : "\\\\";
+  private static final String SEPARATOR_REGEX = "/".equals(File.separator) ? "/" : "\\\\";
 
   public static int compare(FileInfo o1, FileInfo o2) {
     return compare(o1.getPath(), o1.isFile(), o2.getPath(), o2.isFile());

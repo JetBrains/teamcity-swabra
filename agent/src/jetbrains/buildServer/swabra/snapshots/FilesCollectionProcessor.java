@@ -48,7 +48,7 @@ public class FilesCollectionProcessor implements FilesTraversal.ComparisonProces
   private int myDetectedModified;
   private int myDetectedDeleted;
 
-  private Stack<String> myAddedDirs;
+  private final Stack<String> myAddedDirs;
   private final List<File> myUnableToDeleteFiles;
 
   private Results myResults;
