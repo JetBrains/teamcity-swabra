@@ -88,9 +88,8 @@ public class FilesTraversal {
         info2 = it2.getNext();
       }
       processor.comparisonFinished();
-    } catch (InterruptedException ex) {
-      throw ex;
-    } finally {
+    }
+    finally {
       it1.stopIterator();
       it2.stopIterator();
     }

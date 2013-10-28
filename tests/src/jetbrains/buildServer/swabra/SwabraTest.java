@@ -524,10 +524,10 @@ public class SwabraTest extends TestCase {
             snapshotFile = File.createTempFile("swabraInterrupter", "snapshot");
             writer = new FileWriter(snapshotFile);
             writer.write(dir.getAbsolutePath());
-          } catch (IOException e) {
+          } catch (IOException ignored) {
           } finally {
             if (writer != null){
-              try {writer.close();} catch (IOException e) {}
+              try {writer.close();} catch (IOException ignored) {}
             }
           }
           return snapshotFile;
@@ -568,7 +568,7 @@ public class SwabraTest extends TestCase {
           try {
             latch.await(10, TimeUnit.SECONDS);
             dispatcher.getMulticaster().beforeBuildInterrupted(build, BuildInterruptReason.SERVER_STOP_BUILD);
-          } catch (InterruptedException e) {
+          } catch (InterruptedException ignored) {
           }
         }
       });
