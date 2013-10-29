@@ -59,10 +59,7 @@ public class SwabraSettings {
 
     final SwabraSettings that = (SwabraSettings)o;
 
-    if (isActualCleanupEnabled() != that.isActualCleanupEnabled()) return false;
-    if (myStrict != that.myStrict) return false;
-
-    return true;
+    return isActualCleanupEnabled() == that.isActualCleanupEnabled() && myStrict == that.myStrict;
   }
 
   @Override

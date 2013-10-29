@@ -50,10 +50,8 @@ public class ProcessInfo {
 
     final ProcessInfo that = (ProcessInfo)o;
 
-    if (myName != null ? !myName.equals(that.myName) : that.myName != null) return false;
-    if (!myPid.equals(that.myPid)) return false;
-
-    return true;
+    return (myName == null ? that.myName == null : myName.equals(that.myName)) &&
+           myPid.equals(that.myPid);
   }
 
   @Override
