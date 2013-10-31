@@ -73,7 +73,7 @@ public class FilesCollector {
                       @Nullable CollectionResultHandler handler) {
     if (!snapshot.exists() || (snapshot.length() == 0)) {
       logUnableCollect(snapshot, dir, "file doesn't exist", null);
-      handler.error();
+      if (handler != null) handler.error();
       return;
     }
 
@@ -85,11 +85,11 @@ public class FilesCollector {
       iterateAndCollect(snapshot, dir);
     } catch (InterruptedException e) {
       myLogger.warn("Swabra process interrupted. Gracefully finishing...");
-      handler.interrupted();
+      if (handler != null) handler.interrupted();
       return;
     } catch (Exception e) {
       logUnableCollect(snapshot, dir, "Exception occurred: " + e.getMessage(), e);
-      handler.error();
+      if (handler != null) handler.error();
       return;
     }
 
@@ -105,16 +105,16 @@ public class FilesCollector {
     removeSnapshot(snapshot, dir);
     if (results.detectedNewAndUnableToDelete != 0) {
       myLogger.warn(message);
-      handler.lockedFilesDetected();
+      if (handler != null) handler.lockedFilesDetected();
       return;
     }
     if (results.detectedDeleted > 0 || results.detectedModified > 0) {
       myLogger.warn(message);
-      handler.dirtyStateDetected();
+      if (handler != null) handler.dirtyStateDetected();
       return;
     }
     myLogger.message(message, true);
-    handler.success();
+    if (handler != null) handler.success();
   }
 
   private void removeSnapshot(File snapshot, File dir) {
