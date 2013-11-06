@@ -125,7 +125,9 @@
           <a href="${handleDownloader}" target="_blank" showdiscardchangesmessage="false">${actionName} Sysinternals handle.exe</a>
         </jsp:attribute>
         <jsp:attribute name="ifAccessDenied">
-          Please ask your System Administrator to ${fn:toLowerCase(actionName)} Sysinternals handle.exe using Administration -> Tools page.
+          <c:if test="${not handlePresent}">
+            Please ask your System Administrator to ${fn:toLowerCase(actionName)} Sysinternals handle.exe using Administration -> Tools page.
+          </c:if>
         </jsp:attribute>
       </authz:authorize>
     </div>
