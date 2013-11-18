@@ -51,7 +51,7 @@ public class ProcessExecutor {
 //  }
 
   private static ExecResult run(final GeneralCommandLine commandLine) {
-    return SimpleCommandLineProcessRunner.runCommand(commandLine, null, new SimpleCommandLineProcessRunner.ProcessRunCallback() {
+    return SimpleCommandLineProcessRunner.runCommand(commandLine, new byte[0], new SimpleCommandLineProcessRunner.ProcessRunCallback() {
 
       public void onProcessStarted(Process ps) {
         LOG.debug("Started " + commandLine.getCommandLineString());
