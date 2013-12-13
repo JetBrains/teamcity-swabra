@@ -41,7 +41,7 @@ public class SwabraBuildFeature extends BuildFeature {
 
     web.registerController(html, new BaseController() {
       @Override
-      protected ModelAndView doHandle(final HttpServletRequest request, final HttpServletResponse response) throws Exception {
+      protected ModelAndView doHandle(@NotNull final HttpServletRequest request, @NotNull final HttpServletResponse response) throws Exception {
         final ModelAndView mv = new ModelAndView(jsp);
         mv.getModel().put("handlePresent", handleProvider.isHandlePresent());
         mv.getModel().put("requestUrl", html);
