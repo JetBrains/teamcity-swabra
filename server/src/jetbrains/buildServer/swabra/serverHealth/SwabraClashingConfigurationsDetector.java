@@ -1,11 +1,11 @@
 package jetbrains.buildServer.swabra.serverHealth;
 
-import com.intellij.openapi.util.text.StringUtil;
 import java.util.*;
 import jetbrains.buildServer.parameters.ReferencesResolverUtil;
 import jetbrains.buildServer.serverSide.SBuildType;
 import jetbrains.buildServer.util.CollectionsUtil;
 import jetbrains.buildServer.util.Converter;
+import jetbrains.buildServer.util.StringUtil;
 import jetbrains.buildServer.util.filters.Filter;
 import org.jetbrains.annotations.NotNull;
 
@@ -67,12 +67,12 @@ public class SwabraClashingConfigurationsDetector {
     for (SBuildType bt : buildTypes) {
       Collection<SBuildType> bts;
 
-      String checkotDir = bt.getCheckoutDirectory();
-      if (checkotDir != null) {
-        checkotDir = ReferencesResolverUtil.isReference(checkotDir) ? bt.getResolvedSettings().getCheckoutDirectory() : checkotDir;
+      String checkotDir = StringUtil.emptyIfNull(bt.getCheckoutDirectory());
+      if (ReferencesResolverUtil.mayContainReference(checkotDir)) {
+        continue;
       }
 
-      final String groupKey = StringUtil.isEmptyOrSpaces(checkotDir) ? bt.getVcsSettingsHash() : checkotDir;
+      final String groupKey = checkotDir.length() == 0 ? bt.getVcsSettingsHash() : checkotDir;
 
       bts = res.get(groupKey);
       if (bts != null) {
@@ -80,7 +80,7 @@ public class SwabraClashingConfigurationsDetector {
       } else {
         bts = new ArrayList<SBuildType>();
         bts.add(bt);
-        res.put(checkotDir == null ? groupKey : checkotDir, bts);
+        res.put(checkotDir, bts);
       }
     }
     return res.values();
