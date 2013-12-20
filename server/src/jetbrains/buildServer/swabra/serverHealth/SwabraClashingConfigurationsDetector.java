@@ -67,12 +67,12 @@ public class SwabraClashingConfigurationsDetector {
     for (SBuildType bt : buildTypes) {
       Collection<SBuildType> bts;
 
-      String checkotDir = StringUtil.emptyIfNull(bt.getCheckoutDirectory());
-      if (ReferencesResolverUtil.mayContainReference(checkotDir)) {
+      String checkotDir = StringUtil.nullIfEmpty(bt.getCheckoutDirectory());
+      if (checkotDir != null && ReferencesResolverUtil.mayContainReference(checkotDir)) {
         continue;
       }
 
-      final String groupKey = checkotDir.length() == 0 ? bt.getVcsSettingsHash() : checkotDir;
+      final String groupKey = checkotDir == null ? bt.getVcsSettingsHash() : checkotDir;
 
       bts = res.get(groupKey);
       if (bts != null) {
@@ -80,7 +80,7 @@ public class SwabraClashingConfigurationsDetector {
       } else {
         bts = new ArrayList<SBuildType>();
         bts.add(bt);
-        res.put(checkotDir, bts);
+        res.put(checkotDir == null ? groupKey : checkotDir, bts);
       }
     }
     return res.values();
