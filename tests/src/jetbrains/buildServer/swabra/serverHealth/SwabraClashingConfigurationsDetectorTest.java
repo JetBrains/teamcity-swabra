@@ -250,6 +250,7 @@ public class SwabraClashingConfigurationsDetectorTest extends TestCase {
                               final boolean swabraFeaturePresent,
                               final boolean swabraCleanupEnabled,
                               final boolean swabraIsStrict) {
+
     final SBuildType bt = myContext.mock(SBuildType.class, name);
     myContext.checking(new Expectations() {{
       allowing(bt).getCompatibleAgents(); will(returnValue(Collections.singleton(myAgent)));
@@ -257,6 +258,7 @@ public class SwabraClashingConfigurationsDetectorTest extends TestCase {
       allowing(bt).isEnabled(with(any(String.class))); will(returnValue(true));
       allowing(bt).getCheckoutDirectory(); will(returnValue(checkoutDir));
       allowing(bt).getVcsSettingsHash(); will(returnValue(vcsSettingsHash));
+      allowing(bt).getVcsRoots(); will(returnValue(Collections.emptyList()));
       allowing(bt).getBuildFeaturesOfType(with(SwabraBuildFeature.FEATURE_TYPE)); will(returnValue(swabraFeaturePresent ? Collections.singleton(new SBuildFeatureDescriptor() {
         @NotNull
         public String getId() {
