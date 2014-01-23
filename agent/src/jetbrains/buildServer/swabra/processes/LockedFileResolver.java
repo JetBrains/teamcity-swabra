@@ -116,7 +116,7 @@ public class LockedFileResolver {
           }
         } else {
           final StringBuilder sb = new StringBuilder("Skip process ").append(getProcessString(p)).append(" and it's subtree as this may stop TeamCity agent. Suspicious ")
-            .append(getProcessesNumber(ignored.size())).append(":");
+            .append(getProcessesNumber(ignored.size())).append(" from the subtree:");
           appendProcessNodes(ignored, sb);
           log(sb.toString(), true, listener);
         }

@@ -35,7 +35,7 @@ import org.jetbrains.annotations.Nullable;
  */
 public class SwabraSettings {
   private static final String DEFAULT_RULES_CONFIG_PARAM = "swabra.default.rules";
-  private static final String IGNORED_PIDS_CONFIG_PARAM = "swabra.ignored.pids";
+  private static final String IGNORED_PPRCESSES_CONFIG_PARAM = "swabra.ignored.processes";
 
   private static final String[] DEFAULT_RULES = {"-:**/.svn", "-:**/.git", "-:**/.hg", "-:**/CVS", "-:.svn", "-:.git", "-:.hg", "-:CVS"};
 
@@ -66,6 +66,7 @@ public class SwabraSettings {
     } else {
       params = features.iterator().next().getParameters();
     }
+    params.putAll(runningBuild.getSharedConfigParameters());
 
     myCleanupEnabled = SwabraUtil.isCleanupEnabled(params);
     myCleanupMode = SwabraUtil.getCleanupMode(params);
@@ -84,7 +85,7 @@ public class SwabraSettings {
       rules.addAll(Arrays.asList(DEFAULT_RULES));
     }
     myRules = new SwabraRules(myCheckoutDir, rules);
-    myIgnoredProcesses = getIgnoredProcesses(params.get(IGNORED_PIDS_CONFIG_PARAM));
+    myIgnoredProcesses = getIgnoredProcesses(params.get(IGNORED_PPRCESSES_CONFIG_PARAM));
 
     logSettings();
   }
