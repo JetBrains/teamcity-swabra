@@ -95,7 +95,7 @@ public final class Swabra extends AgentLifeCycleAdapter {
       mySettings.prepareHandle(myLogger, myToolsRegistry);
 
       myLockedFileResolver = mySettings.isLockingProcessesDetectionEnabled() ?
-        new LockedFileResolver(new HandleProcessesProvider(mySettings.getHandlePath())/*, myProcessTerminator,*/) : null;
+        new LockedFileResolver(new HandleProcessesProvider(mySettings.getHandlePath()), mySettings.getIgnoredProcesses()/*, myProcessTerminator,*/) : null;
 
       if (!mySettings.isCleanupEnabled()) {
         myLogger.message("Swabra cleanup is disabled", false);

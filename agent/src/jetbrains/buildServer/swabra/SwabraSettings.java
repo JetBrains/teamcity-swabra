@@ -24,7 +24,9 @@ import jetbrains.buildServer.agent.AgentRunningBuild;
 import jetbrains.buildServer.agent.BundledToolsRegistry;
 import jetbrains.buildServer.swabra.processes.HandlePathProvider;
 import jetbrains.buildServer.swabra.snapshots.SwabraRules;
+import jetbrains.buildServer.util.StringUtil;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 /**
  * User: vbedrosova
@@ -33,6 +35,7 @@ import org.jetbrains.annotations.NotNull;
  */
 public class SwabraSettings {
   private static final String DEFAULT_RULES_CONFIG_PARAM = "swabra.default.rules";
+  private static final String IGNORED_PIDS_CONFIG_PARAM = "swabra.ignored.pids";
 
   private static final String[] DEFAULT_RULES = {"-:**/.svn", "-:**/.git", "-:**/.hg", "-:**/CVS", "-:.svn", "-:.git", "-:.hg", "-:CVS"};
 
@@ -51,6 +54,8 @@ public class SwabraSettings {
   private final SwabraRules myRules;
 
   private final File myCheckoutDir;
+  @NotNull
+  private final List<String> myIgnoredProcesses;
 
 
   public SwabraSettings(AgentRunningBuild runningBuild) {
@@ -79,6 +84,7 @@ public class SwabraSettings {
       rules.addAll(Arrays.asList(DEFAULT_RULES));
     }
     myRules = new SwabraRules(myCheckoutDir, rules);
+    myIgnoredProcesses = getIgnoredProcesses(params.get(IGNORED_PIDS_CONFIG_PARAM));
 
     logSettings();
   }
@@ -143,5 +149,25 @@ public class SwabraSettings {
     } else {
       myHandlePath = null;
     }
+  }
+
+  /**
+   * @return processes that should never be killed in case they lock a file
+   */
+  @NotNull
+  public List<String> getIgnoredProcesses() {
+    return myIgnoredProcesses;
+  }
+
+
+  @NotNull
+  private List<String> getIgnoredProcesses(@Nullable String pidsStr) {
+    if (StringUtil.isEmptyOrSpaces(pidsStr)) return Arrays.asList("4"); // by default ignore pid: 4 (System)
+
+    final List<String> res = new ArrayList<String>();
+    for (String pid : pidsStr.split(" *[,;\n\r] *")) {
+      if (StringUtil.isNotEmpty(pid)) res.add(pid);
+    }
+    return res;
   }
 }
