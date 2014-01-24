@@ -58,8 +58,7 @@ public class SwabraTest extends TestCase {
 
   private AgentRunningBuild createBuild(@NotNull final Map<String, String> runParams,
                                         @NotNull final File checkoutDir,
-                                        @NotNull final SimpleBuildLogger logger,
-                                        @NotNull final BuildParametersMap buildParameters) {
+                                        @NotNull final SimpleBuildLogger logger) {
     final AgentRunningBuild build = myContext.mock(AgentRunningBuild.class);
 
     myContext.checking(new Expectations() {
@@ -72,8 +71,8 @@ public class SwabraTest extends TestCase {
         will(returnValue(checkoutDir));
         allowing(build).isCleanBuild();
         will(returnValue(false));
-        allowing(build).getBuildParameters();
-        will(returnValue(buildParameters));
+        allowing(build).getSharedConfigParameters();
+        will(returnValue(Collections.emptyMap()));
         allowing(build).isCheckoutOnAgent();
         will(returnValue(false));
         allowing(build).isCheckoutOnServer();
@@ -136,25 +135,6 @@ public class SwabraTest extends TestCase {
     };
   }
 
-  private BuildParametersMap createBuildParametersMap() {
-    return new BuildParametersMap() {
-      @NotNull
-      public Map<String, String> getEnvironmentVariables() {
-        return Collections.emptyMap();
-      }
-
-      @NotNull
-      public Map<String, String> getSystemProperties() {
-        return Collections.emptyMap();
-      }
-
-      @NotNull
-      public Map<String, String> getAllParameters() {
-        return Collections.emptyMap();
-      }
-    };
-  }
-
   @Override
   @Before
   public void setUp() throws Exception {
@@ -207,7 +187,7 @@ public class SwabraTest extends TestCase {
     final String checkoutDirPath = myCheckoutDir.getAbsolutePath();
 
     final Map<String, String> runParams = new HashMap<String, String>();
-    final AgentRunningBuild build = createBuild(runParams, myCheckoutDir, logger, createBuildParametersMap());
+    final AgentRunningBuild build = createBuild(runParams, myCheckoutDir, logger);
     final BuildRunnerContext runner = myContext.mock(BuildRunnerContext.class);
 
     for (Map<String, String> param : params) {
@@ -561,7 +541,7 @@ public class SwabraTest extends TestCase {
       dispatcher.getMulticaster().agentStarted(agent);
 
       final Map<String, String> runParams = new HashMap<String, String>();
-      final AgentRunningBuild build = createBuild(runParams, myCheckoutDir, logger, createBuildParametersMap());
+      final AgentRunningBuild build = createBuild(runParams, myCheckoutDir, logger);
 
       final Thread interruptThread = new Thread(new Runnable() {
         public void run() {
