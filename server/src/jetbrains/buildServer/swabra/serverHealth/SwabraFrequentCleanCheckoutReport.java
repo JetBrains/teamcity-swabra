@@ -97,7 +97,7 @@ public class SwabraFrequentCleanCheckoutReport extends HealthStatusReport {
 
   @Override
   public void report(@NotNull final HealthStatusScope scope, @NotNull final HealthStatusItemConsumer resultConsumer) {
-    if (!scope.isItemWithSeverityAccepted(ItemSeverity.INFO)) return;
+    if (!scope.isItemWithSeverityAccepted(ItemSeverity.INFO) || scope.getBuildTypes().isEmpty()) return;
 
     final List<List<SwabraSettingsGroup>> result =
       new SwabraClashingConfigurationsDetector().getClashingConfigurationsGroups(myProjectManager.getActiveBuildTypes(), scope.getBuildTypes());
