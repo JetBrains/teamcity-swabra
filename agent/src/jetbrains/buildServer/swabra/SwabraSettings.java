@@ -60,11 +60,10 @@ public class SwabraSettings {
 
   public SwabraSettings(AgentRunningBuild runningBuild) {
     final Collection<AgentBuildFeature> features = runningBuild.getBuildFeaturesOfType("swabra");
-    final Map<String, String> params;
-    if (features.isEmpty()) {
-      params = Collections.emptyMap();
-    } else {
-      params = new HashMap<String, String>(features.iterator().next().getParameters());
+
+    final Map<String, String> params = new HashMap<String, String>();
+    if (!features.isEmpty()) {
+      params.putAll(features.iterator().next().getParameters());
     }
     params.putAll(runningBuild.getSharedConfigParameters());
 
