@@ -91,7 +91,7 @@
   </path>
   
   <path id="library.junit.classpath">
-    <pathelement location="${basedir}/tests/lib/junit-4.5.jar"/>
+    <pathelement location="${basedir}/tests/lib/junit-4.11.jar"/>
   </path>
   
   <path id="library.servlet-api.classpath">
