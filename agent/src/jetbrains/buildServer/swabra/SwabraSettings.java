@@ -64,7 +64,7 @@ public class SwabraSettings {
     if (features.isEmpty()) {
       params = Collections.emptyMap();
     } else {
-      params = features.iterator().next().getParameters();
+      params = new HashMap<String, String>(features.iterator().next().getParameters());
     }
     params.putAll(runningBuild.getSharedConfigParameters());
 
