@@ -85,7 +85,7 @@
   </path>
   
   <path id="library.jmock.classpath">
-    <pathelement location="${basedir}/tests/lib/hamcrest-library-1.1.jar"/>
+    <pathelement location="${basedir}/tests/lib/hamcrest-library-1.3.jar"/>
     <pathelement location="${basedir}/tests/lib/jmock-2.5.1.jar"/>
     <pathelement location="${basedir}/tests/lib/jmock-junit4-2.5.1.jar"/>
   </path>
