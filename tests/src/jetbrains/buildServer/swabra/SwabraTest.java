@@ -567,22 +567,64 @@ public class SwabraTest extends TestCase {
     }
   }
 
+  //public static void main(String[] argx) {
+  //  for (String s : Arrays.asList(
+  //  "$%'`-@{}~!#()&_^",
+  //  "+file",
+  //  "-file",
+  //  ".File",
+  //  "347",
+  //  "=][;.,+№",
+  //  "=file",
+  //  "file name (with brackets)",
+  //  "many.ext.en.sion.s",
+  //  "restarting@2x.png",
+  //  "unicode-äßááóöéÄúü-ыйЁ.пых-ÿ",
+  //  "xss_try_%27%22%3Cscript%3Ealert(666)%3B%3C%2Fscript%3E.png",
+  //  "файло")) {
+  //    StringBuilder sb = new StringBuilder();
+  //    for (int idx = 0; idx < s.length(); idx++) {
+  //      char ch = s.charAt(idx);
+  //      String hexCode = Integer.toHexString(ch);
+  //      sb.append("\\u");
+  //      int paddingCount = 4 - hexCode.length();
+  //      while (paddingCount-- > 0) {
+  //        sb.append(0);
+  //      }
+  //      sb.append(hexCode);
+  //    }
+  //    System.out.println(s + " " + sb);
+  //  }
+  //}
+
   // TW-29332
   public void testUnicodeFileNames_unchanged() throws Exception {
-    // need to manually set lastModified for all files to the same value in all folders;
-    Map<String, Long> modifiedDates = new HashMap<String, Long>();
-    final File beforeBuildDir = new File(getTestDataPath("unicodeFileNames_unchanged", null), "beforeBuild");
-    final File[] files = beforeBuildDir.listFiles();
-    for (File file : files) {
-      modifiedDates.put(file.getName(), file.lastModified());
-    }
-
-    for (String directory : Arrays.asList("afterBuild", "afterCheckout")){
-      File dir = new File(getTestDataPath("unicodeFileNames_unchanged", null), directory);
-      final File[] dirFiles = dir.listFiles();
-      for (File file : dirFiles) {
-        file.setLastModified(modifiedDates.get(file.getName()));
+    final long lastModified = System.currentTimeMillis();
+    final File testData = new File(getTestData(null, null), "unicodeFileNames_unchanged");
+    FileUtil.delete(testData);
+    for (String dirName : Arrays.asList("beforeBuild", "afterBuild", "afterCheckout")){
+      final File dir = new File(testData, dirName);
+      FileUtil.createDir(dir);
+      for (String fileName : Arrays.asList(
+        "\u0024\u0025\u0027\u0060\u002d\u0040\u007b\u007d\u007e\u0021\u0023\u0028\u0029\u0026\u005f\u005e",
+        "+file",
+        "-file",
+        ".File",
+        "347",
+        "\u003d\u005d\u005b\u003b\u002e\u002c\u002b\u2116",
+        "=file",
+        "file name (with brackets)",
+        "many.ext.en.sion.s",
+        "\u0072\u0065\u0073\u0074\u0061\u0072\u0074\u0069\u006e\u0067\u0040\u0032\u0078\u002e\u0070\u006e\u0067",
+        "\u0075\u006e\u0069\u0063\u006f\u0064\u0065\u002d\u00e4\u00df\u00e1\u00e1\u00f3\u00f6\u00e9\u00c4\u00fa\u00fc\u002d\u044b\u0439\u0401\u002e\u043f\u044b\u0445\u002d\u00ff",
+        "\u0078\u0073\u0073\u005f\u0074\u0072\u0079\u005f\u0025\u0032\u0037\u0025\u0032\u0032\u0025\u0033\u0043\u0073\u0063\u0072\u0069\u0070\u0074\u0025\u0033\u0045\u0061\u006c\u0065\u0072\u0074\u0028\u0036\u0036\u0036\u0029\u0025\u0033\u0042\u0025\u0033\u0043\u0025\u0032\u0046\u0073\u0063\u0072\u0069\u0070\u0074\u0025\u0033\u0045\u002e\u0070\u006e\u0067",
+        "\u0444\u0430\u0439\u043b\u043e"
+      )){
+        final File file = new File(dir, fileName);
+        FileUtil.writeFileAndReportErrors(file, "some text");
+        file.setLastModified(lastModified);
       }
+      dir.setLastModified(lastModified);
     }
 
     final Map<String, String> firstCallParams = new HashMap<String, String>();
