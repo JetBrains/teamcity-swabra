@@ -567,36 +567,6 @@ public class SwabraTest extends TestCase {
     }
   }
 
-  //public static void main(String[] argx) {
-  //  for (String s : Arrays.asList(
-  //  "$%'`-@{}~!#()&_^",
-  //  "+file",
-  //  "-file",
-  //  ".File",
-  //  "347",
-  //  "=][;.,+№",
-  //  "=file",
-  //  "file name (with brackets)",
-  //  "many.ext.en.sion.s",
-  //  "restarting@2x.png",
-  //  "unicode-äßááóöéÄúü-ыйЁ.пых-ÿ",
-  //  "xss_try_%27%22%3Cscript%3Ealert(666)%3B%3C%2Fscript%3E.png",
-  //  "файло")) {
-  //    StringBuilder sb = new StringBuilder();
-  //    for (int idx = 0; idx < s.length(); idx++) {
-  //      char ch = s.charAt(idx);
-  //      String hexCode = Integer.toHexString(ch);
-  //      sb.append("\\u");
-  //      int paddingCount = 4 - hexCode.length();
-  //      while (paddingCount-- > 0) {
-  //        sb.append(0);
-  //      }
-  //      sb.append(hexCode);
-  //    }
-  //    System.out.println(s + " " + sb);
-  //  }
-  //}
-
   // TW-29332
   public void testUnicodeFileNames_unchanged() throws Exception {
     final long lastModified = System.currentTimeMillis();
