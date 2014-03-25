@@ -42,6 +42,15 @@ public class ProcessExecutor {
     return run(commandLine);
   }
 
+  public static ExecResult runWmicProcess(@NotNull Long pid) {
+    final GeneralCommandLine commandLine = new GeneralCommandLine();
+    commandLine.setExePath("wmic");
+    commandLine.addParameter("process");
+    commandLine.addParameter(String.valueOf(pid));
+
+    return run(commandLine);
+  }
+
 //  public static ExecResult run(@NotNull String exePath, @NotNull String[] params, SimpleBuildLogger logger) {
 //    final GeneralCommandLine commandLine = new GeneralCommandLine();
 //    commandLine.setExePath(exePath);

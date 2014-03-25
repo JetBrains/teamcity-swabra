@@ -55,14 +55,18 @@ public class LockedFileResolver {
   @NotNull
   private final LockingProcessesProvider myProcessesProvider;
   @NotNull
+  private final WmicProcessDetailsProvider myWmicProcessDetailsProvider;
+  @NotNull
   private final List<String> myIgnoredProcesses;
 //  @NotNull
 //  private final ProcessTerminator myProcessTerminator;
 
   public LockedFileResolver(@NotNull LockingProcessesProvider processesProvider,
-                            @NotNull List<String> ignoredProcesses/*,
+                            @NotNull List<String> ignoredProcesses,
+                            @NotNull WmicProcessDetailsProvider wmicProcessDetailsProvider/*,
                             @NotNull ProcessTerminator processTerminator,*/) {
     myProcessesProvider = processesProvider;
+    myWmicProcessDetailsProvider = wmicProcessDetailsProvider;
     myIgnoredProcesses = new ArrayList<String>(ignoredProcesses);
     myIgnoredProcesses.add(String.valueOf(ProcessTreeTerminator.getCurrentPid()));
 //    myProcessTerminator = processTerminator;
@@ -202,7 +206,8 @@ public class LockedFileResolver {
 
   @NotNull
   private String getProcessString(@NotNull Long pid, @Nullable String name) {
-    return "PID:" + pid + " " + StringUtil.emptyIfNull(name);
+    final String processDetails = myWmicProcessDetailsProvider.getProcessDetails(pid);
+    return "PID:" + pid + "\n" + (StringUtil.isEmptyOrSpaces(processDetails) ? name : processDetails);
   }
 
   private void log(@NotNull String m, boolean isWarning, @Nullable Listener listener) {
