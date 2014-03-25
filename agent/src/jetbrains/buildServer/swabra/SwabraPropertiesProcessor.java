@@ -36,7 +36,7 @@ import static jetbrains.buildServer.swabra.SwabraUtil.unifyPath;
  */
 
 public class SwabraPropertiesProcessor extends AgentLifeCycleAdapter {
-  private static final String FILE_NAME = "snapshot.map";
+  static final String FILE_NAME = "snapshot.map";
   private static final String KEY_VAL_SEPARATOR = "=";
 
   private static final String SNAPSHOT_SUFFIX = ".snapshot";
@@ -280,5 +280,9 @@ public class SwabraPropertiesProcessor extends AgentLifeCycleAdapter {
 
   public void markPending(@NotNull File dir, boolean strict) {
     mark(dir, strict ? DirectoryState.STRICT_PENDING.getName() : DirectoryState.PENDING.getName());
+  }
+
+  public void setPropertiesFile(@NotNull File propertiesFile) {
+    myPropertiesFile = propertiesFile;
   }
 }

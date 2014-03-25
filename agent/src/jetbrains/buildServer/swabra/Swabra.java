@@ -30,11 +30,13 @@ import jetbrains.buildServer.swabra.processes.HandleProcessesProvider;
 import jetbrains.buildServer.swabra.processes.LockedFileResolver;
 import jetbrains.buildServer.swabra.snapshots.*;
 import jetbrains.buildServer.util.EventDispatcher;
+import jetbrains.buildServer.util.positioning.PositionAware;
+import jetbrains.buildServer.util.positioning.PositionConstraint;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 
-public final class Swabra extends AgentLifeCycleAdapter {
+public final class Swabra extends AgentLifeCycleAdapter implements PositionAware {
   public static final String DEBUG_MODE = "swabra.debug.mode";
 
   public static final String CACHE_KEY = "swabra";
@@ -75,6 +77,16 @@ public final class Swabra extends AgentLifeCycleAdapter {
     myPropertiesProcessor = propertiesProcessor;
     myToolsRegistry = toolsRegistry;
 //    myProcessTerminator = processTerminator;
+  }
+
+  @NotNull
+  public String getOrderId() {
+    return "swabra"; // may be referenced in other plugins
+  }
+
+  @NotNull
+  public PositionConstraint getConstraint() {
+    return PositionConstraint.UNDEFINED;
   }
 
   @Override
