@@ -87,7 +87,7 @@ public final class Swabra extends AgentLifeCycleAdapter implements PositionAware
 
   @NotNull
   public PositionConstraint getConstraint() {
-    return PositionConstraint.UNDEFINED;
+    return PositionConstraint.first();
   }
 
   @Override
