@@ -16,10 +16,10 @@
 
 package jetbrains.buildServer.swabra.snapshots;
 
-import com.intellij.openapi.util.SystemInfo;
 import java.io.File;
 import java.util.*;
 import jetbrains.buildServer.util.FileUtil;
+import jetbrains.buildServer.util.StringUtil;
 import jetbrains.buildServer.vcs.FileRule;
 import jetbrains.buildServer.vcs.FileRuleSet;
 import org.jetbrains.annotations.NotNull;
@@ -31,17 +31,13 @@ import org.jetbrains.annotations.Nullable;
  * Time: 15:16
  */
 public class SwabraRules {
-  @Nullable
+  @NotNull
   private final File myBaseDir;
   @NotNull
   private final RuleSet myRuleSet;
   private List<File> myRootPaths;
 
-  public SwabraRules(@NotNull Collection<String> body) {
-    this(null, body);
-  }
-
-  public SwabraRules(@Nullable File baseDir, @NotNull Collection<String> body) {
+  public SwabraRules(@NotNull File baseDir, @NotNull Collection<String> body) {
     myBaseDir = baseDir;
 
     final ArrayList<String> rules = new ArrayList<String>(body);
@@ -50,16 +46,16 @@ public class SwabraRules {
     myRuleSet = new RuleSet(rules);
   }
 
-  private static void addAsRule(@Nullable File baseDir, @NotNull Collection<String> body) {
-    if (baseDir != null) body.add(baseDir.getPath());
+  private static void addAsRule(@NotNull File baseDir, @NotNull Collection<String> body) {
+    body.add(baseDir.getAbsolutePath());
   }
 
   @NotNull
-  private static String resolvePath(@NotNull String path, @Nullable File baseDir) {
-    if (baseDir != null) {
-      return FileUtil.resolvePath(baseDir, path).getPath();
-    }
-    return path;
+  private String resolvePath(@NotNull String path, @NotNull File baseDir) {
+    if (StringUtil.isEmptyOrSpaces(path)) return path;
+
+    final File file = new File(path);
+    return file.isAbsolute() ? file.getAbsolutePath() : baseDir.getAbsolutePath() + "/" + path;
   }
 
   public List<File> getPaths() {
@@ -81,7 +77,7 @@ public class SwabraRules {
 
     @Override
     protected void doPostInitProcess(final List<FileRule> includeRules, final List<FileRule> excludeRules) {
-      sortByFrom(includeRules, true);
+      sortByFrom(includeRules, false);
       sortByFrom(excludeRules, true);
       initRootIncludePaths();
     }
@@ -118,27 +114,28 @@ public class SwabraRules {
 
       for (Iterator<FileRule> iterator = resultRules.iterator(); iterator.hasNext();) {
         FileRule rule = iterator.next();
+        boolean add = true;
 
         if (!shouldInclude(rule.getFrom())) {
-          iterator.remove();
-          continue;
+          add = false;
         }
 
         for (FileRule processed : processedRules) {
-          if (isSubDir(rule.getFrom(), processed.getFrom())) {
-            iterator.remove();
+          if (processed.getMatchedHead(rule.getFrom()) != null) {
+            add = false;
             break;
           }
         }
 
-        processedRules.add(rule);
+        if (add) processedRules.add(rule);
+        else iterator.remove();
       }
 
-      myRootPaths = new ArrayList<File>();
+      final Set<File> rootPaths = new HashSet<File>();
       for (FileRule rule : resultRules) {
-        //noinspection ConstantConditions
-        myRootPaths.add(new File((SystemInfo.isWindows ? "" : "/") + rule.getFrom()));
+        rootPaths.add(new File(getPathWithoutWildcards(rule.getFrom())));
       }
+      myRootPaths = new ArrayList<File>(rootPaths);
     }
 
     public List<String> getForPath(@NotNull String path) {
@@ -160,5 +157,19 @@ public class SwabraRules {
       sortByFrom(allRules, false);
       return allRules;
     }
+
+    @NotNull
+    @Override
+    public String preparePath(@Nullable final String path) {
+      if (StringUtil.isEmptyOrSpaces(path)) {
+        return StringUtil.EMPTY;
+      }
+      return new File(path).isAbsolute() ? FileUtil.normalizeAbsolutePath(FileUtil.normalizeSeparator(path)).replace("\\", "/") : FileUtil.normalizeRelativePath(path);
+    }
+  }
+
+  @NotNull
+  private String getPathWithoutWildcards(@NotNull String from) {
+    return from.contains("*") ?  from.substring(0, from.indexOf('*')): from;
   }
 }

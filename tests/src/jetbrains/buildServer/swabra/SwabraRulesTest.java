@@ -18,9 +18,10 @@ package jetbrains.buildServer.swabra;
 
 import java.io.File;
 import java.util.Arrays;
+import java.util.List;
 import jetbrains.buildServer.swabra.snapshots.SwabraRules;
-import jetbrains.buildServer.util.FileUtil;
-import jetbrains.buildServer.util.TestFor;
+import jetbrains.buildServer.util.*;
+import jetbrains.buildServer.util.filters.Filter;
 import junit.framework.TestCase;
 import org.jetbrains.annotations.NotNull;
 import org.junit.Test;
@@ -31,241 +32,632 @@ import org.junit.Test;
  * Time: 12:58:10
  */
 public class SwabraRulesTest extends TestCase {
-  private SwabraRules createRules(String... rules) {
-    return new SwabraRules(Arrays.asList(rules));
+  @NotNull
+  private File myBaseDir;
+
+  @Override
+  public void setUp() throws Exception {
+    super.setUp();
+    myBaseDir = new File("baseDir");
   }
 
-  private SwabraRules createRules(File baseDir, String... rules) {
-    return new SwabraRules(baseDir, Arrays.asList(rules));
+  private SwabraRules createRules(@NotNull String... rules) {
+    return new SwabraRules(myBaseDir, Arrays.asList(rules));
   }
 
   @Test
   public void test_no_rules() {
     final SwabraRules rules = createRules();
 
-    assertTrue(rules.shouldInclude("."));
-    assertTrue(rules.shouldInclude("any/path"));
+    assertPaths(rules, getBaseDirPath());
+
+    assertFalse(rules.shouldInclude("any/path"));
+    assertFalse(rules.shouldInclude(new File("any/path").getAbsolutePath()));
+
+    assertTrue(rules.shouldInclude(getBaseDirPath()));
+    assertTrue(rules.shouldInclude(resolve("some/path")));
   }
 
   @Test
   public void test_path_exclude() {
     final SwabraRules rules = createRules("-:some/path");
 
-    assertTrue(rules.shouldInclude("."));
+    assertPaths(rules, getBaseDirPath());
 
-    assertFalse(rules.shouldInclude("some/path"));
-    assertFalse(rules.shouldInclude("some/path/content"));
+    assertFalse(rules.shouldInclude("any/path"));
+    assertFalse(rules.shouldInclude(new File("any/path").getAbsolutePath()));
 
-    assertTrue(rules.shouldInclude("some/"));
-    assertTrue(rules.shouldInclude("some"));
+    assertFalse(rules.shouldInclude(resolve("some/path")));
+    assertFalse(rules.shouldInclude(resolve("some/path/content")));
 
-    assertTrue(rules.shouldInclude("another/path"));
+    assertTrue(rules.shouldInclude(getBaseDirPath()));
+    assertTrue(rules.shouldInclude(resolve("some")));
+    assertTrue(rules.shouldInclude(resolve("another/path")));
   }
 
   @Test
-  @TestFor(issues = "TW-14666")
-  public void test_path_exclude_1() {
-    final SwabraRules rules = createRules("-:.", "+:some/path");
+  public void test_path_exclude_dot() {
+    final SwabraRules rules = createRules("-:some/path/.");
 
-    assertFalse(rules.shouldInclude("."));
+    assertPaths(rules, getBaseDirPath());
 
-    assertTrue(rules.shouldInclude("some/path"));
-    assertTrue(rules.shouldInclude("some/path/content"));
+    assertFalse(rules.shouldInclude("any/path"));
+    assertFalse(rules.shouldInclude(new File("any/path").getAbsolutePath()));
 
-    assertFalse(rules.shouldInclude("another/some/path"));
+    assertFalse(rules.shouldInclude(resolve("some/path")));
+    assertFalse(rules.shouldInclude(resolve("some/path/content")));
+
+    assertTrue(rules.shouldInclude(getBaseDirPath()));
+    assertTrue(rules.shouldInclude(resolve("some")));
+    assertTrue(rules.shouldInclude(resolve("another/path")));
   }
 
   @Test
-  public void test_path_exclude_stars() {
-    final SwabraRules rules = createRules("-:**", "+:some/path");
+  public void test_mask_exclude() {
+    final SwabraRules rules = createRules("-:some/path*");
 
-    assertFalse(rules.shouldInclude("."));
+    assertPaths(rules, getBaseDirPath());
 
-    assertTrue(rules.shouldInclude("some/path"));
-    assertTrue(rules.shouldInclude("some/path/content"));
+    assertFalse(rules.shouldInclude("any/path"));
+    assertFalse(rules.shouldInclude(new File("any/path").getAbsolutePath()));
 
-    assertFalse(rules.shouldInclude("another/some/path"));
+    assertFalse(rules.shouldInclude(resolve("some/path")));
+
+    assertTrue(rules.shouldInclude(getBaseDirPath()));
+    assertTrue(rules.shouldInclude(resolve("some")));
+    assertTrue(rules.shouldInclude(resolve("some/path/content")));
+    assertTrue(rules.shouldInclude(resolve("another/path")));
+  }
+
+  @Test
+  public void test_path_exclude_star() {
+    final SwabraRules rules = createRules("-:some/path/*");
+
+    assertPaths(rules, getBaseDirPath());
+
+    assertFalse(rules.shouldInclude("any/path"));
+    assertFalse(rules.shouldInclude(new File("any/path").getAbsolutePath()));
+
+    assertFalse(rules.shouldInclude(resolve("some/path/content")));
+
+    assertTrue(rules.shouldInclude(resolve("some/path")));
+    assertTrue(rules.shouldInclude(resolve("some/path/content/inner")));
+
+    assertTrue(rules.shouldInclude(getBaseDirPath()));
+    assertTrue(rules.shouldInclude(resolve("some")));
+    assertTrue(rules.shouldInclude(resolve("another/path")));
+  }
+
+  @Test
+  public void test_path_exclude_stars_1() {
+    final SwabraRules rules = createRules("-:some/path/**");
+
+    assertPaths(rules, getBaseDirPath());
+
+    assertFalse(rules.shouldInclude("any/path"));
+    assertFalse(rules.shouldInclude(new File("any/path").getAbsolutePath()));
+
+    assertFalse(rules.shouldInclude(resolve("some/path/content")));
+    assertFalse(rules.shouldInclude(resolve("some/path/content/inner")));
+
+    assertTrue(rules.shouldInclude(resolve("some/path")));
+
+    assertTrue(rules.shouldInclude(getBaseDirPath()));
+    assertTrue(rules.shouldInclude(resolve("some")));
+    assertTrue(rules.shouldInclude(resolve("another/path")));
+  }
+
+  @Test
+  public void test_path_exclude_stars_2() {
+    final SwabraRules rules = createRules("-:**/some/**");
+
+    assertPaths(rules, getBaseDirPath());
+
+    assertFalse(rules.shouldInclude("any/path"));
+    assertFalse(rules.shouldInclude(new File("any/path").getAbsolutePath()));
+
+    assertFalse(rules.shouldInclude(resolve("another/some/content")));
+
+    assertTrue(rules.shouldInclude(resolve("some")));
+    assertTrue(rules.shouldInclude(resolve("some/content")));
+
+    assertTrue(rules.shouldInclude(resolve("another/some")));
+    assertTrue(rules.shouldInclude(resolve("another/path")));
+  }
+
+  @Test
+  public void test_path_exclude_stars_3() {
+    final SwabraRules rules = createRules("-:**/some");
+
+    assertPaths(rules, getBaseDirPath());
+
+    assertFalse(rules.shouldInclude("any/path"));
+    assertFalse(rules.shouldInclude(new File("any/path").getAbsolutePath()));
+
+    assertFalse(rules.shouldInclude(resolve("another/some")));
+    assertFalse(rules.shouldInclude(resolve("another/some/content")));
+
+    assertTrue(rules.shouldInclude(resolve("some")));
+    assertTrue(rules.shouldInclude(resolve("some/content")));
   }
 
   @Test
   public void test_path_include_1() {
-    final SwabraRules rules = createRules("+:some/path");
+    final SwabraRules rules = createRules("some/path");
 
-    assertFalse(rules.shouldInclude("."));
+    assertPaths(rules, getBaseDirPath());
 
-    assertTrue(rules.shouldInclude("some/path"));
-    assertTrue(rules.shouldInclude("some/path/content"));
+    assertFalse(rules.shouldInclude("any/path"));
+    assertFalse(rules.shouldInclude(new File("any/path").getAbsolutePath()));
+    assertFalse(rules.shouldInclude(new File("some/path").getAbsolutePath()));
 
-    assertFalse(rules.shouldInclude("another/some/path"));
+    assertTrue(rules.shouldInclude(getBaseDirPath()));
+    assertTrue(rules.shouldInclude(resolve("some/path")));
+    assertTrue(rules.shouldInclude(resolve("some/path/content")));
   }
 
   @Test
   public void test_path_include_2() {
-    final SwabraRules rules = createRules("some/path");
+    final SwabraRules rules = createRules("+:some/path");
 
-    assertFalse(rules.shouldInclude("."));
+    assertPaths(rules, getBaseDirPath());
 
-    assertTrue(rules.shouldInclude("some/path"));
-    assertTrue(rules.shouldInclude("some/path/content"));
+    assertFalse(rules.shouldInclude("any/path"));
+    assertFalse(rules.shouldInclude(new File("any/path").getAbsolutePath()));
+    assertFalse(rules.shouldInclude(new File("some/path").getAbsolutePath()));
 
-    assertFalse(rules.shouldInclude("another/some/path"));
+    assertTrue(rules.shouldInclude(getBaseDirPath()));
+    assertTrue(rules.shouldInclude(resolve("some/path")));
+    assertTrue(rules.shouldInclude(resolve("some/path/content")));
+  }
+
+  @Test
+  public void test_path_include_dot() {
+    final SwabraRules rules = createRules("+:some/path/.");
+
+    assertPaths(rules, getBaseDirPath());
+
+    assertFalse(rules.shouldInclude("any/path"));
+    assertFalse(rules.shouldInclude(new File("any/path").getAbsolutePath()));
+    assertFalse(rules.shouldInclude(new File("some/path").getAbsolutePath()));
+
+    assertTrue(rules.shouldInclude(getBaseDirPath()));
+    assertTrue(rules.shouldInclude(resolve("some/path")));
+    assertTrue(rules.shouldInclude(resolve("some/path/content")));
+  }
+
+  @Test
+  public void test_mask_include() {
+    final SwabraRules rules = createRules("some/path*");
+
+    assertPaths(rules, getBaseDirPath());
+
+    assertFalse(rules.shouldInclude("any/path"));
+    assertFalse(rules.shouldInclude(new File("any/path").getAbsolutePath()));
+    assertFalse(rules.shouldInclude(new File("some/path").getAbsolutePath()));
+
+    assertTrue(rules.shouldInclude(getBaseDirPath()));
+    assertTrue(rules.shouldInclude(resolve("some/path")));
+    assertTrue(rules.shouldInclude(resolve("some/path/content")));
+  }
+
+  @Test
+  public void test_path_include_star() {
+    final SwabraRules rules = createRules("some/path/*");
+
+    assertPaths(rules, getBaseDirPath());
+
+    assertFalse(rules.shouldInclude("any/path"));
+    assertFalse(rules.shouldInclude(new File("any/path").getAbsolutePath()));
+    assertFalse(rules.shouldInclude(new File("some/path").getAbsolutePath()));
+
+    assertTrue(rules.shouldInclude(getBaseDirPath()));
+    assertTrue(rules.shouldInclude(resolve("some/path")));
+    assertTrue(rules.shouldInclude(resolve("some/path/content")));
+    assertTrue(rules.shouldInclude(resolve("some/path/content/inner")));
+  }
+
+  @Test
+  public void test_path_include_stars() {
+    final SwabraRules rules = createRules("some/path/**");
+
+    assertPaths(rules, getBaseDirPath());
+
+    assertFalse(rules.shouldInclude("any/path"));
+    assertFalse(rules.shouldInclude(new File("any/path").getAbsolutePath()));
+    assertFalse(rules.shouldInclude(new File("some/path").getAbsolutePath()));
+
+    assertTrue(rules.shouldInclude(getBaseDirPath()));
+    assertTrue(rules.shouldInclude(resolve("some/path")));
+    assertTrue(rules.shouldInclude(resolve("some/path/content")));
+    assertTrue(rules.shouldInclude(resolve("some/path/content/inner")));
+  }
+
+  @Test
+  public void test_duplicating_rule_include() {
+    final SwabraRules rules = createRules("+:some/path", "+:some/path");
+
+    assertPaths(rules, getBaseDirPath());
+
+    assertFalse(rules.shouldInclude("any/path"));
+    assertFalse(rules.shouldInclude(new File("any/path").getAbsolutePath()));
+    assertFalse(rules.shouldInclude(new File("some/path").getAbsolutePath()));
+
+    assertTrue(rules.shouldInclude(getBaseDirPath()));
+    assertTrue(rules.shouldInclude(resolve("some/path")));
+    assertTrue(rules.shouldInclude(resolve("some/path/content")));
+  }
+
+  @Test
+  public void test_duplicating_rule_include_exclude() {
+    final SwabraRules rules = createRules("+:some/path", "-:some/path");
+
+    assertPaths(rules, getBaseDirPath());
+
+    assertFalse(rules.shouldInclude("any/path"));
+    assertFalse(rules.shouldInclude(new File("any/path").getAbsolutePath()));
+
+    assertFalse(rules.shouldInclude(resolve("some/path")));
+    assertFalse(rules.shouldInclude(resolve("some/path/content")));
+
+    assertTrue(rules.shouldInclude(getBaseDirPath()));
+    assertTrue(rules.shouldInclude(resolve("some")));
+    assertTrue(rules.shouldInclude(resolve("another/path")));
+  }
+
+  @Test
+  public void test_include_base_dir() {
+    final SwabraRules rules = createRules("");
+
+    assertPaths(rules, getBaseDirPath());
+
+    assertFalse(rules.shouldInclude("any/path"));
+    assertFalse(rules.shouldInclude(new File("any/path").getAbsolutePath()));
+
+    assertTrue(rules.shouldInclude(getBaseDirPath()));
+    assertTrue(rules.shouldInclude(resolve("some/path")));
+  }
+
+  @Test
+  public void test_include_base_dir_abs() {
+    final SwabraRules rules = createRules(getBaseDirPath());
+
+    assertPaths(rules, getBaseDirPath());
+
+    assertFalse(rules.shouldInclude("any/path"));
+    assertFalse(rules.shouldInclude(new File("any/path").getAbsolutePath()));
+
+    assertTrue(rules.shouldInclude(getBaseDirPath()));
+    assertTrue(rules.shouldInclude(resolve("some/path")));
+  }
+
+  @Test
+  public void test_include_base_dir_dot() {
+    final SwabraRules rules = createRules("+:.");
+
+    assertPaths(rules, getBaseDirPath());
+
+    assertFalse(rules.shouldInclude("any/path"));
+    assertFalse(rules.shouldInclude(new File("any/path").getAbsolutePath()));
+
+    assertTrue(rules.shouldInclude(getBaseDirPath()));
+    assertTrue(rules.shouldInclude(resolve("some/path")));
+  }
+
+  @Test
+  public void test_include_base_dir_star() {
+    final SwabraRules rules = createRules("+:*");
+
+    assertPaths(rules, getBaseDirPath());
+
+    assertFalse(rules.shouldInclude("any/path"));
+    assertFalse(rules.shouldInclude(new File("any/path").getAbsolutePath()));
+
+    assertTrue(rules.shouldInclude(getBaseDirPath()));
+    assertTrue(rules.shouldInclude(resolve("some/path")));
+  }
+
+  @Test
+  public void test_include_base_dir_stars() {
+    final SwabraRules rules = createRules("+:**");
+
+    assertPaths(rules, getBaseDirPath());
+
+    assertFalse(rules.shouldInclude("any/path"));
+    assertFalse(rules.shouldInclude(new File("any/path").getAbsolutePath()));
+
+    assertTrue(rules.shouldInclude(getBaseDirPath()));
+    assertTrue(rules.shouldInclude(resolve("some/path")));
+  }
+
+  @Test
+  public void test_exclude_base_dir_dot() {
+    final SwabraRules rules = createRules("-:.");
+
+    assertPaths(rules);
+
+    assertFalse(rules.shouldInclude("any/path"));
+    assertFalse(rules.shouldInclude(new File("any/path").getAbsolutePath()));
+
+    assertFalse(rules.shouldInclude(getBaseDirPath()));
+    assertFalse(rules.shouldInclude(resolve("some/path")));
+  }
+
+  @Test
+  public void test_exclude_base_dir_abs() {
+    final SwabraRules rules = createRules("-:" + getBaseDirPath());
+
+    assertPaths(rules);
+
+    assertFalse(rules.shouldInclude("any/path"));
+    assertFalse(rules.shouldInclude(new File("any/path").getAbsolutePath()));
+
+    assertFalse(rules.shouldInclude(getBaseDirPath()));
+    assertFalse(rules.shouldInclude(resolve("some/path")));
+  }
+
+  @Test
+  public void test_exclude_base_dir_star() {
+    final SwabraRules rules = createRules("-:*");
+
+    assertPaths(rules, getBaseDirPath());
+
+    assertFalse(rules.shouldInclude("any/path"));
+    assertFalse(rules.shouldInclude(new File("any/path").getAbsolutePath()));
+
+    assertTrue(rules.shouldInclude(getBaseDirPath()));
+    assertTrue(rules.shouldInclude(resolve("some/path")));
+    assertTrue(rules.shouldInclude(resolve("some/path/content")));
+
+    assertFalse(rules.shouldInclude(resolve("some")));
+  }
+
+  @Test
+  public void test_exclude_base_dir_stars() {
+    final SwabraRules rules = createRules("-:**");
+
+    assertPaths(rules, getBaseDirPath());
+
+    assertFalse(rules.shouldInclude("any/path"));
+    assertFalse(rules.shouldInclude(new File("any/path").getAbsolutePath()));
+
+    assertFalse(rules.shouldInclude(resolve("some")));
+    assertFalse(rules.shouldInclude(resolve("some/path")));
+    assertFalse(rules.shouldInclude(resolve("some/path/content")));
+
+    assertTrue(rules.shouldInclude(getBaseDirPath()));
+  }
+
+  @Test
+  @TestFor(issues = "TW-14666")
+  public void test_partly_exclude_base_dir() {
+    final SwabraRules rules = createRules("-:.", "+:some/path");
+
+    assertPaths(rules, resolve("some/path"));
+
+    assertFalse(rules.shouldInclude("any/path"));
+    assertFalse(rules.shouldInclude(new File("any/path").getAbsolutePath()));
+
+    assertFalse(rules.shouldInclude(getBaseDirPath()));
+    assertFalse(rules.shouldInclude(resolve("another/path")));
+
+    assertTrue(rules.shouldInclude(resolve("some/path")));
+    assertTrue(rules.shouldInclude(resolve("some/path/inner")));
+  }
+
+
+  @Test
+  public void test_partly_exclude_base_dir_abs() {
+    final SwabraRules rules = createRules("-:" + getBaseDirPath(), "+:some/path");
+
+    assertPaths(rules, resolve("some/path"));
+
+    assertFalse(rules.shouldInclude("any/path"));
+    assertFalse(rules.shouldInclude(new File("any/path").getAbsolutePath()));
+
+    assertFalse(rules.shouldInclude(getBaseDirPath()));
+    assertFalse(rules.shouldInclude(resolve("another/path")));
+
+    assertTrue(rules.shouldInclude(resolve("some/path")));
+    assertTrue(rules.shouldInclude(resolve("some/path/inner")));
+  }
+
+  @Test
+  public void test_partly_exclude_base_dir_star() {
+    final SwabraRules rules = createRules("-:*", "+:some/path");
+
+    assertPaths(rules, getBaseDirPath());
+
+    assertFalse(rules.shouldInclude("any/path"));
+    assertFalse(rules.shouldInclude(new File("any/path").getAbsolutePath()));
+
+    assertFalse(rules.shouldInclude(resolve("some")));
+    assertFalse(rules.shouldInclude(resolve("another")));
+
+    assertTrue(rules.shouldInclude(getBaseDirPath()));
+    assertTrue(rules.shouldInclude(resolve("some/path")));
+    assertTrue(rules.shouldInclude(resolve("some/path/inner")));
+    assertTrue(rules.shouldInclude(resolve("another/path")));
+  }
+
+  @Test
+  public void test_partly_exclude_base_dir_stars() {
+    final SwabraRules rules = createRules("-:**", "+:some/path");
+
+    assertPaths(rules, getBaseDirPath());
+
+    assertFalse(rules.shouldInclude("any/path"));
+    assertFalse(rules.shouldInclude(new File("any/path").getAbsolutePath()));
+
+    assertFalse(rules.shouldInclude(resolve("another/path")));
+
+    assertTrue(rules.shouldInclude(getBaseDirPath()));
+    assertTrue(rules.shouldInclude(resolve("some/path")));
+    assertTrue(rules.shouldInclude(resolve("some/path/inner")));
+  }
+
+  @Test
+  public void test_include_outer_dir_abs() {
+    final File outer = new File("outer");
+    final String outerAbsolutePath = outer.getAbsolutePath();
+
+    final SwabraRules rules = createRules(outerAbsolutePath);
+
+    assertPaths(rules, getBaseDirPath(), outerAbsolutePath);
+
+    assertFalse(rules.shouldInclude("any/path"));
+    assertFalse(rules.shouldInclude(new File("any/path").getAbsolutePath()));
+
+    assertTrue(rules.shouldInclude(outerAbsolutePath));
+    assertTrue(rules.shouldInclude(resolve(outer, "some/path")));
+
+    assertTrue(rules.shouldInclude(getBaseDirPath()));
+    assertTrue(rules.shouldInclude(resolve("some/path")));
+  }
+
+  @Test
+  public void test_include_outer_dir_abs_dot() {
+    final File outer = new File("outer");
+    final String outerAbsolutePath = outer.getAbsolutePath();
+
+    final SwabraRules rules = createRules(outerAbsolutePath + "/.");
+
+    assertPaths(rules, getBaseDirPath(), outerAbsolutePath);
+
+    assertFalse(rules.shouldInclude("any/path"));
+    assertFalse(rules.shouldInclude(new File("any/path").getAbsolutePath()));
+
+    assertTrue(rules.shouldInclude(outerAbsolutePath));
+    assertTrue(rules.shouldInclude(resolve(outer, "some/path")));
+
+    assertTrue(rules.shouldInclude(getBaseDirPath()));
+    assertTrue(rules.shouldInclude(resolve("some/path")));
+  }
+
+  @Test
+  public void test_include_outer_dir_abs_star() {
+    final File outer = new File("outer");
+    final String outerAbsolutePath = outer.getAbsolutePath();
+
+    final SwabraRules rules = createRules(outerAbsolutePath + "/*");
+
+    assertPaths(rules, getBaseDirPath(), outerAbsolutePath);
+
+    assertFalse(rules.shouldInclude("any/path"));
+    assertFalse(rules.shouldInclude(new File("any/path").getAbsolutePath()));
+
+    assertFalse(rules.shouldInclude(outerAbsolutePath));
+    assertFalse(rules.shouldInclude(resolve(outer, "some/path")));
+
+    assertTrue(rules.shouldInclude(resolve(outer, "some")));
+
+    assertTrue(rules.shouldInclude(getBaseDirPath()));
+    assertTrue(rules.shouldInclude(resolve("some/path")));
+  }
+
+  @Test
+  public void test_include_outer_dir_abs_stars() {
+    final File outer = new File("outer");
+    final String outerAbsolutePath = outer.getAbsolutePath();
+
+    final SwabraRules rules = createRules(outerAbsolutePath + "/**");
+
+    assertPaths(rules, getBaseDirPath(), outerAbsolutePath);
+
+    assertFalse(rules.shouldInclude("any/path"));
+    assertFalse(rules.shouldInclude(new File("any/path").getAbsolutePath()));
+
+    assertFalse(rules.shouldInclude(outerAbsolutePath));
+
+    assertTrue(rules.shouldInclude(resolve(outer, "some")));
+    assertTrue(rules.shouldInclude(resolve(outer, "some/path")));
+
+    assertTrue(rules.shouldInclude(getBaseDirPath()));
+    assertTrue(rules.shouldInclude(resolve("some/path")));
   }
 
   @Test
   public void test_include_content_1() {
     final SwabraRules rules = createRules("-:some/path", "+:some/path/content");
 
-    assertFalse(rules.shouldInclude("."));
+    assertPaths(rules, getBaseDirPath());
 
-    assertFalse(rules.shouldInclude("some/path"));
-    assertTrue(rules.shouldInclude("some/path/content"));
+    assertFalse(rules.shouldInclude("any/path"));
+    assertFalse(rules.shouldInclude(new File("any/path").getAbsolutePath()));
 
-    assertFalse(rules.shouldInclude("another/some/path"));
+    assertFalse(rules.shouldInclude(resolve("some/path")));
+    assertTrue(rules.shouldInclude(resolve("some/path/content")));
+    assertTrue(rules.shouldInclude(resolve("some/path/content/inner")));
   }
 
   @Test
   public void test_include_content_2() {
     final SwabraRules rules = createRules("-:some/path", "+:some/path/content", "-:some/path/content/inner");
 
-    assertFalse(rules.shouldInclude("."));
+    assertPaths(rules, getBaseDirPath());
 
-    assertFalse(rules.shouldInclude("some/path"));
-    assertTrue(rules.shouldInclude("some/path/content"));
-    assertFalse(rules.shouldInclude("some/path/content/inner"));
+    assertFalse(rules.shouldInclude("any/path"));
+    assertFalse(rules.shouldInclude(new File("any/path").getAbsolutePath()));
 
-    assertFalse(rules.shouldInclude("another/some/path"));
-  }
-
-  @Test
-  public void test_mask_exclude_1() {
-    final SwabraRules rules = createRules("-:**/some/**");
-
-    assertTrue(rules.shouldInclude("."));
-
-    assertTrue(rules.shouldInclude("some"));
-    assertTrue(rules.shouldInclude("some/content"));
-
-    assertTrue(rules.shouldInclude("another/some"));
-    assertFalse(rules.shouldInclude("another/some/content"));
-
-    assertTrue(rules.shouldInclude("another/path"));
-  }
-
-  @Test
-  public void test_mask_exclude_2() {
-    final SwabraRules rules = createRules("-:some/path/**");
-
-    assertTrue(rules.shouldInclude("."));
-
-    assertTrue(rules.shouldInclude("some/path"));
-    assertFalse(rules.shouldInclude("some/path/content"));
-
-    assertTrue(rules.shouldInclude("some"));
-    assertTrue(rules.shouldInclude("another/some/path/content"));
-  }
-
-  @Test
-  public void test_mask_exclude_3() {
-    final SwabraRules rules = createRules("-:**/some");
-
-    assertTrue(rules.shouldInclude("."));
-
-    assertTrue(rules.shouldInclude("some"));
-    assertFalse(rules.shouldInclude("another/some"));
-
-    assertTrue(rules.shouldInclude("some/content"));
-    assertFalse(rules.shouldInclude("another/some/content"));
-  }
-
-  @Test
-  public void test_mask_exclude_4() {
-    final SwabraRules rules = createRules("-:**");
-
-    assertFalse(rules.shouldInclude("."));
-
-    assertFalse(rules.shouldInclude("some/path"));
-    assertFalse(rules.shouldInclude("another/path"));
-  }
-
-  @Test
-  public void test_mask_include_content_1() {
-    final SwabraRules rules = createRules("-:some/path/**", "+:some/path/content/inner/**");
-
-    assertFalse(rules.shouldInclude("."));
-
-    assertFalse(rules.shouldInclude("some/path"));
-    assertFalse(rules.shouldInclude("some/path/content"));
-    assertFalse(rules.shouldInclude("some/path/content/another"));
-
-    assertFalse(rules.shouldInclude("some/path/content/inner"));
-    assertTrue(rules.shouldInclude("some/path/content/inner/content"));
-
-    assertFalse(rules.shouldInclude("some/path/another"));
-    assertFalse(rules.shouldInclude("some/path/another/content"));
-  }
-
-  @Test
-  public void test_mask_include_content_2() {
-    final SwabraRules rules = createRules("-:some/path/**",
-      "+:some/path/content/inner/**",
-      "-:some/path/content/inner/another/path");
-
-    assertFalse(rules.shouldInclude("."));
-
-    assertFalse(rules.shouldInclude("some/path"));
-    assertFalse(rules.shouldInclude("some/path/content"));
-    assertFalse(rules.shouldInclude("some/path/content/another"));
-    assertFalse(rules.shouldInclude("some/path/content/inner/another/path"));
-    assertFalse(rules.shouldInclude("some/path/content/inner/another/path/content"));
-
-    assertFalse(rules.shouldInclude("some/path/content/inner"));
-    assertTrue(rules.shouldInclude("some/path/content/inner/content"));
-    assertTrue(rules.shouldInclude("some/path/content/inner/another"));
+    assertFalse(rules.shouldInclude(resolve("some/path")));
+    assertTrue(rules.shouldInclude(resolve("some/path/content")));
+    assertTrue(rules.shouldInclude(resolve("some/path/content/another")));
+    assertFalse(rules.shouldInclude(resolve("some/path/content/inner")));
+    assertTrue(rules.shouldInclude(resolve("some/path/content/innerAnother")));
+    assertFalse(rules.shouldInclude(resolve("some/path/content/inner/content")));
   }
 
   @Test
   public void test_misc_1() {
     final SwabraRules rules = createRules("-:some/path/**", "+:some/path/content/inner");
 
-    assertFalse(rules.shouldInclude("."));
+    assertPaths(rules, getBaseDirPath());
 
-    assertFalse(rules.shouldInclude("some/path"));
-    assertFalse(rules.shouldInclude("some/path/content"));
-    assertFalse(rules.shouldInclude("some/path/another/path"));
+    assertFalse(rules.shouldInclude("any/path"));
+    assertFalse(rules.shouldInclude(new File("any/path").getAbsolutePath()));
 
-    assertTrue(rules.shouldInclude("some/path/content/inner"));
-    assertTrue(rules.shouldInclude("some/path/content/inner/another/path"));
+    assertFalse(rules.shouldInclude(resolve("some/path/content")));
+    assertFalse(rules.shouldInclude(resolve("some/path/another/path")));
+
+    assertTrue(rules.shouldInclude(resolve("some/path")));
+    assertTrue(rules.shouldInclude(resolve("some/path/content/inner")));
+    assertTrue(rules.shouldInclude(resolve("some/path/content/inner/another/path")));
   }
 
   @Test
   public void test_misc_2() {
     final SwabraRules rules = createRules("-:some/path", "+:some/path/content/inner/**");
 
-    assertFalse(rules.shouldInclude("."));
+    assertPaths(rules, getBaseDirPath());
 
-    assertFalse(rules.shouldInclude("some/path"));
-    assertFalse(rules.shouldInclude("some/path/content"));
-    assertFalse(rules.shouldInclude("some/path/another/path"));
+    assertFalse(rules.shouldInclude("any/path"));
+    assertFalse(rules.shouldInclude(new File("any/path").getAbsolutePath()));
 
-    assertFalse(rules.shouldInclude("some/path/content/inner"));
-    assertTrue(rules.shouldInclude("some/path/content/inner/another/path"));
+    assertFalse(rules.shouldInclude(resolve("some/path")));
+    assertFalse(rules.shouldInclude(resolve("some/path/content")));
+    assertFalse(rules.shouldInclude(resolve("some/path/another/path")));
+    assertFalse(rules.shouldInclude(resolve("some/path/content/inner")));
+
+    assertTrue(rules.shouldInclude(resolve("some/path/content/inner/another/path")));
   }
-
 
   @Test
   public void test_misc_3() {
     final SwabraRules rules = createRules("-:**/some/**", "+:some/path");
 
-    assertFalse(rules.shouldInclude("."));
+    assertPaths(rules, getBaseDirPath());
 
-    assertFalse(rules.shouldInclude("some"));
-    assertFalse(rules.shouldInclude("some/content"));
-    assertFalse(rules.shouldInclude("another/some"));
-    assertFalse(rules.shouldInclude("another/some/content"));
+    assertFalse(rules.shouldInclude(resolve("another/some/content")));
 
-    assertFalse(rules.shouldInclude("another/content"));
-    assertTrue(rules.shouldInclude("some/path"));
-    assertTrue(rules.shouldInclude("some/path/content"));
+    assertFalse(rules.shouldInclude("any/path"));
+    assertFalse(rules.shouldInclude(new File("any/path").getAbsolutePath()));
+
+    assertTrue(rules.shouldInclude(resolve("some")));
+    assertTrue(rules.shouldInclude(resolve("some/content")));
+    assertTrue(rules.shouldInclude(resolve("some/path")));
+    assertTrue(rules.shouldInclude(resolve("some/path/content")));
+    assertTrue(rules.shouldInclude(resolve("another/some")));
+    assertTrue(rules.shouldInclude(resolve("another/content")));
   }
 
   @Test
@@ -273,55 +665,181 @@ public class SwabraRulesTest extends TestCase {
   public void test_misc_with_dots() {
     final SwabraRules rules = createRules("-:./**/some/**", "+:./some/path");
 
-    assertFalse(rules.shouldInclude("."));
+    assertPaths(rules, getBaseDirPath());
 
-    assertFalse(rules.shouldInclude("some"));
-    assertFalse(rules.shouldInclude("some/content"));
-    assertFalse(rules.shouldInclude("another/some"));
-    assertFalse(rules.shouldInclude("another/some/content"));
+    assertFalse(rules.shouldInclude("any/path"));
+    assertFalse(rules.shouldInclude(new File("any/path").getAbsolutePath()));
 
-    assertFalse(rules.shouldInclude("another/content"));
-    assertTrue(rules.shouldInclude("some/path"));
-    assertTrue(rules.shouldInclude("some/path/content"));
+    assertFalse(rules.shouldInclude(resolve("another/some/content")));
+
+    assertTrue(rules.shouldInclude(resolve("some")));
+    assertTrue(rules.shouldInclude(resolve("some/content")));
+    assertTrue(rules.shouldInclude(resolve("some/path")));
+    assertTrue(rules.shouldInclude(resolve("some/path/content")));
+    assertTrue(rules.shouldInclude(resolve("another/some")));
+    assertTrue(rules.shouldInclude(resolve("another/content")));
   }
 
   @Test
   public void test_misc_with_absolute() {
-    final File baseDir = new File("baseDir");
-    final File outerDir = new File("outerDir");
-    final SwabraRules rules = createRules(baseDir, "-:some/path", "+:some/path/content/inner/**", resolve("some/path", outerDir), "-:" + resolve("some/path/content", outerDir));
+    final File outer = new File("outer");
+    final String outerAbsolutePath = outer.getAbsolutePath();
 
-    assertFalse(rules.shouldInclude(baseDir.getPath()));
+    final SwabraRules rules = createRules("-:some/path", "+:some/path/content/inner/**", resolve(outer, "some/path"), "-:" + resolve(outer, "some/path/content"));
 
-    assertFalse(rules.shouldInclude(resolve("some/path", baseDir)));
-    assertFalse(rules.shouldInclude(resolve("some/path/content", baseDir)));
-    assertFalse(rules.shouldInclude(resolve("some/path/another/path", baseDir)));
+    assertPaths(rules, resolve(outer, "some/path"), getBaseDirPath());
 
-    assertFalse(rules.shouldInclude(resolve("some/path/content/inner", baseDir)));
-    assertTrue(rules.shouldInclude(resolve("some/path/content/inner/another/path", baseDir)));
+    assertFalse(rules.shouldInclude("any/path"));
+    assertFalse(rules.shouldInclude(new File("any/path").getAbsolutePath()));
 
-    assertFalse(rules.shouldInclude(outerDir.getPath()));
+    assertTrue(rules.shouldInclude(getBaseDirPath()));
 
-    assertTrue(rules.shouldInclude(resolve("some/path", outerDir)));
-    assertTrue(rules.shouldInclude(resolve("some/path/another/path", outerDir)));
+    assertFalse(rules.shouldInclude(resolve("some/path")));
+    assertFalse(rules.shouldInclude(resolve("some/path/content")));
+    assertFalse(rules.shouldInclude(resolve("some/path/another/path")));
 
-    assertFalse(rules.shouldInclude(resolve("some/path/content", outerDir)));
-    assertFalse(rules.shouldInclude(resolve("some/path/content/inner", outerDir)));
+    assertFalse(rules.shouldInclude(resolve("some/path/content/inner")));
+    assertTrue(rules.shouldInclude(resolve("some/path/content/inner/another/path")));
+
+    assertFalse(rules.shouldInclude(outerAbsolutePath));
+
+    assertTrue(rules.shouldInclude(resolve(outer, "some/path")));
+    assertTrue(rules.shouldInclude(resolve(outer, "some/path/another/path")));
+
+    assertFalse(rules.shouldInclude(resolve(outer, "some/path/content")));
+    assertFalse(rules.shouldInclude(resolve(outer, "some/path/content/inner")));
+  }
+
+  @Test
+  public void test_partly_include_1() {
+    final SwabraRules rules = createRules("-:some/path/**", "+:some/path/content/inner/**");
+
+    assertPaths(rules, getBaseDirPath());
+
+    assertFalse(rules.shouldInclude("any/path"));
+    assertFalse(rules.shouldInclude(new File("any/path").getAbsolutePath()));
+
+    assertFalse(rules.shouldInclude(resolve("some/path/content")));
+    assertFalse(rules.shouldInclude(resolve("some/path/content/another")));
+
+    assertFalse(rules.shouldInclude(resolve("some/path/content/inner")));
+    assertFalse(rules.shouldInclude(resolve("some/path/another")));
+    assertFalse(rules.shouldInclude(resolve("some/path/another/content")));
+
+    assertTrue(rules.shouldInclude(resolve("some/path")));
+    assertTrue(rules.shouldInclude(resolve("some/path/content/inner/content")));
+  }
+
+  @Test
+  public void test_partly_include_2() {
+    final SwabraRules rules = createRules("-:some/path/**",
+      "+:some/path/content/inner/**",
+      "-:some/path/content/inner/another/path");
+
+    assertPaths(rules, getBaseDirPath());
+
+    assertFalse(rules.shouldInclude("any/path"));
+    assertFalse(rules.shouldInclude(new File("any/path").getAbsolutePath()));
+
+    assertFalse(rules.shouldInclude(resolve("some/path/content")));
+    assertFalse(rules.shouldInclude(resolve("some/path/content/another")));
+    assertFalse(rules.shouldInclude(resolve("some/path/content/inner/another/path")));
+    assertFalse(rules.shouldInclude(resolve("some/path/content/inner/another/path/content")));
+    assertFalse(rules.shouldInclude(resolve("some/path/content/inner")));
+
+    assertTrue(rules.shouldInclude(resolve("some/path")));
+    assertTrue(rules.shouldInclude(resolve("some/path/content/inner/content")));
+    assertTrue(rules.shouldInclude(resolve("some/path/content/inner/another")));
+  }
+
+  @Test
+  public void test_partly_include_base_dir() {
+    final SwabraRules rules = createRules("+:.", "-:some/path");
+
+    assertPaths(rules, getBaseDirPath());
+
+    assertFalse(rules.shouldInclude("any/path"));
+    assertFalse(rules.shouldInclude(new File("any/path").getAbsolutePath()));
+
+    assertFalse(rules.shouldInclude(resolve("some/path")));
+    assertFalse(rules.shouldInclude(resolve("some/path/inner")));
+
+    assertTrue(rules.shouldInclude(getBaseDirPath()));
+    assertTrue(rules.shouldInclude(resolve("another/path")));
+  }
+
+  @Test
+  public void test_partly_include_base_dir_star() {
+    final SwabraRules rules = createRules("+:*", "-:some/path");
+
+    assertPaths(rules, getBaseDirPath());
+
+    assertFalse(rules.shouldInclude("any/path"));
+    assertFalse(rules.shouldInclude(new File("any/path").getAbsolutePath()));
+
+    assertFalse(rules.shouldInclude(resolve("some/path")));
+    assertFalse(rules.shouldInclude(resolve("some/path/inner")));
+
+    assertTrue(rules.shouldInclude(getBaseDirPath()));
+    assertTrue(rules.shouldInclude(resolve("some")));
+    assertTrue(rules.shouldInclude(resolve("another/path")));
+  }
+
+  @Test
+  public void test_partly_include_base_dir_stars() {
+    final SwabraRules rules = createRules("+:**", "-:some/path");
+
+    assertPaths(rules, getBaseDirPath());
+
+    assertFalse(rules.shouldInclude("any/path"));
+    assertFalse(rules.shouldInclude(new File("any/path").getAbsolutePath()));
+
+    assertFalse(rules.shouldInclude(resolve("some/path")));
+    assertFalse(rules.shouldInclude(resolve("some/path/inner")));
+
+    assertTrue(rules.shouldInclude(getBaseDirPath()));
+    assertTrue(rules.shouldInclude(resolve("some")));
+    assertTrue(rules.shouldInclude(resolve("another/path")));
   }
 
   @NotNull
-  private String resolve(@NotNull String path, @NotNull File baseDir) {
-    return FileUtil.resolvePath(baseDir, path).getPath();
+  public File getBaseDir() {
+    return myBaseDir;
   }
 
-//  @Test
-//  public void test_crazy_1() {
-//    final SwabraRules rules = createRules("-:some/path", "+:some/path/**");
-//
-//    assertFalse(rules.shouldInclude("."));
-//
-//    assertFalse(rules.shouldInclude("some/path"));
-//    assertTrue(rules.shouldInclude("some/path/content"));
-//    assertTrue(rules.shouldInclude("some/path/another/path"));
-//  }
+  @NotNull
+  public String getBaseDirPath() {
+    return getBaseDir().getAbsolutePath();
+  }
+
+  private void assertPaths(@NotNull SwabraRules rules, String... expectedPaths) {
+    final List<String> paths = getPaths(rules);
+    assertEquals(paths.toString(), expectedPaths.length, paths.size());
+    for (final String p : expectedPaths) {
+      assertNotNull(paths.toString(), CollectionsUtil.findFirst(paths, new Filter<String>() {
+        public boolean accept(@NotNull final String data) {
+          return FileUtil.normalizeSeparator(data).equals(FileUtil.normalizeSeparator(p));
+        }
+      }));
+    }
+  }
+
+  @NotNull
+  private List<String> getPaths(@NotNull SwabraRules rules) {
+    return CollectionsUtil.convertCollection(rules.getPaths(), new Converter<String, File>() {
+      public String createFrom(@NotNull final File source) {
+        return source.getPath();
+      }
+    });
+  }
+
+  @NotNull
+  private String resolve(@NotNull String path) {
+    return resolve(myBaseDir, path);
+  }
+
+  @NotNull
+  private String resolve(@NotNull File baseDir, @NotNull String path) {
+    return FileUtil.resolvePath(baseDir, path).getPath();
+  }
 }
