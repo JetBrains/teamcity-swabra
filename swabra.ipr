@@ -168,7 +168,6 @@
     </annotationProcessing>
   </component>
   <component name="CopyrightManager" default="">
-    <module2copyright />
     <LanguageOptions name="CSS">
       <option name="fileTypeOverride" value="1" />
     </LanguageOptions>
@@ -390,18 +389,10 @@
         <ADDITIONAL_INDENT_OPTIONS fileType="gsp">
           <option name="INDENT_SIZE" value="2" />
         </ADDITIONAL_INDENT_OPTIONS>
-        <ADDITIONAL_INDENT_OPTIONS fileType="jsp">
-          <option name="INDENT_SIZE" value="2" />
-          <option name="CONTINUATION_INDENT_SIZE" value="4" />
-          <option name="TAB_SIZE" value="8" />
-        </ADDITIONAL_INDENT_OPTIONS>
         <ADDITIONAL_INDENT_OPTIONS fileType="sass">
           <option name="INDENT_SIZE" value="2" />
         </ADDITIONAL_INDENT_OPTIONS>
         <ADDITIONAL_INDENT_OPTIONS fileType="sql">
-          <option name="INDENT_SIZE" value="2" />
-        </ADDITIONAL_INDENT_OPTIONS>
-        <ADDITIONAL_INDENT_OPTIONS fileType="yml">
           <option name="INDENT_SIZE" value="2" />
         </ADDITIONAL_INDENT_OPTIONS>
         <codeStyleSettings language="Groovy">
@@ -413,6 +404,13 @@
           <indentOptions>
             <option name="INDENT_SIZE" value="2" />
             <option name="CONTINUATION_INDENT_SIZE" value="2" />
+          </indentOptions>
+        </codeStyleSettings>
+        <codeStyleSettings language="JSP">
+          <indentOptions>
+            <option name="INDENT_SIZE" value="2" />
+            <option name="CONTINUATION_INDENT_SIZE" value="4" />
+            <option name="TAB_SIZE" value="8" />
           </indentOptions>
         </codeStyleSettings>
         <codeStyleSettings language="JavaScript">
@@ -541,14 +539,16 @@
       <CLASSES>
         <root url="jar://$PROJECT_DIR$/tests/lib/jmock-2.5.1.jar!/" />
         <root url="jar://$PROJECT_DIR$/tests/lib/jmock-junit4-2.5.1.jar!/" />
-        <root url="jar://$PROJECT_DIR$/tests/lib/hamcrest-library-1.1.jar!/" />
+        <root url="jar://$PROJECT_DIR$/tests/lib/hamcrest-core-1.3.jar!/" />
+        <root url="jar://$PROJECT_DIR$/tests/lib/hamcrest-integration-1.3.jar!/" />
+        <root url="jar://$PROJECT_DIR$/tests/lib/hamcrest-library-1.3.jar!/" />
       </CLASSES>
       <JAVADOC />
       <SOURCES />
     </library>
     <library name="junit">
       <CLASSES>
-        <root url="jar://$PROJECT_DIR$/tests/lib/junit-4.5.jar!/" />
+        <root url="jar://$PROJECT_DIR$/tests/lib/junit-4.11.jar!/" />
       </CLASSES>
       <JAVADOC />
       <SOURCES />
@@ -613,6 +613,14 @@
     <library name="TeamCity-toolLoader">
       <CLASSES>
         <root url="jar://$TeamCityDistribution$/webapps/ROOT/WEB-INF/lib/toolLoader.jar!/" />
+      </CLASSES>
+      <JAVADOC />
+      <SOURCES />
+    </library>
+    <library name="TeamCity-trove">
+      <CLASSES>
+        <root url="jar://$TeamCityDistribution$/webapps/ROOT/WEB-INF/lib/trove4j.jar!/" />
+        <root url="jar://$TeamCityDistribution$/webapps/ROOT/WEB-INF/lib/trove-3.0.3.jar!/" />
       </CLASSES>
       <JAVADOC />
       <SOURCES />

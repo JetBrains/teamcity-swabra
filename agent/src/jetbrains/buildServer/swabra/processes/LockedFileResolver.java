@@ -16,20 +16,18 @@
 
 package jetbrains.buildServer.swabra.processes;
 
+import jetbrains.buildServer.processes.ProcessFilter;
+import jetbrains.buildServer.processes.ProcessTreeTerminator;
+import jetbrains.buildServer.util.FileUtil;
+import jetbrains.buildServer.util.StringUtil;
+import org.apache.log4j.Logger;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import jetbrains.buildServer.processes.ProcessFilter;
-import jetbrains.buildServer.processes.ProcessNode;
-import jetbrains.buildServer.processes.ProcessTreeTerminator;
-import jetbrains.buildServer.util.CollectionsUtil;
-import jetbrains.buildServer.util.FileUtil;
-import jetbrains.buildServer.util.StringUtil;
-import jetbrains.buildServer.util.filters.Filter;
-import org.apache.log4j.Logger;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 /**
  * User: vbedrosova
@@ -58,18 +56,14 @@ public class LockedFileResolver {
   private final WmicProcessDetailsProvider myWmicProcessDetailsProvider;
   @NotNull
   private final List<String> myIgnoredProcesses;
-//  @NotNull
-//  private final ProcessTerminator myProcessTerminator;
 
   public LockedFileResolver(@NotNull LockingProcessesProvider processesProvider,
                             @NotNull List<String> ignoredProcesses,
-                            @NotNull WmicProcessDetailsProvider wmicProcessDetailsProvider/*,
-                            @NotNull ProcessTerminator processTerminator,*/) {
+                            @NotNull WmicProcessDetailsProvider wmicProcessDetailsProvider) {
     myProcessesProvider = processesProvider;
     myWmicProcessDetailsProvider = wmicProcessDetailsProvider;
     myIgnoredProcesses = new ArrayList<String>(ignoredProcesses);
     myIgnoredProcesses.add(String.valueOf(ProcessTreeTerminator.getCurrentPid()));
-//    myProcessTerminator = processTerminator;
   }
 
 
@@ -84,63 +78,51 @@ public class LockedFileResolver {
    *         and all of them were killed if corresponding option was specified)
    */
   public boolean resolve(@NotNull File f, boolean kill, @Nullable Listener listener) {
-    Collection<ProcessInfo> processes;
+    Collection<ProcessInfo> processes = getLockingProcesses(f, listener);
+    if (processes == null) return false;
 
-    try {
-      processes = myProcessesProvider.getLockingProcesses(f);
-    } catch (GetProcessesException e) {
-      log(e.getMessage(), true, listener);
-      return false;
-    }
-
-    final String number = getProcessesNumber(processes.size());
     if (processes.isEmpty()) {
-      log("Found no locking processes for " + f, false, listener);
+      log("No processes found locking files in directory: " + f, false, listener);
       return false;
     } else {
-      final StringBuilder sb = new StringBuilder("Found locking ").append(number).append(" for ").append(f).append(":");
+      final StringBuilder sb = new StringBuilder("Found ").append(StringUtil.pluralize("process", processes.size())).append(" locking files in directory ").append(f).append(":");
       appendProcessInfos(processes, sb);
       log(sb.toString(), true, listener);
     }
 
+    List<ProcessInfo> ignored = new ArrayList<ProcessInfo>();
+
     if (kill) {
-      log("Locking processes killing is enabled. Will try to kill locking " + number, false, listener);
+      log("Will try to kill locking processes", false, listener);
       for (final ProcessInfo p : processes) {
-
-        final List<ProcessNode> ignored = getIgnored(p);
-        if (ignored.isEmpty()) {
-          try {
-            if (ProcessTreeTerminator.kill(p.getPid(), ProcessFilter.MATCH_ALL)) {
-              log("Killed process " + getProcessString(p), false, listener);
-            } else {
-              logFailedToKill(p, null, listener);
-            }
-          } catch (Exception e) {
-            logFailedToKill(p, e.getMessage(), listener);
-          }
-        } else {
-          final StringBuilder sb = new StringBuilder("Skip process ").append(getProcessString(p)).append(" and it's subtree as this may stop TeamCity agent. Suspicious ")
-            .append(getProcessesNumber(ignored.size())).append(" from the subtree:");
-          appendProcessNodes(ignored, sb);
+        if (isIgnored(p)) {
+          ignored.add(p);
+          final StringBuilder sb = new StringBuilder("The following process and it's subtree has been skipped to avoid stopping of TeamCity agent:\n").append(getProcessString(p));
           log(sb.toString(), true, listener);
+          continue;
         }
-      }
 
-      Collection<ProcessInfo> aliveProcesses;
+        try {
+          if (ProcessTreeTerminator.kill(p.getPid(), ProcessFilter.MATCH_ALL)) {
+            log("Process killed:\n" + getProcessString(p), false, listener);
+          } else {
+            logFailedToKill(p, null, listener);
+          }
+        } catch (Exception e) {
+          logFailedToKill(p, e.getMessage(), listener);
+        }
 
-      try {
-        aliveProcesses = myProcessesProvider.getLockingProcesses(f);
-      } catch (GetProcessesException e) {
-        log(e.getMessage(), true, listener);
-        return false;
-      }
+        Collection<ProcessInfo> aliveProcesses = getLockingProcesses(f, listener);
+        if (aliveProcesses == null) return false;
 
-      if (aliveProcesses.isEmpty()) {
-        return true;
-      } else {
+        List<ProcessInfo> processesLeft = new ArrayList<ProcessInfo>();
+        processesLeft.removeAll(ignored);
+
+        if (processesLeft.isEmpty()) return true;
+
         final StringBuilder sb
-          = new StringBuilder("Failed to kill locking ").append(getProcessesNumber(aliveProcesses.size())).append(" for ").append(f).append(":");
-        appendProcessInfos(aliveProcesses, sb);
+          = new StringBuilder("Failed to kill some of the ").append(StringUtil.pluralize("process", processesLeft.size())).append(" locking files in directory: ").append(f).append(":");
+        appendProcessInfos(processesLeft, sb);
         log(sb.toString(), true, listener);
         return false;
       }
@@ -148,14 +130,19 @@ public class LockedFileResolver {
     return false;
   }
 
-  @NotNull
-  private List<ProcessNode> getIgnored(@NotNull ProcessInfo processInfo) {
-    final Collection<ProcessNode> processes = ProcessTreeTerminator.getChildProcesses(processInfo.getPid(), ProcessFilter.MATCH_ALL);
-    return CollectionsUtil.filterCollection(processes, new Filter<ProcessNode>() {
-      public boolean accept(@NotNull final ProcessNode data) {
-        return myIgnoredProcesses.contains(String.valueOf(data.getPid())) || myIgnoredProcesses.contains(data.getCommandLine());
-      }
-    });
+  @Nullable
+  private Collection<ProcessInfo> getLockingProcesses(@NotNull File f, @Nullable Listener listener) {
+    try {
+      return myProcessesProvider.getLockingProcesses(f);
+    } catch (GetProcessesException e) {
+      log(e.getMessage(), true, listener);
+    }
+
+    return null;
+  }
+
+  private boolean isIgnored(@NotNull final ProcessInfo p) {
+    return myIgnoredProcesses.contains(String.valueOf(p.getPid())) || myIgnoredProcesses.contains(p.getName());
   }
 
   private void logFailedToKill(@NotNull final ProcessInfo p, @Nullable final String message, @Nullable final Listener listener) {
@@ -172,30 +159,13 @@ public class LockedFileResolver {
   public boolean resolveDelete(@NotNull File f, @Nullable Listener listener) {
     resolve(f, true, listener);
 
-    int i = 0;
-    while (i < DELETION_TRIES) {
-      if (!f.exists() || FileUtil.delete(f)) {
-        return true;
-      }
-      try {
-        Thread.sleep(10);
-      } catch (InterruptedException e) {
-        //
-      }
-      ++i;
-    }
-    return false;
+    FileUtil.delete(f, DELETION_TRIES);
+    return !f.exists();
   }
 
   private void appendProcessInfos(@NotNull Collection<ProcessInfo> processes, @NotNull StringBuilder sb) {
     for (final ProcessInfo p : processes) {
       sb.append("\n").append(getProcessString(p.getPid(), p.getName()));
-    }
-  }
-
-  private void appendProcessNodes(@NotNull Collection<ProcessNode> processes, @NotNull StringBuilder sb) {
-    for (final ProcessNode p : processes) {
-      sb.append("\n").append(getProcessString(p.getPid(), p.getCommandLine()));
     }
   }
 
@@ -207,7 +177,7 @@ public class LockedFileResolver {
   @NotNull
   private String getProcessString(@NotNull Long pid, @Nullable String name) {
     final String processDetails = myWmicProcessDetailsProvider.getProcessDetails(pid);
-    return "PID:" + pid + "\n" + (StringUtil.isEmptyOrSpaces(processDetails) ? name : processDetails);
+    return "PID: " + pid + "\n" + StringUtil.trim(StringUtil.isEmptyOrSpaces(processDetails) ? name : processDetails);
   }
 
   private void log(@NotNull String m, boolean isWarning, @Nullable Listener listener) {
@@ -218,9 +188,5 @@ public class LockedFileResolver {
       LOG.info(m);
       if (listener != null) listener.message(m);
     }
-  }
-
-  private String getProcessesNumber(int number) {
-    return number == 1 ? "process" : "processes";
   }
 }

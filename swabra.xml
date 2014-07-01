@@ -13,12 +13,10 @@
   <property name="compiler.debug" value="on"/>
   <property name="compiler.generate.no.warnings" value="off"/>
   <property name="compiler.args" value=""/>
-  <property name="compiler.max.memory" value="128m"/>
+  <property name="compiler.max.memory" value="700m"/>
   <patternset id="ignored.files">
-    <exclude name="**/CVS/**"/>
     <exclude name="**/SCCS/**"/>
     <exclude name="**/RCS/**"/>
-    <exclude name="**/rcs/**"/>
     <exclude name="**/.DS_Store/**"/>
     <exclude name="**/.svn/**"/>
     <exclude name="**/.pyc/**"/>
@@ -29,15 +27,16 @@
     <exclude name="**/*.hprof/**"/>
     <exclude name="**/_svn/**"/>
     <exclude name="**/.hg/**"/>
+    <exclude name="**/.sbas/**"/>
+    <exclude name="**/.IJI.*/**"/>
     <exclude name="**/*.lib/**"/>
     <exclude name="**/*~/**"/>
+    <exclude name="**/*.orig/**"/>
     <exclude name="**/__pycache__/**"/>
     <exclude name="**/.bundle/**"/>
     <exclude name="**/*.rbc/**"/>
-    <exclude name="**/*.orig/**"/>
   </patternset>
   <patternset id="library.patterns">
-    <include name="*.jar"/>
     <include name="*.war"/>
     <include name="*.ear"/>
     <include name="*.apk"/>
@@ -45,12 +44,12 @@
     <include name="*.swc"/>
     <include name="*.ane"/>
     <include name="*.egg"/>
+    <include name="*.jar"/>
   </patternset>
   <patternset id="compiler.resources">
     <include name="**/?*.properties"/>
     <include name="**/?*.xml"/>
     <include name="**/?*.jsp"/>
-    <include name="**/?*.jspf"/>
     <include name="**/?*.js"/>
     <include name="**/?*.gif"/>
     <include name="**/?*.png"/>
@@ -85,6 +84,8 @@
   </path>
   
   <path id="library.jmock.classpath">
+    <pathelement location="${basedir}/tests/lib/hamcrest-core-1.3.jar"/>
+    <pathelement location="${basedir}/tests/lib/hamcrest-integration-1.3.jar"/>
     <pathelement location="${basedir}/tests/lib/hamcrest-library-1.3.jar"/>
     <pathelement location="${basedir}/tests/lib/jmock-2.5.1.jar"/>
     <pathelement location="${basedir}/tests/lib/jmock-junit4-2.5.1.jar"/>
@@ -92,9 +93,6 @@
   
   <path id="library.junit.classpath">
     <pathelement location="${basedir}/tests/lib/junit-4.11.jar"/>
-    <pathelement location="${basedir}/tests/lib/hamcrest-core-1.3.jar"/>
-    <pathelement location="${basedir}/tests/lib/hamcrest-library-1.3.jar"/>
-    <pathelement location="${basedir}/tests/lib/hamcrest-integration-1.3.jar"/>
   </path>
   
   <path id="library.servlet-api.classpath">
@@ -134,6 +132,11 @@
     <pathelement location="${path.variable.teamcitydistribution}/webapps/ROOT/WEB-INF/lib/toolLoader.jar"/>
   </path>
   
+  <path id="library.teamcity-trove.classpath">
+    <pathelement location="${path.variable.teamcitydistribution}/webapps/ROOT/WEB-INF/lib/trove-3.0.3.jar"/>
+    <pathelement location="${path.variable.teamcitydistribution}/webapps/ROOT/WEB-INF/lib/trove4j.jar"/>
+  </path>
+  
   <path id="library.teamcity-util.classpath">
     <pathelement location="${path.variable.teamcitydistribution}/webapps/ROOT/WEB-INF/lib/openapi.jar"/>
     <pathelement location="${path.variable.teamcitydistribution}/webapps/ROOT/WEB-INF/lib/util.jar"/>
@@ -142,6 +145,9 @@
   <path id="library.teamcity-web.classpath">
     <pathelement location="${path.variable.teamcitydistribution}/webapps/ROOT/WEB-INF/lib/web.jar"/>
   </path>
+  
+  
+  <!-- Global Libraries -->
   
   
   <!-- Application Server Libraries -->
@@ -277,10 +283,10 @@
     <pathelement location="${agent.output.dir}"/>
     <path refid="library.devpackage-agent-api.classpath"/>
     <path refid="library.teamcity-util.classpath"/>
-    <path refid="common.runtime.production.module.classpath"/>
+    <pathelement location="${common.output.dir}"/>
+    <path refid="library.teamcity-annotations.classpath"/>
     <path refid="library.teamcity-log4j.classpath"/>
     <path refid="library.teamcity-openapi.classpath"/>
-    <path refid="library.teamcity-annotations.classpath"/>
     <path refid="library.teamcity-processesterminator.classpath"/>
     <path refid="library.teamcity-spring.classpath"/>
     <path refid="library.buildagent-agent.classpath"/>
@@ -307,10 +313,11 @@
     <pathelement location="${agent.output.dir}"/>
     <path refid="library.devpackage-agent-api.classpath"/>
     <path refid="library.teamcity-util.classpath"/>
-    <path refid="common.runtime.module.classpath"/>
+    <pathelement location="${common.testoutput.dir}"/>
+    <pathelement location="${common.output.dir}"/>
+    <path refid="library.teamcity-annotations.classpath"/>
     <path refid="library.teamcity-log4j.classpath"/>
     <path refid="library.teamcity-openapi.classpath"/>
-    <path refid="library.teamcity-annotations.classpath"/>
     <path refid="library.teamcity-processesterminator.classpath"/>
     <path refid="library.teamcity-spring.classpath"/>
     <path refid="library.buildagent-agent.classpath"/>
@@ -395,7 +402,7 @@
     <pathelement location="${server.output.dir}"/>
     <path refid="library.teamcity-util.classpath"/>
     <path refid="library.devpackage-server-api.classpath"/>
-    <path refid="common.runtime.production.module.classpath"/>
+    <pathelement location="${common.output.dir}"/>
     <path refid="library.teamcity-annotations.classpath"/>
     <path refid="library.teamcity-spring.classpath"/>
     <path refid="library.teamcity-jdom.classpath"/>
@@ -429,7 +436,8 @@
     <pathelement location="${server.output.dir}"/>
     <path refid="library.teamcity-util.classpath"/>
     <path refid="library.devpackage-server-api.classpath"/>
-    <path refid="common.runtime.module.classpath"/>
+    <pathelement location="${common.testoutput.dir}"/>
+    <pathelement location="${common.output.dir}"/>
     <path refid="library.teamcity-annotations.classpath"/>
     <path refid="library.teamcity-spring.classpath"/>
     <path refid="library.teamcity-jdom.classpath"/>
@@ -520,6 +528,7 @@
     <path refid="library.devpackage-common-api.classpath"/>
     <pathelement location="${server.output.dir}"/>
     <path refid="library.devpackage-server-api.classpath"/>
+    <path refid="library.teamcity-trove.classpath"/>
   </path>
   
   <path id="tests.runtime.production.module.classpath">
@@ -527,17 +536,25 @@
     <path refid="library.junit.classpath"/>
     <path refid="library.devpackage-agent-api.classpath"/>
     <path refid="library.teamcity-util.classpath"/>
-    <path refid="agent.runtime.production.module.classpath"/>
-    <path refid="library.jmock.classpath"/>
-    <path refid="library.teamcity-log4j.classpath"/>
-    <path refid="common.runtime.production.module.classpath"/>
+    <pathelement location="${agent.output.dir}"/>
+    <pathelement location="${common.output.dir}"/>
     <path refid="library.teamcity-annotations.classpath"/>
+    <path refid="library.teamcity-log4j.classpath"/>
+    <path refid="library.teamcity-openapi.classpath"/>
     <path refid="library.teamcity-processesterminator.classpath"/>
+    <path refid="library.teamcity-spring.classpath"/>
     <path refid="library.buildagent-agent.classpath"/>
-    <path refid="library.devpackage-tests-support.classpath"/>
     <path refid="library.devpackage-common-api.classpath"/>
-    <path refid="server.runtime.production.module.classpath"/>
+    <path refid="library.jmock.classpath"/>
+    <path refid="library.devpackage-tests-support.classpath"/>
+    <pathelement location="${server.output.dir}"/>
     <path refid="library.devpackage-server-api.classpath"/>
+    <path refid="library.teamcity-jdom.classpath"/>
+    <path refid="library.servlet-api.classpath"/>
+    <path refid="library.teamcity-web.classpath"/>
+    <path refid="library.teamcity-toolloader.classpath"/>
+    <path refid="library.teamcity-server.classpath"/>
+    <path refid="library.teamcity-trove.classpath"/>
   </path>
   
   <path id="tests.module.classpath">
@@ -559,6 +576,7 @@
     <pathelement location="${server.testoutput.dir}"/>
     <pathelement location="${server.output.dir}"/>
     <path refid="library.devpackage-server-api.classpath"/>
+    <path refid="library.teamcity-trove.classpath"/>
   </path>
   
   <path id="tests.runtime.module.classpath">
@@ -567,17 +585,28 @@
     <path refid="library.junit.classpath"/>
     <path refid="library.devpackage-agent-api.classpath"/>
     <path refid="library.teamcity-util.classpath"/>
-    <path refid="agent.runtime.module.classpath"/>
-    <path refid="library.jmock.classpath"/>
-    <path refid="library.teamcity-log4j.classpath"/>
-    <path refid="common.runtime.module.classpath"/>
+    <pathelement location="${agent.testoutput.dir}"/>
+    <pathelement location="${agent.output.dir}"/>
+    <pathelement location="${common.testoutput.dir}"/>
+    <pathelement location="${common.output.dir}"/>
     <path refid="library.teamcity-annotations.classpath"/>
+    <path refid="library.teamcity-log4j.classpath"/>
+    <path refid="library.teamcity-openapi.classpath"/>
     <path refid="library.teamcity-processesterminator.classpath"/>
+    <path refid="library.teamcity-spring.classpath"/>
     <path refid="library.buildagent-agent.classpath"/>
-    <path refid="library.devpackage-tests-support.classpath"/>
     <path refid="library.devpackage-common-api.classpath"/>
-    <path refid="server.runtime.module.classpath"/>
+    <path refid="library.jmock.classpath"/>
+    <path refid="library.devpackage-tests-support.classpath"/>
+    <pathelement location="${server.testoutput.dir}"/>
+    <pathelement location="${server.output.dir}"/>
     <path refid="library.devpackage-server-api.classpath"/>
+    <path refid="library.teamcity-jdom.classpath"/>
+    <path refid="library.servlet-api.classpath"/>
+    <path refid="library.teamcity-web.classpath"/>
+    <path refid="library.teamcity-toolloader.classpath"/>
+    <path refid="library.teamcity-server.classpath"/>
+    <path refid="library.teamcity-trove.classpath"/>
   </path>
   
   
@@ -648,10 +677,29 @@
   
   <path id="swabra.runtime.production.module.classpath">
     <pathelement location="${swabra.output.dir}"/>
-    <path refid="agent.runtime.production.module.classpath"/>
-    <path refid="common.runtime.production.module.classpath"/>
-    <path refid="server.runtime.production.module.classpath"/>
-    <path refid="tests.runtime.production.module.classpath"/>
+    <pathelement location="${agent.output.dir}"/>
+    <path refid="library.devpackage-agent-api.classpath"/>
+    <path refid="library.teamcity-util.classpath"/>
+    <pathelement location="${common.output.dir}"/>
+    <path refid="library.teamcity-annotations.classpath"/>
+    <path refid="library.teamcity-log4j.classpath"/>
+    <path refid="library.teamcity-openapi.classpath"/>
+    <path refid="library.teamcity-processesterminator.classpath"/>
+    <path refid="library.teamcity-spring.classpath"/>
+    <path refid="library.buildagent-agent.classpath"/>
+    <path refid="library.devpackage-common-api.classpath"/>
+    <pathelement location="${server.output.dir}"/>
+    <path refid="library.devpackage-server-api.classpath"/>
+    <path refid="library.teamcity-jdom.classpath"/>
+    <path refid="library.servlet-api.classpath"/>
+    <path refid="library.teamcity-web.classpath"/>
+    <path refid="library.teamcity-toolloader.classpath"/>
+    <path refid="library.teamcity-server.classpath"/>
+    <pathelement location="${tests.output.dir}"/>
+    <path refid="library.junit.classpath"/>
+    <path refid="library.jmock.classpath"/>
+    <path refid="library.devpackage-tests-support.classpath"/>
+    <path refid="library.teamcity-trove.classpath"/>
   </path>
   
   <path id="swabra.module.classpath">
@@ -669,10 +717,33 @@
   <path id="swabra.runtime.module.classpath">
     <pathelement location="${swabra.testoutput.dir}"/>
     <pathelement location="${swabra.output.dir}"/>
-    <path refid="agent.runtime.module.classpath"/>
-    <path refid="common.runtime.module.classpath"/>
-    <path refid="server.runtime.module.classpath"/>
-    <path refid="tests.runtime.module.classpath"/>
+    <pathelement location="${agent.testoutput.dir}"/>
+    <pathelement location="${agent.output.dir}"/>
+    <path refid="library.devpackage-agent-api.classpath"/>
+    <path refid="library.teamcity-util.classpath"/>
+    <pathelement location="${common.testoutput.dir}"/>
+    <pathelement location="${common.output.dir}"/>
+    <path refid="library.teamcity-annotations.classpath"/>
+    <path refid="library.teamcity-log4j.classpath"/>
+    <path refid="library.teamcity-openapi.classpath"/>
+    <path refid="library.teamcity-processesterminator.classpath"/>
+    <path refid="library.teamcity-spring.classpath"/>
+    <path refid="library.buildagent-agent.classpath"/>
+    <path refid="library.devpackage-common-api.classpath"/>
+    <pathelement location="${server.testoutput.dir}"/>
+    <pathelement location="${server.output.dir}"/>
+    <path refid="library.devpackage-server-api.classpath"/>
+    <path refid="library.teamcity-jdom.classpath"/>
+    <path refid="library.servlet-api.classpath"/>
+    <path refid="library.teamcity-web.classpath"/>
+    <path refid="library.teamcity-toolloader.classpath"/>
+    <path refid="library.teamcity-server.classpath"/>
+    <pathelement location="${tests.testoutput.dir}"/>
+    <pathelement location="${tests.output.dir}"/>
+    <path refid="library.junit.classpath"/>
+    <path refid="library.jmock.classpath"/>
+    <path refid="library.devpackage-tests-support.classpath"/>
+    <path refid="library.teamcity-trove.classpath"/>
   </path>
   
   

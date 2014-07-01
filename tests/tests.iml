@@ -21,6 +21,7 @@
     <orderEntry type="library" name="devPackage-common-api" level="project" />
     <orderEntry type="module" module-name="server" />
     <orderEntry type="library" name="devPackage-server-api" level="project" />
+    <orderEntry type="library" name="TeamCity-trove" level="project" />
   </component>
 </module>
 
