@@ -97,8 +97,7 @@ public class LockedFileResolver {
       for (final ProcessInfo p : processes) {
         if (isIgnored(p)) {
           ignored.add(p);
-          final StringBuilder sb = new StringBuilder("The following process and it's subtree has been skipped to avoid stopping of TeamCity agent:\n").append(getProcessString(p));
-          log(sb.toString(), true, listener);
+          log("The following process and it's subtree has been skipped to avoid stopping of TeamCity agent:\n" + getProcessString(p), true, listener);
           continue;
         }
 

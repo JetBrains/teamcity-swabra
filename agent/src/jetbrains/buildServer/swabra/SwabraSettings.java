@@ -17,8 +17,6 @@
 package jetbrains.buildServer.swabra;
 
 import com.intellij.openapi.util.SystemInfo;
-import java.io.File;
-import java.util.*;
 import jetbrains.buildServer.agent.AgentBuildFeature;
 import jetbrains.buildServer.agent.AgentRunningBuild;
 import jetbrains.buildServer.agent.BundledToolsRegistry;
@@ -27,6 +25,9 @@ import jetbrains.buildServer.swabra.snapshots.SwabraRules;
 import jetbrains.buildServer.util.StringUtil;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+
+import java.io.File;
+import java.util.*;
 
 /**
  * User: vbedrosova
@@ -162,7 +163,7 @@ public class SwabraSettings {
 
   @NotNull
   private List<String> getIgnoredProcesses(@Nullable String pidsStr) {
-    if (StringUtil.isEmptyOrSpaces(pidsStr)) return Arrays.asList("4"); // by default ignore pid: 4 (System)
+    if (StringUtil.isEmptyOrSpaces(pidsStr)) return Collections.emptyList();
 
     final List<String> res = new ArrayList<String>();
     for (String pid : pidsStr.split(" *[,;\n\r] *")) {
