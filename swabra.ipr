@@ -152,6 +152,7 @@
       <entry name="?*.properties" />
       <entry name="?*.xml" />
       <entry name="?*.jsp" />
+      <entry name="?*.jspf" />
       <entry name="?*.js" />
       <entry name="?*.gif" />
       <entry name="?*.png" />
