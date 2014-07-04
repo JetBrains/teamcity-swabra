@@ -222,6 +222,9 @@ public final class Swabra extends AgentLifeCycleAdapter implements PositionAware
         } else if (mySettings.isCleanupBeforeBuild()) {
           myLogger.debug("Checkout directory cleanup is performed before build");
           collectFilesInCheckoutDir(checkoutDir);
+        } else {
+          myLogger.warn("Checkout directory contains modified or deleted files.");
+          myLogger.message("Clean checkout not enforced - \"Force clean checkout if cannot restore clean directory state\" is unchecked", true);
         }
         return;
       case PENDING:
@@ -273,6 +276,12 @@ public final class Swabra extends AgentLifeCycleAdapter implements PositionAware
                    @Override
                    public void interrupted() {
                      myPropertiesProcessor.markPending(checkoutDir, mySettings.isStrict());
+                   }
+
+                   @Override
+                   public void dirtyStateDetected() {
+                     myLogger.warn("Checkout directory contains modified or deleted files.");
+                     myLogger.message("Clean checkout not enforced - \"Force clean checkout if cannot restore clean directory state\" is unchecked", true);
                    }
                  }
     );
