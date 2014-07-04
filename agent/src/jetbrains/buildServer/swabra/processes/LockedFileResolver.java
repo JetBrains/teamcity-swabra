@@ -110,22 +110,22 @@ public class LockedFileResolver {
         } catch (Exception e) {
           logFailedToKill(p, e.getMessage(), listener);
         }
-
-        Collection<ProcessInfo> aliveProcesses = getLockingProcesses(f, listener);
-        if (aliveProcesses == null) return false;
-
-        List<ProcessInfo> processesLeft = new ArrayList<ProcessInfo>();
-        processesLeft.removeAll(ignored);
-
-        if (processesLeft.isEmpty()) return true;
-
-        final StringBuilder sb
-          = new StringBuilder("Failed to kill some of the ").append(StringUtil.pluralize("process", processesLeft.size())).append(" locking files in directory: ").append(f).append(":");
-        appendProcessInfos(processesLeft, sb);
-        log(sb.toString(), true, listener);
-        return false;
       }
+
+      Collection<ProcessInfo> aliveProcesses = getLockingProcesses(f, listener);
+      if (aliveProcesses == null) return false;
+
+      List<ProcessInfo> processesLeft = new ArrayList<ProcessInfo>();
+      processesLeft.removeAll(ignored);
+
+      if (processesLeft.isEmpty()) return true;
+
+      final StringBuilder sb
+        = new StringBuilder("Failed to kill some of the ").append(StringUtil.pluralize("process", processesLeft.size())).append(" locking files in directory: ").append(f).append(":");
+      appendProcessInfos(processesLeft, sb);
+      log(sb.toString(), true, listener);
     }
+
     return false;
   }
 
