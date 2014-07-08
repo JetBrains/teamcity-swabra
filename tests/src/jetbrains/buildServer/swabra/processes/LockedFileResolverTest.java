@@ -19,6 +19,11 @@ package jetbrains.buildServer.swabra.processes;
 import com.intellij.execution.configurations.GeneralCommandLine;
 import com.intellij.openapi.util.SystemInfo;
 import com.intellij.util.Function;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.net.URISyntaxException;
+import java.util.*;
 import jetbrains.buildServer.BaseTestCase;
 import jetbrains.buildServer.ExecResult;
 import jetbrains.buildServer.SimpleCommandLineProcessRunner;
@@ -34,16 +39,11 @@ import org.hamcrest.Matcher;
 import org.jetbrains.annotations.NotNull;
 import org.jmock.Expectations;
 import org.jmock.Mockery;
+import org.jmock.internal.ExpectationBuilder;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.net.URISyntaxException;
-import java.util.*;
 
 public class LockedFileResolverTest {
   private LockedFileResolver.LockingProcessesProvider myLockingProcessesProvider;
@@ -225,7 +225,8 @@ public class LockedFileResolverTest {
       TempFiles.class,
       Function.class,
       LockedFileResolver.class,
-      ThreadUtil.class
+      ThreadUtil.class,
+      ExpectationBuilder.class
     );
 
     final String sep = System.getProperty("path.separator");
