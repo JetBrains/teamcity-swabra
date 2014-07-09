@@ -32,8 +32,8 @@
             <admin:editBuildTypeLink buildTypeId="${bt.externalId}" step="runType" cameFromUrl="${healthStatusReportUrl}"><c:out value="${bt.fullName}"/></admin:editBuildTypeLink>
           </li>
         </c:if>
-        <c:if test="${num > 3}"><a href="#" onclick="$j('#groupBuildTypes_${groupPos.index} li.hidden').toggleClass('hidden'); $j(this).hide(); return false;">view all (${num}) &raquo;</a></c:if>
       </c:forEach>
+      <c:if test="${num > 3}"><a href="#" onclick="$j('#groupBuildTypes_${groupPos.index} li.hidden').toggleClass('hidden'); $j(this).hide(); return false;">view all (${num}) &raquo;</a></c:if>
     </ul>
   </c:forEach>
 </div>
