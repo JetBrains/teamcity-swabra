@@ -44,6 +44,7 @@ import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import org.testng.IHookable;
 
 public class LockedFileResolverTest {
   private LockedFileResolver.LockingProcessesProvider myLockingProcessesProvider;
@@ -226,7 +227,8 @@ public class LockedFileResolverTest {
       Function.class,
       LockedFileResolver.class,
       ThreadUtil.class,
-      ExpectationBuilder.class
+      ExpectationBuilder.class,
+      IHookable.class
     );
 
     final String sep = System.getProperty("path.separator");
