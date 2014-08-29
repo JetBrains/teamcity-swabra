@@ -529,13 +529,6 @@
         <root url="jar://$TeamCityDistribution$/devPackage/src/openApi-source.jar!/" />
       </SOURCES>
     </library>
-    <library name="devPackage-testng">
-      <CLASSES>
-        <root url="jar://$TeamCityDistribution$/devPackage/tests/testng-6.8.jar!/" />
-      </CLASSES>
-      <JAVADOC />
-      <SOURCES />
-    </library>
     <library name="devPackage-tests-support">
       <CLASSES>
         <root url="jar://$TeamCityDistribution$/devPackage/tests/tests-support.jar!/" />

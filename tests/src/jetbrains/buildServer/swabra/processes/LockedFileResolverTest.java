@@ -24,7 +24,6 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.*;
-import jetbrains.buildServer.BaseTestCase;
 import jetbrains.buildServer.ExecResult;
 import jetbrains.buildServer.SimpleCommandLineProcessRunner;
 import jetbrains.buildServer.TempFiles;
@@ -44,7 +43,6 @@ import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-import org.testng.IHookable;
 
 public class LockedFileResolverTest {
   private LockedFileResolver.LockingProcessesProvider myLockingProcessesProvider;
@@ -219,7 +217,6 @@ public class LockedFileResolverTest {
 
   public String getCurrentClasspath() throws URISyntaxException, IOException {
     List<Class> refernceClasses = Arrays.<Class>asList(
-      BaseTestCase.class,
       getClass(),
       Assert.class,
       Matcher.class,
@@ -227,8 +224,7 @@ public class LockedFileResolverTest {
       Function.class,
       LockedFileResolver.class,
       ThreadUtil.class,
-      ExpectationBuilder.class,
-      IHookable.class
+      ExpectationBuilder.class
     );
 
     final String sep = System.getProperty("path.separator");
