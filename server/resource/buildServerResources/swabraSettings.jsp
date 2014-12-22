@@ -90,10 +90,10 @@
     style="${displayCleanupSettings or displayProcessesSettings? '' : 'display: none;'}">
   <th>Paths to monitor:  <bs:help file="Build+Files+Cleaner+(Swabra)"/></th>
   <td>
-    <props:multilineProperty name="swabra.rules" rows="5" cols="40" linkTitle="Edit paths"/>
-    <span class="grayNote">
-      Newline or comma delimited set of <strong>+|-:path</strong> rules.<br/>
-    </span>
+    <c:set var="note">
+    Newline or comma delimited set of <strong>+|-:path</strong> rules.<br/>
+    </c:set>
+    <props:multilineProperty name="swabra.rules" rows="5" cols="40" linkTitle="Edit paths" note="${note}"/>
 </tr>
 
 <tr class="noBorder" id="swabra.verbose.container"
