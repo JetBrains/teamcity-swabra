@@ -41,7 +41,7 @@ public class SwabraPropertiesProcessor extends AgentLifeCycleAdapter {
 
   private static final String SNAPSHOT_SUFFIX = ".snapshot";
 
-  private Map<String, String> myProperties;
+  private final Map<String, String> myProperties;
   private final SwabraLogger myLogger;
   private File myPropertiesFile;
 
@@ -51,6 +51,7 @@ public class SwabraPropertiesProcessor extends AgentLifeCycleAdapter {
                                    @NotNull final SwabraLogger logger) {
     agentDispatcher.addListener(this);
     myLogger = logger;
+    myProperties = new HashMap<String, String>();
   }
 
   @Override
@@ -105,7 +106,6 @@ public class SwabraPropertiesProcessor extends AgentLifeCycleAdapter {
   }
 
   private void readPropertiesNoAwait(boolean preserveFile) {
-    myProperties = new HashMap<String, String>();
     if (!myPropertiesFile.isFile()) {
       myLogger.debug("Couldn't read directories states from " + myPropertiesFile.getAbsolutePath() + ", no file present");
       return;
@@ -282,7 +282,8 @@ public class SwabraPropertiesProcessor extends AgentLifeCycleAdapter {
     mark(dir, strict ? DirectoryState.STRICT_PENDING.getName() : DirectoryState.PENDING.getName());
   }
 
-  public void setPropertiesFile(@NotNull File propertiesFile) {
-    myPropertiesFile = propertiesFile;
+  // for tests
+  public boolean isInitialized(){
+    return myCleanupFinishedSignal.getCount()==0;
   }
 }

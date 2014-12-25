@@ -54,4 +54,14 @@ public class FileInfo {
   public boolean isFile() {
     return myIsFile;
   }
+
+  @Override
+  public String toString() {
+    return "FileInfo{" +
+           "myPath='" + myPath + '\'' +
+           ", myIsFile=" + myIsFile +
+           ", myLength=" + myLength +
+           ", myLastModified=" + myLastModified +
+           '}';
+  }
 }

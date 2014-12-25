@@ -124,7 +124,7 @@ public final class Swabra extends AgentLifeCycleAdapter implements PositionAware
   }
 
   @Override
-  public void sourcesUpdated(@NotNull AgentRunningBuild runningBuild) {
+  public void sourcesUpdated( AgentRunningBuild runningBuild) {
     makeSnapshots(mySettings.getRules().getPaths());
   }
 

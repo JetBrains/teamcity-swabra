@@ -84,28 +84,6 @@ public class FilesCollectionProcessorTest extends TestCase {
   }
 
   @Test
-  public void test_added_dir_with_content() throws Exception {
-    doTest("added_dir_with_content",
-      new FileChangeInfo(FileChangeType.ADDED, "a", false),
-      new FileChangeInfo(FileChangeType.ADDED, "a/b", false),
-      new FileChangeInfo(FileChangeType.ADDED, "a/b/c", false),
-      new FileChangeInfo(FileChangeType.ADDED, "a/b/c/d", true)
-    );
-  }
-
-  @Test
-  public void test_added__several_dirs_with_content() throws Exception {
-    doTest("added_several_dirs_with_content",
-      new FileChangeInfo(FileChangeType.ADDED, "a", false),
-      new FileChangeInfo(FileChangeType.ADDED, "a/b", false),
-      new FileChangeInfo(FileChangeType.ADDED, "a/b/c", false),
-      new FileChangeInfo(FileChangeType.ADDED, "a/b/c/d", true),
-      new FileChangeInfo(FileChangeType.ADDED, "a/b/e", false),
-      new FileChangeInfo(FileChangeType.ADDED, "a/b/e/f", true)
-    );
-  }
-
-  @Test
   public void test_added_dir_followed_by_deleted() throws Exception {
     doTest("added_dir_followed_by_deleted",
       new FileChangeInfo(FileChangeType.ADDED, "a", false),

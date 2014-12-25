@@ -17,6 +17,8 @@
 package jetbrains.buildServer.swabra.snapshots.iteration;
 
 import java.io.*;
+import java.util.HashSet;
+import java.util.Set;
 import org.apache.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -37,6 +39,7 @@ public class SnapshotFilesIterator implements FilesIterator {
 
   private String myRootFolder;
   private String myCurrentDir;
+  private String mySkipDir = null;
 
   public SnapshotFilesIterator(@NotNull File snapshot) {
     mySnapshot = snapshot;
@@ -58,17 +61,31 @@ public class SnapshotFilesIterator implements FilesIterator {
     }
   }
 
+  public void skipDirectory(final FileInfo dirInfo) {
+    mySkipDir = dirInfo.getPath() + File.separator;
+  }
+
   private FileInfo processNextRecord() throws IOException {
-    String fileRecord = myReader.readLine();
-    if (fileRecord != null) {
+    String fileRecord;
+    while ((fileRecord = myReader.readLine()) != null) {
       final String path = getFilePath(fileRecord);
       final long length = getFileLength(fileRecord);
       final long lastModified = getFileLastModified(fileRecord);
 
-      if (path.endsWith("/") || path.endsWith("\\")) {
-        myCurrentDir = myRootFolder + path;
+      final boolean isDirectory = path.endsWith("/") || path.endsWith("\\");
+      final boolean skipCurrentDir = !myCurrentDir.isEmpty() && mySkipDir != null && myCurrentDir.startsWith(mySkipDir);
+      if (isDirectory) {
+        final String newDir = myRootFolder + path;
+        if (skipCurrentDir && newDir.startsWith(mySkipDir)) {
+          continue;
+        }
+        mySkipDir = null;
+        myCurrentDir = newDir;
         return new FileInfo(myCurrentDir.substring(0, myCurrentDir.length() - 1), length, lastModified, false);
       } else {
+        if (skipCurrentDir) {
+          continue;
+        }
         return new FileInfo(myCurrentDir + path, length, lastModified, true);
       }
     }
@@ -85,5 +102,9 @@ public class SnapshotFilesIterator implements FilesIterator {
     } catch (IOException e) {
       LOG.error("Error occurred when closing reader", e);
     }
+  }
+
+  public boolean isCurrent() {
+    return false;
   }
 }

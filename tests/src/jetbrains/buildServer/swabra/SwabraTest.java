@@ -529,12 +529,12 @@ public class SwabraTest extends TestCase {
         @Override
         public boolean willProcess(final FileInfo info) throws InterruptedException {
           numberFilesProcessed.incrementAndGet();
+          System.out.println(info.toString());
           latch.countDown();
-          Thread.sleep(500);
+          Thread.sleep(2000);
           return super.willProcess(info);
         }
-      },
-                                  interruptedFlag);
+      }, interruptedFlag);
 
       final BuildAgent agent = createBuildAgent(myCheckoutDir.getParentFile());
       dispatcher.getMulticaster().afterAgentConfigurationLoaded(agent);
@@ -546,7 +546,7 @@ public class SwabraTest extends TestCase {
       final Thread interruptThread = new Thread(new Runnable() {
         public void run() {
           try {
-            latch.await(10, TimeUnit.SECONDS);
+            latch.await(100, TimeUnit.SECONDS);
             dispatcher.getMulticaster().beforeBuildInterrupted(build, BuildInterruptReason.SERVER_STOP_BUILD);
           } catch (InterruptedException ignored) {
           }

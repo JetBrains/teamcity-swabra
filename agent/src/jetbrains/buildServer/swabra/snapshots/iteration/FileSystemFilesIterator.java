@@ -64,8 +64,16 @@ public class FileSystemFilesIterator implements FilesIterator {
     }
   }
 
+  public void skipDirectory(final FileInfo dirInfo) {
+    myIterators.pop();
+  }
+
   public void stopIterator() {
     // do nothing
+  }
+
+  public boolean isCurrent() {
+    return true;
   }
 
   private FileInfo processFolder(File folder) throws IOException{

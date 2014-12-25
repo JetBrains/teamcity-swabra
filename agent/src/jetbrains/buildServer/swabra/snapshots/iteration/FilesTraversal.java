@@ -17,6 +17,7 @@
 package jetbrains.buildServer.swabra.snapshots.iteration;
 
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 /**
  * User: vbedrosova
@@ -52,46 +53,47 @@ public class FilesTraversal {
     }
   }
 
-  public void traverseCompare(@NotNull FilesIterator it1,
-                              @NotNull FilesIterator it2,
+  public void traverseCompare(@NotNull FilesIterator snapshotIterator,
+                              @NotNull FilesIterator currentIterator,
                               @NotNull ComparisonProcessor processor) throws Exception {
+    assert !snapshotIterator.isCurrent() && currentIterator.isCurrent();
     try {
       processor.comparisonStarted();
 
-      FileInfo info1 = it1.getNext();
-      FileInfo info2 = it2.getNext();
+      FileInfo snapshotInfo = snapshotIterator.getNext();
+      FileInfo currentInfo = currentIterator.getNext();
 
-      while (info1 != null && info2 != null) {
-        final int comparisonResult = FilesComparator.compare(info1, info2);
+      while (snapshotInfo != null && currentInfo != null) {
+        final int comparisonResult = FilesComparator.compare(snapshotInfo, currentInfo);
         if (fileAdded(comparisonResult)) {
-          process(info2, null, FileChangeType.ADDED, processor);
-          info2 = it2.getNext();
+          processAdded(currentInfo, processor, currentIterator);
+          currentInfo = currentIterator.getNext();
         } else if (fileDeleted(comparisonResult)) {
-          process(info1, null, FileChangeType.DELETED, processor);
-          info1 = it1.getNext();
+          processDeleted(snapshotInfo, processor, snapshotIterator);
+          snapshotInfo = snapshotIterator.getNext();
         } else {
-          if (fileModified(info1, info2)) {
-            process(info1, info2, FileChangeType.MODIFIED, processor);
+          if (fileModified(snapshotInfo, currentInfo)) {
+            processModified(snapshotInfo, currentInfo, processor);
           } else {
-            process(info1, null, FileChangeType.UNCHANGED, processor);
+            processUnchanged(snapshotInfo, processor);
           }
-          info1 = it1.getNext();
-          info2 = it2.getNext();
+          snapshotInfo = snapshotIterator.getNext();
+          currentInfo = currentIterator.getNext();
         }
       }
-      while (info1 != null) {
-        process(info1, null, FileChangeType.DELETED, processor);
-        info1 = it1.getNext();
+      while (snapshotInfo != null) {
+        processDeleted(snapshotInfo, processor, snapshotIterator);
+        snapshotInfo = snapshotIterator.getNext();
       }
-      while (info2 != null) {
-        process(info2, null, FileChangeType.ADDED, processor);
-        info2 = it2.getNext();
+      while (currentInfo != null) {
+        processAdded(currentInfo, processor, currentIterator);
+        currentInfo = currentIterator.getNext();
       }
       processor.comparisonFinished();
     }
     finally {
-      it1.stopIterator();
-      it2.stopIterator();
+      snapshotIterator.stopIterator();
+      currentIterator.stopIterator();
     }
   }
 
@@ -108,22 +110,35 @@ public class FilesTraversal {
       && (was.getLength() != is.getLength() || was.getLastModified() != is.getLastModified());
   }
 
-  private static void process(FileInfo info1, FileInfo info2, FileChangeType changeType, ComparisonProcessor processor) throws InterruptedException {
-    if (processor.willProcess(info1)) {
-      switch (changeType) {
-        case ADDED:
-          processor.processAdded(info1);
-          break;
-        case DELETED:
-          processor.processDeleted(info1);
-          break;
-        case MODIFIED:
-          processor.processModified(info1, info2);
-          break;
-        case UNCHANGED:
-          processor.processUnchanged(info1);
-          break;
+  private static void processAdded(@NotNull final FileInfo currentInfo,
+                                   @NotNull final ComparisonProcessor processor,
+                                   @NotNull final FilesIterator currentIterator) throws InterruptedException {
+    if (processor.willProcess(currentInfo)) {
+      processor.processAdded(currentInfo);
+      if (!currentInfo.isFile()) {
+        currentIterator.skipDirectory(currentInfo);
       }
     }
+  }
+
+  private static void processDeleted(@NotNull final FileInfo snapshotInfo,
+                                     @NotNull final ComparisonProcessor processor,
+                                     @NotNull final FilesIterator snapshotIterator) throws InterruptedException {
+    if (processor.willProcess(snapshotInfo)) {
+      processor.processDeleted(snapshotInfo);
+      if (!snapshotInfo.isFile()) {
+        snapshotIterator.skipDirectory(snapshotInfo);
+      }
+    }
+  }
+
+  private static void processModified(@NotNull final FileInfo snapshotInfo,
+                                      @NotNull final FileInfo currentInfo,
+                                      @NotNull final ComparisonProcessor processor){
+    processor.processModified(snapshotInfo, currentInfo);
+  }
+
+  private static void processUnchanged(@NotNull final FileInfo snapshotInfo, @NotNull final ComparisonProcessor processor){
+    processor.processUnchanged(snapshotInfo);
   }
 }

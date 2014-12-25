@@ -39,7 +39,12 @@ public class FilesComparisonTest extends TestCase {
 
       new SnapshotFilesIterator(getTestData(testData + "Before.snapshot", null)),
 
-      new SnapshotFilesIterator(getTestData(testData + "After.snapshot", null)),
+      new SnapshotFilesIterator(getTestData(testData + "After.snapshot", null)){
+        @Override
+        public boolean isCurrent() {
+          return true;
+        }
+      },
 
       new FilesTraversal.ComparisonProcessor() {
 

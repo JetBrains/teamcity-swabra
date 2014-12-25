@@ -1,0 +1,8 @@
+<!DOCTYPE suite SYSTEM "http://testng.org/testng-1.0.dtd">
+<suite name="Swabra Tests">
+  <test name="Swabra Tests">
+    <classes>
+      <class name="jetbrains.buildServer.swabra.SwabraTest2"/>
+    </classes>
+  </test>
+</suite>

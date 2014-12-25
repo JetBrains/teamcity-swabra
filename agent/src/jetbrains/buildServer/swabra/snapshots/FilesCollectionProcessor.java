@@ -19,14 +19,14 @@ package jetbrains.buildServer.swabra.snapshots;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Stack;
 import java.util.concurrent.atomic.AtomicBoolean;
+import jetbrains.buildServer.agent.impl.directories.AbstractDirectoryCleanerCallback;
+import jetbrains.buildServer.agent.impl.directories.FileRemover;
 import jetbrains.buildServer.swabra.Swabra;
 import jetbrains.buildServer.swabra.SwabraLogger;
 import jetbrains.buildServer.swabra.processes.LockedFileResolver;
 import jetbrains.buildServer.swabra.snapshots.iteration.FileInfo;
 import jetbrains.buildServer.swabra.snapshots.iteration.FilesTraversal;
-import jetbrains.buildServer.util.FileUtil;
 import org.jetbrains.annotations.NotNull;
 
 /**
@@ -48,16 +48,15 @@ public class FilesCollectionProcessor implements FilesTraversal.ComparisonProces
   private int myDetectedModified;
   private int myDetectedDeleted;
 
-  private final Stack<String> myAddedDirs;
   private final List<File> myUnableToDeleteFiles;
 
   private Results myResults;
 
-  @NotNull
-  private final DeletionListener myDeletionListener;
+  @NotNull private final DeletionListener myDeletionListener;
 
-  @NotNull
-  private final AtomicBoolean myBuildInterrupted;
+  @NotNull private final AtomicBoolean myBuildInterrupted;
+
+  @NotNull private final FileRemover myFileRemover;
 
   @NotNull private final String myDir;
 
@@ -74,10 +73,10 @@ public class FilesCollectionProcessor implements FilesTraversal.ComparisonProces
     myVerbose = verbose;
     myStrictDeletion = strict;
 
-    myAddedDirs = new Stack<String>();
     myUnableToDeleteFiles = new ArrayList<File>();
 
     myDeletionListener = new DeletionListener();
+    myFileRemover = new FileRemover(new AbstractDirectoryCleanerCallback());
   }
 
   public boolean willProcess(FileInfo info) throws InterruptedException {
@@ -89,73 +88,22 @@ public class FilesCollectionProcessor implements FilesTraversal.ComparisonProces
   }
 
   public void processUnchanged(FileInfo info) {
-    deleteAddedDirs();
     ++myDetectedUnchanged;
     myLogger.debug("Detected unchanged " + info.getPath());
   }
 
   public void processModified(FileInfo info1, FileInfo info2) {
-    deleteAddedDirs();
     ++myDetectedModified;
     myLogger.warn("Detected modified " + info1.getPath());
   }
 
   public void processDeleted(FileInfo info) {
-    deleteAddedDirs();
     ++myDetectedDeleted;
     myLogger.warn("Detected deleted " + info.getPath());
   }
 
   public void processAdded(FileInfo info) {
-    deleteAddedDirs(info.getPath());
-
     final File file = new File(info.getPath());
-    if (file.isFile()) {
-      deleteObject(file);
-    } else {
-      myAddedDirs.push(info.getPath());
-    }
-  }
-
-  public void comparisonStarted() {
-    myResults = null;
-  }
-
-  public void comparisonFinished() {
-    deleteAddedDirs();
-
-    myResults = new Results(myDetectedUnchanged,
-      myDetectedNewAndDeleted, myUnableToDeleteFiles.size(),
-      myDetectedModified, myDetectedDeleted);
-
-    myDetectedUnchanged = 0;
-    myDetectedNewAndDeleted = 0;
-    myDetectedModified = 0;
-    myDetectedDeleted = 0;
-    myUnableToDeleteFiles.clear();
-  }
-
-  public Results getResults() {
-    return myResults;
-  }
-
-  private void deleteAddedDirs(String nextAdded) {
-    while (canDelete(nextAdded)) {
-      deleteObject(new File(myAddedDirs.pop()));
-    }
-  }
-
-  private void deleteAddedDirs() {
-    while (myAddedDirs.size() > 0) {
-      deleteObject(new File(myAddedDirs.pop()));
-    }
-  }
-
-  private boolean canDelete(String path) {
-    return myAddedDirs.size() > 0 && !path.startsWith(myAddedDirs.peek());
-  }
-
-  protected void deleteObject(File file) {
     if (!resolveDelete(file)) {
       myUnableToDeleteFiles.add(file);
       myLogger.warn("Detected new, unable to delete " + file.getAbsolutePath());
@@ -172,6 +120,28 @@ public class FilesCollectionProcessor implements FilesTraversal.ComparisonProces
       }
     }
   }
+
+  public void comparisonStarted() {
+    myResults = null;
+  }
+
+  public void comparisonFinished() {
+
+    myResults = new Results(myDetectedUnchanged,
+      myDetectedNewAndDeleted, myUnableToDeleteFiles.size(),
+      myDetectedModified, myDetectedDeleted);
+
+    myDetectedUnchanged = 0;
+    myDetectedNewAndDeleted = 0;
+    myDetectedModified = 0;
+    myDetectedDeleted = 0;
+    myUnableToDeleteFiles.clear();
+  }
+
+  public Results getResults() {
+    return myResults;
+  }
+
 
   private final class DeletionListener implements LockedFileResolver.Listener {
     public void message(String m) {
@@ -192,11 +162,12 @@ public class FilesCollectionProcessor implements FilesTraversal.ComparisonProces
     if (!f.exists()) {
       return true;
     }
+    if (myFileRemover.doDelete(f, false, true)) {
+      return true;
+    }
+
     if (f.isDirectory() && unableToDeleteDescendant(f)) {
       return false;
-    }
-    if (FileUtil.delete(f)) {
-      return true;
     }
     if (myLockedFileResolver != null) {
       if (myStrictDeletion) {
