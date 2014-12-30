@@ -2,7 +2,7 @@
 <suite name="Swabra Suite">
   <test name="Swabra Test" preserve-order="false">
     <classes>
-      <class name="jetbrains.buildServer.swabra.SwabraTest2"/>
+      <!--<class name="jetbrains.buildServer.swabra.SwabraTest2"/>-->
       <class name="jetbrains.buildServer.swabra.SwabraTest"/>
       <class name="jetbrains.buildServer.swabra.FilesCollectionProcessorTest"/>
       <class name="jetbrains.buildServer.swabra.FilesComparisonTest"/>
