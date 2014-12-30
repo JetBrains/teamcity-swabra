@@ -1,6 +1,8 @@
 <?xml version="1.0" encoding="ISO-8859-1"?>
 <project name="swabra-custom" basedir="." default="all">
 
+
+
   <property file="build.properties"/>
   <property name="javac2.home" value="${basedir}/lib-compile"/>
   <import file="${basedir}/swabra.xml"/>
@@ -87,6 +89,10 @@
         </fileset>
       </batchtest>
     </junit>
+    <taskdef resource="testngtasks" classpathref="tests.runtime.module.classpath"/>
+    <testng outputdir="${tests.testoutput.dir}" classpathref="tests.runtime.module.classpath" >
+      <xmlfileset file="testng.xml"/>
+    </testng>
   </target>
 
   <target name="check_failures" if="failure_found">

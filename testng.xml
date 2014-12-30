@@ -1,0 +1,16 @@
+<!DOCTYPE suite SYSTEM "http://testng.org/testng-1.0.dtd">
+<suite name="Swabra Suite">
+  <test name="Swabra Test" preserve-order="false">
+    <classes>
+      <class name="jetbrains.buildServer.swabra.SwabraTest2"/>
+      <class name="jetbrains.buildServer.swabra.SwabraTest"/>
+      <class name="jetbrains.buildServer.swabra.FilesCollectionProcessorTest"/>
+      <class name="jetbrains.buildServer.swabra.FilesComparisonTest"/>
+      <class name="jetbrains.buildServer.swabra.FileSystemFilesTraversalTest"/>
+      <class name="jetbrains.buildServer.swabra.SnapshotFilesTraversalTest"/>
+      <class name="jetbrains.buildServer.swabra.SwabraRulesTest"/>
+      <class name="jetbrains.buildServer.swabra.processes.LockedFileResolverTest"/>
+      <class name="jetbrains.buildServer.swabra.serverHealth.SwabraClashingConfigurationsDetectorTest"/>
+    </classes>
+  </test>
+</suite>

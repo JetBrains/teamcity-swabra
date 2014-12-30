@@ -82,6 +82,10 @@
   
   <path id="library.devpackage-tests-support.classpath">
     <pathelement location="${path.variable.teamcitydistribution}/devPackage/tests/tests-support.jar"/>
+    <pathelement location="${path.variable.teamcitydistribution}/devPackage/tests/jmock-1.2.0.jar"/>
+    <pathelement location="${path.variable.teamcitydistribution}/devPackage/tests/junit-3.8.2.jar"/>
+    <pathelement location="${path.variable.teamcitydistribution}/devPackage/tests/junit-4.11.jar"/>
+    <pathelement location="${path.variable.teamcitydistribution}/devPackage/tests/tests-integration.jar"/>
   </path>
   
   <path id="library.jmock.classpath">
@@ -93,7 +97,13 @@
   </path>
   
   <path id="library.junit.classpath">
-    <pathelement location="${basedir}/tests/lib/junit-4.11.jar"/>
+    <pathelement location="${basedir}/tests/lib/testng-6.8.8.jar"/>
+    <pathelement location="${basedir}/tests/lib/jcommander-1.27.jar"/>
+    <pathelement location="${basedir}/tests/lib/bsh-2.0b4.jar"/>
+    <pathelement location="${basedir}/tests/lib/aopalliance-1.0.jar"/>
+    <pathelement location="${basedir}/tests/lib/hamcrest-core-1.3.jar"/>
+    <pathelement location="${basedir}/tests/lib/guice-2.0.jar"/>
+    <pathelement location="${basedir}/tests/lib/snakeyaml-1.6.jar"/>
   </path>
   
   <path id="library.servlet-api.classpath">
@@ -165,7 +175,7 @@
     <taskdef name="javac2" classname="com.intellij.ant.Javac2" classpathref="javac2.classpath"/>
     <taskdef name="instrumentIdeaExtensions" classname="com.intellij.ant.InstrumentIdeaExtensions" classpathref="javac2.classpath"/>
   </target>
-  
+
   <!-- Modules -->
   
   
@@ -759,9 +769,9 @@
   
   <target name="compile.module.swabra" depends="compile.module.swabra.production,compile.module.swabra.tests" description="Compile module swabra"/>
   
-  <target name="compile.module.swabra.production" depends="register.custom.compilers,compile.module.agent,compile.module.common,compile.module.server,compile.module.tests" description="Compile module swabra; production classes"/>
+  <target name="compile.module.swabra.production" depends="compile.module.agent,compile.module.common,compile.module.server,compile.module.tests" description="Compile module swabra; production classes"/>
   
-  <target name="compile.module.swabra.tests" depends="register.custom.compilers,compile.module.swabra.production" description="compile module swabra; test classes" unless="skip.tests"/>
+  <target name="compile.module.swabra.tests" depends="compile.module.swabra.production" description="compile module swabra; test classes" unless="skip.tests"/>
   
   <target name="clean.module.swabra" description="cleanup module">
     <delete dir="${swabra.output.dir}"/>
