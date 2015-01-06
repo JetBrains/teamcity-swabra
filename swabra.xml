@@ -157,6 +157,9 @@
     <pathelement location="${path.variable.teamcitydistribution}/webapps/ROOT/WEB-INF/lib/web.jar"/>
   </path>
   
+  <path id="library.testng.classpath">
+    <pathelement location="${basedir}/tests/lib/testng-6.8.1.jar"/>
+  </path>
   
   <!-- Global Libraries -->
   
@@ -540,6 +543,7 @@
     <pathelement location="${server.output.dir}"/>
     <path refid="library.devpackage-server-api.classpath"/>
     <path refid="library.teamcity-trove.classpath"/>
+    <path refid="library.testng.classpath"/>
   </path>
   
   <path id="tests.runtime.production.module.classpath">
@@ -566,6 +570,7 @@
     <path refid="library.teamcity-toolloader.classpath"/>
     <path refid="library.teamcity-server.classpath"/>
     <path refid="library.teamcity-trove.classpath"/>
+    <path refid="library.testng.classpath"/>
   </path>
   
   <path id="tests.module.classpath">
@@ -588,6 +593,7 @@
     <pathelement location="${server.output.dir}"/>
     <path refid="library.devpackage-server-api.classpath"/>
     <path refid="library.teamcity-trove.classpath"/>
+    <path refid="library.testng.classpath"/>
   </path>
   
   <path id="tests.runtime.module.classpath">
@@ -618,6 +624,7 @@
     <path refid="library.teamcity-toolloader.classpath"/>
     <path refid="library.teamcity-server.classpath"/>
     <path refid="library.teamcity-trove.classpath"/>
+    <path refid="library.testng.classpath"/>
   </path>
   
   
@@ -711,6 +718,7 @@
     <path refid="library.jmock.classpath"/>
     <path refid="library.devpackage-tests-support.classpath"/>
     <path refid="library.teamcity-trove.classpath"/>
+    <path refid="library.testng.classpath"/>
   </path>
   
   <path id="swabra.module.classpath">
@@ -755,6 +763,7 @@
     <path refid="library.jmock.classpath"/>
     <path refid="library.devpackage-tests-support.classpath"/>
     <path refid="library.teamcity-trove.classpath"/>
+    <path refid="library.testng.classpath"/>
   </path>
   
   
