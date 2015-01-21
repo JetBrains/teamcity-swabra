@@ -23,7 +23,7 @@ import jetbrains.buildServer.swabra.snapshots.iteration.FilesTraversal;
 import jetbrains.buildServer.swabra.snapshots.iteration.SnapshotFilesIterator;
 import jetbrains.buildServer.util.FileUtil;
 import junit.framework.TestCase;
-import org.testng.SkipException;
+import org.junit.Assume;
 
 import static jetbrains.buildServer.swabra.TestUtil.getTestData;
 
@@ -93,8 +93,7 @@ public class FilesComparisonTest extends TestCase {
 
   @org.junit.Test
   public void test1() throws Exception {
-    if (!SystemInfo.isWindows)
-      throw new SkipException("For windows only");
+    Assume.assumeTrue("For windows only", SystemInfo.isWindows);
     runTest("filesCompare1");
   }
 
