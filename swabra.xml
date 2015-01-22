@@ -175,8 +175,8 @@
     <pathelement location="${javac2.home}/jgoodies-forms.jar"/>
   </path>
   <target name="register.custom.compilers">
-    <taskdef name="javac2" classname="com.intellij.ant.Javac2" classpathref="javac2.classpath"/>
-    <taskdef name="instrumentIdeaExtensions" classname="com.intellij.ant.InstrumentIdeaExtensions" classpathref="javac2.classpath"/>
+    <taskdef name="javac2" classname="com.intellij.ant.Javac2" classpathref="javac2.classpath" reverseloader="true"/>
+    <taskdef name="instrumentIdeaExtensions" classname="com.intellij.ant.InstrumentIdeaExtensions" classpathref="javac2.classpath" reverseloader="true"/>
   </target>
 
   <!-- Modules -->
