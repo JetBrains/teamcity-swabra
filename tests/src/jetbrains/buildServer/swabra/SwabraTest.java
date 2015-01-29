@@ -719,7 +719,9 @@ E:\TEMP\test-1307328584\checkoutDir2\dir2=pending
     for (String string : strings) {
       boolean okay = false;
       for (DirectoryMapItem item : items) {
-        okay = okay || item.getLocation().getAbsolutePath().equalsIgnoreCase(string.replace("=pending", ""));
+        final String location = item.getLocation().getAbsolutePath();
+        final String[] split = string.split("=");
+        okay = okay || split[0].equals(location);
       }
 
       assertTrue("No matching entry for " + string, okay);
@@ -733,4 +735,103 @@ E:\TEMP\test-1307328584\checkoutDir2\dir2=pending
     assertEquals(3, list.length);
 
   }
+
+  //TW-39812
+
+  public void testDontCleanExtraDirsOnAgentStart() throws IOException {
+    final File checkoutDir1 = new File(myAgentWorkDir, "checkoutDir1");
+    checkoutDir1.mkdirs();
+    final File dir2 = new File(checkoutDir1, "dir2");
+    dir2.mkdirs();
+    final File externalDir3 = myTempFiles.createTempDir();
+    externalDir3.mkdirs();
+    final EventDispatcher<AgentLifeCycleListener> dispatcher = EventDispatcher.create(AgentLifeCycleListener.class);
+
+    final List<DirectoryMapItem> items = new ArrayList<DirectoryMapItem>();
+    items.add(new DirectoryMapItem("bt1", "build1", checkoutDir1, System.currentTimeMillis(), DirectoryLifeTime.getDefault()));
+    DirectoryMapPersistance persistance = new DirectoryMapPersistanceImpl(myAgentConf, new SystemTimeService());
+    persistance.withDirectoriesMap(new DirectoryMapAction() {
+      public void action(@NotNull final DirectoryMapStructure data) {
+        for (DirectoryMapItem item : items) {
+          data.update(item);
+        }
+      }
+    });
+    final SwabraLogger swabraLogger = new SwabraLogger();
+    final SwabraPropertiesProcessor propertiesProcessor =
+      new SwabraPropertiesProcessor(dispatcher, swabraLogger, new DirectoryMapPersistanceImpl(myAgentConf, new SystemTimeService()));
+    final Swabra swabra = new Swabra(dispatcher, createSmartDirectoryCleaner(), new SwabraLogger(),
+                                     propertiesProcessor,
+                                     new BundledToolsRegistry() {
+                                       public BundledTool findTool(@NotNull final String name) {
+                                         return null;
+                                       }
+                                     });
+    final Map<String, String> firstCallParams = new HashMap<String, String>();
+    firstCallParams.put(SwabraUtil.ENABLED, SwabraUtil.BEFORE_BUILD);
+    firstCallParams.put(SwabraUtil.VERBOSE, SwabraUtil.TRUE);
+
+    // since 9.0 dir2 rule is consumed by default checkoutDir rule
+    firstCallParams.put(SwabraUtil.RULES, "-:" +checkoutDir1.getAbsolutePath() +
+                                          "\n+:dir2/\n"
+                                          + externalDir3.getAbsolutePath());
+    final StringBuilder results = new StringBuilder();
+
+    final SimpleBuildLogger logger = new BuildProgressLoggerMock(results);
+
+    propertiesProcessor.afterAgentConfigurationLoaded(myAgent);
+    propertiesProcessor.agentStarted(myAgent);
+    new WaitFor(1000){
+      @Override
+      protected boolean condition() {
+        return propertiesProcessor.isInitialized();
+      }
+    };
+    final AgentRunningBuild build = createBuild(firstCallParams, checkoutDir1, logger);
+    swabra.buildStarted(build);
+    checkoutDir1.mkdirs();
+    File file = new File(checkoutDir1, "file.txt");
+    dir2.mkdirs();
+    file.createNewFile();
+    swabra.sourcesUpdated(build);
+    swabra.afterAtrifactsPublished(build, BuildFinishedStatus.FINISHED_SUCCESS);
+    swabra.buildFinished(build, BuildFinishedStatus.FINISHED_SUCCESS);
+
+    /*
+E:\TEMP\test-1307328584\checkoutDir1=pending
+E:\TEMP\test-253694471=pending
+E:\TEMP\test-1307328584\checkoutDir2\dir2=pending
+    * */
+
+    propertiesProcessor.agentStarted(myAgent);
+    new WaitFor(1000){
+      @Override
+      protected boolean condition() {
+        return propertiesProcessor.isInitialized();
+      }
+    };
+
+    final File snapshotMap = new File(myAgentWorkDir, SwabraPropertiesProcessor.FILE_NAME);
+    final List<String> strings = FileUtil.readFile(snapshotMap);
+    boolean dir2Present = false;
+    boolean externalDirPresent = false;
+    for (String string : strings) {
+      final String location = checkoutDir1.getAbsolutePath();
+      final String[] split = string.split("=");
+      dir2Present = dir2Present || string.startsWith(dir2.getAbsolutePath());
+      externalDirPresent = externalDirPresent ||string.startsWith(externalDir3.getAbsolutePath());
+      assertTrue("No matching entry for " + string, split[2].equals(location));
+    }
+
+    assertTrue("Dir2 should be there",dir2Present);
+    assertTrue("externalDir should be there",externalDirPresent);
+
+    final File[] list = myAgentWorkDir.listFiles(new FilenameFilter() {
+      public boolean accept(final File dir, final String name) {
+        return name.endsWith(".snapshot");
+      }
+    });
+    assertEquals(2, list.length);
+  }
+
 }
