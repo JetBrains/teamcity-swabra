@@ -77,6 +77,9 @@ public class FileSystemFilesIterator implements FilesIterator {
   }
 
   private FileInfo processFolder(File folder) throws IOException{
+    if (!folder.exists()){
+      return null;
+    }
     final File[] files = folder.listFiles();
     if (files == null) {
       throw new IOException("Failed to get folder content for: " + folder);

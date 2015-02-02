@@ -31,6 +31,7 @@ import jetbrains.buildServer.swabra.processes.LockedFileResolver;
 import jetbrains.buildServer.swabra.processes.WmicProcessDetailsProvider;
 import jetbrains.buildServer.swabra.snapshots.*;
 import jetbrains.buildServer.util.EventDispatcher;
+import jetbrains.buildServer.util.FileUtil;
 import jetbrains.buildServer.util.positioning.PositionAware;
 import jetbrains.buildServer.util.positioning.PositionConstraint;
 import org.jetbrains.annotations.NotNull;
@@ -192,17 +193,17 @@ public final class Swabra extends AgentLifeCycleAdapter implements PositionAware
   }
 
   private void processDir(@NotNull File dir) {
-    if (dir.equals(mySettings.getCheckoutDir())) {
+    if (FileUtil.isAncestor(mySettings.getCheckoutDir(), dir, false)) {
       processCheckoutDir(dir);
     } else {
-      processNonCheckoutDir(dir);
+      processExternalDir(dir);
     }
   }
 
-  private void processCheckoutDir(@NotNull final File checkoutDir) {
-    final SwabraPropertiesProcessor.DirectoryState directoryState = getAndCleanDirectoryState(checkoutDir);
+  private void processCheckoutDir(@NotNull final File dir) {
+    final SwabraPropertiesProcessor.DirectoryState directoryState = getAndCleanDirectoryState(dir);
 
-    if (myRunningBuild.isCleanBuild() || !checkoutDir.isDirectory()) {
+    if (myRunningBuild.isCleanBuild() || !dir.isDirectory()) {
       myLogger.message("Clean build. No need to clean up in checkout directory ", false);
       return;
     }
@@ -213,15 +214,15 @@ public final class Swabra extends AgentLifeCycleAdapter implements PositionAware
         return;
       case CLEAN:
         if (mySettings.isStrict()) {
-          doCleanup(checkoutDir, "Checkout directory may contain newly created, modified or deleted files", myRunningBuild);
+          cleanupCheckoutDir("Checkout directory may contain newly created, modified or deleted files", myRunningBuild);
         }
         return;
       case DIRTY:
         if (mySettings.isStrict()) {
-          doCleanup(checkoutDir, "Checkout directory contains newly created, modified or deleted files", myRunningBuild);
+          cleanupCheckoutDir("Checkout directory contains newly created, modified or deleted files", myRunningBuild);
         } else if (mySettings.isCleanupBeforeBuild()) {
           myLogger.debug("Checkout directory cleanup is performed before build");
-          collectFilesInCheckoutDir(checkoutDir);
+          collectFilesInCheckoutDir(dir);
         } else {
           myLogger.warn("Checkout directory contains modified or deleted files.");
           myLogger.message("Clean checkout not enforced - \"Force clean checkout if cannot restore clean directory state\" is unchecked", true);
@@ -229,25 +230,24 @@ public final class Swabra extends AgentLifeCycleAdapter implements PositionAware
         return;
       case PENDING:
         if (mySettings.isStrict()) {
-          doCleanup(checkoutDir, "Checkout directory snapshot may contain information about newly created, modified or deleted files",
-                    myRunningBuild);
+          cleanupCheckoutDir("Checkout directory snapshot may contain information about newly created, modified or deleted files", myRunningBuild);
         } else{
           myLogger.debug("Checkout directory cleanup is performed before build");
-          collectFilesInCheckoutDir(checkoutDir);
+          collectFilesInCheckoutDir(dir);
         }
         return;
       case STRICT_PENDING:
         myLogger.debug("Checkout directory cleanup is performed before build");
-        collectFilesInCheckoutDir(checkoutDir);
+        collectFilesInCheckoutDir(dir);
         return;
       case UNKNOWN:
       default:
-        doCleanup(checkoutDir, "Checkout directory state is unknown", myRunningBuild);
+        cleanupCheckoutDir("Checkout directory state is unknown", myRunningBuild);
     }
   }
 
-  private void collectFilesInCheckoutDir(@NotNull final File checkoutDir) {
-    collectFiles(checkoutDir,
+  private void collectFilesInCheckoutDir(@NotNull final File dir) {
+    collectFiles(dir,
                  mySettings.isStrict() ?
                  new FilesCollector.CollectionResultHandler() {
                    public void success() {
@@ -255,7 +255,7 @@ public final class Swabra extends AgentLifeCycleAdapter implements PositionAware
                    }
 
                    public void error() {
-                     doCleanup(checkoutDir, "Some error occurred during checkout directory cleanup", myRunningBuild);
+                     cleanupCheckoutDir("Some error occurred during checkout directory cleanup", myRunningBuild);
                    }
 
                    public void lockedFilesDetected() {
@@ -263,19 +263,18 @@ public final class Swabra extends AgentLifeCycleAdapter implements PositionAware
                    }
 
                    public void dirtyStateDetected() {
-                     doCleanup(checkoutDir,
-                               "Checkout directory contains modified files or some files were deleted", myRunningBuild);
+                     cleanupCheckoutDir("Checkout directory contains modified files or some files were deleted", myRunningBuild);
                    }
 
                    public void interrupted() {
-                     myPropertiesProcessor.markPending(checkoutDir, checkoutDir, mySettings.isStrict());
+                     myPropertiesProcessor.markPending(dir, dir, mySettings.isStrict());
                    }
                  }
                                        :
                  new FilesCollector.SimpleCollectionResultHandler() {
                    @Override
                    public void interrupted() {
-                     myPropertiesProcessor.markPending(checkoutDir, checkoutDir, mySettings.isStrict());
+                     myPropertiesProcessor.markPending(dir, dir, mySettings.isStrict());
                    }
 
                    @Override
@@ -287,7 +286,7 @@ public final class Swabra extends AgentLifeCycleAdapter implements PositionAware
     );
   }
 
-  private void processNonCheckoutDir(@NotNull File dir) {
+  private void processExternalDir(@NotNull File dir) {
     final SwabraPropertiesProcessor.DirectoryState directoryState = getAndCleanDirectoryState(dir);
 
     switch (directoryState) {
@@ -397,8 +396,8 @@ public final class Swabra extends AgentLifeCycleAdapter implements PositionAware
     );
   }
 
-  private void doCleanup(@NotNull File checkoutDir, @Nullable final String reason, @NotNull final AgentRunningBuild build) {
-    myDirectoryCleaner.cleanFolder(checkoutDir, new SmartDirectoryCleanerCallback() {
+  private void cleanupCheckoutDir(@Nullable final String reason, @NotNull final AgentRunningBuild build) {
+    myDirectoryCleaner.cleanFolder(mySettings.getCheckoutDir(), new SmartDirectoryCleanerCallback() {
       public void logCleanStarted(File dir) {
         String message = (reason == null ? "" : reason + ". ")
           + "Need a clean checkout directory snapshot - forcing clean checkout";
