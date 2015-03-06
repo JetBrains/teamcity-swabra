@@ -104,7 +104,7 @@ public class SwabraBuildFeature extends BuildFeature {
     if (SwabraUtil.isCleanupEnabled(params) || SwabraUtil.isLockingProcessesDetectionEnabled(params)) {
       final List<String> rules = SwabraUtil.splitRules(SwabraUtil.getRules(params));
       if (!rules.isEmpty()) {
-        result.append("Paths to monitor are: ").append(SwabraUtil.getRulesStr(rules)).append("\n");
+        result.append("Paths to monitor are: ").append(SwabraUtil.getRulesStr(rules, false)).append("\n");
       }
     }
     if (SwabraUtil.isVerbose(params)) {

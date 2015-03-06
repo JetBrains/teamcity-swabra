@@ -79,7 +79,7 @@ public class FilesCollector {
 
     final List<String> rules = mySettings.getRules().getRulesForPath(dir);
     myLogger.message("Scanning directory " + dir + " for newly created, modified and deleted files comparing with snapshot " +
-      snapshot.getName() + (rules.size() == 1 ? "" : ", paths to monitor are " + SwabraUtil.getRulesStr(rules)), true);
+      snapshot.getName() + (rules.size() == 1 ? "" : ", paths to monitor are " + SwabraUtil.getRulesStr(rules, true)), true);
 
     try {
       iterateAndCollect(snapshot, dir);

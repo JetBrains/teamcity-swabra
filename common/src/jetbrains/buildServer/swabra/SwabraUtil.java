@@ -120,7 +120,7 @@ public class SwabraUtil {
   }
 
   @NotNull
-  public static String getRulesStr(@NotNull List<String> rules) {
+  public static String getRulesStr(@NotNull List<String> rules, boolean normalizeSeparators) {
     if (rules.isEmpty()) return "";
 
     final StringBuilder sb = new StringBuilder();
@@ -134,7 +134,7 @@ public class SwabraUtil {
       sb.append(" and ").append(more).append(" more path").append(more > 1 ? "s" : "");
     }
 
-    return sb.toString().replace("\\", File.separator).replace("/", File.separator);
+    return normalizeSeparators ? sb.toString().replace("\\", File.separator).replace("/", File.separator) : sb.toString();
   }
 
   private static final int RULES_TO_APPEND = 2;
