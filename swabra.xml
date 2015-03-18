@@ -159,6 +159,7 @@
   
   <path id="library.testng.classpath">
     <pathelement location="${basedir}/tests/lib/testng-6.8.1.jar"/>
+    <pathelement location="${basedir}/tests/lib/jcommander-1.47.jar"/>
   </path>
   
   <!-- Global Libraries -->

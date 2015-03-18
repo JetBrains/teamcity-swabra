@@ -94,6 +94,8 @@ public class SwabraTest2 extends BaseTestCase {
       }
     });
     mySwabraLogger = new SwabraLogger();
+    myMockery = new Mockery();
+    myAgentConf = myMockery.mock(BuildAgentConfiguration.class);
     myPropertiesProcessor = new SwabraPropertiesProcessor(myAgentDispatcher, mySwabraLogger, new DirectoryMapPersistanceImpl(myAgentConf, new SystemTimeService()));
     mySwabra = new Swabra(myAgentDispatcher, myDirectoryCleaner, mySwabraLogger, myPropertiesProcessor, emptyToolsRegistry);
 
@@ -103,10 +105,8 @@ public class SwabraTest2 extends BaseTestCase {
     mySwabraLogger.setBuildLogger(myBuildProgressLogger);
 
 
-    myMockery = new Mockery();
     myAgent = myMockery.mock(BuildAgent.class);
     myRunningBuild = myMockery.mock(AgentRunningBuild.class);
-    myAgentConf = myMockery.mock(BuildAgentConfiguration.class);
 
     myMockery.checking(new Expectations(){{
       allowing(myAgent).getConfiguration(); will(returnValue(myAgentConf));
