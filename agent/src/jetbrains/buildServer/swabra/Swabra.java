@@ -23,15 +23,18 @@ package jetbrains.buildServer.swabra;
  */
 
 import java.io.File;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.concurrent.atomic.AtomicBoolean;
 import jetbrains.buildServer.agent.*;
+import jetbrains.buildServer.agent.impl.directories.DirectoryMapDirectoriesCleaner;
 import jetbrains.buildServer.swabra.processes.HandleProcessesProvider;
 import jetbrains.buildServer.swabra.processes.LockedFileResolver;
 import jetbrains.buildServer.swabra.processes.WmicProcessDetailsProvider;
 import jetbrains.buildServer.swabra.snapshots.*;
 import jetbrains.buildServer.util.EventDispatcher;
 import jetbrains.buildServer.util.FileUtil;
+import jetbrains.buildServer.util.NamedThreadUtil;
 import jetbrains.buildServer.util.positioning.PositionAware;
 import jetbrains.buildServer.util.positioning.PositionConstraint;
 import org.jetbrains.annotations.NotNull;
@@ -51,6 +54,7 @@ public final class Swabra extends AgentLifeCycleAdapter implements PositionAware
   private final SwabraPropertiesProcessor myPropertiesProcessor;
   @NotNull
   private final BundledToolsRegistry myToolsRegistry;
+  @NotNull private final DirectoryMapDirectoriesCleaner myDirectoriesCleaner;
 //  @NotNull
 //  private ProcessTerminator myProcessTerminator;
 
@@ -71,8 +75,10 @@ public final class Swabra extends AgentLifeCycleAdapter implements PositionAware
                 @NotNull final SmartDirectoryCleaner directoryCleaner,
                 @NotNull final SwabraLogger logger,
                 @NotNull final SwabraPropertiesProcessor propertiesProcessor,
-                @NotNull final BundledToolsRegistry toolsRegistry
+                @NotNull final BundledToolsRegistry toolsRegistry,
+                @NotNull final DirectoryMapDirectoriesCleaner directoriesCleaner
                 /*,@NotNull ProcessTerminator processTerminator*/) {
+    myDirectoriesCleaner = directoriesCleaner;
     agentDispatcher.addListener(this);
     myDirectoryCleaner = directoryCleaner;
     myLogger = logger;
@@ -397,34 +403,10 @@ public final class Swabra extends AgentLifeCycleAdapter implements PositionAware
   }
 
   private void cleanupCheckoutDir(@Nullable final String reason, @NotNull final AgentRunningBuild build) {
-    myDirectoryCleaner.cleanFolder(mySettings.getCheckoutDir(), new SmartDirectoryCleanerCallback() {
-      public void logCleanStarted(File dir) {
-        String message = (reason == null ? "" : reason + ". ")
-          + "Need a clean checkout directory snapshot - forcing clean checkout";
-        myLogger.message(message, true);
-      }
-
-      public void logFailedToDeleteEmptyDirectory(File dir) {
-        myLogger.error("Failed to delete empty directory " + dir.getAbsolutePath());
-        fail();
-        build.stopBuild("Swabra cleanup failed: some files are locked");
-      }
-
-      public void logFailedToCleanFilesUnderDirectory(File dir) {
-        myLogger.error("Failed to delete files in directory " + dir.getAbsolutePath());
-        fail();
-      }
-
-      public void logFailedToCleanFile(File file) {
-        myLogger.error("Failed to delete file " + file.getAbsolutePath());
-        fail();
-      }
-
-      public void logFailedToCleanEntireFolder(File dir) {
-        myLogger.error("Failed to delete directory " + dir.getAbsolutePath());
-        fail();
-      }
-    });
+    String message = (reason == null ? "" : reason + ". ")
+                     + "Need a clean checkout directory snapshot - forcing clean checkout";
+    myLogger.message(message, true);
+    myDirectoriesCleaner.removeCheckoutDirectories(Arrays.asList(mySettings.getCheckoutDir()), true);
   }
 
   private void fail() {

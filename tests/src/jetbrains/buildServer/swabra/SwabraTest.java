@@ -18,15 +18,14 @@ package jetbrains.buildServer.swabra;
 
 import com.intellij.openapi.util.Pair;
 import com.intellij.util.WaitFor;
-import java.io.File;
-import java.io.FileWriter;
-import java.io.FilenameFilter;
-import java.io.IOException;
+import java.io.*;
 import java.util.*;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicReference;
+import jetbrains.buildServer.BaseTestCase;
 import jetbrains.buildServer.TempFiles;
 import jetbrains.buildServer.agent.*;
 import jetbrains.buildServer.agent.impl.directories.*;
@@ -35,14 +34,13 @@ import jetbrains.buildServer.util.Action;
 import jetbrains.buildServer.util.EventDispatcher;
 import jetbrains.buildServer.util.FileUtil;
 import jetbrains.buildServer.util.SystemTimeService;
-import junit.framework.Assert;
 import junit.framework.TestCase;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.jmock.Expectations;
 import org.jmock.Mockery;
 import org.jmock.integration.junit4.JUnit4Mockery;
 import org.junit.After;
-import org.junit.Before;
 
 import static jetbrains.buildServer.swabra.TestUtil.getTestData;
 import static jetbrains.buildServer.swabra.TestUtil.getTestDataPath;
@@ -61,10 +59,11 @@ public class SwabraTest extends TestCase {
   private File myCheckoutDir;
   private File myAgentWorkDir;
   private TempFiles myTempFiles;
-  private BuildAgentConfiguration myAgentConf;
+  private BuildAgentConfigurationEx myAgentConf;
   private BuildAgent myAgent;
   private Mockery myContext;
   private StringBuilder myResults;
+  private EventDispatcher<AgentLifeCycleListener> myDispatcher;
 
 
   private AgentRunningBuild createBuild(@NotNull final Map<String, String> runParams,
@@ -123,7 +122,6 @@ public class SwabraTest extends TestCase {
   }
 
   @Override
-  @Before
   public void setUp() throws Exception {
     myContext = new JUnit4Mockery();
     myTempFiles = new TempFiles();
@@ -132,7 +130,8 @@ public class SwabraTest extends TestCase {
     myCheckoutDir = new File(myAgentWorkDir, "checkout_dir");
     myCheckoutDir.mkdirs();
     myAgent = myContext.mock(BuildAgent.class);
-    myAgentConf = myContext.mock(BuildAgentConfiguration.class);
+    myDispatcher = EventDispatcher.create(AgentLifeCycleListener.class);
+    myAgentConf = myContext.mock(BuildAgentConfigurationEx.class);
     myContext.checking(new Expectations() {
       {
         allowing(myAgentConf).getCacheDirectory(with(Swabra.CACHE_KEY));
@@ -168,21 +167,39 @@ public class SwabraTest extends TestCase {
     myResults = new StringBuilder();
 
     final SimpleBuildLogger logger = new BuildProgressLoggerMock(myResults);
-    final EventDispatcher<AgentLifeCycleListener> dispatcher = EventDispatcher.create(AgentLifeCycleListener.class);
     final SwabraLogger swabraLogger = new SwabraLogger();
-    final Swabra swabra = new Swabra(dispatcher, createSmartDirectoryCleaner(), new SwabraLogger(),
-      new SwabraPropertiesProcessor(dispatcher, swabraLogger, new DirectoryMapPersistanceImpl(myAgentConf, new SystemTimeService())), new BundledToolsRegistry() {
-      public BundledTool findTool(@NotNull final String name) {
-        return null;
+    final DirectoryCleaner directoryCleaner = new DirectoryCleaner() {
+      public boolean delete(@NotNull final File f, @NotNull final DirectoryCleanerCallback callback) {
+        return false;
       }
-    }/*, new ProcessTerminator()*/);
+
+      public boolean deleteNow(@NotNull final File f, @NotNull final DirectoryCleanerCallback callback) {
+        return false;
+      }
+    };
+
+    final Swabra swabra = new Swabra(myDispatcher, createSmartDirectoryCleaner(), new SwabraLogger(),
+                                     new SwabraPropertiesProcessor(myDispatcher, swabraLogger,
+                                                                   new DirectoryMapPersistanceImpl(myAgentConf, new SystemTimeService())),
+                                     new BundledToolsRegistry() {
+
+                                       @Nullable
+                                       public BundledTool findTool(@NotNull final String name) {
+                                         return null;
+                                       }
+                                     },
+                                     new DirectoryMapDirectoriesCleanerImpl(myDispatcher,
+                                              directoryCleaner,
+                                              new DirectoryMapPersistanceImpl(myAgentConf, new SystemTimeService()),
+                                              new DirectoryMapDirtyTrackerImpl() )
+    );
 
 //    final File pttTemp = new File(TEST_DATA_PATH, "ptt");
 //    System.setProperty(ProcessTreeTerminator.TEMP_PATH_SYSTEM_PROPERTY, pttTemp.getAbsolutePath());
 
 
-    dispatcher.getMulticaster().afterAgentConfigurationLoaded(myAgent);
-    dispatcher.getMulticaster().agentStarted(myAgent);
+    myDispatcher.getMulticaster().afterAgentConfigurationLoaded(myAgent);
+    myDispatcher.getMulticaster().agentStarted(myAgent);
 
     final String checkoutDirPath = myCheckoutDir.getAbsolutePath();
 
@@ -193,7 +210,7 @@ public class SwabraTest extends TestCase {
     for (Map<String, String> param : params) {
       runParams.clear();
       runParams.putAll(param);
-      runBuild(dirName, dispatcher, build, runner, checkoutDirPath);
+      runBuild(dirName, myDispatcher, build, runner, checkoutDirPath);
       if (afterBuildActions != null) {
         afterBuildActions.run();
       }
@@ -488,10 +505,9 @@ public class SwabraTest extends TestCase {
       final StringBuilder results = new StringBuilder();
 
       final SimpleBuildLogger logger = new BuildProgressLoggerMock(results);
-      final EventDispatcher<AgentLifeCycleListener> dispatcher = EventDispatcher.create(AgentLifeCycleListener.class);
       final SwabraLogger swabraLogger = new SwabraLogger();
       final SwabraPropertiesProcessor propertiesProcessor =
-        new SwabraPropertiesProcessor(dispatcher, swabraLogger, new DirectoryMapPersistanceImpl(myAgentConf, new SystemTimeService())) {
+        new SwabraPropertiesProcessor(myDispatcher, swabraLogger, new DirectoryMapPersistanceImpl(myAgentConf, new SystemTimeService())) {
         @Override
         public DirectoryState getState(final File dir) {
           return dir.equals(myCheckoutDir) ? DirectoryState.PENDING : DirectoryState.UNKNOWN;
@@ -515,12 +531,25 @@ public class SwabraTest extends TestCase {
         }
       };
 
-      final Swabra swabra = new Swabra(dispatcher, createSmartDirectoryCleaner(), new SwabraLogger(),
+      final DirectoryCleaner directoryCleaner = new DirectoryCleaner() {
+        public boolean delete(@NotNull final File f, @NotNull final DirectoryCleanerCallback callback) {
+          return false;
+        }
+
+        public boolean deleteNow(@NotNull final File f, @NotNull final DirectoryCleanerCallback callback) {
+          return false;
+        }
+      };
+      final Swabra swabra = new Swabra(myDispatcher, createSmartDirectoryCleaner(), new SwabraLogger(),
                                        propertiesProcessor, new BundledToolsRegistry() {
         public BundledTool findTool(@NotNull final String name) {
           return null;
         }
-      }/*, new ProcessTerminator()*/);
+      }, new DirectoryMapDirectoriesCleanerImpl(myDispatcher,
+                                                directoryCleaner,
+                                                new DirectoryMapPersistanceImpl(myAgentConf, new SystemTimeService()),
+                                                new DirectoryMapDirtyTrackerImpl()
+      ));
 
       final CountDownLatch latch = new CountDownLatch(2);
       final AtomicBoolean interruptedFlag = new AtomicBoolean(false);
@@ -537,8 +566,8 @@ public class SwabraTest extends TestCase {
         }
       }, interruptedFlag);
 
-      dispatcher.getMulticaster().afterAgentConfigurationLoaded(myAgent);
-      dispatcher.getMulticaster().agentStarted(myAgent);
+      myDispatcher.getMulticaster().afterAgentConfigurationLoaded(myAgent);
+      myDispatcher.getMulticaster().agentStarted(myAgent);
 
       final Map<String, String> runParams = new HashMap<String, String>();
       final AgentRunningBuild build = createBuild(runParams, myCheckoutDir, logger);
@@ -547,7 +576,7 @@ public class SwabraTest extends TestCase {
         public void run() {
           try {
             latch.await(100, TimeUnit.SECONDS);
-            dispatcher.getMulticaster().beforeBuildInterrupted(build, BuildInterruptReason.SERVER_STOP_BUILD);
+            myDispatcher.getMulticaster().beforeBuildInterrupted(build, BuildInterruptReason.SERVER_STOP_BUILD);
           } catch (InterruptedException ignored) {
           }
         }
@@ -558,7 +587,7 @@ public class SwabraTest extends TestCase {
       map.put(SwabraUtil.ENABLED, SwabraUtil.TRUE);
       runParams.putAll(map);
 
-      dispatcher.getMulticaster().buildStarted(build);
+      myDispatcher.getMulticaster().buildStarted(build);
 
       // processed 2 of 5 files
       assertEquals(2, numberFilesProcessed.get());
@@ -669,7 +698,7 @@ public class SwabraTest extends TestCase {
     final SimpleBuildLogger logger = new BuildProgressLoggerMock(results);
 
     doWholeTest(items, new Action<Pair<Swabra, SwabraPropertiesProcessor>>() {
-      public void apply(final Pair<Swabra, SwabraPropertiesProcessor> pair)  {
+      public void apply(final Pair<Swabra, SwabraPropertiesProcessor> pair) {
         final Swabra swabra = pair.getFirst();
         final SwabraPropertiesProcessor propertiesProcessor = pair.getSecond();
         try {
@@ -685,13 +714,13 @@ public class SwabraTest extends TestCase {
             swabra.buildFinished(build, BuildFinishedStatus.FINISHED_SUCCESS);
           }
           propertiesProcessor.agentStarted(myAgent);
-          new WaitFor(1000){
+          new WaitFor(1000) {
             @Override
             protected boolean condition() {
               return propertiesProcessor.isInitialized();
             }
           };
-        } catch (Exception ex){
+        } catch (Exception ex) {
           ex.printStackTrace();
           fail(ex.toString());
         }
@@ -771,7 +800,7 @@ E:\TEMP\test-1307328584\checkoutDir2\dir2=pending
           swabra.buildFinished(build, BuildFinishedStatus.FINISHED_SUCCESS);
 
           propertiesProcessor.agentStarted(myAgent);
-          new WaitFor(1000){
+          new WaitFor(1000) {
             @Override
             protected boolean condition() {
               return propertiesProcessor.isInitialized();
@@ -804,7 +833,7 @@ E:\TEMP\test-1307328584\checkoutDir2\dir2=pending
     }
 
     assertTrue("Dir2 should be there",dir2Present);
-    assertTrue("externalDir should be there",externalDirPresent);
+    assertTrue("externalDir should be there", externalDirPresent);
 
     final File[] list = myAgentWorkDir.listFiles(new FilenameFilter() {
       public boolean accept(final File dir, final String name) {
@@ -973,10 +1002,88 @@ E:\TEMP\test-1307328584\checkoutDir2\dir2=pending
 
   }
 
+  //TW-40391
+  // The test actually checks whether swabra properly calls AgentLifeCycleAdapter#checkoutDirectoryRemoved
+  // to ensure that agent will handle clean checkout properly, if swabra cleanup fails for any reason.
+  public void testShouldRaiseCheckoutDirectoryRemovedEvent() throws Exception {
+    final Map<String, String> firstCallParams = new HashMap<String, String>();
+    firstCallParams.put(SwabraUtil.ENABLED, SwabraUtil.BEFORE_BUILD);
+    firstCallParams.put(SwabraUtil.VERBOSE, SwabraUtil.TRUE);
+    firstCallParams.put(SwabraUtil.STRICT, SwabraUtil.TRUE);
+    final Map<File, AtomicBoolean> removedCheckoutDirs = new HashMap<File, AtomicBoolean>();
+    final AtomicBoolean shouldFail = new AtomicBoolean(false);
+    final AtomicReference<String> failMessage = new AtomicReference<String>();
+    myDispatcher.addListener(new AgentLifeCycleAdapter(){
+      @Override
+      public void checkoutDirectoryRemoved(@NotNull final File checkoutDir) {
+        if (removedCheckoutDirs.get(checkoutDir) == null || !removedCheckoutDirs.get(checkoutDir).compareAndSet(false, true)) {
+          shouldFail.set(true);
+          failMessage.set("Removed unexpected dir " + checkoutDir.getAbsolutePath());
+        }
+      }
+    });
+    final File checkoutDir1 = new File(myAgentWorkDir, "checkoutDir1");
+    checkoutDir1.mkdirs();
+    final File externalDir = myTempFiles.createTempDir();
+    externalDir.mkdirs();
+    final List<DirectoryMapItem> items = new ArrayList<DirectoryMapItem>();
+    items.add(new DirectoryMapItem("bt1", "build1", checkoutDir1, System.currentTimeMillis(), DirectoryLifeTime.getDefault()));
+
+    final StringBuilder results = new StringBuilder();
+
+    final SimpleBuildLogger logger = new BuildProgressLoggerMock(results);
+    checkoutDir1.mkdirs();
+    final File file = new File(checkoutDir1, "file.txt");
+    final Random r = new Random();
+    removedCheckoutDirs.put(checkoutDir1, new AtomicBoolean(true));
+    doWholeTest(items, new Action<Pair<Swabra, SwabraPropertiesProcessor>>() {
+      public void apply(final Pair<Swabra, SwabraPropertiesProcessor> pair) {
+        try {
+          final Swabra swabra = pair.getFirst();
+          for (int i=0; i<2; i++) {
+            final AgentRunningBuild build = createBuild(firstCallParams, checkoutDir1, logger);
+            removedCheckoutDirs.get(checkoutDir1).set(false);
+            swabra.buildStarted(build);
+            checkoutDir1.mkdirs();
+            file.createNewFile();
+            swabra.sourcesUpdated(build);
+            final int arrayLength = r.nextInt(65536);
+            final char[] data = new char[arrayLength];
+            Arrays.fill(data, 'A');
+            FileUtil.writeFileAndReportErrors(file, new String(data));
+            swabra.afterAtrifactsPublished(build, BuildFinishedStatus.FINISHED_SUCCESS);
+            swabra.buildFinished(build, BuildFinishedStatus.FINISHED_SUCCESS);
+            assertTrue("step: " + (i+1), removedCheckoutDirs.get(checkoutDir1).get());
+          }
+        } catch (IOException e) {
+          e.printStackTrace();
+          fail(e.toString());
+        }
+      }
+    });
+    if (shouldFail.get()){
+      fail(failMessage.get());
+    }
+    for (final File dir : removedCheckoutDirs.keySet()) {
+      if (!removedCheckoutDirs.get(dir).get()){
+        fail(String.format("%s should have been removed!", dir.getAbsolutePath()));
+      }
+    }
+  }
+
   private void doWholeTest(final List<DirectoryMapItem> items,
                            final Action<Pair<Swabra, SwabraPropertiesProcessor>
                              > action) throws Exception {
-    final EventDispatcher<AgentLifeCycleListener> dispatcher = EventDispatcher.create(AgentLifeCycleListener.class);
+    final DirectoryCleaner directoryCleaner = new DirectoryCleaner() {
+      public boolean delete(@NotNull final File f, @NotNull final DirectoryCleanerCallback callback) {
+        final FileRemover remover = new FileRemover(callback);
+        return remover.doDelete(f, true);
+      }
+
+      public boolean deleteNow(@NotNull final File f, @NotNull final DirectoryCleanerCallback callback) {
+        return delete(f, callback);
+      }
+    };
 
     DirectoryMapPersistance persistance = new DirectoryMapPersistanceImpl(myAgentConf, new SystemTimeService());
     persistance.withDirectoriesMap(new DirectoryMapAction() {
@@ -988,14 +1095,21 @@ E:\TEMP\test-1307328584\checkoutDir2\dir2=pending
     });
     final SwabraLogger swabraLogger = new SwabraLogger();
     final SwabraPropertiesProcessor propertiesProcessor =
-      new SwabraPropertiesProcessor(dispatcher, swabraLogger, new DirectoryMapPersistanceImpl(myAgentConf, new SystemTimeService()));
-    final Swabra swabra = new Swabra(dispatcher, createSmartDirectoryCleaner(), new SwabraLogger(),
+      new SwabraPropertiesProcessor(myDispatcher, swabraLogger, new DirectoryMapPersistanceImpl(myAgentConf, new SystemTimeService()));
+    final DirectoryMapDirtyTrackerImpl dirtyTracker = new DirectoryMapDirtyTrackerImpl();
+    final Swabra swabra = new Swabra(myDispatcher, createSmartDirectoryCleaner(), new SwabraLogger(),
                                      propertiesProcessor,
                                      new BundledToolsRegistry() {
                                        public BundledTool findTool(@NotNull final String name) {
                                          return null;
                                        }
-                                     });
+                                     },
+                                     new DirectoryMapDirectoriesCleanerImpl(
+                                       myDispatcher,
+                                       directoryCleaner,
+                                       persistance,
+                                       dirtyTracker
+                                       ));
 
 
     propertiesProcessor.afterAgentConfigurationLoaded(myAgent);
