@@ -66,7 +66,7 @@
   <!--</delete>-->
   <!--</target>-->
 
-  <target name="test" depends="test-nofail, check_failures"/>
+  <target name="test" depends="test-nofail"/>
 
   <target name="test-nofail">
     <delete dir="test-reports" quiet="true"/>
@@ -75,7 +75,7 @@
     <antcall target="copy.log4j.configuration"/>
     <!--<antcall target="prepare.test.data"/>-->
 
-    <junit printsummary="on" fork="true" haltonfailure="false" haltonerror="false" failureproperty="failure_found"
+    <junit printsummary="on" fork="true" haltonfailure="false" haltonerror="false"
            showoutput="true">
       <classpath>
         <path refid="tests.runtime.module.classpath"/>
@@ -93,10 +93,6 @@
     <testng outputdir="${tests.testoutput.dir}" classpathref="tests.runtime.module.classpath" >
       <xmlfileset file="testng.xml"/>
     </testng>
-  </target>
-
-  <target name="check_failures" if="failure_found">
-    <fail message="Failures found"/>
   </target>
 
 </project>
