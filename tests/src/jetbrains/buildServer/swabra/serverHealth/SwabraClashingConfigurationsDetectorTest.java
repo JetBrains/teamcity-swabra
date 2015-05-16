@@ -16,7 +16,7 @@
 
 package jetbrains.buildServer.swabra.serverHealth;
 
-import com.intellij.util.containers.HashMap;
+import java.util.HashMap;
 import java.util.*;
 import jetbrains.buildServer.serverSide.*;
 import jetbrains.buildServer.swabra.SwabraBuildFeature;
