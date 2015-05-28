@@ -65,11 +65,12 @@ public class SwabraTest extends TestCase {
   private StringBuilder myResults;
   private EventDispatcher<AgentLifeCycleListener> myDispatcher;
 
+  private final AtomicInteger myBuildIdSequence = new AtomicInteger(100);
 
   private AgentRunningBuild createBuild(@NotNull final Map<String, String> runParams,
                                         @NotNull final File checkoutDir,
                                         @NotNull final SimpleBuildLogger logger) {
-    final AgentRunningBuild build = myContext.mock(AgentRunningBuild.class, "build" + System.currentTimeMillis());
+    final AgentRunningBuild build = myContext.mock(AgentRunningBuild.class, "build" + myBuildIdSequence.getAndIncrement());
 
     myContext.checking(new Expectations() {
       {
