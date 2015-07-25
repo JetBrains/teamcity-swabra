@@ -558,6 +558,35 @@ public class SwabraTest2 extends BaseTestCase {
     });
   }
 
+  public void modified_file_excluded_rule() throws Exception {
+    final File baseDir = new File(myCheckoutDir, "baseDir");
+    final File file = new File(baseDir, "file.txt");
+    final Map<String, String> map = mySwabraParamsRef.iterator().next();
+    map.put(SwabraUtil.RULES, String.format("-:%s/*", baseDir.getAbsolutePath()));
+    doTest(new ActionThrow<Exception>() {
+      public void apply() throws Exception {
+        baseDir.mkdir();
+        file.createNewFile();
+      }
+    }, new ActionThrow<Exception>() {
+      public void apply() throws Exception {
+        FileUtil.writeFile(file, "testData", "utf-8");
+      }
+    }, new ActionThrow<Exception>() {
+      public void apply() throws Exception {
+        final String[] lines = myBuildLog.toString().split("\\n");
+        boolean modifiedFileLogged = false;
+        for (String line : lines) {
+          if (line.endsWith("modified " + file.getAbsolutePath())){
+            modifiedFileLogged = true;
+          }
+        }
+        assertFalse(modifiedFileLogged);
+        checkResults(1, 0, 0, 0);
+      }
+    });
+  }
+
   private void checkResults(int unchanged, int modified, int added, int deleted){
     if (added == 0) {
       assertContains(myBuildLog.toString(),

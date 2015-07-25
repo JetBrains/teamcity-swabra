@@ -134,8 +134,10 @@ public class FilesTraversal {
 
   private static void processModified(@NotNull final FileInfo snapshotInfo,
                                       @NotNull final FileInfo currentInfo,
-                                      @NotNull final ComparisonProcessor processor){
-    processor.processModified(snapshotInfo, currentInfo);
+                                      @NotNull final ComparisonProcessor processor) throws InterruptedException {
+    if (processor.willProcess(snapshotInfo)) {
+      processor.processModified(snapshotInfo, currentInfo);
+    }
   }
 
   private static void processUnchanged(@NotNull final FileInfo snapshotInfo, @NotNull final ComparisonProcessor processor){
