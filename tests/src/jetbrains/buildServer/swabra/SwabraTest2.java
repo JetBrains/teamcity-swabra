@@ -20,6 +20,7 @@ import com.intellij.util.WaitFor;
 import java.io.File;
 import java.io.IOException;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicBoolean;
 import jetbrains.buildServer.BaseTestCase;
 import jetbrains.buildServer.XmlRpcHandlerManager;
 import jetbrains.buildServer.agent.*;
@@ -28,6 +29,9 @@ import jetbrains.buildServer.agent.impl.directories.*;
 import jetbrains.buildServer.agentServer.Server;
 import jetbrains.buildServer.artifacts.ArtifactDependencyInfo;
 import jetbrains.buildServer.parameters.ValueResolver;
+import jetbrains.buildServer.swabra.processes.LockedFileResolver;
+import jetbrains.buildServer.swabra.snapshots.FilesCollectionProcessor;
+import jetbrains.buildServer.swabra.snapshots.FilesCollector;
 import jetbrains.buildServer.util.*;
 import jetbrains.buildServer.vcs.VcsChangeInfo;
 import jetbrains.buildServer.vcs.VcsRoot;
@@ -585,6 +589,52 @@ public class SwabraTest2 extends BaseTestCase {
         checkResults(1, 0, 0, 0);
       }
     });
+  }
+
+  @TestFor(issues = "TW-42186")
+  public void process_empty_added_directory() throws Exception {
+    final File baseDir = new File(myCheckoutDir, "baseDir");
+    final File file = new File(baseDir, "file.txt");
+    final File newDir = new File(myCheckoutDir, ".newDir");
+    doTest(new ActionThrow<Exception>() {
+      public void apply() throws Exception {
+        baseDir.mkdir();
+        file.createNewFile();
+      }
+    }, new ActionThrow<Exception>() {
+      public void apply() throws Exception {
+        FileUtil.writeFile(file, "testData", "utf-8");
+        newDir.mkdirs();
+      }
+    }, new ActionThrow<Exception>() {
+      public void apply() throws Exception {
+        final String[] lines = myBuildLog.toString().split("\\n");
+        boolean modifiedFileLogged = false;
+        boolean deletedDirLogger = false;
+        for (String line : lines) {
+          if (line.endsWith("modified " + file.getAbsolutePath())){
+            modifiedFileLogged = true;
+          }
+          if (line.endsWith("new and deleted " + newDir.getAbsolutePath())){
+            deletedDirLogger = true;
+          }
+          assertFalse(line.contains("Detected deleted"));
+        }
+        assertTrue(modifiedFileLogged);
+        assertTrue(deletedDirLogger);
+        checkResults(1, 1, 1, 0);
+      }
+    });
+  }
+
+  public void match_directory_against_snapshot(){
+    final FilesCollectionProcessor collectionProcessor = new FilesCollectionProcessor(
+      mySwabraLogger, null, new File("E:\\Shara"), true, false, new AtomicBoolean(false));
+    final SwabraSettings settings = new SwabraSettings(myRunningBuild);
+    final FilesCollector collector = new FilesCollector(collectionProcessor, mySwabraLogger, settings);
+    final File snapshotFile = new File("E:\\Shara\\876587a1.snapshot ");
+    final File dir = new File("E:\\Shara\\c5f149413f54681c");
+    collector.collect(snapshotFile, dir, new FilesCollector.SimpleCollectionResultHandler());
   }
 
   private void checkResults(int unchanged, int modified, int added, int deleted){

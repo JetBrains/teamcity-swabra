@@ -84,16 +84,14 @@ public class FileSystemFilesIterator implements FilesIterator {
     if (files == null) {
       throw new IOException("Failed to get folder content for: " + folder);
     }
-    if (files.length > 0) {
-      final List<File> filesList = Arrays.asList(files);
-      Collections.sort(filesList, new Comparator<File>() {
-        public int compare(File o1, File o2) {
-          final int res = FilesComparator.compareByType(o1.isFile(), o2.isFile());
-          return res == 0 ? o1.getName().compareTo(o2.getName()) : res;
-        }
-      });
-      myIterators.push(filesList.iterator());
-    }
+    final List<File> filesList = Arrays.asList(files);
+    Collections.sort(filesList, new Comparator<File>() {
+      public int compare(File o1, File o2) {
+        final int res = FilesComparator.compareByType(o1.isFile(), o2.isFile());
+        return res == 0 ? o1.getName().compareTo(o2.getName()) : res;
+      }
+    });
+    myIterators.push(filesList.iterator());
     return createFileInfo(folder);
   }
 
