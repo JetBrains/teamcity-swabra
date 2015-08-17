@@ -615,6 +615,7 @@ public class SwabraTest2 extends BaseTestCase {
           if (line.endsWith("modified " + file.getAbsolutePath())){
             modifiedFileLogged = true;
           }
+
           if (line.endsWith("new and deleted " + newDir.getAbsolutePath())){
             deletedDirLogger = true;
           }
@@ -625,16 +626,6 @@ public class SwabraTest2 extends BaseTestCase {
         checkResults(1, 1, 1, 0);
       }
     });
-  }
-
-  public void match_directory_against_snapshot(){
-    final FilesCollectionProcessor collectionProcessor = new FilesCollectionProcessor(
-      mySwabraLogger, null, new File("E:\\Shara"), true, false, new AtomicBoolean(false));
-    final SwabraSettings settings = new SwabraSettings(myRunningBuild);
-    final FilesCollector collector = new FilesCollector(collectionProcessor, mySwabraLogger, settings);
-    final File snapshotFile = new File("E:\\Shara\\876587a1.snapshot ");
-    final File dir = new File("E:\\Shara\\c5f149413f54681c");
-    collector.collect(snapshotFile, dir, new FilesCollector.SimpleCollectionResultHandler());
   }
 
   private void checkResults(int unchanged, int modified, int added, int deleted){
