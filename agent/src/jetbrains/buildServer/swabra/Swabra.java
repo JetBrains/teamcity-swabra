@@ -106,9 +106,16 @@ public final class Swabra extends AgentLifeCycleAdapter implements PositionAware
     if (myRunningBuild.getInterruptReason() == null){
       myBuildInterrupted.set(false);
     }
+    myLogger.setBuildLogger(myRunningBuild.getBuildLogger());
+  }
 
-    mySettings = new SwabraSettings(runningBuild);
-    myLogger.setBuildLogger(runningBuild.getBuildLogger());
+  /**
+   * We have to calculate {@link SwabraSettings} only after effective checkout type is calculated,
+   * because it's used to resolve swabra rules.
+   */
+  @Override
+  public void checkoutModeResolved(@NotNull AgentCheckoutMode checkoutMode) {
+    mySettings = new SwabraSettings(myRunningBuild);
 
     myLogger.activityStarted();
     try {
@@ -131,7 +138,7 @@ public final class Swabra extends AgentLifeCycleAdapter implements PositionAware
   }
 
   @Override
-  public void sourcesUpdated( AgentRunningBuild runningBuild) {
+  public void sourcesUpdated(@NotNull AgentRunningBuild runningBuild) {
     makeSnapshots(mySettings.getRules().getPaths());
   }
 

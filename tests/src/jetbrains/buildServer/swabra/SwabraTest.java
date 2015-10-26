@@ -84,10 +84,8 @@ public class SwabraTest extends TestCase {
         will(returnValue(false));
         allowing(build).getSharedConfigParameters();
         will(returnValue(Collections.emptyMap()));
-        allowing(build).isCheckoutOnAgent();
-        will(returnValue(false));
-        allowing(build).isCheckoutOnServer();
-        will(returnValue(true));
+        allowing(build).getEffectiveCheckoutMode();
+        will(returnValue(AgentCheckoutMode.ON_SERVER));
         allowing(build).getInterruptReason();
         will(returnValue(null));
       }
@@ -235,6 +233,7 @@ public class SwabraTest extends TestCase {
     FileUtil.copyDir(getTestData(dirName + File.separator + BEFORE_BUILD, null), myCheckoutDir);
     FileUtil.delete(new File(checkoutDirPath + File.separator + ".svn"));
     dispatcher.getMulticaster().buildStarted(build);
+    dispatcher.getMulticaster().checkoutModeResolved(build.getEffectiveCheckoutMode());
     Thread.sleep(100);
     cleanCheckoutDir();
 
@@ -589,6 +588,7 @@ public class SwabraTest extends TestCase {
       runParams.putAll(map);
 
       myDispatcher.getMulticaster().buildStarted(build);
+      swabra.checkoutModeResolved(build.getEffectiveCheckoutMode());
 
       // processed 2 of 5 files
       assertEquals(2, numberFilesProcessed.get());
@@ -707,6 +707,7 @@ public class SwabraTest extends TestCase {
             final File folder = item.getLocation();
             final AgentRunningBuild build = createBuild(firstCallParams, folder, logger);
             swabra.buildStarted(build);
+            swabra.checkoutModeResolved(build.getEffectiveCheckoutMode());
             folder.mkdirs();
             File file = new File(folder, "file.txt");
             file.createNewFile();
@@ -792,6 +793,7 @@ E:\TEMP\test-1307328584\checkoutDir2\dir2=pending
           final SwabraPropertiesProcessor propertiesProcessor = pair.getSecond();
           final AgentRunningBuild build = createBuild(firstCallParams, checkoutDir1, logger);
           swabra.buildStarted(build);
+          swabra.checkoutModeResolved(build.getEffectiveCheckoutMode());
           checkoutDir1.mkdirs();
           File file = new File(checkoutDir1, "file.txt");
           dir2.mkdirs();
@@ -877,6 +879,7 @@ E:\TEMP\test-1307328584\checkoutDir2\dir2=pending
           final Swabra swabra = pair.getFirst();
           final AgentRunningBuild build = createBuild(swabraParams, checkoutDir1, logger);
           swabra.buildStarted(build);
+          swabra.checkoutModeResolved(build.getEffectiveCheckoutMode());
           dir2.mkdirs();
           file.createNewFile();
           swabra.sourcesUpdated(build);
@@ -886,23 +889,25 @@ E:\TEMP\test-1307328584\checkoutDir2\dir2=pending
 
           final AgentRunningBuild build2 = createBuild(swabraParams, checkoutDir1, loggerStrict);
           swabra.buildStarted(build2);
+          swabra.checkoutModeResolved(build2.getEffectiveCheckoutMode());
           dir2.mkdirs();
           file.createNewFile();
           swabra.sourcesUpdated(build2);
           file.delete();
-          swabra.afterAtrifactsPublished(build, BuildFinishedStatus.FINISHED_SUCCESS);
-          swabra.buildFinished(build, BuildFinishedStatus.FINISHED_SUCCESS);
+          swabra.afterAtrifactsPublished(build2, BuildFinishedStatus.FINISHED_SUCCESS);
+          swabra.buildFinished(build2, BuildFinishedStatus.FINISHED_SUCCESS);
 
           swabraParams.remove(SwabraUtil.STRICT);
 
           final AgentRunningBuild build3 = createBuild(swabraParams, checkoutDir1, loggerNotStrict);
           swabra.buildStarted(build3);
+          swabra.checkoutModeResolved(build3.getEffectiveCheckoutMode());
           dir2.mkdirs();
           file.createNewFile();
           swabra.sourcesUpdated(build3);
           file.delete();
-          swabra.afterAtrifactsPublished(build, BuildFinishedStatus.FINISHED_SUCCESS);
-          swabra.buildFinished(build, BuildFinishedStatus.FINISHED_SUCCESS);
+          swabra.afterAtrifactsPublished(build3, BuildFinishedStatus.FINISHED_SUCCESS);
+          swabra.buildFinished(build3, BuildFinishedStatus.FINISHED_SUCCESS);
 
         } catch (Exception e) {
           e.printStackTrace();
@@ -956,6 +961,7 @@ E:\TEMP\test-1307328584\checkoutDir2\dir2=pending
           final Swabra swabra = pair.getFirst();
           final AgentRunningBuild build = createBuild(swabraParams, checkoutDir1, logger);
           swabra.buildStarted(build);
+          swabra.checkoutModeResolved(build.getEffectiveCheckoutMode());
           file.createNewFile();
           swabra.sourcesUpdated(build);
           file.delete();
@@ -964,21 +970,23 @@ E:\TEMP\test-1307328584\checkoutDir2\dir2=pending
 
           final AgentRunningBuild build2 = createBuild(swabraParams, checkoutDir1, loggerStrict);
           swabra.buildStarted(build2);
+          swabra.checkoutModeResolved(build2.getEffectiveCheckoutMode());
           file.createNewFile();
           swabra.sourcesUpdated(build2);
           file.delete();
-          swabra.afterAtrifactsPublished(build, BuildFinishedStatus.FINISHED_SUCCESS);
-          swabra.buildFinished(build, BuildFinishedStatus.FINISHED_SUCCESS);
+          swabra.afterAtrifactsPublished(build2, BuildFinishedStatus.FINISHED_SUCCESS);
+          swabra.buildFinished(build2, BuildFinishedStatus.FINISHED_SUCCESS);
 
           swabraParams.remove(SwabraUtil.STRICT);
 
           final AgentRunningBuild build3 = createBuild(swabraParams, checkoutDir1, loggerNotStrict);
           swabra.buildStarted(build3);
+          swabra.checkoutModeResolved(build3.getEffectiveCheckoutMode());
           file.createNewFile();
           swabra.sourcesUpdated(build3);
           file.delete();
-          swabra.afterAtrifactsPublished(build, BuildFinishedStatus.FINISHED_SUCCESS);
-          swabra.buildFinished(build, BuildFinishedStatus.FINISHED_SUCCESS);
+          swabra.afterAtrifactsPublished(build3, BuildFinishedStatus.FINISHED_SUCCESS);
+          swabra.buildFinished(build3, BuildFinishedStatus.FINISHED_SUCCESS);
 
         } catch (Exception e) {
           e.printStackTrace();
@@ -1045,6 +1053,7 @@ E:\TEMP\test-1307328584\checkoutDir2\dir2=pending
             final AgentRunningBuild build = createBuild(firstCallParams, checkoutDir1, logger);
             removedCheckoutDirs.get(checkoutDir1).set(false);
             swabra.buildStarted(build);
+            swabra.checkoutModeResolved(build.getEffectiveCheckoutMode());
             checkoutDir1.mkdirs();
             file.createNewFile();
             swabra.sourcesUpdated(build);

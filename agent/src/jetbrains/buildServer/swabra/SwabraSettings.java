@@ -18,6 +18,7 @@ package jetbrains.buildServer.swabra;
 
 import com.intellij.openapi.util.SystemInfo;
 import jetbrains.buildServer.agent.AgentBuildFeature;
+import jetbrains.buildServer.agent.AgentCheckoutMode;
 import jetbrains.buildServer.agent.AgentRunningBuild;
 import jetbrains.buildServer.agent.BundledToolsRegistry;
 import jetbrains.buildServer.swabra.processes.HandlePathProvider;
@@ -81,7 +82,7 @@ public class SwabraSettings {
 
     if (params.containsKey(DEFAULT_RULES_CONFIG_PARAM)) {
       rules.addAll(SwabraUtil.splitRules(params.get(DEFAULT_RULES_CONFIG_PARAM)));
-    } else if (runningBuild.isCheckoutOnAgent()) {
+    } else if (AgentCheckoutMode.ON_AGENT == runningBuild.getEffectiveCheckoutMode()) {
       rules.addAll(Arrays.asList(DEFAULT_RULES));
     }
     myRules = new SwabraRules(myCheckoutDir, rules);

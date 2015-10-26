@@ -18,24 +18,12 @@ package jetbrains.buildServer.swabra;
 
 import com.intellij.util.WaitFor;
 import java.io.File;
-import java.io.IOException;
 import java.util.*;
-import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicReference;
 import jetbrains.buildServer.BaseTestCase;
-import jetbrains.buildServer.XmlRpcHandlerManager;
 import jetbrains.buildServer.agent.*;
-import jetbrains.buildServer.agent.impl.AgentBuildSettingsProxy;
 import jetbrains.buildServer.agent.impl.directories.*;
-import jetbrains.buildServer.agentServer.Server;
-import jetbrains.buildServer.artifacts.ArtifactDependencyInfo;
-import jetbrains.buildServer.parameters.ValueResolver;
-import jetbrains.buildServer.swabra.processes.LockedFileResolver;
-import jetbrains.buildServer.swabra.snapshots.FilesCollectionProcessor;
-import jetbrains.buildServer.swabra.snapshots.FilesCollector;
 import jetbrains.buildServer.util.*;
-import jetbrains.buildServer.vcs.VcsChangeInfo;
-import jetbrains.buildServer.vcs.VcsRoot;
-import jetbrains.buildServer.vcs.VcsRootEntry;
 import org.hamcrest.Description;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -43,6 +31,7 @@ import org.jmock.Expectations;
 import org.jmock.Mockery;
 import org.jmock.api.Action;
 import org.jmock.api.Invocation;
+import org.jmock.lib.action.CustomAction;
 import org.testng.SkipException;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
@@ -75,10 +64,9 @@ public class SwabraTest2 extends BaseTestCase {
   private StringBuilder myBuildLog;
   private Mockery myMockery;
   private BuildAgent myAgent;
+  private AtomicReference<AgentCheckoutMode> myResolvedCheckoutMode;
   private AgentRunningBuild myRunningBuild;
   private BuildAgentConfiguration myAgentConf;
-  private List<File> mySourceFiles;
-  private List<File> myAddedFiles;
 
   @BeforeMethod
   public void setUp() throws Exception {
@@ -86,6 +74,7 @@ public class SwabraTest2 extends BaseTestCase {
     final File agentWorkDir = createTempDir();
     myCheckoutDir = new File(agentWorkDir, "checkout");
     myCheckoutDir.mkdir();
+    myResolvedCheckoutMode = new AtomicReference<AgentCheckoutMode>();
     mySwabraDir = createTempDir();
     myAgentDispatcher = EventDispatcher.create(AgentLifeCycleListener.class);
     final DirectoryCleaner cleaner = new DirectoryCleaner() {
@@ -121,7 +110,11 @@ public class SwabraTest2 extends BaseTestCase {
       allowing(myRunningBuild).getCheckoutDirectory(); will(returnValue(myCheckoutDir));
       allowing(myRunningBuild).getInterruptReason(); will(returnValue(null));
       allowing(myRunningBuild).getSharedConfigParameters(); will(returnValue(Collections.emptyMap()));
-      allowing(myRunningBuild).isCheckoutOnAgent(); will(returnValue(false));
+      allowing(myRunningBuild).getEffectiveCheckoutMode(); will(new CustomAction("checkout type") {
+        public Object invoke(final Invocation invocation) throws Throwable {
+          return myResolvedCheckoutMode.get();
+        }
+      });
       allowing(myRunningBuild).getBuildLogger(); will(returnValue(myBuildProgressLogger));
       allowing(myRunningBuild).getBuildFeaturesOfType(with("swabra")); will(doAll(new Action() {
         public Object invoke(final Invocation invocation) throws Throwable {
@@ -166,8 +159,6 @@ public class SwabraTest2 extends BaseTestCase {
         return myPropertiesProcessor.isInitialized();
       }
     };
-    mySourceFiles = new ArrayList<File>();
-    myAddedFiles = new ArrayList<File>();
   }
 
   private void doTest(@Nullable final ActionThrow<Exception> preparations,
@@ -175,14 +166,26 @@ public class SwabraTest2 extends BaseTestCase {
                       @Nullable final ActionThrow<Exception> assertions) throws Exception {
     doTest(preparations, actions, assertions, true);
   }
+
   private void doTest(@Nullable final ActionThrow<Exception> preparations,
                       @Nullable final ActionThrow<Exception> actions,
                       @Nullable final ActionThrow<Exception> assertions,
                       final boolean checkForExceptions) throws Exception {
+   doTest(preparations, actions, assertions, checkForExceptions, AgentCheckoutMode.ON_SERVER);
+  }
+
+  private void doTest(@Nullable final ActionThrow<Exception> preparations,
+                      @Nullable final ActionThrow<Exception> actions,
+                      @Nullable final ActionThrow<Exception> assertions,
+                      final boolean checkForExceptions,
+                      final AgentCheckoutMode checkoutMode) throws Exception {
     mySwabra.buildStarted(myRunningBuild);
 
     if (preparations != null)
       preparations.apply();
+
+    myResolvedCheckoutMode.set(checkoutMode);
+    mySwabra.checkoutModeResolved(myResolvedCheckoutMode.get());
 
     mySwabra.sourcesUpdated(myRunningBuild);
     if (actions != null)
@@ -589,6 +592,67 @@ public class SwabraTest2 extends BaseTestCase {
         checkResults(1, 0, 0, 0);
       }
     });
+  }
+
+  /**
+   * On agent side checkout we exclude folders like .git by default
+   */
+  public void modified_file_inside_vcs_folder_on_agent_side_checkout() throws Exception {
+    final File baseDir = new File(myCheckoutDir, ".git");
+    final File file = new File(baseDir, "file.txt");
+    doTest(new ActionThrow<Exception>() {
+      public void apply() throws Exception {
+        baseDir.mkdir();
+        file.createNewFile();
+      }
+    }, new ActionThrow<Exception>() {
+      public void apply() throws Exception {
+        FileUtil.writeFile(file, "testData", "utf-8");
+      }
+    }, new ActionThrow<Exception>() {
+      public void apply() throws Exception {
+        final String[] lines = myBuildLog.toString().split("\\n");
+        boolean modifiedFileLogged = false;
+        for (String line : lines) {
+          if (line.endsWith("modified " + file.getAbsolutePath())){
+            modifiedFileLogged = true;
+          }
+        }
+        assertFalse(modifiedFileLogged);
+        checkResults(1, 0, 0, 0);
+      }
+    }, true, AgentCheckoutMode.ON_AGENT);
+  }
+
+  /**
+   * On server side checkout we should not exclude folders like .git
+   */
+  public void modified_file_inside_vcs_folder_on_server_side_checkout() throws Exception {
+    final File baseDir = new File(myCheckoutDir, ".git");
+    final File file = new File(baseDir, "file.txt");
+    doTest(new ActionThrow<Exception>() {
+      public void apply() throws Exception {
+        baseDir.mkdir();
+        file.createNewFile();
+        myResolvedCheckoutMode.set(AgentCheckoutMode.ON_SERVER);
+      }
+    }, new ActionThrow<Exception>() {
+      public void apply() throws Exception {
+        FileUtil.writeFile(file, "testData", "utf-8");
+      }
+    }, new ActionThrow<Exception>() {
+      public void apply() throws Exception {
+        final String[] lines = myBuildLog.toString().split("\\n");
+        boolean modifiedFileLogged = false;
+        for (String line : lines) {
+          if (line.endsWith("modified " + file.getAbsolutePath())){
+            modifiedFileLogged = true;
+          }
+        }
+        assertTrue(modifiedFileLogged);
+        checkResults(1, 1, 0, 0);
+      }
+    }, true, AgentCheckoutMode.ON_SERVER);
   }
 
   @TestFor(issues = "TW-42186")
