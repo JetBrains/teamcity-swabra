@@ -1,4 +1,3 @@
-<%@ page import="jetbrains.buildServer.web.openapi.healthStatus.HealthStatusItemDisplayMode" %>
 <%@ page import="jetbrains.buildServer.swabra.serverHealth.SwabraFrequentCleanCheckoutReport" %>
 <%@ include file="/include-internal.jsp" %>
 
@@ -7,7 +6,6 @@
 <jsp:useBean id="healthStatusReportUrl" type="java.lang.String" scope="request"/>
 
 <c:set var="groups" value="<%=healthStatusItem.getAdditionalData().get(SwabraFrequentCleanCheckoutReport.SWABRA_CLASHING_BUILD_TYPES)%>"/>
-<c:set var="inplaceMode" value="<%=HealthStatusItemDisplayMode.IN_PLACE%>"/>
 <style type="text/css">
   .groups ul {
     margin-top: 0.2em;
