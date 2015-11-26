@@ -179,12 +179,13 @@ public class SwabraTest2 extends BaseTestCase {
                       @Nullable final ActionThrow<Exception> assertions,
                       final boolean checkForExceptions,
                       final AgentCheckoutMode checkoutMode) throws Exception {
+    myResolvedCheckoutMode.set(checkoutMode);
+
     mySwabra.buildStarted(myRunningBuild);
 
     if (preparations != null)
       preparations.apply();
 
-    myResolvedCheckoutMode.set(checkoutMode);
 
     mySwabra.sourcesUpdated(myRunningBuild);
     if (actions != null)
