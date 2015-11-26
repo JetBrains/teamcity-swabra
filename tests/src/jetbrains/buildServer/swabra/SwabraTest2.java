@@ -185,7 +185,6 @@ public class SwabraTest2 extends BaseTestCase {
       preparations.apply();
 
     myResolvedCheckoutMode.set(checkoutMode);
-    mySwabra.checkoutModeResolved(myResolvedCheckoutMode.get());
 
     mySwabra.sourcesUpdated(myRunningBuild);
     if (actions != null)
