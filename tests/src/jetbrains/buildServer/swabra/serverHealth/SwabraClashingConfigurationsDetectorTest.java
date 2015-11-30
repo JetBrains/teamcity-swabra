@@ -18,6 +18,7 @@ package jetbrains.buildServer.swabra.serverHealth;
 
 import java.util.HashMap;
 import java.util.*;
+import jetbrains.buildServer.BuildTypeDescriptor;
 import jetbrains.buildServer.serverSide.*;
 import jetbrains.buildServer.swabra.SwabraBuildFeature;
 import jetbrains.buildServer.swabra.SwabraUtil;
@@ -267,13 +268,14 @@ public class SwabraClashingConfigurationsDetectorTest extends TestCase {
                               final boolean swabraCleanupEnabled,
                               final boolean swabraIsStrict) {
 
-    final SBuildType bt = myContext.mock(SBuildType.class, name);
+    final BuildTypeEx bt = myContext.mock(BuildTypeEx.class, name);
     myContext.checking(new Expectations() {{
       allowing(bt).getCompatibleAgents(); will(returnValue(Collections.singleton(myAgent)));
       allowing(bt).getName(); will(returnValue(name));
       allowing(bt).isEnabled(with(any(String.class))); will(returnValue(true));
       allowing(bt).getCheckoutDirectory(); will(returnValue(checkoutDir));
-      allowing(bt).getVcsSettingsHash(); will(returnValue(vcsSettingsHash));
+      allowing(bt).getCheckoutType(); will(returnValue(BuildTypeDescriptor.CheckoutType.ON_AGENT));
+      allowing(bt).getVcsRootsHash(with(any(BuildTypeDescriptor.CheckoutType.class))); will(returnValue(vcsSettingsHash));
       allowing(bt).getVcsRoots(); will(returnValue(Collections.emptyList()));
       allowing(bt).getBuildFeaturesOfType(with(SwabraBuildFeature.FEATURE_TYPE)); will(returnValue(swabraFeaturePresent ? Collections.singleton(new SBuildFeatureDescriptor() {
         @NotNull

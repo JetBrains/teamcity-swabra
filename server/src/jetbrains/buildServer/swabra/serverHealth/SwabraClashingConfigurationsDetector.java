@@ -19,6 +19,7 @@ package jetbrains.buildServer.swabra.serverHealth;
 import java.util.*;
 import jetbrains.buildServer.BuildTypeDescriptor;
 import jetbrains.buildServer.parameters.ReferencesResolverUtil;
+import jetbrains.buildServer.serverSide.BuildTypeEx;
 import jetbrains.buildServer.serverSide.SBuildType;
 import jetbrains.buildServer.util.CollectionsUtil;
 import jetbrains.buildServer.util.Converter;
@@ -104,7 +105,8 @@ public class SwabraClashingConfigurationsDetector {
     }
 
     final Map<String, Collection<SBuildType>> res = new HashMap<String, Collection<SBuildType>>();
-    for (SBuildType bt : buildTypesToProcess) {
+    for (SBuildType buildType : buildTypesToProcess) {
+      BuildTypeEx bt = (BuildTypeEx)buildType;
       Collection<SBuildType> bts;
 
       String checkoutDir = StringUtil.nullIfEmpty(bt.getCheckoutDirectory());
@@ -117,7 +119,7 @@ public class SwabraClashingConfigurationsDetector {
         //as a result, build types with auto checkout mode will be excluded from this report.
       }
 
-      final String groupKey = checkoutDir == null ? bt.getVcsSettingsHash() : checkoutDir;
+      final String groupKey = checkoutDir == null ? bt.getVcsRootsHash(bt.getCheckoutType()) : checkoutDir;
 
       bts = res.get(groupKey);
       if (bts != null) {
