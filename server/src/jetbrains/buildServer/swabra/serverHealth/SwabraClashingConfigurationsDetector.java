@@ -17,6 +17,7 @@
 package jetbrains.buildServer.swabra.serverHealth;
 
 import java.util.*;
+import jetbrains.buildServer.BuildTypeDescriptor;
 import jetbrains.buildServer.parameters.ReferencesResolverUtil;
 import jetbrains.buildServer.serverSide.SBuildType;
 import jetbrains.buildServer.util.CollectionsUtil;
@@ -106,12 +107,17 @@ public class SwabraClashingConfigurationsDetector {
     for (SBuildType bt : buildTypesToProcess) {
       Collection<SBuildType> bts;
 
-      String checkotDir = StringUtil.nullIfEmpty(bt.getCheckoutDirectory());
-      if (checkotDir != null && ReferencesResolverUtil.mayContainReference(checkotDir)) {
+      String checkoutDir = StringUtil.nullIfEmpty(bt.getCheckoutDirectory());
+      if (checkoutDir != null && ReferencesResolverUtil.mayContainReference(checkoutDir)) {
         continue;
       }
 
-      final String groupKey = checkotDir == null ? bt.getVcsSettingsHash() : checkotDir;
+      if (bt.getCheckoutType() == BuildTypeDescriptor.CheckoutType.AUTO) {
+        continue; //we don't know checkout directory for auto checkout because it's resolved on agent.
+        //as a result, build types with auto checkout mode will be excluded from this report.
+      }
+
+      final String groupKey = checkoutDir == null ? bt.getVcsSettingsHash() : checkoutDir;
 
       bts = res.get(groupKey);
       if (bts != null) {
@@ -119,7 +125,7 @@ public class SwabraClashingConfigurationsDetector {
       } else {
         bts = new ArrayList<SBuildType>();
         bts.add(bt);
-        res.put(checkotDir == null ? groupKey : checkotDir, bts);
+        res.put(groupKey, bts);
       }
     }
     return res.values();
