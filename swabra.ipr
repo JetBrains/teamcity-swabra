@@ -599,6 +599,7 @@
     <library name="TeamCity-server">
       <CLASSES>
         <root url="jar://$TeamCityDistribution$/webapps/ROOT/WEB-INF/lib/server.jar!/" />
+        <root url="jar://$teamcitydistribution$/webapps/ROOT/WEB-INF/lib/common-impl.jar!/" />
       </CLASSES>
       <JAVADOC />
       <SOURCES />
