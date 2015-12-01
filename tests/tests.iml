@@ -23,6 +23,7 @@
     <orderEntry type="library" name="devPackage-server-api" level="project" />
     <orderEntry type="library" name="TeamCity-trove" level="project" />
     <orderEntry type="library" name="TestNG" level="project" />
+    <orderEntry type="library" name="TeamCity-server" level="project" />
   </component>
 </module>
 
