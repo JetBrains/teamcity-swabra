@@ -18,12 +18,12 @@ package jetbrains.buildServer.swabra;
 
 import java.io.File;
 import java.io.FileWriter;
+import jetbrains.buildServer.BaseTestCase;
 import jetbrains.buildServer.TempFiles;
 import jetbrains.buildServer.swabra.snapshots.iteration.FileInfo;
 import jetbrains.buildServer.swabra.snapshots.iteration.FileSystemFilesIterator;
 import jetbrains.buildServer.swabra.snapshots.iteration.FilesTraversal;
 import jetbrains.buildServer.util.FileUtil;
-import junit.framework.TestCase;
 
 import static jetbrains.buildServer.swabra.TestUtil.getTestData;
 
@@ -32,33 +32,38 @@ import static jetbrains.buildServer.swabra.TestUtil.getTestData;
  * Date: 30.01.2010
  * Time: 17:40:03
  */
-public class FileSystemFilesTraversalTest extends TestCase {
+public class FileSystemFilesTraversalTest extends BaseTestCase {
   private void runTest(String resultsFileName) throws Exception {
     final FilesTraversal traversal = new FilesTraversal();
     final StringBuffer results = new StringBuffer();
 
-    final File root = new File(new TempFiles().createTempDir(), "root");
-    FileUtil.copyDir(getTestData("filesTraverse", null), root);
-    TestUtil.deleteSvnFiles(root);
+    final TempFiles tempFiles = new TempFiles();
+    try {
+      final File root = new File(tempFiles.createTempDir(), "root");
+      FileUtil.copyDir(getTestData("filesTraverse", null), root);
+      TestUtil.deleteSvnFiles(root);
 
-    traversal.traverse(new FileSystemFilesIterator(root),
-      new FilesTraversal.SimpleProcessor() {
-        public void process(FileInfo file) {
-          results.append(file.getPath()).append("\n");
-        }
-      });
+      traversal.traverse(new FileSystemFilesIterator(root),
+        new FilesTraversal.SimpleProcessor() {
+          public void process(FileInfo file) {
+            results.append(file.getPath()).append("\n");
+          }
+        });
 
-    final File goldFile = getTestData(resultsFileName + ".gold", null);
-    final String resultsFile = goldFile.getAbsolutePath().replace(".gold", ".tmp");
+      final File goldFile = getTestData(resultsFileName + ".gold", null);
+      final String resultsFile = goldFile.getAbsolutePath().replace(".gold", ".tmp");
 
-    final String actual = results.toString().trim().replace(root.getAbsolutePath(), "##ROOT##").replace("/", "\\");
-    final String expected = FileUtil.readText(goldFile).trim();
-    if (!actual.equals(expected)) {
-      final FileWriter resultsWriter = new FileWriter(resultsFile);
-      resultsWriter.write(actual);
-      resultsWriter.close();
+      final String actual = results.toString().trim().replace(root.getAbsolutePath(), "##ROOT##").replace("/", "\\");
+      final String expected = FileUtil.readText(goldFile).trim();
+      if (!actual.equals(expected)) {
+        final FileWriter resultsWriter = new FileWriter(resultsFile);
+        resultsWriter.write(actual);
+        resultsWriter.close();
 
-      assertEquals(actual, expected, actual);
+        assertEquals(actual, expected, actual);
+      }
+    } finally {
+      tempFiles.cleanup();
     }
   }
 
