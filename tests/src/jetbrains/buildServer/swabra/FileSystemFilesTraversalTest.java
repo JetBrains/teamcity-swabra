@@ -18,12 +18,12 @@ package jetbrains.buildServer.swabra;
 
 import java.io.File;
 import java.io.FileWriter;
-import jetbrains.buildServer.BaseTestCase;
 import jetbrains.buildServer.TempFiles;
 import jetbrains.buildServer.swabra.snapshots.iteration.FileInfo;
 import jetbrains.buildServer.swabra.snapshots.iteration.FileSystemFilesIterator;
 import jetbrains.buildServer.swabra.snapshots.iteration.FilesTraversal;
 import jetbrains.buildServer.util.FileUtil;
+import junit.framework.TestCase;
 
 import static jetbrains.buildServer.swabra.TestUtil.getTestData;
 
@@ -32,7 +32,7 @@ import static jetbrains.buildServer.swabra.TestUtil.getTestData;
  * Date: 30.01.2010
  * Time: 17:40:03
  */
-public class FileSystemFilesTraversalTest extends BaseTestCase {
+public class FileSystemFilesTraversalTest extends TestCase {
   private void runTest(String resultsFileName) throws Exception {
     final FilesTraversal traversal = new FilesTraversal();
     final StringBuffer results = new StringBuffer();
