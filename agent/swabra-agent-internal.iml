@@ -9,7 +9,7 @@
     <content url="file://$MODULE_DIR$">
       <sourceFolder url="file://$MODULE_DIR$/src" isTestSource="false" />
     </content>
-    <orderEntry type="inheritedJdk" />
+    <orderEntry type="jdk" jdkName="1.6" jdkType="JavaSDK" />
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="module" module-name="swabra-common-internal" />
     <orderEntry type="module" module-name="agent-openapi" />
@@ -19,4 +19,3 @@
     <orderEntry type="module" module-name="agent" />
   </component>
 </module>
-
