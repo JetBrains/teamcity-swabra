@@ -635,6 +635,7 @@
     <library name="TestNG">
       <CLASSES>
         <root url="jar://$PROJECT_DIR$/tests/lib/testng-6.8.1.jar!/" />
+        <root url="jar://$PROJECT_DIR$/tests/lib/jcommander-1.47.jar!/" />
       </CLASSES>
       <JAVADOC />
       <SOURCES />
