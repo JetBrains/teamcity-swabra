@@ -19,34 +19,66 @@ package jetbrains.buildServer.swabra;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Collection;
+import java.util.Collections;
 import jetbrains.buildServer.serverSide.AgentToolManager;
 import jetbrains.buildServer.serverSide.ServerPaths;
+import jetbrains.buildServer.tools.ToolProvider;
+import jetbrains.buildServer.tools.ToolType;
+import jetbrains.buildServer.tools.ToolVersion;
 import jetbrains.buildServer.util.ArchiveUtil;
 import jetbrains.buildServer.util.FileUtil;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 /**
  * User: vbedrosova
  * Date: 26.02.2010
  * Time: 15:48:35
  */
-public class HandleProvider {
+public class HandleProvider implements ToolProvider {
   private static final org.apache.log4j.Logger LOG = org.apache.log4j.Logger.getLogger(HandleProvider.class.getName());
-
   private static final String HANDLE_TOOL = "SysinternalsHandle";
 
-  @NotNull
-  private final ServerPaths myServerPaths;
-  
-  @NotNull
-  private final AgentToolManager myToolManager;
+  @NotNull private final ServerPaths myServerPaths;
+  @NotNull private final AgentToolManager myToolManager;
+  private HandleTool myHandleTool;
 
   public HandleProvider(@NotNull final ServerPaths paths,
-                        @NotNull final AgentToolManager toolManager) {
+                        @NotNull final AgentToolManager toolManager,
+                        @NotNull final HandleTool handleTool) {
     myServerPaths = paths;
     myToolManager = toolManager;
+    myHandleTool = handleTool;
 
     convertOldHandlePlugin();
+  }
+
+  @NotNull
+  @Override
+  public ToolType getType() {
+    return myHandleTool;
+  }
+
+  @NotNull
+  @Override
+  public Collection<ToolVersion> getInstalledToolVersions() {
+    if(myToolManager.isToolRegistered(HANDLE_TOOL))
+      return Collections.singletonList(new ToolVersion() {
+        @NotNull
+        @Override
+        public ToolType getType() {
+          return myHandleTool;
+        }
+
+        @Nullable
+        @Override
+        public String getVersion() {
+          return null;
+        }
+      });
+    else
+      return Collections.emptyList();
   }
 
   public boolean isHandlePresent() {
