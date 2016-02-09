@@ -26,6 +26,7 @@ import java.io.File;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.concurrent.atomic.AtomicBoolean;
+import jetbrains.buildServer.TeamCityRuntimeException;
 import jetbrains.buildServer.agent.*;
 import jetbrains.buildServer.agent.impl.directories.DirectoryMapDirectoriesCleaner;
 import jetbrains.buildServer.swabra.processes.HandleProcessesProvider;
@@ -34,11 +35,13 @@ import jetbrains.buildServer.swabra.processes.WmicProcessDetailsProvider;
 import jetbrains.buildServer.swabra.snapshots.*;
 import jetbrains.buildServer.util.EventDispatcher;
 import jetbrains.buildServer.util.FileUtil;
-import jetbrains.buildServer.util.NamedThreadUtil;
+import jetbrains.buildServer.util.StringUtil;
 import jetbrains.buildServer.util.positioning.PositionAware;
 import jetbrains.buildServer.util.positioning.PositionConstraint;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+
+import static jetbrains.buildServer.agent.AgentRuntimeProperties.FAIL_ON_CLEAN_CHECKOUT;
 
 
 public final class Swabra extends AgentLifeCycleAdapter implements PositionAware {
@@ -402,9 +405,13 @@ public final class Swabra extends AgentLifeCycleAdapter implements PositionAware
     );
   }
 
-  private void cleanupCheckoutDir(@Nullable final String reason, @NotNull final AgentRunningBuild build) {
-    String message = (reason == null ? "" : reason + ". ")
-                     + "Need a clean checkout directory snapshot - forcing clean checkout";
+  private void cleanupCheckoutDir(@NotNull final String reason, @NotNull final AgentRunningBuild build) {
+
+    if (cleanupIsDisabled(reason, build)) {
+      return;
+    }
+
+    String message = reason + ". Need a clean checkout directory snapshot - forcing clean checkout";
     myLogger.message(message, true);
     myDirectoriesCleaner.removeCheckoutDirectories(Arrays.asList(mySettings.getCheckoutDir()), true);
   }
@@ -416,4 +423,34 @@ public final class Swabra extends AgentLifeCycleAdapter implements PositionAware
     mySettings.setCleanupEnabled(false);
     myLogger.failBuild();
   }
+
+
+  private boolean cleanupIsDisabled(final @NotNull String reason, final @NotNull AgentRunningBuild build) {
+    final String failOnCleanCheckoutProperty = build.getSharedConfigParameters().get(FAIL_ON_CLEAN_CHECKOUT);
+    final boolean shouldIgnoreCleanCheckout = "ignoreAndContinue".equals(failOnCleanCheckoutProperty);
+
+    if (StringUtil.isTrue(failOnCleanCheckoutProperty)) {
+      final String errorMessage = String.format(FAIL_ON_CLEAN_LOG_MESSAGE, reason);
+      myLogger.error(errorMessage);
+      throw new TeamCityRuntimeException("Clean checkout is requested by Swabra but is not allowed");
+    }
+
+    if (shouldIgnoreCleanCheckout) {
+      myLogger.warn(String.format(IGNORE_CLEAN_CHECKOUT_MESSAGE, reason));
+      return true;
+    }
+
+    return false;
+  }
+
+  private static final String FAIL_ON_CLEAN_LOG_MESSAGE = "The checkout directory should be cleaned by Swabra plugin, reason: '%s',\n" +
+                                                          "but clean checkout was disabled by the option " + FAIL_ON_CLEAN_CHECKOUT + ".\n" +
+                                                          "When checkout directory state is reviewed and corrected,\n" +
+                                                          "run build on this build agent with configuration parameter " + FAIL_ON_CLEAN_CHECKOUT + "=ignoreAndContinue\n" +
+                                                          "Alternatively, you can cleanup checkout directory or enforce clean checkout on this agent from TeamCity UI.";
+
+  private static final String IGNORE_CLEAN_CHECKOUT_MESSAGE = "Clean checkout is initiated by Swabra plugin due to: '%s',\n" +
+                                                              "but it was disabled with " +
+                                                              FAIL_ON_CLEAN_CHECKOUT + "=ignoreAndContinue configuration parameter,\n" +
+                                                              "skip clean checkout and continue";
 }
