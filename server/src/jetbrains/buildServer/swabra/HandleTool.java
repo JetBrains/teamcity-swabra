@@ -28,7 +28,7 @@ public class HandleTool extends ToolTypeExtension {
   @Override
   @NotNull
   public String getType() {
-    return "SysinternalsHandle";
+    return "handleTool";
   }
 
   @Override
