@@ -25,9 +25,10 @@ import org.jetbrains.annotations.NotNull;
  * Time: 16:38
  */
 public class HandleTool extends ToolTypeExtension {
+  @Override
   @NotNull
   public String getType() {
-    return "handleTool";
+    return "SysinternalsHandle";
   }
 
   @Override

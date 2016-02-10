@@ -29,7 +29,6 @@ import jetbrains.buildServer.tools.ToolVersion;
 import jetbrains.buildServer.util.ArchiveUtil;
 import jetbrains.buildServer.util.FileUtil;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 /**
  * User: vbedrosova
@@ -64,19 +63,7 @@ public class HandleProvider implements ToolProvider {
   @Override
   public Collection<ToolVersion> getInstalledToolVersions() {
     if(myToolManager.isToolRegistered(HANDLE_TOOL))
-      return Collections.singletonList(new ToolVersion() {
-        @NotNull
-        @Override
-        public ToolType getType() {
-          return myHandleTool;
-        }
-
-        @Nullable
-        @Override
-        public String getVersion() {
-          return null;
-        }
-      });
+      return Collections.singletonList(new ToolVersion(myHandleTool, null));
     else
       return Collections.emptyList();
   }
