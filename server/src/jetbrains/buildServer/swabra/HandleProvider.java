@@ -29,6 +29,7 @@ import jetbrains.buildServer.tools.ToolVersion;
 import jetbrains.buildServer.util.ArchiveUtil;
 import jetbrains.buildServer.util.FileUtil;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 /**
  * User: vbedrosova
@@ -41,7 +42,7 @@ public class HandleProvider implements ToolProvider {
 
   @NotNull private final ServerPaths myServerPaths;
   @NotNull private final AgentToolManager myToolManager;
-  private HandleTool myHandleTool;
+  @NotNull private final HandleTool myHandleTool;
 
   public HandleProvider(@NotNull final ServerPaths paths,
                         @NotNull final AgentToolManager toolManager,
@@ -66,6 +67,27 @@ public class HandleProvider implements ToolProvider {
       return Collections.singletonList(new ToolVersion(myHandleTool, null));
     else
       return Collections.emptyList();
+  }
+
+  @Nullable
+  @Override
+  public ToolVersion installTool(@Nullable final String version, @NotNull final File toolContent) {
+    try {
+      packHandleTool(toolContent);
+    } catch (IOException e) {
+      LOG.debug("Failed to install SysInternals handle.exe", e);
+      return null;
+    }
+    return new ToolVersion(myHandleTool, null);
+  }
+
+  @Override
+  public void removeTool(@Nullable final String version) {
+    if (myToolManager.isToolRegistered(HANDLE_TOOL)) {
+      LOG.debug("Removing SysInternals handle.exe");
+      FileUtil.delete(getHandleExe());
+      myToolManager.unregisterSharedTool(HANDLE_TOOL);
+    }
   }
 
   public boolean isHandlePresent() {
