@@ -19,6 +19,7 @@ package jetbrains.buildServer.swabra;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.URL;
 import java.util.Collection;
 import java.util.Collections;
 import jetbrains.buildServer.serverSide.AgentToolManager;
@@ -26,8 +27,10 @@ import jetbrains.buildServer.serverSide.ServerPaths;
 import jetbrains.buildServer.tools.ToolProvider;
 import jetbrains.buildServer.tools.ToolType;
 import jetbrains.buildServer.tools.ToolVersion;
+import jetbrains.buildServer.tools.web.actions.URLDownloader;
 import jetbrains.buildServer.util.ArchiveUtil;
 import jetbrains.buildServer.util.FileUtil;
+import org.apache.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -37,12 +40,13 @@ import org.jetbrains.annotations.Nullable;
  * Time: 15:48:35
  */
 public class HandleProvider implements ToolProvider {
-  private static final org.apache.log4j.Logger LOG = org.apache.log4j.Logger.getLogger(HandleProvider.class.getName());
+  private static final Logger LOG = org.apache.log4j.Logger.getLogger(HandleProvider.class.getName());
   private static final String HANDLE_TOOL = "SysinternalsHandle";
 
   @NotNull private final ServerPaths myServerPaths;
   @NotNull private final AgentToolManager myToolManager;
   @NotNull private final HandleTool myHandleTool;
+  @NotNull private final ToolVersion mySingleToolVersion;
 
   public HandleProvider(@NotNull final ServerPaths paths,
                         @NotNull final AgentToolManager toolManager,
@@ -50,7 +54,7 @@ public class HandleProvider implements ToolProvider {
     myServerPaths = paths;
     myToolManager = toolManager;
     myHandleTool = handleTool;
-
+    mySingleToolVersion = new ToolVersion(myHandleTool, "SOME_VERSION");
     convertOldHandlePlugin();
   }
 
@@ -63,10 +67,27 @@ public class HandleProvider implements ToolProvider {
   @NotNull
   @Override
   public Collection<ToolVersion> getInstalledToolVersions() {
-    if(myToolManager.isToolRegistered(HANDLE_TOOL))
-      return Collections.singletonList(new ToolVersion(myHandleTool, null));
+    if(myToolManager.isToolRegistered(HANDLE_TOOL)) {
+      return Collections.singletonList(mySingleToolVersion);
+    }
     else
       return Collections.emptyList();
+  }
+
+  @NotNull
+  @Override
+  public Collection<ToolVersion> getAvailableToolVersions() {
+    return Collections.singleton(mySingleToolVersion); //TODO: provide version
+  }
+
+  @Override
+  public void fetchAvailableToolVersion(@NotNull final ToolVersion toolVersion, @NotNull final File location) {
+    try {
+      URLDownloader.download(new URL(myHandleTool.getDownloadUrl()), location);
+      LOG.debug("Successfully downloaded Sysinternals handle.exe to " + location);
+    } catch (Throwable throwable) {
+      LOG.debug("Failed to download Sysinternals handle.exe", throwable);
+    }
   }
 
   @Nullable
@@ -78,11 +99,11 @@ public class HandleProvider implements ToolProvider {
       LOG.debug("Failed to install SysInternals handle.exe", e);
       return null;
     }
-    return new ToolVersion(myHandleTool, null);
+    return mySingleToolVersion;
   }
 
   @Override
-  public void removeTool(@Nullable final String version) {
+  public void removeTool(@NotNull final String version) {
     if (myToolManager.isToolRegistered(HANDLE_TOOL)) {
       LOG.debug("Removing SysInternals handle.exe");
       FileUtil.delete(getHandleExe());
