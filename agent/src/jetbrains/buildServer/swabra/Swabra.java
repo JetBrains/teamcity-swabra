@@ -364,7 +364,7 @@ public final class Swabra extends AgentLifeCycleAdapter implements PositionAware
   }
 
   private void makeSnapshot(@NotNull File dir) {
-    if (!new SnapshotGenerator(dir, myLogger).generateSnapshot(myPropertiesProcessor.getSnapshotFile(dir))) {
+    if (!new SnapshotGenerator(dir, myLogger, mySettings.getRules()).generateSnapshot(myPropertiesProcessor.getSnapshotFile(dir))) {
       mySettings.setCleanupEnabled(false);
     } else {
       myPropertiesProcessor.markPending(dir, mySettings.getCheckoutDir(), mySettings.isStrict());

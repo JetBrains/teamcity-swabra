@@ -18,7 +18,10 @@ package jetbrains.buildServer.swabra;
 
 import java.io.File;
 import java.io.FileWriter;
+import java.util.Arrays;
+import java.util.Collections;
 import jetbrains.buildServer.TempFiles;
+import jetbrains.buildServer.swabra.snapshots.SwabraRules;
 import jetbrains.buildServer.swabra.snapshots.iteration.FileInfo;
 import jetbrains.buildServer.swabra.snapshots.iteration.FileSystemFilesIterator;
 import jetbrains.buildServer.swabra.snapshots.iteration.FilesTraversal;
@@ -33,7 +36,7 @@ import static jetbrains.buildServer.swabra.TestUtil.getTestData;
  * Time: 17:40:03
  */
 public class FileSystemFilesTraversalTest extends TestCase {
-  private void runTest(String resultsFileName) throws Exception {
+  private void runTest(String resultsFileName, String... rulesString) throws Exception {
     final FilesTraversal traversal = new FilesTraversal();
     final StringBuffer results = new StringBuffer();
 
@@ -43,7 +46,8 @@ public class FileSystemFilesTraversalTest extends TestCase {
       FileUtil.copyDir(getTestData("filesTraverse", null), root);
       TestUtil.deleteSvnFiles(root);
 
-      traversal.traverse(new FileSystemFilesIterator(root),
+      final SwabraRules rules = new SwabraRules(root, Arrays.asList(rulesString));
+      traversal.traverse(new FileSystemFilesIterator(root, rules),
         new FilesTraversal.SimpleProcessor() {
           public void process(FileInfo file) {
             results.append(file.getPath()).append("\n");
@@ -67,7 +71,12 @@ public class FileSystemFilesTraversalTest extends TestCase {
     }
   }
 
-  public void test1() throws Exception {
+  public void test_all_files() throws Exception {
     runTest("fileSystemFilesTraversal");
   }
+
+  public void test_filtered() throws Exception {
+    runTest("fileSystemFilesTraversal_filtered", "-:*/a*");
+  }
+
 }

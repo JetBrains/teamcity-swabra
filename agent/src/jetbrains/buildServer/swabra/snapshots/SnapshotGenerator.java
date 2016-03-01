@@ -35,14 +35,17 @@ import static jetbrains.buildServer.swabra.snapshots.SnapshotUtil.getSnapshotHea
  */
 public class SnapshotGenerator {
   private final File myRootDir;
+  @NotNull private final SwabraRules myRules;
   private String myRootDirParent;
   private int mySavedObjects;
 
   private final SwabraLogger myLogger;
 
   public SnapshotGenerator(@NotNull File dir,
-                           @NotNull SwabraLogger logger) {
+                           @NotNull final SwabraLogger logger,
+                           @NotNull final SwabraRules rules) {
     myRootDir = dir;
+    myRules = rules;
     myRootDirParent = SwabraUtil.unifyPath(dir.getParent());
     if (myRootDirParent.endsWith(File.separator)) {
       myRootDirParent = myRootDirParent.substring(0, myRootDirParent.length() - 1);
@@ -94,7 +97,7 @@ public class SnapshotGenerator {
 
   private void iterateAndBuildSnapshot(final BufferedWriter writer) throws Exception {
     final FilesTraversal tr = new FilesTraversal();
-    tr.traverse(new FileSystemFilesIterator(myRootDir), new FilesTraversal.SimpleProcessor() {
+    tr.traverse(new FileSystemFilesIterator(myRootDir, myRules), new FilesTraversal.SimpleProcessor() {
       public void process(FileInfo file) throws Exception {
         writer.write(getSnapshotEntry(file, myRootDirParent));
         ++mySavedObjects;

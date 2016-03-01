@@ -19,6 +19,7 @@ package jetbrains.buildServer.swabra.snapshots.iteration;
 import java.io.File;
 import java.io.IOException;
 import java.util.*;
+import jetbrains.buildServer.swabra.snapshots.SwabraRules;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -30,10 +31,12 @@ import org.jetbrains.annotations.Nullable;
 public class FileSystemFilesIterator implements FilesIterator {
   @NotNull
   private final File myRootFolder;
+  @NotNull private final SwabraRules myRules;
   private Stack<Iterator<File>> myIterators;
 
-  public FileSystemFilesIterator(@NotNull File rootFolder) {
+  public FileSystemFilesIterator(@NotNull File rootFolder,@NotNull final SwabraRules rules) {
     myRootFolder = rootFolder;
+    myRules = rules;
   }
 
   @Nullable
@@ -46,22 +49,24 @@ public class FileSystemFilesIterator implements FilesIterator {
       return null;
     }
     final Iterator<File> it = myIterators.peek();
-    if (it.hasNext()) {
+    while (it.hasNext()) {
       final File next = it.next();
-      if (next.isFile()) {
-        return createFileInfo(next);
-      } else if (next.isDirectory()) {
-        return processFolder(next);
-      } else {
-        throw new IOException("Failed to read " + next);
+      if (myRules.shouldInclude(next.getPath())) {
+        if (next.isFile()) {
+          return createFileInfo(next);
+        } else if (next.isDirectory()) {
+          return processFolder(next);
+        } else {
+          throw new IOException("Failed to read " + next);
+        }
       }
-    } else {
-      myIterators.pop();
-      if (myIterators.isEmpty()) {
-        return null;
-      }
-      return getNext();
     }
+    myIterators.pop();
+    if (myIterators.isEmpty()) {
+      return null;
+    }
+    return getNext();
+
   }
 
   public void skipDirectory(final FileInfo dirInfo) {
