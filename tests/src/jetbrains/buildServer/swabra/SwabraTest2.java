@@ -619,7 +619,7 @@ public class SwabraTest2 extends BaseTestCase {
           }
         }
         assertFalse(modifiedFileLogged);
-        checkResults(1, 0, 0, 0);
+        checkResults(0, 0, 0, 0);
       }
     }, true, AgentCheckoutMode.ON_AGENT);
   }
