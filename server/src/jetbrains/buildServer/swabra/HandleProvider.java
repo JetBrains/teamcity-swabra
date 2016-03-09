@@ -25,7 +25,7 @@ import java.util.Collections;
 import jetbrains.buildServer.serverSide.AgentToolManager;
 import jetbrains.buildServer.serverSide.ServerPaths;
 import jetbrains.buildServer.tools.ToolException;
-import jetbrains.buildServer.tools.ToolProvider;
+import jetbrains.buildServer.tools.ToolProviderAdapter;
 import jetbrains.buildServer.tools.ToolType;
 import jetbrains.buildServer.tools.ToolVersion;
 import jetbrains.buildServer.tools.web.actions.URLDownloader;
@@ -39,7 +39,7 @@ import org.jetbrains.annotations.NotNull;
  * Date: 26.02.2010
  * Time: 15:48:35
  */
-public class HandleProvider implements ToolProvider {
+public class HandleProvider extends ToolProviderAdapter {
   private static final String HANDLE_TOOL = "SysinternalsHandle";
   private static final String HANDLE_EXE = "handle.exe";
 
