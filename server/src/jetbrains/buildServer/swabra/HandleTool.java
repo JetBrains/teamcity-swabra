@@ -25,6 +25,9 @@ import org.jetbrains.annotations.NotNull;
  * Time: 16:38
  */
 public class HandleTool extends ToolTypeExtension {
+
+  public static final String HTTP_LIVE_SYSINTERNALS_COM_HANDLE_EXE = "http://live.sysinternals.com/handle.exe";
+
   @Override
   @NotNull
   public String getType() {
@@ -55,7 +58,7 @@ public class HandleTool extends ToolTypeExtension {
 
   @Override
   public String getDownloadUrl() {
-    return "http://live.sysinternals.com/handle.exe";
+    return HTTP_LIVE_SYSINTERNALS_COM_HANDLE_EXE;
   }
 
   @Override

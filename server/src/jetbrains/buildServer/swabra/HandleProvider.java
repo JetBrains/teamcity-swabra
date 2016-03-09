@@ -24,6 +24,7 @@ import java.util.Collection;
 import java.util.Collections;
 import jetbrains.buildServer.serverSide.AgentToolManager;
 import jetbrains.buildServer.serverSide.ServerPaths;
+import jetbrains.buildServer.tools.ToolException;
 import jetbrains.buildServer.tools.ToolProvider;
 import jetbrains.buildServer.tools.ToolType;
 import jetbrains.buildServer.tools.ToolVersion;
@@ -32,7 +33,6 @@ import jetbrains.buildServer.util.ArchiveUtil;
 import jetbrains.buildServer.util.FileUtil;
 import org.apache.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 /**
  * User: vbedrosova
@@ -40,8 +40,10 @@ import org.jetbrains.annotations.Nullable;
  * Time: 15:48:35
  */
 public class HandleProvider implements ToolProvider {
-  private static final Logger LOG = org.apache.log4j.Logger.getLogger(HandleProvider.class.getName());
   private static final String HANDLE_TOOL = "SysinternalsHandle";
+  private static final String HANDLE_EXE = "handle.exe";
+
+  private static final Logger LOG = org.apache.log4j.Logger.getLogger(HandleProvider.class.getName());
 
   @NotNull private final ServerPaths myServerPaths;
   @NotNull private final AgentToolManager myToolManager;
@@ -81,23 +83,25 @@ public class HandleProvider implements ToolProvider {
   }
 
   @Override
-  public void fetchAvailableToolVersion(@NotNull final ToolVersion toolVersion, @NotNull final File location) {
+  public void installTool(@NotNull final ToolVersion toolVersion) throws ToolException {
     try {
-      URLDownloader.download(new URL(myHandleTool.getDownloadUrl()), location);
+      final File tempFolder = FileUtil.createTempDirectory("TeamCity", "downloaded_" + HANDLE_TOOL);
+      final File location = new File(tempFolder, HANDLE_EXE);
+      URLDownloader.download(new URL(HandleTool.HTTP_LIVE_SYSINTERNALS_COM_HANDLE_EXE), location);
+      packHandleTool(tempFolder);
       LOG.debug("Successfully downloaded Sysinternals handle.exe to " + location);
     } catch (Throwable throwable) {
-      LOG.debug("Failed to download Sysinternals handle.exe", throwable);
+      throw new ToolException("Failed to download Sysinternals handle.exe." + throwable.getMessage(), throwable);
     }
   }
 
-  @Nullable
+  @NotNull
   @Override
-  public ToolVersion installTool(@Nullable final String version, @NotNull final File toolContent) {
+  public ToolVersion installTool(@NotNull final File toolContent) throws ToolException {
     try {
-      packHandleTool(toolContent);
+      packHandleTool(toolContent.getParentFile());
     } catch (IOException e) {
-      LOG.debug("Failed to install SysInternals handle.exe", e);
-      return null;
+      throw new ToolException("Failed to install uploaded SysInternals handle.exe", e);
     }
     return mySingleToolVersion;
   }
@@ -106,7 +110,6 @@ public class HandleProvider implements ToolProvider {
   public void removeTool(@NotNull final String version) {
     if (myToolManager.isToolRegistered(HANDLE_TOOL)) {
       LOG.debug("Removing SysInternals handle.exe");
-      FileUtil.delete(getHandleExe());
       myToolManager.unregisterSharedTool(HANDLE_TOOL);
     }
   }
@@ -117,18 +120,16 @@ public class HandleProvider implements ToolProvider {
 
   @NotNull
   public File getHandleExe() {
-    return new File(myToolManager.getRegisteredToolPath(HANDLE_TOOL), "handle.exe");
+    return new File(myToolManager.getRegisteredToolPath(HANDLE_TOOL), HANDLE_EXE);
   }
 
   public void packHandleTool(@NotNull File handleTool) throws IOException {
     if (myToolManager.isToolRegistered(HANDLE_TOOL)) {
-      LOG.debug("Updating " + handleTool + " tool");
-      FileUtil.delete(getHandleExe());
-      FileUtil.copyDir(handleTool, myToolManager.getRegisteredToolPath(HANDLE_TOOL));
-    } else {
-      LOG.debug("Packaging " + handleTool + " as tool");
-      myToolManager.registerSharedTool(HANDLE_TOOL, handleTool);
+      LOG.debug("Updating " + handleTool + " tool. Removing old one.");
+      myToolManager.unregisterSharedTool(HANDLE_TOOL);
     }
+    LOG.debug("Packaging " + handleTool + " as tool");
+    myToolManager.registerSharedTool(HANDLE_TOOL, handleTool);
   }
 
   private void convertOldHandlePlugin() {
