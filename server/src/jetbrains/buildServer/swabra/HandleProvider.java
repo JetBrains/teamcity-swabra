@@ -54,7 +54,7 @@ public class HandleProvider implements ToolProvider {
     myServerPaths = paths;
     myToolManager = toolManager;
     myHandleTool = handleTool;
-    mySingleToolVersion = new ToolVersion(myHandleTool, "SOME_VERSION");
+    mySingleToolVersion = new ToolVersion(myHandleTool, "Latest");
     convertOldHandlePlugin();
   }
 
