@@ -126,6 +126,7 @@
   
   <path id="library.devpackage-common-api.classpath">
     <pathelement location="${path.variable.teamcitydistribution}/devPackage/common-api.jar"/>
+    <pathelement location="${path.variable.teamcitydistribution}/devPackage/serviceMessages.jar"/>
   </path>
   
   <path id="library.devpackage-server-api.classpath">
