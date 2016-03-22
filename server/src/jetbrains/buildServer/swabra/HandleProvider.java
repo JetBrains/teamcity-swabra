@@ -19,20 +19,17 @@ package jetbrains.buildServer.swabra;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Collection;
 import java.util.Collections;
 import jetbrains.buildServer.serverSide.AgentToolManager;
-import jetbrains.buildServer.serverSide.ServerPaths;
-import jetbrains.buildServer.tools.ToolException;
-import jetbrains.buildServer.tools.ToolProviderAdapter;
-import jetbrains.buildServer.tools.ToolType;
-import jetbrains.buildServer.tools.ToolVersion;
+import jetbrains.buildServer.tools.*;
 import jetbrains.buildServer.tools.web.actions.URLDownloader;
-import jetbrains.buildServer.util.ArchiveUtil;
 import jetbrains.buildServer.util.FileUtil;
 import org.apache.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 /**
  * User: vbedrosova
@@ -45,19 +42,15 @@ public class HandleProvider extends ToolProviderAdapter {
 
   private static final Logger LOG = org.apache.log4j.Logger.getLogger(HandleProvider.class.getName());
 
-  @NotNull private final ServerPaths myServerPaths;
   @NotNull private final AgentToolManager myToolManager;
   @NotNull private final HandleTool myHandleTool;
   @NotNull private final ToolVersion mySingleToolVersion;
 
-  public HandleProvider(@NotNull final ServerPaths paths,
-                        @NotNull final AgentToolManager toolManager,
+  public HandleProvider(@NotNull final AgentToolManager toolManager,
                         @NotNull final HandleTool handleTool) {
-    myServerPaths = paths;
     myToolManager = toolManager;
     myHandleTool = handleTool;
-    mySingleToolVersion = new ToolVersion(myHandleTool, "Latest");
-    convertOldHandlePlugin();
+    mySingleToolVersion = new SimpleToolVersion(myHandleTool, "Latest");
   }
 
   @NotNull
@@ -68,103 +61,59 @@ public class HandleProvider extends ToolProviderAdapter {
 
   @NotNull
   @Override
-  public Collection<ToolVersion> getInstalledToolVersions() {
-    if(myToolManager.isToolRegistered(HANDLE_TOOL)) {
-      return Collections.singletonList(mySingleToolVersion);
-    }
-    else
-      return Collections.emptyList();
-  }
-
-  @NotNull
-  @Override
   public Collection<ToolVersion> getAvailableToolVersions() {
     return Collections.singleton(mySingleToolVersion); //TODO: provide version
   }
 
+  @NotNull
   @Override
-  public void installTool(@NotNull final ToolVersion toolVersion) throws ToolException {
+  public File fetchToolPackage(@NotNull final ToolVersion toolVersion, @NotNull final File targetDirectory) throws ToolException {
+    final File location = new File(targetDirectory, HANDLE_EXE);
     try {
-      final File tempFolder = FileUtil.createTempDirectory("TeamCity", "downloaded_" + HANDLE_TOOL);
-      final File location = new File(tempFolder, HANDLE_EXE);
       URLDownloader.download(new URL(HandleTool.HTTP_LIVE_SYSINTERNALS_COM_HANDLE_EXE), location);
-      packHandleTool(tempFolder);
-      LOG.debug("Successfully downloaded Sysinternals handle.exe to " + location);
-    } catch (Throwable throwable) {
-      throw new ToolException("Failed to download Sysinternals handle.exe." + throwable.getMessage(), throwable);
+    } catch (MalformedURLException e) {
+      throw new ToolException("Failed to fetch " + HANDLE_TOOL, e);
+    }
+    LOG.debug("Successfully downloaded Sysinternals handle.exe to " + location);
+    return location;
+  }
+
+  @Override
+  public void unpackTool(@NotNull final File toolPackage, @NotNull final File targetDirectory) throws ToolException {
+    try {
+      FileUtil.copy(toolPackage, new File(targetDirectory, HANDLE_EXE));
+    } catch (IOException e) {
+      throw new ToolException("Failed to copy " + HANDLE_TOOL + " to " + targetDirectory, e);
     }
   }
 
   @NotNull
   @Override
-  public ToolVersion installTool(@NotNull final File toolContent) throws ToolException {
-    try {
-      packHandleTool(toolContent.getParentFile());
-    } catch (IOException e) {
-      throw new ToolException("Failed to install uploaded SysInternals handle.exe", e);
-    }
-    return mySingleToolVersion;
+  public File getToolPackagesFile(@NotNull final File homeDirectory, @NotNull final ToolVersion toolVersion) {
+    return new File(homeDirectory, HANDLE_EXE);
   }
 
+  @Nullable
   @Override
-  public void removeTool(@NotNull final String version) {
-    if (myToolManager.isToolRegistered(HANDLE_TOOL)) {
-      LOG.debug("Removing SysInternals handle.exe");
-      myToolManager.unregisterSharedTool(HANDLE_TOOL);
-    }
+  public ToolVersion tryGetPackageVersion(@NotNull final File toolPackage) {
+    return toolPackage.getName().equalsIgnoreCase(HANDLE_EXE) ? mySingleToolVersion : null;
   }
 
-  public boolean isHandlePresent() {
+  boolean isHandlePresent() {
     return myToolManager.isToolRegistered(HANDLE_TOOL);
   }
 
   @NotNull
-  public File getHandleExe() {
+  File getHandleExe() {
     return new File(myToolManager.getRegisteredToolPath(HANDLE_TOOL), HANDLE_EXE);
   }
 
-  public void packHandleTool(@NotNull File handleTool) throws IOException {
+  void packHandleTool(@NotNull File handleTool) throws IOException {
     if (myToolManager.isToolRegistered(HANDLE_TOOL)) {
       LOG.debug("Updating " + handleTool + " tool. Removing old one.");
       myToolManager.unregisterSharedTool(HANDLE_TOOL);
     }
     LOG.debug("Packaging " + handleTool + " as tool");
     myToolManager.registerSharedTool(HANDLE_TOOL, handleTool);
-  }
-
-  private void convertOldHandlePlugin() {
-    final File oldPlugin1 = new File(myServerPaths.getPluginsDir(), "handle-provider");
-    if (oldPlugin1.exists()) {
-      LOG.debug("Detected old handle-provider plugin " + oldPlugin1);
-      try {
-        if (!getHandleExe().isFile()) {
-          LOG.debug("Converting old handle-provider plugin " + oldPlugin1 + " into tool");
-          final File agentPlugin = new File(oldPlugin1, "agent/handle-provider.zip");
-          if (agentPlugin.isFile()) {
-            final File temp = new File(FileUtil.getTempDirectory(), "handle-provider");
-            try {
-              ArchiveUtil.unpackZip(agentPlugin, "", temp);
-
-              final File handleExe = new File(temp, "handle-provider/bin/handle.exe");
-              if (handleExe.isFile()) {
-                packHandleTool(handleExe.getParentFile());
-              } else {
-                LOG.warn("No handle.exe detected in " + oldPlugin1);
-              }
-            } finally {
-              FileUtil.delete(temp);
-            }
-          } else {
-            LOG.warn("No agent plugin detected in " + oldPlugin1);
-          }
-        }
-      } catch (IOException e) {
-        LOG.warn("Failed to convert " + oldPlugin1, e);
-      } finally {
-        LOG.debug("Deleting old handle-provider plugin " + oldPlugin1);
-        FileUtil.delete(oldPlugin1);
-      }
-    }
-    FileUtil.delete(new File(myServerPaths.getPluginDataDirectory(), "handle-provider.zip"));
   }
 }

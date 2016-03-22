@@ -11,4 +11,6 @@
 
   <bean class="jetbrains.buildServer.swabra.HandleTool"/>
   <bean class="jetbrains.buildServer.swabra.HandleToolServerProcessor"/>
+
+  <bean class="jetbrains.buildServer.swabra.OldHandleToolConverter"/>
 </beans>
