@@ -602,9 +602,10 @@
       <JAVADOC />
       <SOURCES />
     </library>
-    <library name="TeamCity-toolLoader">
+    <library name="TeamCity-server-tools">
       <CLASSES>
-        <root url="jar://$TeamCityDistribution$/webapps/ROOT/WEB-INF/lib/toolLoader.jar!/" />
+        <root url="jar://$TeamCityDistribution$/webapps/ROOT/WEB-INF/lib/common-tools.jar!/" />
+        <root url="jar://$TeamCityDistribution$/webapps/ROOT/WEB-INF/lib/server-tools.jar!/" />
       </CLASSES>
       <JAVADOC />
       <SOURCES />
