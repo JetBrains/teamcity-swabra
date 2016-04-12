@@ -186,9 +186,10 @@
     <pathelement location="${path.variable.teamcitydistribution}/webapps/ROOT/WEB-INF/lib/spring-webmvc.jar"/>
     <pathelement location="${path.variable.teamcitydistribution}/webapps/ROOT/WEB-INF/lib/spring.jar"/>
   </path>
-  
-  <path id="library.teamcity-toolloader.classpath">
-    <pathelement location="${path.variable.teamcitydistribution}/webapps/ROOT/WEB-INF/lib/toolLoader.jar"/>
+
+  <path id="library.teamcity-server-tools.classpath">
+    <pathelement location="${path.variable.teamcitydistribution}/webapps/ROOT/WEB-INF/lib/common-tools.jar"/>
+    <pathelement location="${path.variable.teamcitydistribution}/webapps/ROOT/WEB-INF/lib/server-tools.jar"/>
   </path>
   
   <path id="library.teamcity-trove.classpath">
@@ -457,7 +458,7 @@
     <path refid="library.servlet-api.classpath"/>
     <path refid="library.teamcity-web.classpath"/>
     <path refid="library.teamcity-log4j.classpath"/>
-    <path refid="library.teamcity-toolloader.classpath"/>
+    <path refid="library.teamcity-server-tools.classpath"/>
     <path refid="library.teamcity-server.classpath"/>
     <path refid="library.devpackage-common-api.classpath"/>
   </path>
@@ -473,7 +474,7 @@
     <path refid="library.servlet-api.classpath"/>
     <path refid="library.teamcity-web.classpath"/>
     <path refid="library.teamcity-log4j.classpath"/>
-    <path refid="library.teamcity-toolloader.classpath"/>
+    <path refid="library.teamcity-server-tools.classpath"/>
     <path refid="library.teamcity-server.classpath"/>
     <path refid="library.devpackage-common-api.classpath"/>
   </path>
@@ -491,7 +492,7 @@
     <path refid="library.servlet-api.classpath"/>
     <path refid="library.teamcity-web.classpath"/>
     <path refid="library.teamcity-log4j.classpath"/>
-    <path refid="library.teamcity-toolloader.classpath"/>
+    <path refid="library.teamcity-server-tools.classpath"/>
     <path refid="library.teamcity-server.classpath"/>
     <path refid="library.devpackage-common-api.classpath"/>
   </path>
@@ -508,7 +509,7 @@
     <path refid="library.servlet-api.classpath"/>
     <path refid="library.teamcity-web.classpath"/>
     <path refid="library.teamcity-log4j.classpath"/>
-    <path refid="library.teamcity-toolloader.classpath"/>
+    <path refid="library.teamcity-server-tools.classpath"/>
     <path refid="library.teamcity-server.classpath"/>
     <path refid="library.devpackage-common-api.classpath"/>
   </path>
