@@ -36,7 +36,7 @@ import org.jetbrains.annotations.Nullable;
  * Date: 26.02.2010
  * Time: 15:48:35
  */
-public class HandleProvider extends ToolProviderAdapter {
+public class HandleProvider extends ServerToolProviderAdapter {
   private static final String HANDLE_TOOL = "SysinternalsHandle";
   private static final String HANDLE_EXE = "handle.exe";
 
@@ -79,18 +79,12 @@ public class HandleProvider extends ToolProviderAdapter {
   }
 
   @Override
-  public void unpackTool(@NotNull final File toolPackage, @NotNull final File targetDirectory) throws ToolException {
+  public void unpackToolPackage(@NotNull final File toolPackage, @NotNull final File targetDirectory) throws ToolException {
     try {
       FileUtil.copy(toolPackage, new File(targetDirectory, HANDLE_EXE));
     } catch (IOException e) {
       throw new ToolException("Failed to copy " + HANDLE_TOOL + " to " + targetDirectory, e);
     }
-  }
-
-  @NotNull
-  @Override
-  public File getToolPackagesFile(@NotNull final File homeDirectory, @NotNull final ToolVersion toolVersion) {
-    return new File(homeDirectory, HANDLE_EXE);
   }
 
   @Nullable
