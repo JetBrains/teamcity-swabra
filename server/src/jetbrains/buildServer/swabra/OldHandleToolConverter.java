@@ -17,8 +17,8 @@
 package jetbrains.buildServer.swabra;
 
 import java.io.File;
-import java.io.IOException;
 import jetbrains.buildServer.serverSide.ServerPaths;
+import jetbrains.buildServer.tools.ToolException;
 import jetbrains.buildServer.util.ArchiveUtil;
 import jetbrains.buildServer.util.FileUtil;
 import org.apache.log4j.Logger;
@@ -66,7 +66,7 @@ public class OldHandleToolConverter {
             LOG.warn("No agent plugin detected in " + oldPlugin1);
           }
         }
-      } catch (IOException e) {
+      } catch (ToolException e) {
         LOG.warn("Failed to convert " + oldPlugin1, e);
       } finally {
         LOG.debug("Deleting old handle-provider plugin " + oldPlugin1);
