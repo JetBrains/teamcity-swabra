@@ -31,10 +31,10 @@ public class HandleToolServerProcessor implements ServerToolProcessor {
   private static final Logger LOG = Logger.getLogger(HandleToolServerProcessor.class.getName());
 
   @NotNull
-  private final HandleProvider myHandleProvider;
+  private final HandleToolManager myHandleToolManager;
 
-  public HandleToolServerProcessor(@NotNull final HandleProvider handleProvider) {
-    myHandleProvider = handleProvider;
+  public HandleToolServerProcessor(@NotNull final HandleToolManager handleToolManager) {
+    myHandleToolManager = handleToolManager;
   }
 
   @NotNull
@@ -44,13 +44,13 @@ public class HandleToolServerProcessor implements ServerToolProcessor {
 
   public void processTool(@NotNull final File tool, @NotNull final ServerToolProcessorCallback callback) {
     try {
-      myHandleProvider.packHandleTool(tool);
-      callback.progress("Saved " + myHandleProvider.getHandleExe(), Status.NORMAL);
+      myHandleToolManager.packHandleTool(tool);
+      callback.progress("Saved " + myHandleToolManager.getHandleExe(), Status.NORMAL);
       callback.progress("handle.exe will be present on agents after the upgrade process (will start automatically)", Status.NORMAL);
     } catch (Throwable throwable) {
-      final String err = "Failed to save " + myHandleProvider.getHandleExe();
+      final String err = "Failed to save " + myHandleToolManager.getHandleExe();
       LOG.error(err, throwable);
-      callback.progress("Failed to save " + myHandleProvider.getHandleExe() + ", please see teamcity-server.log for details", Status.ERROR);
+      callback.progress("Failed to save " + myHandleToolManager.getHandleExe() + ", please see teamcity-server.log for details", Status.ERROR);
     }
   }
 }

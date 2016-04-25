@@ -36,7 +36,7 @@ public class SwabraBuildFeature extends BuildFeature {
 
   public SwabraBuildFeature(@NotNull final PluginDescriptor descriptor,
                             @NotNull final WebControllerManager web,
-                            @NotNull final HandleProvider handleProvider) {
+                            @NotNull final HandleToolManager handleToolManager) {
     final String jsp = descriptor.getPluginResourcesPath("swabraSettings.jsp");
     final String html = descriptor.getPluginResourcesPath("swabraSettings.html");
 
@@ -44,7 +44,7 @@ public class SwabraBuildFeature extends BuildFeature {
       @Override
       protected ModelAndView doHandle(@NotNull final HttpServletRequest request, @NotNull final HttpServletResponse response) throws Exception {
         final ModelAndView mv = new ModelAndView(jsp);
-        mv.getModel().put("handlePresent", handleProvider.isHandlePresent());
+        mv.getModel().put("handlePresent", handleToolManager.isHandlePresent());
         mv.getModel().put("requestUrl", html);
         mv.getModel().put("buildTypeId", getBuildTypeIdParameter(request));
         return mv;

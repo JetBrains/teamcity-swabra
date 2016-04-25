@@ -32,11 +32,11 @@ public class OldHandleToolConverter {
   private static final Logger LOG = org.apache.log4j.Logger.getLogger(HandleProvider.class.getName());
 
   private final ServerPaths myServerPaths;
-  @NotNull private final HandleProvider myHandleProvider;
+  @NotNull private final HandleToolManager myHandleProvider;
 
-  public OldHandleToolConverter(@NotNull final ServerPaths serverPaths, @NotNull final HandleProvider handleProvider) {
+  public OldHandleToolConverter(@NotNull final ServerPaths serverPaths, @NotNull final HandleToolManager handleToolManager) {
     myServerPaths = serverPaths;
-    myHandleProvider = handleProvider;
+    myHandleProvider = handleToolManager;
     convertOldHandlePlugin();
   }
 

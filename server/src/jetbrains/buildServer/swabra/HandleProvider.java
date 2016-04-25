@@ -24,12 +24,14 @@ import java.net.URL;
 import java.util.Collection;
 import java.util.Collections;
 import jetbrains.buildServer.tools.*;
-import jetbrains.buildServer.tools.installed.AgentToolManager;
 import jetbrains.buildServer.tools.web.actions.URLDownloader;
 import jetbrains.buildServer.util.FileUtil;
 import org.apache.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+
+import static jetbrains.buildServer.swabra.HandleTool.HANDLE_EXE;
+import static jetbrains.buildServer.swabra.HandleTool.HANDLE_TOOL;
 
 /**
  * User: vbedrosova
@@ -37,18 +39,12 @@ import org.jetbrains.annotations.Nullable;
  * Time: 15:48:35
  */
 public class HandleProvider extends ServerToolProviderAdapter {
-  private static final String HANDLE_TOOL = "SysinternalsHandle";
-  private static final String HANDLE_EXE = "handle.exe";
-
   private static final Logger LOG = org.apache.log4j.Logger.getLogger(HandleProvider.class.getName());
 
-  @NotNull private final AgentToolManager myToolManager;
   @NotNull private final HandleTool myHandleTool;
   @NotNull private final ToolVersion mySingleToolVersion;
 
-  public HandleProvider(@NotNull final AgentToolManager toolManager,
-                        @NotNull final HandleTool handleTool) {
-    myToolManager = toolManager;
+  public HandleProvider(@NotNull final HandleTool handleTool) {
     myHandleTool = handleTool;
     mySingleToolVersion = new SimpleToolVersion(myHandleTool, "Latest");
   }
@@ -91,23 +87,5 @@ public class HandleProvider extends ServerToolProviderAdapter {
   @Override
   public ToolVersion tryGetPackageVersion(@NotNull final File toolPackage) {
     return toolPackage.getName().equalsIgnoreCase(HANDLE_EXE) ? mySingleToolVersion : null;
-  }
-
-  boolean isHandlePresent() {
-    return myToolManager.isToolRegistered(HANDLE_TOOL);
-  }
-
-  @NotNull
-  File getHandleExe() {
-    return new File(myToolManager.getRegisteredToolPath(HANDLE_TOOL), HANDLE_EXE);
-  }
-
-  void packHandleTool(@NotNull File handleTool) throws ToolException {
-    if (myToolManager.isToolRegistered(HANDLE_TOOL)) {
-      LOG.debug("Updating " + handleTool + " tool. Removing old one.");
-      myToolManager.unregisterSharedTool(HANDLE_TOOL);
-    }
-    LOG.debug("Packaging " + handleTool + " as tool");
-    myToolManager.registerSharedTool(HANDLE_TOOL, handleTool);
   }
 }

@@ -26,6 +26,8 @@ import org.jetbrains.annotations.NotNull;
  */
 public class HandleTool extends ToolTypeExtension {
 
+  public static final String HANDLE_TOOL = "SysinternalsHandle";
+  public static final String HANDLE_EXE = "handle.exe";
   public static final String HTTP_LIVE_SYSINTERNALS_COM_HANDLE_EXE = "http://live.sysinternals.com/handle.exe";
 
   @Override
