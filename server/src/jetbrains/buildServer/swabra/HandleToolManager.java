@@ -50,9 +50,9 @@ public class HandleToolManager {
   void packHandleTool(@NotNull File handleTool) throws ToolException {
     if (myToolManager.isToolRegistered(HANDLE_TOOL)) {
       LOG.debug("Updating " + handleTool + " tool. Removing old one.");
-      myToolManager.unregisterSharedTool(HANDLE_TOOL);
+      myToolManager.removeTool(HANDLE_TOOL);
     }
     LOG.debug("Packaging " + handleTool + " as tool");
-    myToolManager.registerSharedTool(HANDLE_TOOL, handleTool);
+    myToolManager.installTool(HANDLE_TOOL, handleTool);
   }
 }
