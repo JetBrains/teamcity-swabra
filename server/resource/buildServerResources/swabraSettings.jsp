@@ -115,7 +115,7 @@
 
 <tr class="noBorder" style="${empty processesSelected ? 'display: none;' : ''}" id="swabra.download.handle.container">
   <td colspan="2">
-    <div class="${not handlePresent ? 'attentionComment' : ''}">
+    <div class="${not handlePresent ? 'icon_before icon16 attentionComment' : ''}">
       <c:if test="${not handlePresent}">
         Note that for locking processes detection handle.exe tool is required on agents.<br/>
       </c:if>
