@@ -18,7 +18,7 @@ package jetbrains.buildServer.swabra;
 
 import java.io.File;
 import jetbrains.buildServer.tools.ToolException;
-import jetbrains.buildServer.tools.installed.AgentToolManager;
+import jetbrains.buildServer.tools.installed.ToolsRegistry;
 import org.apache.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
 
@@ -32,27 +32,27 @@ public class HandleToolManager {
 
   private static final Logger LOG = org.apache.log4j.Logger.getLogger(HandleToolManager.class.getName());
 
-  private final AgentToolManager myToolManager;
+  private final ToolsRegistry myToolsRegistry;
 
-  public HandleToolManager(final AgentToolManager toolManager) {
-    myToolManager = toolManager;
+  public HandleToolManager(final ToolsRegistry toolsRegistry) {
+    myToolsRegistry = toolsRegistry;
   }
 
   boolean isHandlePresent() {
-    return myToolManager.isToolRegistered(HANDLE_TOOL);
+    return myToolsRegistry.isToolRegistered(HANDLE_TOOL);
   }
 
   @NotNull
   File getHandleExe() {
-    return new File(myToolManager.getRegisteredToolPath(HANDLE_TOOL), HANDLE_EXE);
+    return new File(myToolsRegistry.getRegisteredToolPath(HANDLE_TOOL), HANDLE_EXE);
   }
 
   void packHandleTool(@NotNull File handleTool) throws ToolException {
-    if (myToolManager.isToolRegistered(HANDLE_TOOL)) {
+    if (myToolsRegistry.isToolRegistered(HANDLE_TOOL)) {
       LOG.debug("Updating " + handleTool + " tool. Removing old one.");
-      myToolManager.removeTool(HANDLE_TOOL);
+      myToolsRegistry.removeTool(HANDLE_TOOL);
     }
     LOG.debug("Packaging " + handleTool + " as tool");
-    myToolManager.installTool(HANDLE_TOOL, handleTool);
+    myToolsRegistry.installTool(handleTool);
   }
 }
