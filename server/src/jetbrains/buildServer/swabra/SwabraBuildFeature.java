@@ -23,11 +23,14 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import jetbrains.buildServer.controllers.BaseController;
 import jetbrains.buildServer.serverSide.BuildFeature;
+import jetbrains.buildServer.tools.installed.ToolsRegistry;
 import jetbrains.buildServer.util.StringUtil;
 import jetbrains.buildServer.web.openapi.PluginDescriptor;
 import jetbrains.buildServer.web.openapi.WebControllerManager;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.web.servlet.ModelAndView;
+
+import static jetbrains.buildServer.swabra.HandleTool.HANDLE_TOOL;
 
 public class SwabraBuildFeature extends BuildFeature {
   public static final String FEATURE_TYPE = "swabra";
@@ -36,7 +39,7 @@ public class SwabraBuildFeature extends BuildFeature {
 
   public SwabraBuildFeature(@NotNull final PluginDescriptor descriptor,
                             @NotNull final WebControllerManager web,
-                            @NotNull final HandleToolManager handleToolManager) {
+                            @NotNull final ToolsRegistry toolsRegistry) {
     final String jsp = descriptor.getPluginResourcesPath("swabraSettings.jsp");
     final String html = descriptor.getPluginResourcesPath("swabraSettings.html");
 
@@ -44,7 +47,7 @@ public class SwabraBuildFeature extends BuildFeature {
       @Override
       protected ModelAndView doHandle(@NotNull final HttpServletRequest request, @NotNull final HttpServletResponse response) throws Exception {
         final ModelAndView mv = new ModelAndView(jsp);
-        mv.getModel().put("handlePresent", handleToolManager.isHandlePresent());
+        mv.getModel().put("handlePresent", toolsRegistry.isToolRegistered(HANDLE_TOOL));
         mv.getModel().put("requestUrl", html);
         mv.getModel().put("buildTypeId", getBuildTypeIdParameter(request));
         return mv;

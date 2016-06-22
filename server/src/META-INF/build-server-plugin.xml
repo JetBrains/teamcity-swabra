@@ -12,7 +12,6 @@
   <bean class="jetbrains.buildServer.swabra.serverHealth.SwabraFrequentCleanCheckoutReport"/>
 
   <bean class="jetbrains.buildServer.swabra.HandleToolServerProcessor"/>
-  <bean class="jetbrains.buildServer.swabra.HandleToolManager"/>
 
   <bean class="jetbrains.buildServer.swabra.OldHandleToolConverter"/>
 </beans>

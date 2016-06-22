@@ -19,8 +19,12 @@ package jetbrains.buildServer.swabra;
 import java.io.File;
 import jetbrains.buildServer.messages.Status;
 import jetbrains.buildServer.tools.ServerToolProcessor;
+import jetbrains.buildServer.tools.installed.ToolsRegistry;
 import org.apache.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
+
+import static jetbrains.buildServer.swabra.HandleTool.HANDLE_EXE;
+import static jetbrains.buildServer.swabra.HandleTool.HANDLE_TOOL;
 
 /**
  * User: vbedrosova
@@ -31,10 +35,10 @@ public class HandleToolServerProcessor implements ServerToolProcessor {
   private static final Logger LOG = Logger.getLogger(HandleToolServerProcessor.class.getName());
 
   @NotNull
-  private final HandleToolManager myHandleToolManager;
+  private final ToolsRegistry myToolsRegistry;
 
-  public HandleToolServerProcessor(@NotNull final HandleToolManager handleToolManager) {
-    myHandleToolManager = handleToolManager;
+  public HandleToolServerProcessor(@NotNull final ToolsRegistry toolsRegistry) {
+    myToolsRegistry = toolsRegistry;
   }
 
   @NotNull
@@ -43,14 +47,20 @@ public class HandleToolServerProcessor implements ServerToolProcessor {
   }
 
   public void processTool(@NotNull final File tool, @NotNull final ServerToolProcessorCallback callback) {
+    final File handleExe = new File(myToolsRegistry.getRegisteredToolPath(HANDLE_TOOL), HANDLE_EXE);
     try {
-      myHandleToolManager.packHandleTool(tool);
-      callback.progress("Saved " + myHandleToolManager.getHandleExe(), Status.NORMAL);
+      if (myToolsRegistry.isToolRegistered(HANDLE_TOOL)) {
+        LOG.debug("Updating " + handleExe + " tool. Removing old one.");
+        myToolsRegistry.removeTool(HANDLE_TOOL);
+      }
+      LOG.debug("Packaging " + handleExe + " as tool");
+      myToolsRegistry.installTool(handleExe);
+      callback.progress("Saved " + handleExe, Status.NORMAL);
       callback.progress("handle.exe will be present on agents after the upgrade process (will start automatically)", Status.NORMAL);
     } catch (Throwable throwable) {
-      final String err = "Failed to save " + myHandleToolManager.getHandleExe();
+      final String err = "Failed to save " + handleExe;
       LOG.error(err, throwable);
-      callback.progress("Failed to save " + myHandleToolManager.getHandleExe() + ", please see teamcity-server.log for details", Status.ERROR);
+      callback.progress("Failed to save " + handleExe + ", please see teamcity-server.log for details", Status.ERROR);
     }
   }
 }

@@ -77,7 +77,10 @@ public class HandleProvider extends ServerToolProviderAdapter {
   @Override
   public void unpackToolPackage(@NotNull final File toolPackage, @NotNull final File targetDirectory) throws ToolException {
     try {
-      FileUtil.copy(toolPackage, new File(targetDirectory, HANDLE_EXE));
+      if(toolPackage.isDirectory())
+        FileUtil.copyDir(toolPackage, targetDirectory);
+      else
+        FileUtil.copy(toolPackage, new File(targetDirectory, HANDLE_EXE));
     } catch (IOException e) {
       throw new ToolException("Failed to copy " + HANDLE_TOOL + " to " + targetDirectory, e);
     }
@@ -86,6 +89,8 @@ public class HandleProvider extends ServerToolProviderAdapter {
   @Nullable
   @Override
   public ToolVersion tryGetPackageVersion(@NotNull final File toolPackage) {
-    return toolPackage.getName().equalsIgnoreCase(HANDLE_EXE) ? mySingleToolVersion : null;
+    final String toolPackageName = toolPackage.getName();
+    return ((toolPackage.isDirectory() && toolPackageName.equalsIgnoreCase(HANDLE_TOOL)) || (toolPackage.isFile() && toolPackageName.equalsIgnoreCase(HANDLE_EXE)))
+           ? mySingleToolVersion : null;
   }
 }
