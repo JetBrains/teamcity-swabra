@@ -27,7 +27,7 @@ import jetbrains.buildServer.tools.ServerToolProviderAdapter;
 import jetbrains.buildServer.tools.ToolException;
 import jetbrains.buildServer.tools.ToolType;
 import jetbrains.buildServer.tools.ToolVersion;
-import jetbrains.buildServer.tools.web.actions.URLDownloader;
+import jetbrains.buildServer.tools.utils.URLDownloader;
 import jetbrains.buildServer.util.FileUtil;
 import org.apache.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
