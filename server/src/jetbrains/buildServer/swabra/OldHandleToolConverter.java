@@ -45,7 +45,7 @@ public class OldHandleToolConverter implements ServerToolPreProcessor {
   @NotNull
   @Override
   public String getName() {
-    return HandleTool.HANDLE_TOOL_TYPE_NAME;
+    return HandleToolType.HANDLE_TOOL_TYPE_NAME;
   }
 
   @Override

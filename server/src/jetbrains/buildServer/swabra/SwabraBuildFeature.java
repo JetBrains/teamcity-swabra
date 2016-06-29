@@ -30,7 +30,7 @@ import jetbrains.buildServer.web.openapi.WebControllerManager;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.web.servlet.ModelAndView;
 
-import static jetbrains.buildServer.swabra.HandleTool.HANDLE_TOOL;
+import static jetbrains.buildServer.swabra.HandleToolType.HANDLE_TOOL;
 
 public class SwabraBuildFeature extends BuildFeature {
   public static final String FEATURE_TYPE = "swabra";

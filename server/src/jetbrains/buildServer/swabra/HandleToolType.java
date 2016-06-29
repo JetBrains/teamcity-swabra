@@ -16,7 +16,7 @@
 
 package jetbrains.buildServer.swabra;
 
-import jetbrains.buildServer.tools.ToolTypeExtension;
+import jetbrains.buildServer.tools.ToolTypeAdapter;
 import org.jetbrains.annotations.NotNull;
 
 /**
@@ -24,8 +24,7 @@ import org.jetbrains.annotations.NotNull;
  * Date: 25.04.11
  * Time: 16:38
  */
-public class HandleTool extends ToolTypeExtension {
-
+public class HandleToolType extends ToolTypeAdapter {
   public static final String HANDLE_TOOL = "SysinternalsHandle";
   public static final String HANDLE_EXE = "handle.exe";
   public static final String HTTP_LIVE_SYSINTERNALS_COM_HANDLE_EXE = "http://live.sysinternals.com/handle.exe";
@@ -45,8 +44,7 @@ public class HandleTool extends ToolTypeExtension {
 
   @Override
   public String getDescription() {
-    return "On Windows agents handle.exe is used to determine processes which hold files in the checkout directory. " +
-           "handle.exe will be automatically distributed to the agents and the agents will restart";
+    return "On Windows agents handle.exe is used to determine processes which hold files in the checkout directory.";
   }
 
   @Override
@@ -57,11 +55,6 @@ public class HandleTool extends ToolTypeExtension {
   @Override
   public boolean isSupportDownload() {
     return true;
-  }
-
-  @Override
-  public String getDownloadUrl() {
-    return HTTP_LIVE_SYSINTERNALS_COM_HANDLE_EXE;
   }
 
   @Override
