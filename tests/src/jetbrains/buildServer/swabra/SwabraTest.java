@@ -18,14 +18,16 @@ package jetbrains.buildServer.swabra;
 
 import com.intellij.openapi.util.Pair;
 import com.intellij.util.WaitFor;
-import java.io.*;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.FilenameFilter;
+import java.io.IOException;
 import java.util.*;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
-import jetbrains.buildServer.BaseTestCase;
 import jetbrains.buildServer.TempFiles;
 import jetbrains.buildServer.agent.*;
 import jetbrains.buildServer.agent.impl.directories.*;
@@ -181,10 +183,13 @@ public class SwabraTest extends TestCase {
                                      new SwabraPropertiesProcessor(myDispatcher, swabraLogger,
                                                                    new DirectoryMapPersistanceImpl(myAgentConf, new SystemTimeService())),
                                      new BundledToolsRegistry() {
-
                                        @Nullable
                                        public BundledTool findTool(@NotNull final String name) {
                                          return null;
+                                       }
+
+                                       @Override
+                                       public void registerTool(@NotNull final String toolName, @NotNull final BundledTool tool) {
                                        }
                                      },
                                      new DirectoryMapDirectoriesCleanerImpl(myDispatcher,
@@ -543,6 +548,10 @@ public class SwabraTest extends TestCase {
                                        propertiesProcessor, new BundledToolsRegistry() {
         public BundledTool findTool(@NotNull final String name) {
           return null;
+        }
+
+        @Override
+        public void registerTool(@NotNull final String toolName, @NotNull final BundledTool tool) {
         }
       }, new DirectoryMapDirectoriesCleanerImpl(myDispatcher,
                                                 directoryCleaner,
@@ -1101,6 +1110,10 @@ E:\TEMP\test-1307328584\checkoutDir2\dir2=pending
                                      new BundledToolsRegistry() {
                                        public BundledTool findTool(@NotNull final String name) {
                                          return null;
+                                       }
+
+                                       @Override
+                                       public void registerTool(@NotNull final String toolName, @NotNull final BundledTool tool) {
                                        }
                                      },
                                      new DirectoryMapDirectoriesCleanerImpl(
