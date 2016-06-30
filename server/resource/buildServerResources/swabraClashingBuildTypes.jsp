@@ -1,9 +1,12 @@
 <%@ page import="jetbrains.buildServer.swabra.serverHealth.SwabraFrequentCleanCheckoutReport" %>
+<%@ page import="jetbrains.buildServer.web.openapi.healthStatus.HealthStatusItemDisplayMode" %>
 <%@ include file="/include-internal.jsp" %>
 
 <jsp:useBean id="healthStatusItem" type="jetbrains.buildServer.serverSide.healthStatus.HealthStatusItem" scope="request"/>
 <jsp:useBean id="showMode" type="jetbrains.buildServer.web.openapi.healthStatus.HealthStatusItemDisplayMode" scope="request"/>
 <jsp:useBean id="healthStatusReportUrl" type="java.lang.String" scope="request"/>
+<c:set var="inplaceMode" value="<%=HealthStatusItemDisplayMode.IN_PLACE%>"/>
+<c:set var="cameFromUrl" value="${showMode eq inplaceMode ? pageUrl : healthStatusReportUrl}"/>
 
 <c:set var="groups" value="<%=healthStatusItem.getAdditionalData().get(SwabraFrequentCleanCheckoutReport.SWABRA_CLASHING_BUILD_TYPES)%>"/>
 <style type="text/css">
@@ -27,7 +30,7 @@
         <c:if test="${afn:permissionGrantedForBuildType(bt, 'VIEW_PROJECT')}">
           <c:set var="num" value="${num + 1}"/>
           <li class="${num > 3 ? 'hidden' : ''}">
-            <admin:editBuildTypeLink buildTypeId="${bt.externalId}" step="runType" cameFromUrl="${healthStatusReportUrl}"><c:out value="${bt.fullName}"/></admin:editBuildTypeLink>
+            <admin:editBuildTypeLink buildTypeId="${bt.externalId}" step="runType" cameFromUrl="${cameFromUrl}"><c:out value="${bt.fullName}"/></admin:editBuildTypeLink>
           </li>
         </c:if>
       </c:forEach>
