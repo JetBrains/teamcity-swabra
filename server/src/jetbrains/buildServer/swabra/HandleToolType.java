@@ -48,7 +48,8 @@ public class HandleToolType extends ToolTypeAdapter {
   }
 
   @Override
-  public String getFileName() {
+  @NotNull
+  public String getShortDisplayName() {
     return "handle.exe";
   }
 
