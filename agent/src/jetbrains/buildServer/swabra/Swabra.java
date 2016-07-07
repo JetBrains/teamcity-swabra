@@ -223,11 +223,13 @@ public final class Swabra extends AgentLifeCycleAdapter implements PositionAware
         return;
       case CLEAN:
         if (mySettings.isStrict()) {
+          reportCleanCheckoutDetected();
           cleanupCheckoutDir("Checkout directory may contain newly created, modified or deleted files", myRunningBuild);
         }
         return;
       case DIRTY:
         if (mySettings.isStrict()) {
+          reportCleanCheckoutDetected();
           cleanupCheckoutDir("Checkout directory contains newly created, modified or deleted files", myRunningBuild);
         } else if (mySettings.isCleanupBeforeBuild()) {
           myLogger.debug("Checkout directory cleanup is performed before build");
@@ -239,6 +241,7 @@ public final class Swabra extends AgentLifeCycleAdapter implements PositionAware
         return;
       case PENDING:
         if (mySettings.isStrict()) {
+          reportCleanCheckoutDetected();
           cleanupCheckoutDir("Checkout directory snapshot may contain information about newly created, modified or deleted files", myRunningBuild);
         } else{
           myLogger.debug("Checkout directory cleanup is performed before build");
@@ -253,6 +256,10 @@ public final class Swabra extends AgentLifeCycleAdapter implements PositionAware
       default:
         cleanupCheckoutDir("Checkout directory state is unknown", myRunningBuild);
     }
+  }
+
+  private void reportCleanCheckoutDetected() {
+    myRunningBuild.addSharedConfigParameter(SwabraUtil.CLEAN_CHECKOUT_DETECTED_PARAM, "true");
   }
 
   private void collectFilesInCheckoutDir(@NotNull final File dir) {

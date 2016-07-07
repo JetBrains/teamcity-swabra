@@ -38,18 +38,22 @@ import org.jetbrains.annotations.NotNull;
  * Detects frequent clean checkout cause - build types working in the same checkout directory and having different Swabra settings
  */
 public class SwabraFrequentCleanCheckoutReport extends HealthStatusReport {
+
   private static final String SWABRA_FREQUENT_CLEAN_CHECKOUT_TYPE = "swabraFrequentCleanCheckout";
+
   public static final String SWABRA_CLASHING_BUILD_TYPES = "swabraClashingBuildTypes";
   public static final String CATEGORY_NAME = "Possible frequent clean checkout (Swabra case)";
   public static final String CATEGORY_DESCRIPTION = "Build configurations with the same checkout directory but different Swabra settings";
 
   @NotNull private final ProjectManager myProjectManager;
   @NotNull private final ItemCategory myCategory;
+  @NotNull private final SwabraCleanCheckoutWatcher myWatcher;
 
   public SwabraFrequentCleanCheckoutReport(@NotNull final PluginDescriptor descriptor,
                                            @NotNull final PagePlaces pagePlaces,
                                            @NotNull final WebLinks webLinks,
-                                           @NotNull ProjectManager projectManager) {
+                                           @NotNull ProjectManager projectManager,
+                                           @NotNull SwabraCleanCheckoutWatcher watcher) {
     final HealthStatusItemPageExtension pageExtension = new HealthStatusItemPageExtension(SWABRA_FREQUENT_CLEAN_CHECKOUT_TYPE, pagePlaces) {
       @Override
       public boolean isAvailable(@NotNull final HttpServletRequest request) {
@@ -75,6 +79,7 @@ public class SwabraFrequentCleanCheckoutReport extends HealthStatusReport {
 
     myCategory = new ItemCategory(SWABRA_FREQUENT_CLEAN_CHECKOUT_TYPE, CATEGORY_NAME, ItemSeverity.INFO, CATEGORY_DESCRIPTION, webLinks.getHelp("Build Files Cleaner (Swabra)"));
     myProjectManager = projectManager;
+    myWatcher = watcher;
   }
 
   @NotNull
@@ -103,7 +108,7 @@ public class SwabraFrequentCleanCheckoutReport extends HealthStatusReport {
   @Override
   public void report(@NotNull final HealthStatusScope scope, @NotNull final HealthStatusItemConsumer resultConsumer) {
     final List<List<SwabraSettingsGroup>> result =
-      new SwabraClashingConfigurationsDetector().getClashingConfigurationsGroups(myProjectManager.getActiveBuildTypes(), scope.getBuildTypes());
+      new SwabraClashingConfigurationsDetector(myWatcher, myProjectManager).getClashingConfigurationsGroups(scope.getBuildTypes());
 
     for (List<SwabraSettingsGroup> group : result) {
       if(group.isEmpty()) continue;

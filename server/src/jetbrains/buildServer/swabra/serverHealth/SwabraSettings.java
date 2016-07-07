@@ -49,6 +49,12 @@ public class SwabraSettings {
     }
   }
 
+  public SwabraSettings(final boolean featurePresent, final boolean cleanupEnabled, final boolean strict) {
+    myFeaturePresent = featurePresent;
+    myCleanupEnabled = cleanupEnabled;
+    myStrict = strict;
+  }
+
   @Used("jsp")
   public boolean isCleanupEnabled() {
     return myCleanupEnabled;
@@ -93,5 +99,14 @@ public class SwabraSettings {
       }
     }
     return null;
+  }
+
+  @Override
+  public String toString() {
+    return "SwabraSettings{" +
+           "present=" + myFeaturePresent +
+           ", enabled=" + myCleanupEnabled +
+           ", strict=" + myStrict +
+           '}';
   }
 }

@@ -10,7 +10,6 @@
       <class name="jetbrains.buildServer.swabra.SnapshotFilesTraversalTest"/>
       <class name="jetbrains.buildServer.swabra.SwabraRulesTest"/>
       <class name="jetbrains.buildServer.swabra.processes.LockedFileResolverTest"/>
-      <class name="jetbrains.buildServer.swabra.serverHealth.SwabraClashingConfigurationsDetectorTest"/>
     </classes>
   </test>
 </suite>

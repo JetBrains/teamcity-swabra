@@ -17,15 +17,11 @@
 package jetbrains.buildServer.swabra.serverHealth;
 
 import java.util.*;
-import jetbrains.buildServer.BuildTypeDescriptor;
-import jetbrains.buildServer.parameters.ReferencesResolverUtil;
-import jetbrains.buildServer.serverSide.BuildTypeEx;
+import jetbrains.buildServer.serverSide.ProjectManager;
 import jetbrains.buildServer.serverSide.SBuildType;
 import jetbrains.buildServer.util.CollectionsUtil;
 import jetbrains.buildServer.util.Converter;
-import jetbrains.buildServer.util.StringUtil;
 import jetbrains.buildServer.util.filters.Filter;
-import jetbrains.buildServer.vcs.SVcsRoot;
 import org.jetbrains.annotations.NotNull;
 
 /**
@@ -34,11 +30,20 @@ import org.jetbrains.annotations.NotNull;
  * Time: 6:08 PM
  */
 public class SwabraClashingConfigurationsDetector {
+
+  @NotNull private final SwabraCleanCheckoutWatcher myWatcher;
+  @NotNull private final ProjectManager myProjectManager;
+
+  public SwabraClashingConfigurationsDetector(@NotNull final SwabraCleanCheckoutWatcher watcher, @NotNull final ProjectManager projectManager) {
+    myWatcher = watcher;
+    myProjectManager = projectManager;
+  }
+
   @NotNull
-  public List<List<SwabraSettingsGroup>> getClashingConfigurationsGroups(@NotNull Collection<SBuildType> buildTypes, @NotNull Collection<SBuildType> scopeBuildTypes) {
+  public List<List<SwabraSettingsGroup>> getClashingConfigurationsGroups(@NotNull Collection<SBuildType> buildTypes) {
     final List<List<SwabraSettingsGroup>> res = new ArrayList<List<SwabraSettingsGroup>>();
-    for (Collection<SBuildType> group : groupBuildTypesByCheckoutDir(buildTypes, scopeBuildTypes)) {
-      if (group.size() > 1 && buildTypesAccepted(group, scopeBuildTypes)) {
+    for (Collection<SBuildType> group : groupClashingBuildTypes(buildTypes)) {
+      if (group.size() > 1) {
         final Map<SwabraSettings, List<SBuildType>> clashed = CollectionsUtil.groupBy(group, new Converter<SwabraSettings, SBuildType>() {
           public SwabraSettings createFrom(@NotNull final SBuildType bt) {
             return new SwabraSettings(bt);
@@ -57,79 +62,55 @@ public class SwabraClashingConfigurationsDetector {
     return res;
   }
 
-  private static boolean buildTypesAccepted(@NotNull Collection<SBuildType> buildTypes, @NotNull final Collection<SBuildType> scopeBuildTypes) {
-    return null != CollectionsUtil.findFirst(buildTypes, new Filter<SBuildType>() {
-      public boolean accept(@NotNull final SBuildType data) {
-        return scopeBuildTypes.contains(data);
+  @NotNull
+  private Collection<Collection<SBuildType>> groupClashingBuildTypes(@NotNull Collection<SBuildType> buildTypes) {
+    final List<ClashingGroup> groups = new ArrayList<ClashingGroup>();
+    for (SBuildType bt : buildTypes) {
+      final Collection<String> cleanCheckoutCauses = myWatcher.getRecentCleanCheckoutCauses(bt);
+      if (cleanCheckoutCauses.isEmpty()) continue;
+
+      ClashingGroup relatedGroup = null;
+      for (ClashingGroup group : groups) {
+        if (null != CollectionsUtil.findFirst(group.guiltyBuildTypes, new Filter<String>() {
+          @Override
+          public boolean accept(@NotNull final String data) {
+            return cleanCheckoutCauses.contains(data);
+          }
+        })) {
+          relatedGroup = group;
+          break;
+        };
+      }
+      if (relatedGroup == null) {
+        relatedGroup = new ClashingGroup();
+        groups.add(relatedGroup);
+      }
+      relatedGroup.sufferingBuildTypes.add(bt.getBuildTypeId());
+      relatedGroup.guiltyBuildTypes.addAll(cleanCheckoutCauses);
+    }
+    return CollectionsUtil.convertCollection(groups, new Converter<Collection<SBuildType>, ClashingGroup>() {
+      @Override
+      public Collection<SBuildType> createFrom(@NotNull final ClashingGroup source) {
+        final Set<SBuildType> res = new HashSet<SBuildType>();
+        res.addAll(getBuildTypes(source.sufferingBuildTypes));
+        res.addAll(getBuildTypes(source.guiltyBuildTypes));
+        return res;
       }
     });
   }
 
   @NotNull
-  public List<List<SBuildType>> getClashingConfigurations(@NotNull Collection<SBuildType> buildTypes, @NotNull Collection<SBuildType> scopeBuildTypes) {
-    final List<List<SBuildType>> res = new ArrayList<List<SBuildType>>();
-    for (List<SwabraSettingsGroup> groups : getClashingConfigurationsGroups(buildTypes, scopeBuildTypes)) {
-      final List<SBuildType> tmpRes = new ArrayList<SBuildType>();
-      for (SwabraSettingsGroup group: groups) tmpRes.addAll(group.getBuildTypes());
-      res.add(tmpRes);
-    }
-    return res;
+  private Collection<SBuildType> getBuildTypes(@NotNull Collection<String> ids) {
+    return CollectionsUtil.convertAndFilterNulls(ids, new Converter<SBuildType, String>() {
+      @Override
+      public SBuildType createFrom(@NotNull final String source) {
+        return myProjectManager.findBuildTypeById(source);
+      }
+    });
   }
 
-  /**
-   * Returns build types with enabled Swabra build feature grouped by vcs settings hash or by custom checkout dir
-   * @return
-   */
-  @NotNull
-  private Collection<Collection<SBuildType>> groupBuildTypesByCheckoutDir(@NotNull Collection<SBuildType> buildTypes, @NotNull final Collection<SBuildType> scopeBuildTypes) {
-    Collection<List<SBuildType>> sameRootsGroups = CollectionsUtil.groupBy(buildTypes, new Converter<Object, SBuildType>() {
-      public Object createFrom(@NotNull final SBuildType source) {
-        StringBuilder sb = new StringBuilder();
-        for (SVcsRoot root: source.getVcsRoots()) {
-          sb.append(root.getId()).append(':');
-        }
-        return sb.toString();
-      }
-    }).values();
-
-    Iterator<List<SBuildType>> groupsIt = sameRootsGroups.iterator();
-    while (groupsIt.hasNext()) {
-      if (!buildTypesAccepted(groupsIt.next(), scopeBuildTypes)) {
-        groupsIt.remove();
-      }
-    }
-
-    Set<SBuildType> buildTypesToProcess = new HashSet<SBuildType>();
-    for (List<SBuildType> group: sameRootsGroups) {
-      buildTypesToProcess.addAll(group);
-    }
-
-    final Map<String, Collection<SBuildType>> res = new HashMap<String, Collection<SBuildType>>();
-    for (SBuildType buildType : buildTypesToProcess) {
-      BuildTypeEx bt = (BuildTypeEx)buildType;
-      Collection<SBuildType> bts;
-
-      String checkoutDir = StringUtil.nullIfEmpty(bt.getCheckoutDirectory());
-      if (checkoutDir != null && ReferencesResolverUtil.mayContainReference(checkoutDir)) {
-        continue;
-      }
-
-      if (bt.getCheckoutType() == BuildTypeDescriptor.CheckoutType.AUTO) {
-        continue; //we don't know checkout directory for auto checkout because it's resolved on agent.
-        //as a result, build types with auto checkout mode will be excluded from this report.
-      }
-
-      final String groupKey = checkoutDir == null ? bt.getVcsRootsHash(bt.getCheckoutType()) : checkoutDir;
-
-      bts = res.get(groupKey);
-      if (bts != null) {
-        bts.add(bt);
-      } else {
-        bts = new ArrayList<SBuildType>();
-        bts.add(bt);
-        res.put(groupKey, bts);
-      }
-    }
-    return res.values();
+  private static final class ClashingGroup {
+    private final Set<String> sufferingBuildTypes = new HashSet<>();
+    private final Set<String> guiltyBuildTypes = new HashSet<>();
   }
 }
