@@ -143,6 +143,7 @@ public class SwabraTest2 extends BaseTestCase {
         }
       }));
       allowing(myRunningBuild).isCleanBuild(); will(returnValue(true));
+      allowing(myRunningBuild).getBuildTypeId(); will(returnValue("btID"));
 
 
       allowing(myAgentConf).getCacheDirectory(with(SwabraUtil.FEATURE_TYPE)); will(returnValue(mySwabraDir));

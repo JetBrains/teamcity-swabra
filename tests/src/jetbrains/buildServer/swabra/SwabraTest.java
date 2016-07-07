@@ -90,6 +90,8 @@ public class SwabraTest extends TestCase {
         will(returnValue(AgentCheckoutMode.ON_SERVER));
         allowing(build).getInterruptReason();
         will(returnValue(null));
+        allowing(build).getBuildTypeId();
+        will(returnValue("btID"));
       }
     });
 
