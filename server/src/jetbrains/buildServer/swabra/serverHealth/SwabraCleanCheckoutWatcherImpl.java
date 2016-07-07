@@ -87,7 +87,7 @@ public class SwabraCleanCheckoutWatcherImpl extends BuildServerAdapter implement
           synchronized (LOCK) {
             final CustomDataStorage storage = getDataStorage(bt);
             final Map<String, String> values = storage.getValues();
-            if (values == null) return;
+            if (values == null) continue;
 
             for (Map.Entry<String, String> e : values.entrySet()) {
               if (isOldOrBad(e.getValue(), now) || myProjectManager.findBuildTypeById(e.getKey()) == null) {
