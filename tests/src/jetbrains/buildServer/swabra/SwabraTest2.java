@@ -61,7 +61,6 @@ public class SwabraTest2 extends BaseTestCase {
     }
   };
   private EventDispatcher<AgentLifeCycleListener> myAgentDispatcher;
-  private SmartDirectoryCleanerImpl myDirectoryCleaner;
   private SwabraLogger mySwabraLogger;
   private SwabraPropertiesProcessor myPropertiesProcessor;
   private Collection<Map<String,String>> mySwabraParamsRef;
@@ -91,12 +90,11 @@ public class SwabraTest2 extends BaseTestCase {
         return false;
       }
     };
-    myDirectoryCleaner = new SmartDirectoryCleanerImpl(cleaner);
     mySwabraLogger = new SwabraLogger();
     myMockery = new Mockery();
     myAgentConf = myMockery.mock(BuildAgentConfiguration.class);
     myPropertiesProcessor = new SwabraPropertiesProcessor(myAgentDispatcher, mySwabraLogger, new DirectoryMapPersistanceImpl(myAgentConf, new SystemTimeService()));
-    mySwabra = new Swabra(myAgentDispatcher, myDirectoryCleaner, mySwabraLogger, myPropertiesProcessor, emptyToolsRegistry,
+    mySwabra = new Swabra(myAgentDispatcher, mySwabraLogger, myPropertiesProcessor, emptyToolsRegistry,
                           new DirectoryMapDirectoriesCleanerImpl(myAgentDispatcher, cleaner, new DirectoryMapPersistanceImpl(myAgentConf, new SystemTimeService()), new DirectoryMapDirtyTrackerImpl()));
 
     mySwabraParamsRef = new ArrayList<Map<String, String>>();

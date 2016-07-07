@@ -50,8 +50,6 @@ public final class Swabra extends AgentLifeCycleAdapter implements PositionAware
   public static final String CACHE_KEY = "swabra";
   public static final String TEST_LOG = "swabra.test.log";
 
-  @NotNull
-  private final SmartDirectoryCleaner myDirectoryCleaner;
   private final SwabraLogger myLogger;
   @NotNull
   private final SwabraPropertiesProcessor myPropertiesProcessor;
@@ -75,7 +73,6 @@ public final class Swabra extends AgentLifeCycleAdapter implements PositionAware
   private AtomicBoolean myBuildInterrupted = new AtomicBoolean(false);
 
   public Swabra(@NotNull final EventDispatcher<AgentLifeCycleListener> agentDispatcher,
-                @NotNull final SmartDirectoryCleaner directoryCleaner,
                 @NotNull final SwabraLogger logger,
                 @NotNull final SwabraPropertiesProcessor propertiesProcessor,
                 @NotNull final BundledToolsRegistry toolsRegistry,
@@ -83,7 +80,6 @@ public final class Swabra extends AgentLifeCycleAdapter implements PositionAware
                 /*,@NotNull ProcessTerminator processTerminator*/) {
     myDirectoriesCleaner = directoriesCleaner;
     agentDispatcher.addListener(this);
-    myDirectoryCleaner = directoryCleaner;
     myLogger = logger;
     myPropertiesProcessor = propertiesProcessor;
     myToolsRegistry = toolsRegistry;

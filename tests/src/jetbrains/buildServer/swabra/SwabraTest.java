@@ -111,17 +111,6 @@ public class SwabraTest extends TestCase {
     });
   }
 
-  private SmartDirectoryCleaner createSmartDirectoryCleaner() {
-    return new SmartDirectoryCleaner() {
-      public void cleanFolder(@NotNull File file, @NotNull SmartDirectoryCleanerCallback callback) {
-        callback.logCleanStarted(file);
-        if (!FileUtil.delete(file)) {
-          callback.logFailedToCleanEntireFolder(file);
-        }
-      }
-    };
-  }
-
   @Override
   public void setUp() throws Exception {
     myContext = new JUnit4Mockery();
@@ -179,7 +168,7 @@ public class SwabraTest extends TestCase {
       }
     };
 
-    final Swabra swabra = new Swabra(myDispatcher, createSmartDirectoryCleaner(), new SwabraLogger(),
+    final Swabra swabra = new Swabra(myDispatcher, new SwabraLogger(),
                                      new SwabraPropertiesProcessor(myDispatcher, swabraLogger,
                                                                    new DirectoryMapPersistanceImpl(myAgentConf, new SystemTimeService())),
                                      new BundledToolsRegistry() {
@@ -544,7 +533,7 @@ public class SwabraTest extends TestCase {
           return false;
         }
       };
-      final Swabra swabra = new Swabra(myDispatcher, createSmartDirectoryCleaner(), new SwabraLogger(),
+      final Swabra swabra = new Swabra(myDispatcher, new SwabraLogger(),
                                        propertiesProcessor, new BundledToolsRegistry() {
         public BundledTool findTool(@NotNull final String name) {
           return null;
@@ -1105,7 +1094,7 @@ E:\TEMP\test-1307328584\checkoutDir2\dir2=pending
     final SwabraPropertiesProcessor propertiesProcessor =
       new SwabraPropertiesProcessor(myDispatcher, swabraLogger, new DirectoryMapPersistanceImpl(myAgentConf, new SystemTimeService()));
     final DirectoryMapDirtyTrackerImpl dirtyTracker = new DirectoryMapDirtyTrackerImpl();
-    final Swabra swabra = new Swabra(myDispatcher, createSmartDirectoryCleaner(), new SwabraLogger(),
+    final Swabra swabra = new Swabra(myDispatcher, new SwabraLogger(),
                                      propertiesProcessor,
                                      new BundledToolsRegistry() {
                                        public BundledTool findTool(@NotNull final String name) {
