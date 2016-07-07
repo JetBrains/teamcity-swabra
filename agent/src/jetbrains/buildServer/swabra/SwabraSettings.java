@@ -17,6 +17,8 @@
 package jetbrains.buildServer.swabra;
 
 import com.intellij.openapi.util.SystemInfo;
+import java.io.File;
+import java.util.*;
 import jetbrains.buildServer.agent.AgentBuildFeature;
 import jetbrains.buildServer.agent.AgentCheckoutMode;
 import jetbrains.buildServer.agent.AgentRunningBuild;
@@ -26,9 +28,6 @@ import jetbrains.buildServer.swabra.snapshots.SwabraRules;
 import jetbrains.buildServer.util.StringUtil;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-
-import java.io.File;
-import java.util.*;
 
 /**
  * User: vbedrosova
@@ -61,7 +60,7 @@ public class SwabraSettings {
 
 
   public SwabraSettings(AgentRunningBuild runningBuild) {
-    final Collection<AgentBuildFeature> features = runningBuild.getBuildFeaturesOfType("swabra");
+    final Collection<AgentBuildFeature> features = runningBuild.getBuildFeaturesOfType(SwabraUtil.FEATURE_TYPE);
 
     final Map<String, String> params = new HashMap<String, String>();
     if (!features.isEmpty()) {

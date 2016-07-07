@@ -20,7 +20,6 @@ import java.util.Map;
 import jetbrains.buildServer.Used;
 import jetbrains.buildServer.serverSide.SBuildFeatureDescriptor;
 import jetbrains.buildServer.serverSide.SBuildType;
-import jetbrains.buildServer.swabra.SwabraBuildFeature;
 import jetbrains.buildServer.swabra.SwabraUtil;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -93,7 +92,7 @@ public class SwabraSettings {
 
   @Nullable
   private static SBuildFeatureDescriptor getSwabraBuildFeature(@NotNull SBuildType bt) {
-    for (SBuildFeatureDescriptor feature : bt.getBuildFeaturesOfType(SwabraBuildFeature.FEATURE_TYPE)) {
+    for (SBuildFeatureDescriptor feature : bt.getBuildFeaturesOfType(SwabraUtil.FEATURE_TYPE)) {
       if (bt.isEnabled(feature.getId())) {
        return feature;
       }

@@ -33,7 +33,6 @@ import org.springframework.web.servlet.ModelAndView;
 import static jetbrains.buildServer.swabra.HandleToolType.HANDLE_TOOL;
 
 public class SwabraBuildFeature extends BuildFeature {
-  public static final String FEATURE_TYPE = "swabra";
 
   private final String myEditUrl;
 
@@ -64,7 +63,7 @@ public class SwabraBuildFeature extends BuildFeature {
   @NotNull
   @Override
   public String getType() {
-    return FEATURE_TYPE;
+    return SwabraUtil.FEATURE_TYPE;
   }
 
   @NotNull

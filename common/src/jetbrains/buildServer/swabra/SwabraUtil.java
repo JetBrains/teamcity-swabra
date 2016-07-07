@@ -27,6 +27,9 @@ import org.jetbrains.annotations.Nullable;
  * Time: 15:02:17
  */
 public class SwabraUtil {
+
+  public static final String FEATURE_TYPE = "swabra";
+
   public static final String ENABLED = "swabra.enabled";
   public static final String STRICT = "swabra.strict";
   public static final String VERBOSE = "swabra.verbose";

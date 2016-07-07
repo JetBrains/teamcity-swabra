@@ -119,14 +119,14 @@ public class SwabraTest2 extends BaseTestCase {
         }
       });
       allowing(myRunningBuild).getBuildLogger(); will(returnValue(myBuildProgressLogger));
-      allowing(myRunningBuild).getBuildFeaturesOfType(with("swabra")); will(doAll(new Action() {
+      allowing(myRunningBuild).getBuildFeaturesOfType(with(SwabraUtil.FEATURE_TYPE)); will(doAll(new Action() {
         public Object invoke(final Invocation invocation) throws Throwable {
           Collection<AgentBuildFeature> swabraFeatures = new ArrayList<AgentBuildFeature>();
           for (final Map<String, String> map : mySwabraParamsRef) {
             swabraFeatures.add(new AgentBuildFeature() {
               @NotNull
               public String getType() {
-                return "swabra";
+                return SwabraUtil.FEATURE_TYPE;
               }
 
               @NotNull
@@ -145,7 +145,7 @@ public class SwabraTest2 extends BaseTestCase {
       allowing(myRunningBuild).isCleanBuild(); will(returnValue(true));
 
 
-      allowing(myAgentConf).getCacheDirectory(with("swabra")); will(returnValue(mySwabraDir));
+      allowing(myAgentConf).getCacheDirectory(with(SwabraUtil.FEATURE_TYPE)); will(returnValue(mySwabraDir));
       allowing(myAgentConf).getWorkDirectory(); will(returnValue(agentWorkDir));
 
     }});

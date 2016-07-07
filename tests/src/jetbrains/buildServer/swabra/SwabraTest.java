@@ -76,7 +76,7 @@ public class SwabraTest extends TestCase {
 
     myContext.checking(new Expectations() {
       {
-        allowing(build).getBuildFeaturesOfType(with("swabra"));
+        allowing(build).getBuildFeaturesOfType(with(SwabraUtil.FEATURE_TYPE));
         will(returnValue(createBuildFeatures(runParams)));
         allowing(build).getBuildLogger();
         will(returnValue(logger));
@@ -101,7 +101,7 @@ public class SwabraTest extends TestCase {
     return Collections.<AgentBuildFeature>singletonList(new AgentBuildFeature() {
       @NotNull
       public String getType() {
-        return "swabra";
+        return SwabraUtil.FEATURE_TYPE;
       }
 
       @NotNull
