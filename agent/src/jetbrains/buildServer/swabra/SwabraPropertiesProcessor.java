@@ -16,7 +16,6 @@
 
 package jetbrains.buildServer.swabra;
 
-import com.intellij.openapi.util.Pair;
 import java.io.*;
 import java.util.*;
 import java.util.concurrent.CountDownLatch;
@@ -46,7 +45,7 @@ public class SwabraPropertiesProcessor extends AgentLifeCycleAdapter {
 
   private static final String SNAPSHOT_SUFFIX = ".snapshot";
 
-  private final Map<String, Pair<String,String>> myProperties;
+  private final Map<String, DirInfo> myProperties;
   private final SwabraLogger myLogger;
   @NotNull private final DirectoryMapPersistance myPersist;
   private File myPropertiesFile;
@@ -59,7 +58,7 @@ public class SwabraPropertiesProcessor extends AgentLifeCycleAdapter {
     myPersist = persistance;
     agentDispatcher.addListener(this);
     myLogger = logger;
-    myProperties = new HashMap<String, Pair<String, String>>();
+    myProperties = new HashMap<String, DirInfo>();
   }
 
   @Override
@@ -129,13 +128,13 @@ public class SwabraPropertiesProcessor extends AgentLifeCycleAdapter {
       String fileRecord = reader.readLine();
       while (fileRecord != null) {
         final String[] mapElem = fileRecord.split(KEY_VAL_SEPARATOR);
-        if (mapElem.length > 3 || mapElem.length < 2) {
+        if (mapElem.length > 4 || mapElem.length < 2) {
           myLogger.warn("Error reading directories states from " + myPropertiesFile.getAbsolutePath() + ", came across illegal record");
           return;
         }
-        final String checkoutDirName = mapElem[0];
-        final String path = mapElem.length == 2 ? checkoutDirName : mapElem[2];
-        myProperties.put(checkoutDirName, new Pair<String, String>(mapElem[1], path));
+        final String dir = mapElem[0];
+        final String checkoutDir = mapElem.length == 2 ? dir : mapElem[2];
+        myProperties.put(dir, new DirInfo(mapElem[1], checkoutDir, mapElem.length == 4 ? mapElem[3] : null));
         fileRecord = reader.readLine();
       }
     } catch (IOException e) {
@@ -170,11 +169,13 @@ public class SwabraPropertiesProcessor extends AgentLifeCycleAdapter {
     BufferedWriter writer = null;
     try {
       writer = new BufferedWriter(new FileWriter(myPropertiesFile));
-      for (Map.Entry<String, Pair<String, String>> entry : myProperties.entrySet()) {
-          writer.write(String.format("%s%s%s%s%s%n"
+      for (Map.Entry<String, DirInfo> entry : myProperties.entrySet()) {
+          writer.write(String.format("%s%s%s%s%s%s%s%n"
             , entry.getKey(), KEY_VAL_SEPARATOR
-            , entry.getValue().getFirst(), KEY_VAL_SEPARATOR
-            , entry.getValue().getSecond()));
+            , entry.getValue().state, KEY_VAL_SEPARATOR
+            , entry.getValue().checkoutDir, KEY_VAL_SEPARATOR
+            , entry.getValue().buildTypeId)
+          );
       }
     } catch (IOException e) {
       myLogger.warn("Error saving directories states to " + myPropertiesFile.getAbsolutePath() + getMessage(e));
@@ -216,10 +217,10 @@ public class SwabraPropertiesProcessor extends AgentLifeCycleAdapter {
           continue;
         }
         final String unifiedCheckoutDirPath = unifyPath(checkoutDir);
-        for (Map.Entry<String, Pair<String, String>> entry : myProperties.entrySet()) {
-          final Pair<String, String> pair = entry.getValue();
+        for (Map.Entry<String, DirInfo> entry : myProperties.entrySet()) {
+          final DirInfo info = entry.getValue();
           final String monitoredDir = entry.getKey();
-          if (pair.getSecond().equals(unifiedCheckoutDirPath)) {
+          if (info.checkoutDir.equals(unifiedCheckoutDirPath)) {
             propertiesToRemove.remove(unifyPath(monitoredDir));
             snapshotsToRemove.remove(getSnapshotFile(new File(monitoredDir)));
           }
@@ -284,31 +285,49 @@ public class SwabraPropertiesProcessor extends AgentLifeCycleAdapter {
   }
 
   public DirectoryState getState(File dir) {
-    final Pair<String, String> pair = myProperties.get(unifyPath(dir));
-    return DirectoryState.getState(pair == null ? null: pair.getFirst());
+    final DirInfo info = myProperties.get(unifyPath(dir));
+    return DirectoryState.getState(info == null ? null: info.state);
   }
 
-  private synchronized void mark(@NotNull final File dir, @NotNull final File checkoutDir, @NotNull String state) {
+  public synchronized String getPreviousBuildTypeId(File dir) {
+    final DirInfo info = myProperties.get(unifyPath(dir));
+    return info == null ? null: info.buildTypeId;
+  }
+
+  private synchronized void mark(@NotNull final File dir, @NotNull final File checkoutDir, @NotNull String state, @NotNull String buildTypeId) {
     readProperties(false);
     myLogger.debug("Marking " + dir.getAbsolutePath() + " as " + state);
-    myProperties.put(unifyPath(dir), Pair.create(state, unifyPath(checkoutDir)));
+    myProperties.put(unifyPath(dir), new DirInfo(state, unifyPath(checkoutDir), buildTypeId));
     writeProperties();
   }
 
-  public void markDirty(@NotNull final File dir, @NotNull final File checkoutDir) {
-    mark(dir, checkoutDir, DirectoryState.DIRTY.getName());
+  public void markDirty(@NotNull final File dir, @NotNull final File checkoutDir, @NotNull String buildTypeId) {
+    mark(dir, checkoutDir, DirectoryState.DIRTY.getName(), buildTypeId);
   }
 
-  public void markClean(@NotNull File dir, @NotNull final File checkoutDir, boolean strict) {
-    mark(dir, checkoutDir, strict ? DirectoryState.STRICT_CLEAN.getName() : DirectoryState.CLEAN.getName());
+  public void markClean(@NotNull File dir, @NotNull final File checkoutDir, boolean strict, @NotNull String buildTypeId) {
+    mark(dir, checkoutDir, strict ? DirectoryState.STRICT_CLEAN.getName() : DirectoryState.CLEAN.getName(), buildTypeId);
   }
 
-  public void markPending(@NotNull File dir, @NotNull final File checkoutDir, boolean strict) {
-    mark(dir, checkoutDir, strict ? DirectoryState.STRICT_PENDING.getName() : DirectoryState.PENDING.getName());
+  public void markPending(@NotNull File dir, @NotNull final File checkoutDir, boolean strict, @NotNull String buildTypeId) {
+    mark(dir, checkoutDir, strict ? DirectoryState.STRICT_PENDING.getName() : DirectoryState.PENDING.getName(), buildTypeId);
   }
 
   // for tests
   public boolean isInitialized(){
     return myCleanupFinishedSignal.getCount()==0;
+  }
+
+  private static final class DirInfo {
+    @NotNull private final String state;
+    @NotNull private final String checkoutDir;
+    @Nullable private final String buildTypeId;
+
+
+    private DirInfo(@NotNull final String state, @NotNull final String checkoutDir, @Nullable final String buildTypeId) {
+      this.state = state;
+      this.checkoutDir = checkoutDir;
+      this.buildTypeId = buildTypeId;
+    }
   }
 }

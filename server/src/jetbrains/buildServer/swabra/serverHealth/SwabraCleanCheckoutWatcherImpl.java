@@ -18,7 +18,6 @@ package jetbrains.buildServer.swabra.serverHealth;
 
 import java.util.Collection;
 import java.util.Collections;
-import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import jetbrains.buildServer.serverSide.*;
@@ -36,10 +35,8 @@ public class SwabraCleanCheckoutWatcherImpl extends BuildServerAdapter implement
 
   public static final String CLEAN_CHECKOUT_BUILDS_STORAGE = "swabra.clean.checkout.builds.storage";
   public static final String BUILDS_STORAGE_PERIOD_PROPERTY = "teamcity.healthStatus.swabra.clean.checkout.builds.storage.period";
-  public static final String CHECKOUT_DIR_PARAM = "system.teamcity.build.checkoutDir";
 
   public static final long MONTH = 30*24*3600*1000;
-  public static final int HISTORY_LOOKUP_DEPTH = 100;
 
   private static final Object LOCK = new Object();
 
@@ -56,57 +53,16 @@ public class SwabraCleanCheckoutWatcherImpl extends BuildServerAdapter implement
   }
 
 
-
   @Override
   public void buildFinished(@NotNull final SRunningBuild build) {
-    if (Boolean.parseBoolean(build.getParametersProvider().get(SwabraUtil.CLEAN_CHECKOUT_DETECTED_PARAM))) {
+    final SBuildType buildType = build.getBuildType();
+    if (buildType == null) return;
 
-      final SBuildType buildType = build.getBuildType();
-      if (buildType == null) return;
-
-      final String checkoutDir = getCheckoutDir(build);
-      if (StringUtil.isEmptyOrSpaces(checkoutDir)) return;
-
-      final SwabraSettings settings = new SwabraSettings(buildType);
-      if (!settings.isFeaturePresent()) return; // why are we here?
-
-      final SBuildAgent agent = build.getAgent();
-
-      myExecutor.execute(new Runnable() {
-        @Override
-        public void run() {
-
-          synchronized (LOCK) {
-            final List<SFinishedBuild> history = agent.getBuildHistory(null, true);
-
-            String historyBuildTypeId = null;
-            for (int i = 0; i < Math.min(history.size(), HISTORY_LOOKUP_DEPTH); i++) {
-              final SFinishedBuild historyBuild = history.get(i);
-              if (historyBuild.getBuildId() >= build.getBuildId()) continue;
-              if (!checkoutDir.equals(getCheckoutDir(historyBuild))) continue;
-
-              final SBuildType historyBuildType = historyBuild.getBuildType();
-              if (historyBuildType == null) continue;
-
-              historyBuildTypeId = historyBuildType.getBuildTypeId();
-              break;
-            }
-
-            if (historyBuildTypeId != null) {
-              getDataStorage(buildType).putValue(historyBuildTypeId, String.valueOf(System.currentTimeMillis()));
-            }
-          }
-
-        }
-      });
-
+    final String causeBuildTypeId = build.getParametersProvider().get(SwabraUtil.CLEAN_CHECKOUT_CAUSE_BUILD_TYPE_ID);
+    if (StringUtil.isNotEmpty(causeBuildTypeId)) {
+      getDataStorage(buildType).putValue(causeBuildTypeId, String.valueOf(System.currentTimeMillis()));
       cleanOldValues();
     }
-  }
-
-  @Nullable
-  private static String getCheckoutDir(@NotNull SBuild build) {
-    return build.getParametersProvider().get(CHECKOUT_DIR_PARAM);
   }
 
   @NotNull

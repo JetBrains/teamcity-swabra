@@ -210,6 +210,7 @@ public final class Swabra extends AgentLifeCycleAdapter implements PositionAware
   }
 
   private void processCheckoutDir(@NotNull final File dir) {
+    final String previousBuildTypeId = myPropertiesProcessor.getPreviousBuildTypeId(dir);
     final SwabraPropertiesProcessor.DirectoryState directoryState = getAndCleanDirectoryState(dir);
 
     if (myRunningBuild.isCleanBuild() || !dir.isDirectory()) {
@@ -223,13 +224,13 @@ public final class Swabra extends AgentLifeCycleAdapter implements PositionAware
         return;
       case CLEAN:
         if (mySettings.isStrict()) {
-          reportCleanCheckoutDetected();
+          reportCleanCheckoutDetected(previousBuildTypeId);
           cleanupCheckoutDir("Checkout directory may contain newly created, modified or deleted files", myRunningBuild);
         }
         return;
       case DIRTY:
         if (mySettings.isStrict()) {
-          reportCleanCheckoutDetected();
+          reportCleanCheckoutDetected(previousBuildTypeId);
           cleanupCheckoutDir("Checkout directory contains newly created, modified or deleted files", myRunningBuild);
         } else if (mySettings.isCleanupBeforeBuild()) {
           myLogger.debug("Checkout directory cleanup is performed before build");
@@ -241,7 +242,7 @@ public final class Swabra extends AgentLifeCycleAdapter implements PositionAware
         return;
       case PENDING:
         if (mySettings.isStrict()) {
-          reportCleanCheckoutDetected();
+          reportCleanCheckoutDetected(previousBuildTypeId);
           cleanupCheckoutDir("Checkout directory snapshot may contain information about newly created, modified or deleted files", myRunningBuild);
         } else{
           myLogger.debug("Checkout directory cleanup is performed before build");
@@ -258,8 +259,10 @@ public final class Swabra extends AgentLifeCycleAdapter implements PositionAware
     }
   }
 
-  private void reportCleanCheckoutDetected() {
-    myRunningBuild.addSharedConfigParameter(SwabraUtil.CLEAN_CHECKOUT_DETECTED_PARAM, "true");
+  private void reportCleanCheckoutDetected(@Nullable String causeBuildTypeId) {
+    if (StringUtil.isNotEmpty(causeBuildTypeId)) {
+      myRunningBuild.addSharedConfigParameter(SwabraUtil.CLEAN_CHECKOUT_CAUSE_BUILD_TYPE_ID, causeBuildTypeId);
+    }
   }
 
   private void collectFilesInCheckoutDir(@NotNull final File dir) {
@@ -283,14 +286,14 @@ public final class Swabra extends AgentLifeCycleAdapter implements PositionAware
                    }
 
                    public void interrupted() {
-                     myPropertiesProcessor.markPending(dir, dir, mySettings.isStrict());
+                     myPropertiesProcessor.markPending(dir, dir, mySettings.isStrict(), myRunningBuild.getBuildTypeId());
                    }
                  }
                                        :
                  new FilesCollector.SimpleCollectionResultHandler() {
                    @Override
                    public void interrupted() {
-                     myPropertiesProcessor.markPending(dir, dir, mySettings.isStrict());
+                     myPropertiesProcessor.markPending(dir, dir, mySettings.isStrict(), myRunningBuild.getBuildTypeId());
                    }
 
                    @Override
@@ -329,6 +332,7 @@ public final class Swabra extends AgentLifeCycleAdapter implements PositionAware
 
   private SwabraPropertiesProcessor.DirectoryState getAndCleanDirectoryState(@NotNull File dir) {
     final SwabraPropertiesProcessor.DirectoryState directoryState = myPropertiesProcessor.getState(dir);
+
     myLogger.message(dir + " directory state is " + directoryState, false);
     myPropertiesProcessor.deleteRecord(dir);
     return directoryState;
@@ -374,7 +378,7 @@ public final class Swabra extends AgentLifeCycleAdapter implements PositionAware
     if (!new SnapshotGenerator(dir, myLogger, mySettings.getRules()).generateSnapshot(myPropertiesProcessor.getSnapshotFile(dir))) {
       mySettings.setCleanupEnabled(false);
     } else {
-      myPropertiesProcessor.markPending(dir, mySettings.getCheckoutDir(), mySettings.isStrict());
+      myPropertiesProcessor.markPending(dir, mySettings.getCheckoutDir(), mySettings.isStrict(), myRunningBuild.getBuildTypeId());
     }
   }
 
@@ -390,23 +394,23 @@ public final class Swabra extends AgentLifeCycleAdapter implements PositionAware
     collectFiles(dir,
                  new FilesCollector.CollectionResultHandler() {
                    public void success() {
-                     myPropertiesProcessor.markClean(dir, mySettings.getCheckoutDir(), mySettings.isStrict());
+                     myPropertiesProcessor.markClean(dir, mySettings.getCheckoutDir(), mySettings.isStrict(), myRunningBuild.getBuildTypeId());
                    }
 
                    public void error() {
-                     myPropertiesProcessor.markDirty(dir, mySettings.getCheckoutDir());
+                     myPropertiesProcessor.markDirty(dir, mySettings.getCheckoutDir(), myRunningBuild.getBuildTypeId());
                    }
 
                    public void lockedFilesDetected() {
-                     myPropertiesProcessor.markPending(dir, mySettings.getCheckoutDir(), mySettings.isStrict());
+                     myPropertiesProcessor.markPending(dir, mySettings.getCheckoutDir(), mySettings.isStrict(), myRunningBuild.getBuildTypeId());
                    }
 
                    public void dirtyStateDetected() {
-                     myPropertiesProcessor.markDirty(dir, mySettings.getCheckoutDir());
+                     myPropertiesProcessor.markDirty(dir, mySettings.getCheckoutDir(), myRunningBuild.getBuildTypeId());
                    }
 
                    public void interrupted() {
-                     myPropertiesProcessor.markPending(dir, mySettings.getCheckoutDir(), mySettings.isStrict());
+                     myPropertiesProcessor.markPending(dir, mySettings.getCheckoutDir(), mySettings.isStrict(), myRunningBuild.getBuildTypeId());
                    }
                  }
     );
