@@ -43,7 +43,7 @@ public class SwabraFrequentCleanCheckoutReport extends HealthStatusReport {
 
   public static final String SWABRA_CLASHING_BUILD_TYPES = "swabraClashingBuildTypes";
   public static final String CATEGORY_NAME = "Possible frequent clean checkout (Swabra case)";
-  public static final String CATEGORY_DESCRIPTION = "Build configurations with the same checkout directory but different Swabra settings";
+  public static final String CATEGORY_DESCRIPTION = "Build configurations share checkout directory but have different Swabra settings. This results in incomplete Swabra reporting or clean checkout (for configurations where \"Force clean checkout if cannot restore clean directory state\" option is enabled)";
 
   @NotNull private final ProjectManager myProjectManager;
   @NotNull private final ItemCategory myCategory;

@@ -13,17 +13,21 @@
   .groups ul {
     margin-top: 0.2em;
   }
+  .groups {
+    margin-top: 1em;
+  }
 </style>
-<div>
-  Frequent clean checkout is possible because of inconsistent Swabra settings in the following build configurations: <bs:help file="Build+Files+Cleaner+(Swabra)"/>
+
+<div class="swabraReportDescription">
+  The following build configurations share checkout directory but have different Swabra settings. Make sure such build configurations have identical Swabra settings:<br/>
 </div>
 <div class="groups">
   <c:forEach items="${groups}" var="group" varStatus="groupPos">
     <div><em><c:if test="${group.settings.featurePresent}"
-          ><c:if test="${group.settings.cleanupEnabled}">Cleanup enabled, ${group.settings.strict ? "strict" : "non-strict"}</c:if
-          ><c:if test="${not group.settings.cleanupEnabled}">Cleanup disabled</c:if
+          ><c:if test="${group.settings.cleanupEnabled}">Swabra cleanup enabled, "Force clean checkout if cannot restore clean directory state" option ${group.settings.strict ? "enabled" : "disabled"}</c:if
+          ><c:if test="${not group.settings.cleanupEnabled}">Swabra cleanup disabled</c:if
           ></c:if
-        ><c:if test="${not group.settings.featurePresent}">No build feature</c:if>:</em></div>
+        ><c:if test="${not group.settings.featurePresent}">No Swabra build feature enabled</c:if>:</em></div>
     <ul id="groupBuildTypes_${groupPos.index}">
       <c:set var="num" value="0"/>
       <c:forEach items="${group.buildTypes}" var="bt">
