@@ -61,7 +61,6 @@ public class SwabraCleanCheckoutWatcherImpl extends BuildServerAdapter implement
     final String causeBuildTypeId = build.getParametersProvider().get(SwabraUtil.CLEAN_CHECKOUT_CAUSE_BUILD_TYPE_ID);
     if (StringUtil.isNotEmpty(causeBuildTypeId)) {
       getDataStorage(buildType).putValue(causeBuildTypeId, String.valueOf(System.currentTimeMillis()));
-      cleanOldValues();
     }
   }
 
