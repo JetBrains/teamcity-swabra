@@ -36,7 +36,7 @@ public class SwabraCleanCheckoutWatcherImpl extends BuildServerAdapter implement
   public static final String CLEAN_CHECKOUT_BUILDS_STORAGE = "swabra.clean.checkout.builds.storage";
   public static final String BUILDS_STORAGE_PERIOD_PROPERTY = "teamcity.healthStatus.swabra.clean.checkout.builds.storage.period";
 
-  public static final long MONTH = 30*24*3600*1000;
+  public static final long MONTH = 30*24*3600*1000L;
 
   private static final Object LOCK = new Object();
 
