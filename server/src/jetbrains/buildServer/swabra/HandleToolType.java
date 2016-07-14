@@ -77,4 +77,9 @@ public class HandleToolType extends ToolTypeAdapter {
   public String getTeamCityHelpAnchor() {
     return "DownloadingHandle";
   }
+
+  @Override
+  public boolean isSingleton() {
+    return true;
+  }
 }

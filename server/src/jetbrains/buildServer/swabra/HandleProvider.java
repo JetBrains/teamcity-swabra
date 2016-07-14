@@ -67,7 +67,7 @@ public class HandleProvider extends ServerToolProviderAdapter {
     @NotNull
     @Override
     public String getDisplayName() {
-      return myHandleToolType.getDisplayName();
+      return myHandleToolType.getDisplayName() + " latest version";
     }
 
     @Override
