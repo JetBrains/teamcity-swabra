@@ -22,6 +22,7 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 import jetbrains.buildServer.ExecResult;
+import jetbrains.buildServer.util.StringUtil;
 import org.apache.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
 
@@ -36,6 +37,7 @@ public class HandleProcessesProvider implements LockedFileResolver.LockingProces
   private static final Logger LOG = Logger.getLogger(LockedFileResolver.class);
 
   private static final String PID = "pid: ";
+  public static final int MAX_OUTPUT_LENGTH = 2000;
 
   @NotNull
   private final String myHandleExePath;
@@ -48,15 +50,34 @@ public class HandleProcessesProvider implements LockedFileResolver.LockingProces
   public Collection<ProcessInfo> getLockingProcesses(@NotNull final File file) throws GetProcessesException {
     final ExecResult result = ProcessExecutor.runHandleAcceptEula(myHandleExePath, file.getAbsolutePath());
 
-    LOG.debug("handle.exe output:\n" + result.getStdout());
+    final boolean isError = result.getExitCode() > 0;
+    final String stdout = result.getStdout();
+    final String msg = "handle.exe exit code: " + result.getExitCode() +
+                       "\n[StdOut] " + truncate(stdout) +
+                       "\n[StdErr] " + truncate(result.getStderr()) +
+                       "\n[Exception] " + result.getException().getMessage();
+    log(msg, !isError);
+    if (isError) {
+      throw result.getException() == null ? new GetProcessesException(msg) : new GetProcessesException(msg, result.getException());
+    }
 
-    if (HandleOutputReader.noResult(result.getStdout())) {
+    if (HandleOutputReader.noResult(stdout)) {
       LOG.debug("No matching handles found for " + file.getAbsolutePath());
       return Collections.emptyList();
-    } else if (HandleOutputReader.noAdministrativeRights(result.getStdout())) {
+    } else if (HandleOutputReader.noAdministrativeRights(stdout)) {
       throw new GetProcessesException("Administrative privilege is required to run handle.exe");
     }
-    return getPidsFromStdout(result.getStdout());
+    return getPidsFromStdout(stdout);
+  }
+
+  private void log(@NotNull String message, boolean debug) {
+    if (debug) LOG.debug(message);
+    else LOG.info(message);
+  }
+
+  @NotNull
+  private String truncate(@NotNull String s) {
+    return StringUtil.truncateStringValueWithDotsAtEnd(s, MAX_OUTPUT_LENGTH);
   }
 
   private Collection<ProcessInfo> getPidsFromStdout(String stdout) {
