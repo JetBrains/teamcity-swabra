@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<dsl-extension kind="buildFeature" type="swabra" generateDslJar="true">
+  <class name="Swabra" />
+  <function name="swabra" description="Adds Swabra build feature"/>
+  <params>
+    <param name="swabra.enabled" dslName="filesCleanup" type="FilesCleanup"/>
+    <param name="swabra.strict" dslName="forceCleanCheckout" trueValue="true" falseValue="" description="Force clean checkout if cannot restore clean directory state" />
+    <param name="swabra.processes" dslName="lockingProcesses" type="LockingProcessPolicy" description="Whether to inspect the checkout directory for processes locking files in this directory, and what to do with such processes"/>
+    <param name="swabra.verbose" dslName="verbose" type="boolean" trueValue="true" falseValue="" />
+    <param name="swabra.rules" dslName="paths" description="Paths to monitor"/>
+  </params>
+  <types>
+    <enum name="FilesCleanup">
+      <option name="DISABLED" value=""/>
+      <option name="BEFORE_BUILD" value="swabra.before.build"/>
+      <option name="AFTER_BUILD" value="swabra.after.build"/>
+    </enum>
+    <enum name="LockingProcessPolicy">
+      <option name="DISABLED" value=""/>
+      <option name="REPORT" value="report"/>
+      <option name="KILL" value="kill"/>
+    </enum>
+  </types>
+</dsl-extension>
