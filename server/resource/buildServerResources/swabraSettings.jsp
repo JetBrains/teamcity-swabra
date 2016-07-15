@@ -73,7 +73,7 @@
     </props:selectProperty>
 
     <span class="smallNote" id="swabra.processes.note" style="${empty processesSelected ? 'display: none;' : ''}">
-      Before the end of the build inspect the checkout directory for processes locking files in this directory.
+      On Windows agents before the end of the build inspect the checkout directory for processes locking files in this directory.
     </span>
     <span class="smallNote" id="swabra.processes.report.note" style="${processesSelected eq 'report' ? '' : 'display: none;'}">
       Report about such processes in the build log.
