@@ -87,7 +87,7 @@ public class SwabraUtil {
   }
 
   public static boolean isLockingProcessesDetectionEnabled(@NotNull final Map<String, String> params) {
-    return isLockingProcessesReport(params) || isLockingProcessesReport(params);
+    return isLockingProcessesReport(params) || isLockingProcessesKill(params);
   }
 
   public static boolean isLockingProcessesReport(@NotNull final Map<String, String> params) {
