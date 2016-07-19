@@ -107,7 +107,7 @@ public class HandleProvider extends ServerToolProviderAdapter {
   public File fetchToolPackage(@NotNull final ToolVersion toolVersion, @NotNull final File targetDirectory) throws ToolException {
     final File location = new File(targetDirectory, HANDLE_EXE);
     try {
-      URLDownloader.download(new URL(HandleToolType.HTTP_LIVE_SYSINTERNALS_COM_HANDLE_EXE), location);
+      URLDownloader.download(new URL(HandleToolType.HTTPS_LIVE_SYSINTERNALS_COM_HANDLE_EXE), location);
     } catch (MalformedURLException e) {
       throw new ToolException("Failed to fetch " + HANDLE_TOOL, e);
     }

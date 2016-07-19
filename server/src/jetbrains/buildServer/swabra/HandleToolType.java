@@ -27,7 +27,7 @@ import org.jetbrains.annotations.NotNull;
 public class HandleToolType extends ToolTypeAdapter {
   public static final String HANDLE_TOOL = "SysinternalsHandle";
   public static final String HANDLE_EXE = "handle.exe";
-  public static final String HTTP_LIVE_SYSINTERNALS_COM_HANDLE_EXE = "http://live.sysinternals.com/handle.exe";
+  public static final String HTTPS_LIVE_SYSINTERNALS_COM_HANDLE_EXE = "https://live.sysinternals.com/handle.exe";
   public static final String HANDLE_TOOL_TYPE_NAME = "handleTool";
 
   @Override
