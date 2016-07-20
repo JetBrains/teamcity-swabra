@@ -4,7 +4,7 @@
   <function name="swabra" description="Adds Swabra build feature"/>
   <params>
     <param name="swabra.enabled" dslName="filesCleanup" type="FilesCleanup"/>
-    <param name="swabra.strict" dslName="forceCleanCheckout" trueValue="true" falseValue="" description="Force clean checkout if cannot restore clean directory state" />
+    <param name="swabra.strict" dslName="forceCleanCheckout" type="boolean" trueValue="true" falseValue="" description="Force clean checkout if cannot restore clean directory state" />
     <param name="swabra.processes" dslName="lockingProcesses" type="LockingProcessPolicy" description="Whether to inspect the checkout directory for processes locking files in this directory, and what to do with such processes"/>
     <param name="swabra.verbose" dslName="verbose" type="boolean" trueValue="true" falseValue="" />
     <param name="swabra.rules" dslName="paths" description="Paths to monitor"/>
