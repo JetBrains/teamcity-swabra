@@ -50,12 +50,14 @@ public class HandleProcessesProvider implements LockedFileResolver.LockingProces
   public Collection<ProcessInfo> getLockingProcesses(@NotNull final File file) throws GetProcessesException {
     final ExecResult result = ProcessExecutor.runHandleAcceptEula(myHandleExePath, file.getAbsolutePath());
 
+    if (result == null) throw new GetProcessesException("Couldn't run " + myHandleExePath + " due to an internal error");
+
     final boolean isError = result.getExitCode() > 0;
     final String stdout = result.getStdout();
     final String msg = "handle.exe exit code: " + result.getExitCode() +
                        "\n[StdOut] " + truncate(stdout) +
                        "\n[StdErr] " + truncate(result.getStderr()) +
-                       "\n[Exception] " + result.getException().getMessage();
+                       "\n[Exception] " + result.getException();
     log(msg, !isError);
     if (isError) {
       throw result.getException() == null ? new GetProcessesException(msg) : new GetProcessesException(msg, result.getException());
