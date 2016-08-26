@@ -16,7 +16,7 @@
 
 package jetbrains.buildServer.swabra.processes;
 
-import jetbrains.buildServer.processes.ProcessFilter;
+import jetbrains.buildServer.processes.KillProcessDetails;
 import jetbrains.buildServer.processes.ProcessTreeTerminator;
 import jetbrains.buildServer.util.FileUtil;
 import jetbrains.buildServer.util.StringUtil;
@@ -102,7 +102,7 @@ public class LockedFileResolver {
         }
 
         try {
-          if (ProcessTreeTerminator.kill(p.getPid(), ProcessFilter.MATCH_ALL)) {
+          if (ProcessTreeTerminator.kill(p.getPid(), KillProcessDetails.KILL_ALL_FORCE)) {
             log("Process killed:\n" + getProcessString(p), false, listener);
           } else {
             logFailedToKill(p, null, listener);
