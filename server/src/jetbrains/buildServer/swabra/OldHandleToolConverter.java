@@ -19,7 +19,7 @@ package jetbrains.buildServer.swabra;
 import java.io.File;
 import java.io.IOException;
 import jetbrains.buildServer.serverSide.ServerPaths;
-import jetbrains.buildServer.tools.ServerToolPreProcessor;
+import jetbrains.buildServer.tools.ServerToolPreProcessorAdapter;
 import jetbrains.buildServer.tools.ToolException;
 import jetbrains.buildServer.tools.installed.ToolPaths;
 import jetbrains.buildServer.util.ArchiveUtil;
@@ -30,7 +30,7 @@ import org.jetbrains.annotations.NotNull;
 /**
  * Created by Evgeniy.Koshkin on 21-Mar-16.
  */
-public class OldHandleToolConverter implements ServerToolPreProcessor {
+public class OldHandleToolConverter extends ServerToolPreProcessorAdapter {
 
   private static final Logger LOG = Logger.getLogger(HandleProvider.class.getName());
 
@@ -49,7 +49,7 @@ public class OldHandleToolConverter implements ServerToolPreProcessor {
   }
 
   @Override
-  public void preProcess() throws ToolException {
+  public void doBeforeServerStartup() throws ToolException {
     final File oldPlugin1 = new File(myServerPaths.getPluginsDir(), "handle-provider");
     if (oldPlugin1.exists()) {
       LOG.debug("Detected old handle-provider plugin " + oldPlugin1);
