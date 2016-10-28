@@ -39,6 +39,7 @@
 
     <element name="server-additional-files" optional="yes" description="fileset of the files to pack into root of the server plugin part"/>
     <element name="agent-additional-files" optional="yes" description="fileset of the files to pack into root of the agent plugin part"/>
+    <element name="dsl-descriptions" optional="yes" description="fileset of the dsl descriptions to pack into plugin"/>
 
     <sequential>
 
@@ -121,6 +122,12 @@
       <copy todir="@{out.unpacked}">
         <fileset dir="${basedir}" excludes="**"/>
         <server-additional-files/>
+      </copy>
+
+      <!-- copy dsl descriptions -->
+      <copy todir="@{out.unpacked}/kotlin-dsl">
+        <fileset dir="${basedir}" excludes="**"/>
+        <dsl-descriptions/>
       </copy>
 
       <!-- clean -->

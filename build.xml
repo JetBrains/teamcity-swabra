@@ -33,8 +33,11 @@
                              common.output="${common.output.dir}"
                              out="dist"
                              plugin.descriptor.file="${basedir}/teamcity-plugin.xml"
-                             plugin.version="${plugin.version}"/>
-
+                             plugin.version="${plugin.version}">
+      <dsl-descriptions>
+        <fileset file="${basedir}/server/Swabra.xml"/>
+      </dsl-descriptions>
+    </package.teamcity.plugin>
   </target>
 
   <target name="deploy" depends="dist" description="deploy plugin to TeamCity">
