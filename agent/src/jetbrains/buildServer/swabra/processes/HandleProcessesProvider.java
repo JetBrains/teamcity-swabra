@@ -52,14 +52,14 @@ public class HandleProcessesProvider implements LockedFileResolver.LockingProces
 
     if (result == null) throw new GetProcessesException("Couldn't run " + myHandleExePath + " due to an internal error");
 
-    final boolean isError = result.getExitCode() > 0;
+    final boolean isSuccess = result.getExitCode() == 0 && result.getException() == null;
     final String stdout = result.getStdout();
     final String msg = "handle.exe exit code: " + result.getExitCode() +
                        "\n[StdOut] " + truncate(stdout) +
                        "\n[StdErr] " + truncate(result.getStderr()) +
                        "\n[Exception] " + result.getException();
-    log(msg, !isError);
-    if (isError) {
+    log(msg, isSuccess);
+    if (!isSuccess) {
       throw result.getException() == null ? new GetProcessesException(msg) : new GetProcessesException(msg, result.getException());
     }
 
