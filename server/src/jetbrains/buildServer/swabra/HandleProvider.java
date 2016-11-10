@@ -19,8 +19,6 @@ package jetbrains.buildServer.swabra;
 
 import java.io.File;
 import java.io.IOException;
-import java.net.MalformedURLException;
-import java.net.URL;
 import java.util.Collection;
 import java.util.Collections;
 import jetbrains.buildServer.tools.ServerToolProviderAdapter;
@@ -107,9 +105,9 @@ public class HandleProvider extends ServerToolProviderAdapter {
   public File fetchToolPackage(@NotNull final ToolVersion toolVersion, @NotNull final File targetDirectory) throws ToolException {
     final File location = new File(targetDirectory, HANDLE_EXE);
     try {
-      URLDownloader.download(new URL(HandleToolType.HTTPS_LIVE_SYSINTERNALS_COM_HANDLE_EXE), location);
-    } catch (MalformedURLException e) {
-      throw new ToolException("Failed to fetch " + HANDLE_TOOL, e);
+      URLDownloader.download(HandleToolType.HTTPS_LIVE_SYSINTERNALS_COM_HANDLE_EXE, location);
+    } catch (Throwable e) {
+      throw new ToolException("Failed to fetch " + HANDLE_TOOL + ": " + e.getMessage(), e);
     }
     LOG.debug("Successfully downloaded Sysinternals handle.exe to " + location);
     return location;
