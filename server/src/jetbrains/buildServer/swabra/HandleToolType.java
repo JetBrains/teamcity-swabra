@@ -82,4 +82,9 @@ public class HandleToolType extends ToolTypeAdapter {
   public boolean isSingleton() {
     return true;
   }
+
+  @Override
+  public boolean isCountUsages() {
+    return false;
+  }
 }
