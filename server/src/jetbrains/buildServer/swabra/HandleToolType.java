@@ -53,6 +53,12 @@ public class HandleToolType extends ToolTypeAdapter {
     return "handle.exe";
   }
 
+  @NotNull
+  @Override
+  public String getTargetFileDisplayName() {
+    return "handle.exe";
+  }
+
   @Override
   public boolean isSupportDownload() {
     return true;
