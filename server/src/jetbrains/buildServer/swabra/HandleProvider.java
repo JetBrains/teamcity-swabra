@@ -21,15 +21,11 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Collection;
 import java.util.Collections;
-import jetbrains.buildServer.tools.ServerToolProviderAdapter;
-import jetbrains.buildServer.tools.ToolException;
-import jetbrains.buildServer.tools.ToolType;
-import jetbrains.buildServer.tools.ToolVersion;
+import jetbrains.buildServer.tools.*;
 import jetbrains.buildServer.tools.utils.URLDownloader;
 import jetbrains.buildServer.util.FileUtil;
 import org.apache.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 import static jetbrains.buildServer.swabra.HandleToolType.HANDLE_EXE;
 import static jetbrains.buildServer.swabra.HandleToolType.HANDLE_TOOL;
@@ -125,11 +121,11 @@ public class HandleProvider extends ServerToolProviderAdapter {
     }
   }
 
-  @Nullable
+  @NotNull
   @Override
-  public ToolVersion tryGetPackageVersion(@NotNull final File toolPackage) {
+  public GetPackageVersionResult tryGetPackageVersion(@NotNull final File toolPackage) {
     final String toolPackageName = toolPackage.getName();
     return ((toolPackage.isDirectory() && toolPackageName.equalsIgnoreCase(HANDLE_TOOL)) || (toolPackage.isFile() && toolPackageName.equalsIgnoreCase(HANDLE_EXE)))
-           ? mySingleToolVersion : null;
+           ? GetPackageVersionResult.version(mySingleToolVersion) : GetPackageVersionResult.error(toolPackage.getAbsolutePath() + " is not a valid " + HANDLE_TOOL + " package");
   }
 }
