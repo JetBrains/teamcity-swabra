@@ -178,6 +178,11 @@ public class SwabraTest extends TestCase {
                                        public BundledTool findTool(@NotNull final String name) {
                                          return null;
                                        }
+
+                                       @Override
+                                       public void registerTool(@NotNull final String toolName, @NotNull final BundledTool tool) {
+
+                                       }
                                      },
                                      new DirectoryMapDirectoriesCleanerImpl(myDispatcher,
                                               directoryCleaner,
@@ -535,6 +540,11 @@ public class SwabraTest extends TestCase {
                                        propertiesProcessor, new BundledToolsRegistry() {
         public BundledTool findTool(@NotNull final String name) {
           return null;
+        }
+
+        @Override
+        public void registerTool(@NotNull final String toolName, @NotNull final BundledTool tool) {
+
         }
       }, new DirectoryMapDirectoriesCleanerImpl(myDispatcher,
                                                 directoryCleaner,
@@ -1093,6 +1103,11 @@ E:\TEMP\test-1307328584\checkoutDir2\dir2=pending
                                      new BundledToolsRegistry() {
                                        public BundledTool findTool(@NotNull final String name) {
                                          return null;
+                                       }
+
+                                       @Override
+                                       public void registerTool(@NotNull final String toolName, @NotNull final BundledTool tool) {
+
                                        }
                                      },
                                      new DirectoryMapDirectoriesCleanerImpl(

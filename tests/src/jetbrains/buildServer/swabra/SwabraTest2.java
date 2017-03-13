@@ -54,6 +54,11 @@ public class SwabraTest2 extends BaseTestCase {
     public BundledTool findTool(@NotNull final String name) {
       return null;
     }
+
+    @Override
+    public void registerTool(@NotNull final String toolName, @NotNull final BundledTool tool) {
+
+    }
   };
   private EventDispatcher<AgentLifeCycleListener> myAgentDispatcher;
   private SwabraLogger mySwabraLogger;
