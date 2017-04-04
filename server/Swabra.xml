@@ -1,19 +1,60 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <dsl-extension kind="buildFeature" type="swabra" generateDslJar="true">
-  <class name="Swabra" />
-  <function name="swabra" description="Adds Swabra build feature"/>
+  <class name="Swabra">
+    <description>
+      A [build feature](https://confluence.jetbrains.com/display/TCDL/Build+Files+Cleaner+(Swabra)) cleaning files and processes created during a build
+    </description>
+  </class>
+  <function name="swabra">
+    <description>
+      Adds a [build feature](https://confluence.jetbrains.com/display/TCDL/Build+Files+Cleaner+(Swabra)) cleaning files and processes created during a build
+      @see Swabra
+    </description>
+  </function>
   <params>
-    <param name="swabra.enabled" dslName="filesCleanup" type="FilesCleanup"/>
-    <param name="swabra.strict" dslName="forceCleanCheckout" type="boolean" trueValue="true" falseValue="" description="Force clean checkout if cannot restore clean directory state" />
+    <param name="swabra.enabled" dslName="filesCleanup" type="FilesCleanup">
+      <description>
+        A files cleanup mode to use
+        @see FilesCleanup
+      </description>
+    </param>
+    <param name="swabra.strict" dslName="forceCleanCheckout" type="boolean" trueValue="true" falseValue="">
+      <description>
+        Force [clean checkout](https://confluence.jetbrains.com/display/TCDL/Clean+Checkout) if cannot restore clean directory state
+      </description>
+    </param>
     <param name="swabra.processes" dslName="lockingProcesses" type="LockingProcessPolicy" description="Whether to inspect the checkout directory for processes locking files in this directory, and what to do with such processes"/>
-    <param name="swabra.verbose" dslName="verbose" type="boolean" trueValue="true" falseValue="" />
-    <param name="swabra.rules" dslName="paths" description="Paths to monitor"/>
+    <param name="swabra.verbose" dslName="verbose" type="boolean" trueValue="true" falseValue="">
+      <description>
+        Enables detailed logging to build log
+      </description>
+    </param>
+    <param name="swabra.rules" dslName="paths" description="Paths to monitor">
+      <description>
+        A newline-separated set of +|-:path rules to define what files and directories should be cleaned
+      </description>
+    </param>
   </params>
   <types>
     <enum name="FilesCleanup">
-      <option name="DISABLED" value=""/>
-      <option name="BEFORE_BUILD" value="swabra.before.build"/>
-      <option name="AFTER_BUILD" value="swabra.after.build"/>
+      <description>
+        Files cleanup mode
+      </description>
+      <option name="DISABLED" value="">
+        <description>
+          Don't cleanup files
+        </description>
+      </option>
+      <option name="BEFORE_BUILD" value="swabra.before.build">
+        <description>
+          Cleanup files before build start
+        </description>
+      </option>
+      <option name="AFTER_BUILD" value="swabra.after.build">
+        <description>
+          Cleanup files after build finish
+        </description>
+      </option>
     </enum>
     <enum name="LockingProcessPolicy">
       <option name="DISABLED" value=""/>
