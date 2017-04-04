@@ -23,7 +23,12 @@
         Force [clean checkout](https://confluence.jetbrains.com/display/TCDL/Clean+Checkout) if cannot restore clean directory state
       </description>
     </param>
-    <param name="swabra.processes" dslName="lockingProcesses" type="LockingProcessPolicy" description="Whether to inspect the checkout directory for processes locking files in this directory, and what to do with such processes"/>
+    <param name="swabra.processes" dslName="lockingProcesses" type="LockingProcessPolicy">
+      <description>
+        Whether to inspect the checkout directory for processes locking files in this directory, and what to do with such processes
+        @see LockingProcessPolicy
+      </description>
+    </param>
     <param name="swabra.verbose" dslName="verbose" type="boolean" trueValue="true" falseValue="">
       <description>
         Enables detailed logging to build log
@@ -57,9 +62,24 @@
       </option>
     </enum>
     <enum name="LockingProcessPolicy">
-      <option name="DISABLED" value=""/>
-      <option name="REPORT" value="report"/>
-      <option name="KILL" value="kill"/>
+      <description>
+        Specifies how to handle processes locking some files
+      </description>
+      <option name="DISABLED" value="">
+        <description>
+          Don't detect locking processes
+        </description>
+      </option>
+      <option name="REPORT" value="report">
+        <description>
+          Report detected locking processes
+        </description>
+      </option>
+      <option name="KILL" value="kill">
+        <description>
+          Kill detected locking processes
+        </description>
+      </option>
     </enum>
   </types>
 </dsl-extension>
