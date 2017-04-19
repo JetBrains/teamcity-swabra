@@ -193,6 +193,10 @@ public final class Swabra extends AgentLifeCycleAdapter implements PositionAware
 
   private void processDirs(@NotNull Collection<File> dirs) {
     for (File dir : dirs) {
+      if (myBuildInterrupted.get()) {
+        myLogger.message("Will skip " + dir + " because interrupted", true);
+        continue;
+      }
       processDir(dir);
     }
   }
