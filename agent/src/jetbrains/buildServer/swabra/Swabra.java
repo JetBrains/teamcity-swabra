@@ -109,18 +109,18 @@ public final class Swabra extends AgentLifeCycleAdapter implements PositionAware
 
     mySettings = new SwabraSettings(myRunningBuild);
 
+    if (!mySettings.isCleanupEnabled()) {
+      myLogger.message("Swabra cleanup is disabled", false);
+      myPropertiesProcessor.deleteRecords(mySettings.getCheckoutDir());
+      return;
+    }
+
     myLogger.activityStarted();
     try {
       mySettings.prepareHandle(myLogger, myToolsRegistry);
 
       myLockedFileResolver = mySettings.isLockingProcessesDetectionEnabled() ?
         new LockedFileResolver(new HandleProcessesProvider(mySettings.getHandlePath()), mySettings.getIgnoredProcesses(), new WmicProcessDetailsProvider()/*, myProcessTerminator,*/) : null;
-
-      if (!mySettings.isCleanupEnabled()) {
-        myLogger.message("Swabra cleanup is disabled", false);
-        myPropertiesProcessor.deleteRecords(mySettings.getRules().getPaths());
-        return;
-      }
 
       processDirs(mySettings.getRules().getPaths());
 
@@ -251,6 +251,7 @@ public final class Swabra extends AgentLifeCycleAdapter implements PositionAware
         return;
       case UNKNOWN:
       default:
+        reportCleanCheckoutDetected(previousBuildTypeId);
         cleanupCheckoutDir("Checkout directory state is unknown", myRunningBuild);
     }
   }
@@ -301,7 +302,7 @@ public final class Swabra extends AgentLifeCycleAdapter implements PositionAware
     );
   }
 
-  private void processExternalDir(@NotNull File dir) {
+  private void processExternalDir(@NotNull final File dir) {
     final SwabraPropertiesProcessor.DirectoryState directoryState = getAndCleanDirectoryState(dir);
 
     switch (directoryState) {
@@ -312,18 +313,24 @@ public final class Swabra extends AgentLifeCycleAdapter implements PositionAware
       case DIRTY:
         if (mySettings.isCleanupBeforeBuild()) {
           myLogger.debug(dir + " cleanup is performed before build");
-          collectFiles(dir, null);
-        }
-        return;
+          break;
+        } else return;
       case PENDING:
       case STRICT_PENDING:
         myLogger.debug(dir + " cleanup is performed before build");
-        collectFiles(dir, null);
-        return;
+        break;
       case UNKNOWN:
       default:
         myLogger.debug(dir + " directory state is unknown");
+        return;
     }
+
+    collectFiles(dir, new FilesCollector.SimpleCollectionResultHandler() {
+      @Override
+      public void interrupted() {
+        myPropertiesProcessor.markPending(dir, mySettings.getCheckoutDir(), mySettings.isStrict(), myRunningBuild.getBuildTypeId());
+      }
+    });
   }
 
   private SwabraPropertiesProcessor.DirectoryState getAndCleanDirectoryState(@NotNull File dir) {
@@ -380,6 +387,10 @@ public final class Swabra extends AgentLifeCycleAdapter implements PositionAware
 
   private void collectFiles(@NotNull Collection<File> dirs) {
    for (File dir : dirs) {
+     if (myBuildInterrupted.get()) {
+       myLogger.message("Will skip " + dir + " because interrupted", true);
+       continue;
+     }
      collectFiles(dir);
    }
   }

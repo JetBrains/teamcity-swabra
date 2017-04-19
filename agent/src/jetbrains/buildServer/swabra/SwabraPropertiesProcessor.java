@@ -98,12 +98,28 @@ public class SwabraPropertiesProcessor extends AgentLifeCycleAdapter {
     writeProperties();
   }
 
-  public synchronized void deleteRecords(@NotNull Collection<File> dirs) {
-    readProperties(false);
-    for (File dir : dirs) {
-      myProperties.remove(unifyPath(dir));
+  public synchronized void deleteRecords(@NotNull File checkoutDir) {
+    final ArrayList<String> propertiesToRemove = new ArrayList<String>();
+    final ArrayList<File> snapshotsToRemove = new ArrayList<File>();
+
+    final String unifiedCheckoutDirPath = unifyPath(checkoutDir);
+    for (Map.Entry<String, DirInfo> entry : myProperties.entrySet()) {
+      final DirInfo info = entry.getValue();
+      final String monitoredDir = entry.getKey();
+      if (info.checkoutDir.equals(unifiedCheckoutDirPath)) {
+        propertiesToRemove.add(unifyPath(monitoredDir));
+        snapshotsToRemove.add(getSnapshotFile(new File(monitoredDir)));
+      }
     }
+    for (String s : propertiesToRemove) {
+      myProperties.remove(s);
+    }
+
     writeProperties();
+
+    for (File f : snapshotsToRemove) {
+      FileUtil.delete(f);
+    }
   }
 
   private void readProperties(boolean preserveFile) {
