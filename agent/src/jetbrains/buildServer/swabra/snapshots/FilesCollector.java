@@ -84,7 +84,7 @@ public class FilesCollector {
     try {
       iterateAndCollect(snapshot, dir);
     } catch (InterruptedException e) {
-      myLogger.warn("Swabra process interrupted. Gracefully finishing...");
+      myLogger.warn("Interrupted while scanning " + dir + ". Gracefully finishing...");
       if (handler != null) handler.interrupted();
       return;
     } catch (Exception e) {
