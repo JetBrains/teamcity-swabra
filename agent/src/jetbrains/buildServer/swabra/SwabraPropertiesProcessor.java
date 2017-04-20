@@ -99,6 +99,8 @@ public class SwabraPropertiesProcessor extends AgentLifeCycleAdapter {
   }
 
   public synchronized void deleteRecords(@NotNull File checkoutDir) {
+    readProperties(false);
+
     final ArrayList<String> propertiesToRemove = new ArrayList<String>();
     final ArrayList<File> snapshotsToRemove = new ArrayList<File>();
 
