@@ -20,6 +20,7 @@ import java.util.Date;
 import jetbrains.buildServer.BuildProblemData;
 import jetbrains.buildServer.agent.FlowLogger;
 import jetbrains.buildServer.messages.BuildMessage1;
+import jetbrains.buildServer.messages.Status;
 import org.jetbrains.annotations.NotNull;
 
 /**
@@ -56,6 +57,11 @@ public class BuildProgressLoggerMock implements FlowLogger {
     myText.append("MESSAGE: ");
     myText.append(message);
     myText.append("\n");
+  }
+
+  @Override
+  public void message(final String message, final Status status) {
+    message(message);
   }
 
   public void error(@NotNull final String message) {
