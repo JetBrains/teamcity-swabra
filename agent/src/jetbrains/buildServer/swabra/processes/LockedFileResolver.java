@@ -81,10 +81,10 @@ public class LockedFileResolver {
     if (processes == null) return false;
 
     if (processes.isEmpty()) {
-      log("No processes found locking files in directory: " + f, false, listener);
+      log("No processes found locking files in directory \"" + f + "\"", false, listener);
       return false;
     } else {
-      final StringBuilder sb = new StringBuilder("Found ").append(StringUtil.pluralize("process", processes.size())).append(" locking files in directory ").append(f).append(":");
+      final StringBuilder sb = new StringBuilder("Found ").append(StringUtil.pluralize("process", processes.size())).append(" locking files in directory \"").append(f).append("\":");
       appendProcessInfos(processes, sb);
       log(sb.toString(), true, listener);
     }
@@ -120,7 +120,7 @@ public class LockedFileResolver {
       if (processesLeft.isEmpty()) return true;
 
       final StringBuilder sb
-        = new StringBuilder("Failed to kill some of the ").append(StringUtil.pluralize("process", processesLeft.size())).append(" locking files in directory: ").append(f).append(":");
+        = new StringBuilder("Failed to kill some of the ").append(StringUtil.pluralize("process", processesLeft.size())).append(" locking files in directory \"").append(f).append("\":");
       appendProcessInfos(processesLeft, sb);
       log(sb.toString(), true, listener);
     }
