@@ -36,7 +36,7 @@ public class SnapshotFilesTraversalTest extends TestCase {
     final FilesTraversal traversal = new FilesTraversal();
     final StringBuffer results = new StringBuffer();
 
-    traversal.traverse(new SnapshotFilesIterator(getTestData("filesTraverse.snapshot", null)),
+    traversal.traverse(new SnapshotFilesIterator(getTestData(resultsFileName + ".snapshot", null)),
       new FilesTraversal.SimpleProcessor() {
         public void process(FileInfo file) {
           results.append(file.getPath()).append(" ").append(file.getLength()).append(" ").append(file.getLastModified()).append("\n");
@@ -59,5 +59,9 @@ public class SnapshotFilesTraversalTest extends TestCase {
 
   public void test1() throws Exception {
     runTest("snapshotFilesTraversal");
+  }
+
+  public void testRootFolder() throws Exception {
+    runTest("snapshotFilesTraversalRootFolder");
   }
 }
