@@ -133,7 +133,7 @@ public class SwabraRules {
 
       final Set<File> rootPaths = new HashSet<File>();
       for (FileRule rule : resultRules) {
-        rootPaths.add(new File(getPathWithoutWildcards(rule.getFrom())));
+        rootPaths.add(getPathWithoutWildcards(new File(rule.getFrom())));
       }
       myRootPaths = new ArrayList<File>(rootPaths);
     }
@@ -169,7 +169,10 @@ public class SwabraRules {
   }
 
   @NotNull
-  private String getPathWithoutWildcards(@NotNull String from) {
-    return from.contains("*") ?  from.substring(0, from.indexOf('*')): from;
+  private File getPathWithoutWildcards(@NotNull File from) {
+    while(from != null && from.getPath().contains("*")){
+      from = from.getParentFile();
+    }
+    return from == null ? new File("") : from;
   }
 }
