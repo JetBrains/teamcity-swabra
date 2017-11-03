@@ -357,7 +357,7 @@ public final class Swabra extends AgentLifeCycleAdapter implements PositionAware
         processor = myInternalProcessor;
       else
         processor = new FilesCollectionProcessorMock(myLogger, myLockedFileResolver, dir, mySettings.isVerbose(), mySettings.isStrict(), System.getProperty(TEST_LOG), myBuildInterrupted);
-    } else if (mySettings.getRules().getRulesForPath(dir).size() == 1) {
+    } else if (mySettings.getRules().getRulesForPath(dir).size() == 1 && !mySettings.getRules().requiresListingForDir(dir)) {
       processor = new FilesCollectionProcessor(myLogger, myLockedFileResolver, dir, mySettings.isVerbose(), mySettings.isStrict(), myBuildInterrupted);
     } else {
       processor = new FilesCollectionRulesAwareProcessor(myLogger, myLockedFileResolver, dir, mySettings, myBuildInterrupted);

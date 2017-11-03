@@ -33,17 +33,19 @@ public class FileSystemFilesIterator implements FilesIterator {
   private final File myRootFolder;
   @NotNull private final SwabraRules myRules;
   private Stack<Iterator<File>> myIterators;
+  private final boolean myRequiresListing;
 
   public FileSystemFilesIterator(@NotNull File rootFolder,@NotNull final SwabraRules rules) {
     myRootFolder = rootFolder;
     myRules = rules;
+    myRequiresListing = myRules.requiresListingForDir(rootFolder);
   }
 
   @Nullable
   public FileInfo getNext() throws IOException {
     if (myIterators == null) {
       myIterators = new Stack<Iterator<File>>();
-      return processFolder(myRootFolder);
+      return processFolder(myRootFolder, myRules.shouldInclude(myRootFolder.getPath()));
     }
     if (myIterators.isEmpty()) {
       return null;
@@ -51,11 +53,14 @@ public class FileSystemFilesIterator implements FilesIterator {
     final Iterator<File> it = myIterators.peek();
     while (it.hasNext()) {
       final File next = it.next();
-      if (myRules.shouldInclude(next.getPath())) {
+      boolean shouldInclude = myRules.shouldInclude(next.getPath());
+      if ((next.isDirectory() && myRequiresListing) || shouldInclude) {
         if (next.isFile()) {
           return createFileInfo(next);
         } else if (next.isDirectory()) {
-          return processFolder(next);
+          FileInfo processResult = processFolder(next, shouldInclude);
+          if (processResult != null)
+            return processResult;
         } else {
           throw new IOException("Failed to read " + next);
         }
@@ -81,7 +86,8 @@ public class FileSystemFilesIterator implements FilesIterator {
     return true;
   }
 
-  private FileInfo processFolder(File folder) throws IOException{
+  @Nullable
+  private FileInfo processFolder(File folder, boolean createFileInfo) throws IOException{
     if (!folder.exists()){
       return null;
     }
@@ -97,7 +103,10 @@ public class FileSystemFilesIterator implements FilesIterator {
       }
     });
     myIterators.push(filesList.iterator());
-    return createFileInfo(folder);
+    if (createFileInfo)
+      return createFileInfo(folder);
+    else
+      return null;
   }
 
   private static FileInfo createFileInfo(File file) {

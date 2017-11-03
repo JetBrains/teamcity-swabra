@@ -24,6 +24,13 @@ import org.jetbrains.annotations.NotNull;
  * Time: 17:22:24
  */
 public class FilesTraversal {
+
+  private final boolean myFullListingEnforced;
+
+  public FilesTraversal(final boolean fullListingEnforced) {
+    myFullListingEnforced = fullListingEnforced;
+  }
+
   public static interface SimpleProcessor {
     void process(FileInfo file) throws Exception;
   }
@@ -96,42 +103,42 @@ public class FilesTraversal {
     }
   }
 
-  private static boolean fileAdded(int comparisonResult) {
+  private boolean fileAdded(int comparisonResult) {
     return comparisonResult > 0;
   }
 
-  private static boolean fileDeleted(int comparisonResult) {
+  private boolean fileDeleted(int comparisonResult) {
     return comparisonResult < 0;
   }
 
-  private static boolean fileModified(FileInfo was, FileInfo is) {
+  private boolean fileModified(FileInfo was, FileInfo is) {
     return (was.isFile() || is.isFile())
       && (was.getLength() != is.getLength() || was.getLastModified() != is.getLastModified());
   }
 
-  private static void processAdded(@NotNull final FileInfo currentInfo,
+  private void processAdded(@NotNull final FileInfo currentInfo,
                                    @NotNull final ComparisonProcessor processor,
                                    @NotNull final FilesIterator currentIterator) throws InterruptedException {
     if (processor.willProcess(currentInfo)) {
       processor.processAdded(currentInfo);
-      if (!currentInfo.isFile()) {
+      if (!currentInfo.isFile() && !myFullListingEnforced) {
         currentIterator.skipDirectory(currentInfo);
       }
     }
   }
 
-  private static void processDeleted(@NotNull final FileInfo snapshotInfo,
+  private void processDeleted(@NotNull final FileInfo snapshotInfo,
                                      @NotNull final ComparisonProcessor processor,
                                      @NotNull final FilesIterator snapshotIterator) throws InterruptedException {
     if (processor.willProcess(snapshotInfo)) {
       processor.processDeleted(snapshotInfo);
-      if (!snapshotInfo.isFile()) {
+      if (!snapshotInfo.isFile() && !myFullListingEnforced) {
         snapshotIterator.skipDirectory(snapshotInfo);
       }
     }
   }
 
-  private static void processModified(@NotNull final FileInfo snapshotInfo,
+  private void processModified(@NotNull final FileInfo snapshotInfo,
                                       @NotNull final FileInfo currentInfo,
                                       @NotNull final ComparisonProcessor processor) throws InterruptedException {
     if (processor.willProcess(snapshotInfo)) {
@@ -139,7 +146,7 @@ public class FilesTraversal {
     }
   }
 
-  private static void processUnchanged(@NotNull final FileInfo snapshotInfo, @NotNull final ComparisonProcessor processor){
+  private void processUnchanged(@NotNull final FileInfo snapshotInfo, @NotNull final ComparisonProcessor processor){
     processor.processUnchanged(snapshotInfo);
   }
 }

@@ -97,7 +97,7 @@ public class SnapshotGenerator {
   }
 
   private void iterateAndBuildSnapshot(final BufferedWriter writer) throws Exception {
-    final FilesTraversal tr = new FilesTraversal();
+    final FilesTraversal tr = new FilesTraversal(myRules.requiresListingForDir(myRootDir));
     tr.traverse(new FileSystemFilesIterator(myRootDir, myRules), new FilesTraversal.SimpleProcessor() {
       public void process(FileInfo file) throws Exception {
         writer.write(getSnapshotEntry(file, myRootDirParent));

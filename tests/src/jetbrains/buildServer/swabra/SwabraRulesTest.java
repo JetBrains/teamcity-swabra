@@ -20,6 +20,7 @@ import java.io.File;
 import java.util.Arrays;
 import java.util.List;
 import jetbrains.buildServer.swabra.snapshots.SwabraRules;
+import jetbrains.buildServer.swabra.snapshots.iteration.FileInfo;
 import jetbrains.buildServer.util.*;
 import jetbrains.buildServer.util.filters.Filter;
 import junit.framework.TestCase;
@@ -800,6 +801,16 @@ public class SwabraRulesTest extends TestCase {
     assertTrue(rules.shouldInclude(getBaseDirPath()));
     assertTrue(rules.shouldInclude(resolve("some")));
     assertTrue(rules.shouldInclude(resolve("another/path")));
+  }
+
+  @Test
+  public void test_list_directory_if_necessary(){
+    final SwabraRules rules = createRules("-:.", "+:some/**/surefire-reports/TEST-*.xml");
+
+    assertPaths(rules, getBaseDirPath() + "/some");
+
+    assertTrue(rules.shouldInclude(resolve("some/a/surefire-reports/TEST-1.xml")));
+    assertFalse(rules.shouldInclude(resolve("some/a/surefire-reports/TES-1.xml")));
   }
 
   @NotNull

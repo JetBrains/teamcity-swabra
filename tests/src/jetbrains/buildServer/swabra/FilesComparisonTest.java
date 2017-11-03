@@ -24,6 +24,7 @@ import jetbrains.buildServer.swabra.snapshots.iteration.SnapshotFilesIterator;
 import jetbrains.buildServer.util.FileUtil;
 import junit.framework.TestCase;
 import org.junit.Assume;
+import org.testng.SkipException;
 
 import static jetbrains.buildServer.swabra.TestUtil.getTestData;
 
@@ -34,7 +35,7 @@ import static jetbrains.buildServer.swabra.TestUtil.getTestData;
  */
 public class FilesComparisonTest extends TestCase {
   private void runTest(String testData) throws Exception {
-    final FilesTraversal traversal = new FilesTraversal();
+    final FilesTraversal traversal = new FilesTraversal(false);
     final StringBuffer results = new StringBuffer();
 
     traversal.traverseCompare(

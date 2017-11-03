@@ -34,7 +34,7 @@ public class SwabraRules {
   @NotNull
   private final File myBaseDir;
   @NotNull
-  private final RuleSet myRuleSet;
+  private final SwabraRuleSet mySwabraRuleSet;
   private List<File> myRootPaths;
 
   public SwabraRules(@NotNull File baseDir, @NotNull Collection<String> body) {
@@ -43,7 +43,7 @@ public class SwabraRules {
     final ArrayList<String> rules = new ArrayList<String>(body);
     addAsRule(myBaseDir, rules);
 
-    myRuleSet = new RuleSet(rules);
+    mySwabraRuleSet = new SwabraRuleSet(rules);
   }
 
   private static void addAsRule(@NotNull File baseDir, @NotNull Collection<String> body) {
@@ -62,48 +62,57 @@ public class SwabraRules {
     return myRootPaths;
   }
 
+  public boolean requiresListingForDir(File dir){
+    List<SwabraFileRule> rulesForPath = mySwabraRuleSet.getRulesForPath(dir.getPath());
+    for (SwabraFileRule rule : rulesForPath) {
+      if (rule.isRequiresFullListing())
+        return true;
+    }
+    return false;
+  }
+
   public boolean shouldInclude(@NotNull String path) {
-    return myRuleSet.shouldInclude(path);
+    return mySwabraRuleSet.shouldInclude(path);
   }
 
   public List<String> getRulesForPath(@NotNull File pathFile) {
-    return myRuleSet.getForPath(pathFile.getPath());
+    return mySwabraRuleSet.getForPath(pathFile.getPath());
   }
 
-  private final class RuleSet extends FileRuleSet<FileRule, FileRule> {
-    public RuleSet(List<String> body) {
+  private final class SwabraRuleSet extends FileRuleSet<SwabraFileRule, SwabraFileRule> {
+    public SwabraRuleSet(List<String> body) {
       super(body);
     }
 
     @Override
-    protected void doPostInitProcess(final List<FileRule> includeRules, final List<FileRule> excludeRules) {
+    protected void doPostInitProcess(final List<SwabraFileRule> includeRules, final List<SwabraFileRule> excludeRules) {
       sortByFrom(includeRules, false);
       sortByFrom(excludeRules, true);
       initRootIncludePaths();
     }
 
     @Override
-    protected FileRule createNewIncludeRule(final String line) {
+    protected SwabraFileRule createNewIncludeRule(final String line) {
       return createRule(line, true);
     }
 
     @Override
-    protected FileRule createNewExcludeRule(final String line) {
+    protected SwabraFileRule createNewExcludeRule(final String line) {
       return createRule(line, false);
     }
 
     @Override
-    protected FileRule createNewIncludeRule(final FileRule includeRule) {
+    protected SwabraFileRule createNewIncludeRule(final SwabraFileRule includeRule) {
       return createNewIncludeRule(includeRule.getFrom());
     }
 
     @Override
-    protected FileRule createNewExcludeRule(final FileRule excludeRule) {
+    protected SwabraFileRule createNewExcludeRule(final SwabraFileRule excludeRule) {
       return createNewExcludeRule(excludeRule.getFrom());
     }
 
-    private FileRule createRule(@NotNull String line, boolean isInclude) {
-      return new FileRule(resolvePath(line, myBaseDir), null, this, isInclude);
+    private SwabraFileRule createRule(@NotNull String line, boolean isInclude) {
+      return new SwabraFileRule(resolvePath(line, myBaseDir), null, this, isInclude);
     }
 
     private void initRootIncludePaths() {
@@ -142,7 +151,7 @@ public class SwabraRules {
       path = preparePath(path);
 
       final ArrayList<String> rules = new ArrayList<String>();
-      for (FileRule rule : getAllRulesSorted()) {
+      for (SwabraFileRule rule : getAllRulesSorted()) {
         if (isSubDir(rule.getFrom(), path)) {
           rules.add(rule.toString());
         }
@@ -150,8 +159,20 @@ public class SwabraRules {
       return rules;
     }
 
-    private List<FileRule> getAllRulesSorted() {
-      final ArrayList<FileRule> allRules = new ArrayList<FileRule>(getIncludeRules().size() + getExcludeRules().size());
+    public List<SwabraFileRule> getRulesForPath(@NotNull String path) {
+      path = preparePath(path);
+
+      final ArrayList<SwabraFileRule> rules = new ArrayList<SwabraFileRule>();
+      for (SwabraFileRule rule : getAllRulesSorted()) {
+        if (isSubDir(rule.getFrom(), path)) {
+          rules.add(rule);
+        }
+      }
+      return rules;
+    }
+
+    private List<SwabraFileRule> getAllRulesSorted() {
+      final ArrayList<SwabraFileRule> allRules = new ArrayList<SwabraFileRule>(getIncludeRules().size() + getExcludeRules().size());
       allRules.addAll(getIncludeRules());
       allRules.addAll(getExcludeRules());
       sortByFrom(allRules, false);
@@ -165,6 +186,24 @@ public class SwabraRules {
         return StringUtil.EMPTY;
       }
       return new File(path).isAbsolute() ? FileUtil.normalizeAbsolutePath(FileUtil.normalizeSeparator(path)).replace("\\", "/") : FileUtil.normalizeRelativePath(path);
+    }
+  }
+
+  private static class SwabraFileRule extends FileRule<SwabraRuleSet>{
+    private final boolean requiresFullListing;
+
+    private SwabraFileRule(@NotNull final String fromPath, @Nullable final String additionalProperties, final SwabraRuleSet swabraRuleSet, final boolean isInclude) {
+      super(fromPath, additionalProperties, swabraRuleSet, isInclude);
+      if (!fromPath.contains("*")){
+        requiresFullListing = false;
+      } else {
+        File ruleParent = new File(fromPath).getParentFile();
+        requiresFullListing = ruleParent != null && ruleParent.getPath().contains("*");
+      }
+    }
+
+    public boolean isRequiresFullListing() {
+      return requiresFullListing;
     }
   }
 
