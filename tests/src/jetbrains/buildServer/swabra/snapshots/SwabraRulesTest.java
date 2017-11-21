@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2015 JetBrains s.r.o.
+ * Copyright 2000-2017 JetBrains s.r.o.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,10 +14,11 @@
  * limitations under the License.
  */
 
-package jetbrains.buildServer.swabra;
+package jetbrains.buildServer.swabra.snapshots;
 
 import java.io.File;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import jetbrains.buildServer.swabra.snapshots.SwabraRules;
 import jetbrains.buildServer.swabra.snapshots.iteration.FileInfo;

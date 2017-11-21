@@ -25,11 +25,7 @@ import org.jetbrains.annotations.NotNull;
  */
 public class FilesTraversal {
 
-  private final boolean myFullListingEnforced;
-
-  public FilesTraversal(final boolean fullListingEnforced) {
-    myFullListingEnforced = fullListingEnforced;
-  }
+  public FilesTraversal() {}
 
   public static interface SimpleProcessor {
     void process(FileInfo file) throws Exception;
@@ -121,7 +117,7 @@ public class FilesTraversal {
                                    @NotNull final FilesIterator currentIterator) throws InterruptedException {
     if (processor.willProcess(currentInfo)) {
       processor.processAdded(currentInfo);
-      if (!currentInfo.isFile() && !myFullListingEnforced) {
+      if (!currentInfo.isFile()) {
         currentIterator.skipDirectory(currentInfo);
       }
     }
@@ -132,7 +128,7 @@ public class FilesTraversal {
                                      @NotNull final FilesIterator snapshotIterator) throws InterruptedException {
     if (processor.willProcess(snapshotInfo)) {
       processor.processDeleted(snapshotInfo);
-      if (!snapshotInfo.isFile() && !myFullListingEnforced) {
+      if (!snapshotInfo.isFile()) {
         snapshotIterator.skipDirectory(snapshotInfo);
       }
     }

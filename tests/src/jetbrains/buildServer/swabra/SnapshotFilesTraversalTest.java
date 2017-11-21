@@ -33,7 +33,7 @@ import static jetbrains.buildServer.swabra.TestUtil.getTestData;
  */
 public class SnapshotFilesTraversalTest extends TestCase {
   private void runTest(String resultsFileName) throws Exception {
-    final FilesTraversal traversal = new FilesTraversal(false);
+    final FilesTraversal traversal = new FilesTraversal();
     final StringBuffer results = new StringBuffer();
 
     traversal.traverse(new SnapshotFilesIterator(getTestData(resultsFileName + ".snapshot", null)),

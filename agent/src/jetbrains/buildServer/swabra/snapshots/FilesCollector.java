@@ -131,7 +131,7 @@ public class FilesCollector {
   }
 
   private void iterateAndCollect(File snapshot, File dir) throws Exception {
-    final FilesTraversal traversal = new FilesTraversal(mySettings.getRules().requiresListingForDir(dir));
+    final FilesTraversal traversal = new FilesTraversal();
     traversal.traverseCompare(new SnapshotFilesIterator(snapshot),
                               new FileSystemFilesIterator(dir, mySettings.getRules()),
                               myProcessor);

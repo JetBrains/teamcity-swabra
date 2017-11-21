@@ -36,7 +36,7 @@ import static jetbrains.buildServer.swabra.TestUtil.getTestData;
  */
 public class FileSystemFilesTraversalTest extends TestCase {
   private void runTest(String resultsFileName, boolean fullListing, String... rulesString) throws Exception {
-    final FilesTraversal traversal = new FilesTraversal(false);
+    final FilesTraversal traversal = new FilesTraversal();
     final StringBuffer results = new StringBuffer();
 
     final TempFiles tempFiles = new TempFiles();

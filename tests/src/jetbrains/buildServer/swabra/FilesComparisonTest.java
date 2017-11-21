@@ -24,7 +24,6 @@ import jetbrains.buildServer.swabra.snapshots.iteration.SnapshotFilesIterator;
 import jetbrains.buildServer.util.FileUtil;
 import junit.framework.TestCase;
 import org.junit.Assume;
-import org.testng.SkipException;
 
 import static jetbrains.buildServer.swabra.TestUtil.getTestData;
 
@@ -35,7 +34,7 @@ import static jetbrains.buildServer.swabra.TestUtil.getTestData;
  */
 public class FilesComparisonTest extends TestCase {
   private void runTest(String testData) throws Exception {
-    final FilesTraversal traversal = new FilesTraversal(false);
+    final FilesTraversal traversal = new FilesTraversal();
     final StringBuffer results = new StringBuffer();
 
     traversal.traverseCompare(
@@ -88,7 +87,7 @@ public class FilesComparisonTest extends TestCase {
       resultsWriter.write(actual);
       resultsWriter.close();
 
-      assertEquals(actual, expected, actual);
+      assertEquals(actual.replaceAll("\r\n", "\n"), expected.replaceAll("\r\n", "\n"), actual.replaceAll("\r\n", "\n"));
     }
   }
 
@@ -107,5 +106,20 @@ public class FilesComparisonTest extends TestCase {
   @org.junit.Test
   public void testUnicodeFileNames() throws Exception {
     runTest("unicodeFileNames");
+  }
+
+  @org.junit.Test
+  public void test_skip_dir() throws Exception {
+    runTest("compare/compareSkipDirs");
+  }
+
+  @org.junit.Test
+  public void test_skip_dir_first_in_list() throws Exception {
+    runTest("compare/compareSkipDirsFirstInList");
+  }
+
+  @org.junit.Test
+  public void test_skip_dir_last_in_list() throws Exception {
+    runTest("compare/compareSkipDirsLastInList");
   }
 }
