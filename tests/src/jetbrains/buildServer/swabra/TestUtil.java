@@ -16,10 +16,13 @@
 
 package jetbrains.buildServer.swabra;
 
+import java.io.CharArrayWriter;
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.FileReader;
 import java.util.List;
 import jetbrains.buildServer.util.FileUtil;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 /**

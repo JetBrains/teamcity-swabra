@@ -71,7 +71,7 @@ public class SnapshotFilesIterator implements FilesIterator {
       final long lastModified = getFileLastModified(fileRecord);
 
       final boolean isDirectory = path.endsWith("/") || path.endsWith("\\");
-      final boolean skipCurrentDir = !myCurrentDir.isEmpty() && mySkipDir != null && myCurrentDir.startsWith(mySkipDir);
+      final boolean skipCurrentDir = !myCurrentDir.isEmpty() && mySkipDir != null && hasParentOf(myCurrentDir, mySkipDir);
       if (isDirectory) {
         final String newDir = myRootFolder + path;
         if (skipCurrentDir && newDir.startsWith(mySkipDir)) {
@@ -100,6 +100,17 @@ public class SnapshotFilesIterator implements FilesIterator {
     } catch (IOException e) {
       LOG.error("Error occurred when closing reader", e);
     }
+  }
+
+  private static boolean hasParentOf(String dirPath, String parentDir){
+    File dir = new File(dirPath.replace("/", File.separator).replace("\\", File.separator));
+    File parent = new File(parentDir.replace("/", File.separator).replace("\\", File.separator));
+    while (dir != null){
+      if (dir.getPath().equalsIgnoreCase(parent.getPath()))
+        return true;
+      dir = dir.getParentFile();
+    }
+    return false;
   }
 
   public boolean isCurrent() {
