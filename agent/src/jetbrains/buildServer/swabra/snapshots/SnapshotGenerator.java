@@ -74,7 +74,7 @@ public class SnapshotGenerator {
       iterateAndBuildSnapshot(writer);
       myLogger.debug("Successfully finished saving " + myRootDir +
         " directory state to snapshot file " + snapshot.getName() + ", saved " + mySavedObjects + " objects (including root dir)");
-    } catch (Exception e) {
+    } catch (Throwable e) {
       myLogger.warn("Unable to save " + myRootDir.getAbsolutePath()
         + " directory state to snapshot file " + snapshot.getName() + getMessage(e));
       myLogger.exception(e);
@@ -92,7 +92,7 @@ public class SnapshotGenerator {
     return true;
   }
 
-  private String getMessage(Exception e) {
+  private String getMessage(Throwable e) {
     return e.getMessage() == null ? "" : ": " + e.getMessage();
   }
 

@@ -43,35 +43,35 @@ public class FileSystemFilesIterator implements FilesIterator {
 
   @Nullable
   public FileInfo getNext() throws IOException {
-    if (myIterators == null) {
-      myIterators = new Stack<Iterator<File>>();
-      return processFolder(myRootFolder, myRules.shouldInclude(myRootFolder.getPath()));
-    }
-    if (myIterators.isEmpty()) {
-      return null;
-    }
-    final Iterator<File> it = myIterators.peek();
-    while (it.hasNext()) {
-      final File next = it.next();
-      boolean shouldInclude = myRules.shouldInclude(next.getPath());
-      if ((next.isDirectory() && myRequiresListing) || shouldInclude) {
-        if (next.isFile()) {
-          return createFileInfo(next);
-        } else if (next.isDirectory()) {
-          FileInfo processResult = processFolder(next, shouldInclude);
-          if (processResult != null)
-            return processResult;
-        } else {
-          throw new IOException("Failed to read " + next);
+    while (true) {
+      if (myIterators == null) {
+        myIterators = new Stack<Iterator<File>>();
+        return processFolder(myRootFolder, myRules.shouldInclude(myRootFolder.getPath()));
+      }
+      if (myIterators.isEmpty()) {
+        return null;
+      }
+      final Iterator<File> it = myIterators.peek();
+      while (it.hasNext()) {
+        final File next = it.next();
+        boolean shouldInclude = myRules.shouldInclude(next.getPath());
+        if ((next.isDirectory() && myRequiresListing) || shouldInclude) {
+          if (next.isFile()) {
+            return createFileInfo(next);
+          } else if (next.isDirectory()) {
+            FileInfo processResult = processFolder(next, shouldInclude);
+            if (processResult != null)
+              return processResult;
+          } else {
+            throw new IOException("Failed to read " + next);
+          }
         }
       }
+      myIterators.pop();
+      if (myIterators.isEmpty()) {
+        return null;
+      }
     }
-    myIterators.pop();
-    if (myIterators.isEmpty()) {
-      return null;
-    }
-    return getNext();
-
   }
 
   public void skipDirectory(final FileInfo dirInfo) {
