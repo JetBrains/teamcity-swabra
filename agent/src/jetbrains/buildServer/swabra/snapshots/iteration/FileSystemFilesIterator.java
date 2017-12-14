@@ -29,6 +29,7 @@ import org.jetbrains.annotations.Nullable;
  * Time: 14:27:18
  */
 public class FileSystemFilesIterator implements FilesIterator {
+  private static final int MAX_DEPTH = 258;
   @NotNull
   private final File myRootFolder;
   @NotNull private final SwabraRules myRules;
@@ -47,6 +48,9 @@ public class FileSystemFilesIterator implements FilesIterator {
       if (myIterators == null) {
         myIterators = new Stack<Iterator<File>>();
         return processFolder(myRootFolder, myRules.shouldInclude(myRootFolder.getPath()));
+      }
+      if (myIterators.size() > MAX_DEPTH) {
+        throw new IOException("Too many entries in depth. Is there a loop. Current folder depth is more than " + MAX_DEPTH);
       }
       if (myIterators.isEmpty()) {
         return null;
