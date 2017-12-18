@@ -18,7 +18,6 @@ package jetbrains.buildServer.swabra;
 
 import java.io.File;
 import java.io.FileWriter;
-import java.io.IOException;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
@@ -30,7 +29,6 @@ import jetbrains.buildServer.swabra.snapshots.iteration.FilesTraversal;
 import jetbrains.buildServer.util.FileUtil;
 import jetbrains.buildServer.util.StringUtil;
 import junit.framework.TestCase;
-import org.assertj.core.api.BDDAssertions;
 
 import static jetbrains.buildServer.swabra.TestUtil.getTestData;
 
@@ -81,6 +79,7 @@ public class FileSystemFilesTraversalTest extends TestCase {
 
   public void test_filtered() throws Exception {
     runTest("fileSystemFilesTraversal_filtered", true, "-:**/a*");
+
   }
 
   public void test_many_dirs_excluded() throws Exception {
@@ -126,7 +125,7 @@ public class FileSystemFilesTraversalTest extends TestCase {
                          }
                        });
 
-    BDDAssertions.then(expectedDirs).isEmpty();
+    assertTrue(expectedDirs.isEmpty());
   }
 
 }
