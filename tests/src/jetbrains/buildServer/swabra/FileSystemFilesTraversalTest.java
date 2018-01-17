@@ -100,7 +100,7 @@ public class FileSystemFilesTraversalTest extends TestCase {
       File dirIncI = new File(dirInc, dirI);
       assertTrue(dirIncI.mkdir());
       expectedDirs.add(dirI);
-      expectedDirs.add("dirInc/"+dirI);
+      expectedDirs.add("dirInc"+File.separator+dirI);
 
       File dirExI = new File(dirExc, dirI);
       assertTrue(dirExI.mkdir());
@@ -108,7 +108,7 @@ public class FileSystemFilesTraversalTest extends TestCase {
         String dirJ = "dir" + j;
         assertTrue(new File(dirExI, dirJ).mkdir());
         assertTrue(new File(dirIncI, dirJ).mkdir());
-        expectedDirs.add("dirInc/"+dirI +"/"+dirJ);
+        expectedDirs.add("dirInc"+File.separator+dirI +File.separator+dirJ);
       }
     }
 
