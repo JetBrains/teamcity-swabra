@@ -117,7 +117,7 @@ public class FileSystemFilesTraversalTest extends TestCase {
     traversal.traverse(new FileSystemFilesIterator(root, rules),
                        new FilesTraversal.SimpleProcessor() {
                          public void process(FileInfo file) {
-                           String path = file.getPath().replaceAll(root.getPath(), "");
+                           String path = file.getPath().replace(root.getPath(), "");
                            if (StringUtil.isNotEmpty(path)) {
                              path = path.substring(1);
                              assertTrue("Expected to contain " + path, expectedDirs.remove(path));
