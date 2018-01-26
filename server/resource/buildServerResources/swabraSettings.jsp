@@ -115,9 +115,9 @@
 
 <tr class="noBorder" style="${empty processesSelected ? 'display: none;' : ''}" id="swabra.download.handle.container">
   <td colspan="2">
-    <div class="${not handlePresent ? 'icon_before icon16 attentionComment' : ''}">
+    <div class="${not handlePresent ? 'attentionComment' : ''}">
       <c:if test="${not handlePresent}">
-        Note that for locking processes detection handle.exe tool is required on agents.<br/>
+        <bs:buildStatusIcon type="red-sign" className="warningIcon"/>Note that for locking processes detection handle.exe tool is required on agents.<br/>
       </c:if>
       <authz:authorize allPermissions="CHANGE_SERVER_SETTINGS">
         <jsp:attribute name="ifAccessGranted">
