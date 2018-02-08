@@ -88,7 +88,7 @@
 
 <tr class="noBorder" id="swabra.rules.container"
     style="${displayCleanupSettings or displayProcessesSettings? '' : 'display: none;'}">
-  <th>Paths to monitor:  <bs:help file="Build+Files+Cleaner+(Swabra)"/></th>
+  <th>Paths to monitor:<bs:help file="Build+Files+Cleaner+(Swabra)"/></th>
   <td>
     <c:set var="note">
     Newline or comma delimited set of <strong>+|-:path</strong> rules.<br/>
