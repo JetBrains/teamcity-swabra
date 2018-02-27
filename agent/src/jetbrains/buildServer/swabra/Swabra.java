@@ -27,6 +27,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.concurrent.atomic.AtomicBoolean;
 import jetbrains.buildServer.TeamCityRuntimeException;
+import jetbrains.buildServer.Used;
 import jetbrains.buildServer.agent.*;
 import jetbrains.buildServer.agent.impl.directories.DirectoryMapDirectoriesCleaner;
 import jetbrains.buildServer.swabra.processes.HandleProcessesProvider;
@@ -56,8 +57,7 @@ public final class Swabra extends AgentLifeCycleAdapter implements PositionAware
   @NotNull
   private final BundledToolsRegistry myToolsRegistry;
   @NotNull private final DirectoryMapDirectoriesCleaner myDirectoriesCleaner;
-//  @NotNull
-//  private ProcessTerminator myProcessTerminator;
+  @NotNull private final LockedFileResolver.LockingProcessesProviderFactory myLockingProcessesProviderFactory;
 
   private LockedFileResolver myLockedFileResolver;
   private SwabraSettings mySettings;
@@ -76,14 +76,32 @@ public final class Swabra extends AgentLifeCycleAdapter implements PositionAware
                 @NotNull final SwabraLogger logger,
                 @NotNull final SwabraPropertiesProcessor propertiesProcessor,
                 @NotNull final BundledToolsRegistry toolsRegistry,
-                @NotNull final DirectoryMapDirectoriesCleaner directoriesCleaner
-                /*,@NotNull ProcessTerminator processTerminator*/) {
+                @NotNull final DirectoryMapDirectoriesCleaner directoriesCleaner) {
+    this(agentDispatcher, logger, propertiesProcessor, toolsRegistry, directoriesCleaner, new LockedFileResolver.LockingProcessesProviderFactory(){
+
+      @Nullable
+      @Override
+      public LockedFileResolver.LockingProcessesProvider createProvider(final SwabraSettings swabraSettings) {
+        if (swabraSettings.getHandlePath() == null)
+          return null;
+        return new HandleProcessesProvider(swabraSettings.getHandlePath());
+      }
+    });
+  }
+
+  @Used("tests")
+  public Swabra(@NotNull final EventDispatcher<AgentLifeCycleListener> agentDispatcher,
+                @NotNull final SwabraLogger logger,
+                @NotNull final SwabraPropertiesProcessor propertiesProcessor,
+                @NotNull final BundledToolsRegistry toolsRegistry,
+                @NotNull final DirectoryMapDirectoriesCleaner directoriesCleaner,
+                @NotNull final LockedFileResolver.LockingProcessesProviderFactory lockingProcessesProviderFactory) {
     myDirectoriesCleaner = directoriesCleaner;
     agentDispatcher.addListener(this);
     myLogger = logger;
     myPropertiesProcessor = propertiesProcessor;
     myToolsRegistry = toolsRegistry;
-//    myProcessTerminator = processTerminator;
+    myLockingProcessesProviderFactory = lockingProcessesProviderFactory;
   }
 
   @NotNull
@@ -109,7 +127,9 @@ public final class Swabra extends AgentLifeCycleAdapter implements PositionAware
 
     mySettings = new SwabraSettings(myRunningBuild);
 
-    if (!mySettings.isCleanupEnabled()) {
+    mySettings.prepareHandle(myLogger, myToolsRegistry);
+
+    if (!mySettings.isSwabraEnabled()) {
       myLogger.message("Swabra cleanup is disabled", false);
       myPropertiesProcessor.deleteRecords(mySettings.getCheckoutDir());
       return;
@@ -117,12 +137,15 @@ public final class Swabra extends AgentLifeCycleAdapter implements PositionAware
 
     myLogger.activityStarted();
     try {
-      mySettings.prepareHandle(myLogger, myToolsRegistry);
+      final LockedFileResolver.LockingProcessesProvider provider = myLockingProcessesProviderFactory.createProvider(mySettings);
+      myLockedFileResolver = mySettings.isLockingProcessesDetectionEnabled() && provider != null ?
+                             new LockedFileResolver(provider,
+                                                    mySettings.getIgnoredProcesses(),
+                                                    new WmicProcessDetailsProvider()/*, myProcessTerminator,*/) : null;
 
-      myLockedFileResolver = mySettings.isLockingProcessesDetectionEnabled() ?
-        new LockedFileResolver(new HandleProcessesProvider(mySettings.getHandlePath()), mySettings.getIgnoredProcesses(), new WmicProcessDetailsProvider()/*, myProcessTerminator,*/) : null;
-
-      processDirs(mySettings.getRules().getPaths());
+      if (mySettings.isCleanupEnabled()) {
+        processDirs(mySettings.getRules().getPaths());
+      }
 
     } finally {
       myLogger.activityFinished();

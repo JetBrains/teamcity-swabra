@@ -72,6 +72,7 @@ public class SwabraTest2 extends BaseTestCase {
   private AgentRunningBuild myRunningBuild;
   private BuildAgentConfiguration myAgentConf;
 
+  @Override
   @BeforeMethod
   public void setUp() throws Exception {
     super.setUp();

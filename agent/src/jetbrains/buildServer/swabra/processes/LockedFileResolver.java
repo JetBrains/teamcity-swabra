@@ -22,6 +22,7 @@ import java.util.Collection;
 import java.util.List;
 import jetbrains.buildServer.processes.KillProcessDetails;
 import jetbrains.buildServer.processes.ProcessTreeTerminator;
+import jetbrains.buildServer.swabra.SwabraSettings;
 import jetbrains.buildServer.util.FileUtil;
 import jetbrains.buildServer.util.StringUtil;
 import org.apache.log4j.Logger;
@@ -41,6 +42,11 @@ public class LockedFileResolver {
   public static interface LockingProcessesProvider {
     @NotNull
     Collection<ProcessInfo> getLockingProcesses(@NotNull File f) throws GetProcessesException;
+  }
+  public static interface LockingProcessesProviderFactory {
+
+    @Nullable
+    LockingProcessesProvider createProvider(SwabraSettings swabraSettings);
   }
 
   public static interface Listener {

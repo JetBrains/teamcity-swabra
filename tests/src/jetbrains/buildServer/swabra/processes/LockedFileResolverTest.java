@@ -135,6 +135,47 @@ public class LockedFileResolverTest {
     myListener.assertMessageContains("Process killed:\nPID: " + child.getPid());
   }
 
+  @Test
+  public void test_locking_processes_no_cleanup() throws Throwable{
+    if (!SystemInfo.isWindows) return;
+
+    final File tempDir = myTempFiles.createTempDir();
+
+    final ExecResult[] res = new ExecResult[1];
+    Thread t = new Thread(new Runnable() {
+      public void run() {
+        try {
+          res[0] = startProcess(tempDir.getAbsolutePath(), tempDir);
+        } catch (Throwable throwable) {
+          ExceptionUtil.rethrowAsRuntimeException(throwable);
+        }
+      }
+    });
+    t.start();
+
+    new WaitFor() {
+      @Override
+      protected boolean condition() {
+        return !ProcessTreeTerminator.getChildProcesses(ProcessFilter.MATCH_ALL).isEmpty();
+      }
+    };
+
+    Assert.assertNull("Process did not start: " + res[0], res[0]);
+
+    Collection<ProcessNode> children = ProcessTreeTerminator.getChildProcesses(ProcessFilter.MATCH_ALL);
+    Assert.assertFalse(children.isEmpty());
+
+    ProcessNode child = children.iterator().next();
+
+    setupLockingProcesses(Collections.singletonList(new ProcessInfo(child.getPid(), child.getCommandLine())), tempDir);
+    getLockedFileResolver().resolve(tempDir, true, myListener);
+
+    t.join();
+
+    myListener.assertWarnContains("Found process locking files in directory");
+    myListener.assertMessageContains("Process killed:\nPID: " + child.getPid());
+  }
+
   // used from test
   public static void main(String[] args) throws IOException {
     File dir = new File(args[0]);

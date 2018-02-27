@@ -98,6 +98,10 @@ public class SwabraSettings {
     return myCleanupEnabled;
   }
 
+  public boolean isSwabraEnabled(){
+    return isCleanupEnabled() || isLockingProcessesDetectionEnabled();
+  }
+
   public boolean isCleanupBeforeBuild() {
     return myCleanupEnabled && !isCleanupAfterBuild();
   }
@@ -118,8 +122,9 @@ public class SwabraSettings {
     return (myLockingProcessesKill || myLockingProcessesReport) && myHandlePath != null;
   }
 
+  @Nullable
   public String getHandlePath() {
-    return myHandlePath.getPath();
+    return myHandlePath == null ? null : myHandlePath.getPath();
   }
 
   public SwabraRules getRules() {

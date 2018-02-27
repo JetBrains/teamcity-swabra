@@ -1088,6 +1088,94 @@ E:\TEMP\test-1307328584\checkoutDir2\dir2=pending
     }
   }
 
+  //TW-53881
+  public void testShouldCheckForLockingProcessesIfDontCheckFiles() throws Exception {
+    if (!SystemInfo.isWindows)
+      throw new SkipException("This test is for Windows only");
+
+    final String goldFile = getTestDataPath("emptyCheckoutDir_b" + ".gold", null);
+    final String resultsFile = goldFile.replace(".gold", ".tmp");
+    System.setProperty(Swabra.TEST_LOG, resultsFile);
+
+    new File(resultsFile).delete();
+
+    File handleExeDir = myTempFiles.createTempDir();
+    new File(handleExeDir, "handle.exe").createNewFile();
+
+    myResults = new StringBuilder();
+
+    final SimpleBuildLogger logger = new BuildProgressLoggerMock(myResults);
+    final SwabraLogger swabraLogger = new SwabraLogger();
+    final DirectoryCleaner directoryCleaner = new DirectoryCleaner() {
+      public boolean delete(@NotNull final File f, @NotNull final DirectoryCleanerCallback callback) {
+        return false;
+      }
+
+      public boolean deleteNow(@NotNull final File f, @NotNull final DirectoryCleanerCallback callback) {
+        return false;
+      }
+    };
+
+    final Swabra swabra = new Swabra(myDispatcher, new SwabraLogger(),
+                                     new SwabraPropertiesProcessor(myDispatcher, swabraLogger,
+                                                                   new DirectoryMapPersistanceImpl(myAgentConf, new SystemTimeService())),
+                                     new BundledToolsRegistry() {
+                                       @Nullable
+                                       public BundledTool findTool(@NotNull final String name) {
+                                         if ("SysinternalsHandle".equalsIgnoreCase(name)) {
+                                           return () -> handleExeDir;
+                                         }
+                                         return null;
+                                       }
+
+                                       @Override
+                                       public void registerTool(@NotNull final String toolName, @NotNull final BundledTool tool) {
+
+                                       }
+                                     },
+                                     new DirectoryMapDirectoriesCleanerImpl(myDispatcher,
+                                                                            directoryCleaner,
+                                                                            new DirectoryMapPersistanceImpl(myAgentConf, new SystemTimeService()),
+                                                                            new DirectoryMapDirtyTrackerImpl()),
+                                     new LockedFileResolver.LockingProcessesProviderFactory() {
+                                       @Nullable
+                                       @Override
+                                       public LockedFileResolver.LockingProcessesProvider createProvider(final SwabraSettings swabraSettings) {
+                                         return new LockedFileResolver.LockingProcessesProvider() {
+                                           @NotNull
+                                           @Override
+                                           public Collection<ProcessInfo> getLockingProcesses(@NotNull final File f) {
+                                             return Arrays.asList(new ProcessInfo(1234567l, "SwabraTestProcess"));
+                                           }
+                                         };
+                                       }
+                                     }
+    );
+
+//    final File pttTemp = new File(TEST_DATA_PATH, "ptt");
+//    System.setProperty(ProcessTreeTerminator.TEMP_PATH_SYSTEM_PROPERTY, pttTemp.getAbsolutePath());
+
+
+    myDispatcher.getMulticaster().afterAgentConfigurationLoaded(myAgent);
+    myDispatcher.getMulticaster().agentStarted(myAgent);
+
+    final String checkoutDirPath = myCheckoutDir.getAbsolutePath();
+
+    final Map<String, String> swabraParams = new HashMap<String, String>();
+    swabraParams.put(SwabraUtil.ENABLED, "");
+    swabraParams.put(SwabraUtil.LOCKING_PROCESS, "report");
+
+    final AgentRunningBuild build = createBuild(swabraParams, myCheckoutDir, logger);
+    final BuildRunnerContext runner = myContext.mock(BuildRunnerContext.class, "context"+System.currentTimeMillis());
+
+    runBuild("emptyCheckoutDir", myDispatcher, build, runner, checkoutDirPath);
+
+    System.out.println(myResults.toString());
+    assertTrue(myResults.toString().contains("WARNING: Found process locking files in directory"));
+    assertTrue(myResults.toString().contains("PID: 1234567"));
+    assertTrue(myResults.toString().contains("SwabraTestProcess"));
+  }
+
   private void doWholeTest(final List<DirectoryMapItem> items,
                            final Action<Pair<Swabra, SwabraPropertiesProcessor>
                              > action) throws Exception {

@@ -18,6 +18,7 @@ package jetbrains.buildServer.swabra;
 
 import java.io.File;
 import java.util.*;
+import jetbrains.buildServer.util.StringUtil;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -59,7 +60,7 @@ public class SwabraUtil {
   public static final String CLEAN_CHECKOUT_CAUSE_BUILD_TYPE_ID = "swabra.clean.checkout.cause.build.type.id";
 
   public static boolean isCleanupEnabled(@NotNull final Map<String, String> params) {
-    return params.containsKey(ENABLED);
+    return StringUtil.isNotEmpty(params.get(ENABLED));
   }
 
   public static String getCleanupMode(@NotNull final Map<String, String> params) {
@@ -79,7 +80,7 @@ public class SwabraUtil {
   }
 
   public static boolean isLockingProcessesKill(@NotNull final Map<String, String> params) {
-    return params.containsKey(LOCKING_PROCESS_KILL) || "kill".equals(params.get(LOCKING_PROCESS));
+    return StringUtil.isNotEmpty(params.get(LOCKING_PROCESS_KILL)) || "kill".equals(params.get(LOCKING_PROCESS));
   }
 
   public static boolean isStrict(@NotNull final Map<String, String> params) {
@@ -91,7 +92,7 @@ public class SwabraUtil {
   }
 
   public static boolean isLockingProcessesReport(@NotNull final Map<String, String> params) {
-    return params.containsKey(LOCKING_PROCESS_DETECTION) || "report".equals(params.get(LOCKING_PROCESS));
+    return StringUtil.isNotEmpty(params.get(LOCKING_PROCESS_DETECTION)) || "report".equals(params.get(LOCKING_PROCESS));
   }
 
   public static String getRules(@NotNull final Map<String, String> params) {
