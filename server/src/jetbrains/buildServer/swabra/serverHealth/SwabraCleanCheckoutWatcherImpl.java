@@ -44,11 +44,14 @@ public class SwabraCleanCheckoutWatcherImpl implements SwabraCleanCheckoutWatche
   public static final long MONTH = 30*24*3600*1000L;
 
   @NotNull private final ProjectManager myProjectManager;
+  @NotNull private final ServerResponsibility myServerResponsibility;
 
   public SwabraCleanCheckoutWatcherImpl(@NotNull EventDispatcher<BuildServerListener> eventDispatcher,
                                         @NotNull ProjectManager projectManager,
-                                        @NotNull final ServerExtensionHolder extensionHolder) {
+                                        @NotNull final ServerExtensionHolder extensionHolder,
+                                        @NotNull ServerResponsibility serverResponsibility) {
     myProjectManager = projectManager;
+    myServerResponsibility = serverResponsibility;
 
     eventDispatcher.addListener(new BuildServerAdapter(){
       @Override
@@ -67,6 +70,9 @@ public class SwabraCleanCheckoutWatcherImpl implements SwabraCleanCheckoutWatche
 
 
   private void onBuildFinished(@NotNull final SRunningBuild build) {
+    if (!myServerResponsibility.canManageServerConfig())
+      return;
+
     final SBuildType buildType = build.getBuildType();
     if (buildType == null) return;
 
