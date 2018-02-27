@@ -36,11 +36,11 @@ public class HandleProcessesProviderTestNG extends BaseTestCase {
   @Override
   protected void setUp() throws Exception {
     super.setUp();
-    if (!SystemInfo.isWindows) throw new SkipException("This test is only for Windows");
   }
 
   @TestFor(issues = "TW-47665")
   public void should_respect_negative_exit_code() throws Throwable {
+    if (!SystemInfo.isWindows) throw new SkipException("This test is only for Windows");
     try {
       createProvider(createHandleExe("<head><title>Document Moved</title></head>\n" +
                                      "<body><h1>Object Moved</h1>This document may be found <a HREF=\"https://live.sysinternals.com/handle.exe\">here</a></body>")).getLockingProcesses(createTempFile());
@@ -53,6 +53,7 @@ public class HandleProcessesProviderTestNG extends BaseTestCase {
 
   @TestFor(issues = "TW-47665")
   public void test_empty_handle_exe() throws Throwable {
+    if (!SystemInfo.isWindows) throw new SkipException("This test is only for Windows");
     try {
       createProvider(createHandleExe("")).getLockingProcesses(createTempFile());
     } catch (GetProcessesException e) {

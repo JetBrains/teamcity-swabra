@@ -17,6 +17,7 @@
 package jetbrains.buildServer.swabra;
 
 import com.intellij.openapi.util.Pair;
+import com.intellij.openapi.util.SystemInfo;
 import com.intellij.util.WaitFor;
 import java.io.File;
 import java.io.FileWriter;
@@ -28,9 +29,15 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
+import jetbrains.buildServer.BaseTestCase;
 import jetbrains.buildServer.TempFiles;
 import jetbrains.buildServer.agent.*;
 import jetbrains.buildServer.agent.impl.directories.*;
+import jetbrains.buildServer.serverSide.BasePropertiesModel;
+import jetbrains.buildServer.serverSide.TeamCityProperties;
+import jetbrains.buildServer.swabra.processes.GetProcessesException;
+import jetbrains.buildServer.swabra.processes.LockedFileResolver;
+import jetbrains.buildServer.swabra.processes.ProcessInfo;
 import jetbrains.buildServer.swabra.snapshots.iteration.FileInfo;
 import jetbrains.buildServer.util.Action;
 import jetbrains.buildServer.util.EventDispatcher;
@@ -42,7 +49,10 @@ import org.jetbrains.annotations.Nullable;
 import org.jmock.Expectations;
 import org.jmock.Mockery;
 import org.jmock.integration.junit4.JUnit4Mockery;
-import org.junit.After;
+import org.testng.SkipException;
+import org.testng.annotations.AfterMethod;
+import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.Test;
 
 import static jetbrains.buildServer.swabra.TestUtil.getTestData;
 import static jetbrains.buildServer.swabra.TestUtil.getTestDataPath;
@@ -53,7 +63,8 @@ import static jetbrains.buildServer.swabra.TestUtil.getTestDataPath;
  * Date: 21.04.2009
  * Time: 15:03:19
  */
-public class SwabraTest extends TestCase {
+@Test
+public class SwabraTest extends BaseTestCase {
   private static final String BEFORE_BUILD = "beforeBuild";
   private static final String AFTER_CHECKOUT = "afterCheckout";
   private static final String AFTER_BUILD = "afterBuild";
@@ -92,6 +103,9 @@ public class SwabraTest extends TestCase {
         will(returnValue(null));
         allowing(build).getBuildTypeId();
         will(returnValue("btID"));
+        allowing(build).addSharedConfigParameter("swabra.clean.checkout.cause.build.type.id", "btID");
+
+
       }
     });
 
@@ -114,6 +128,7 @@ public class SwabraTest extends TestCase {
   }
 
   @Override
+  @BeforeMethod
   public void setUp() throws Exception {
     myContext = new JUnit4Mockery();
     myTempFiles = new TempFiles();
@@ -137,7 +152,7 @@ public class SwabraTest extends TestCase {
   }
 
   @Override
-  @After
+  @AfterMethod
   public void tearDown() throws Exception {
     myTempFiles.cleanup();
     super.tearDown();
@@ -212,7 +227,8 @@ public class SwabraTest extends TestCase {
       }
     }
 
-    final String baseText = FileUtil.readText(new File(resultsFile)).trim();
+    String text = FileUtil.readText(new File(resultsFile));
+    final String baseText = text.trim();
     String actual = baseText.replace(myCheckoutDir.getAbsolutePath(), "##CHECKOUT_DIR##");
     if (extraDirs!= null) {
       for (int i = 0; i < extraDirs.size(); i++) {
