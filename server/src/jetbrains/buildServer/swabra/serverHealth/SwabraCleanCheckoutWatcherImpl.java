@@ -43,8 +43,6 @@ public class SwabraCleanCheckoutWatcherImpl implements SwabraCleanCheckoutWatche
 
   public static final long MONTH = 30*24*3600*1000L;
 
-  private static final Object LOCK = new Object();
-
   @NotNull private final ProjectManager myProjectManager;
 
   public SwabraCleanCheckoutWatcherImpl(@NotNull EventDispatcher<BuildServerListener> eventDispatcher,
@@ -91,17 +89,15 @@ public class SwabraCleanCheckoutWatcherImpl implements SwabraCleanCheckoutWatche
       if (cleanupState.isInterrupted())
         return;
 
-      synchronized (LOCK) {
-        final CustomDataStorage storage = getDataStorage(bt);
-        final Map<String, String> values = storage.getValues();
-        if (values == null) continue;
+      final CustomDataStorage storage = getDataStorage(bt);
+      final Map<String, String> values = storage.getValues();
+      if (values == null) continue;
 
-        for (Map.Entry<String, String> e : values.entrySet()) {
-          if (cleanupState.isInterrupted())
-            return;
-          if (isOldOrBad(e.getValue(), now) || myProjectManager.findBuildTypeById(e.getKey()) == null) {
-            storage.putValue(e.getKey(), null);
-          }
+      for (Map.Entry<String, String> e : values.entrySet()) {
+        if (cleanupState.isInterrupted())
+          return;
+        if (isOldOrBad(e.getValue(), now) || myProjectManager.findBuildTypeById(e.getKey()) == null) {
+          storage.putValue(e.getKey(), null);
         }
       }
 
@@ -120,9 +116,7 @@ public class SwabraCleanCheckoutWatcherImpl implements SwabraCleanCheckoutWatche
   // see teamcity.healthStatus.swabra.builds.storage.period property
   @NotNull
   public Collection<String> getRecentCleanCheckoutCauses(@NotNull SBuildType buildType) {
-    synchronized (LOCK) {
-      final Map<String, String> values = buildType.getCustomDataStorage(CLEAN_CHECKOUT_BUILDS_STORAGE).getValues();
-      return values == null ? Collections.emptyList() : values.keySet();
-    }
+    final Map<String, String> values = buildType.getCustomDataStorage(CLEAN_CHECKOUT_BUILDS_STORAGE).getValues();
+    return values == null ? Collections.emptyList() : values.keySet();
   }
 }
