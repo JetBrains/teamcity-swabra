@@ -16,12 +16,17 @@
 
 package jetbrains.buildServer.swabra.serverHealth;
 
+import java.io.File;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import jetbrains.buildServer.serverSide.*;
+import jetbrains.buildServer.serverSide.cleanup.CleanupExtension;
+import jetbrains.buildServer.serverSide.cleanup.CleanupExtensionAdapter;
+import jetbrains.buildServer.serverSide.cleanup.CleanupProcessState;
 import jetbrains.buildServer.serverSide.executors.ExecutorServices;
+import jetbrains.buildServer.serverSide.impl.cleanup.FileCleanListener;
 import jetbrains.buildServer.swabra.SwabraUtil;
 import jetbrains.buildServer.util.EventDispatcher;
 import jetbrains.buildServer.util.StringUtil;
@@ -31,7 +36,7 @@ import org.jetbrains.annotations.Nullable;
 /**
  * @author vbedrosova
  */
-public class SwabraCleanCheckoutWatcherImpl extends BuildServerAdapter implements SwabraCleanCheckoutWatcher {
+public class SwabraCleanCheckoutWatcherImpl implements SwabraCleanCheckoutWatcher {
 
   public static final String CLEAN_CHECKOUT_BUILDS_STORAGE = "swabra.clean.checkout.builds.storage";
   public static final String BUILDS_STORAGE_PERIOD_PROPERTY = "teamcity.healthStatus.swabra.clean.checkout.builds.storage.period";
@@ -41,20 +46,29 @@ public class SwabraCleanCheckoutWatcherImpl extends BuildServerAdapter implement
   private static final Object LOCK = new Object();
 
   @NotNull private final ProjectManager myProjectManager;
-  @NotNull private final ExecutorService myExecutor;
 
   public SwabraCleanCheckoutWatcherImpl(@NotNull EventDispatcher<BuildServerListener> eventDispatcher,
                                         @NotNull ProjectManager projectManager,
-                                        @NotNull ExecutorServices executorServices) {
+                                        @NotNull final ServerExtensionHolder extensionHolder) {
     myProjectManager = projectManager;
-    myExecutor = executorServices.getLowPriorityExecutorService();
 
-    eventDispatcher.addListener(this);
+    eventDispatcher.addListener(new BuildServerAdapter(){
+      @Override
+      public void buildFinished(@NotNull final SRunningBuild build) {
+        onBuildFinished(build);
+      }
+    });
+
+    extensionHolder.registerExtension(CleanupExtension.class, SwabraCleanCheckoutWatcherImpl.class.getName(), new CleanupExtensionAdapter() {
+      @Override
+      public void afterCleanup(@NotNull final CleanupProcessState cleanupState) {
+        cleanOldValues(cleanupState);
+      }
+    });
   }
 
 
-  @Override
-  public void buildFinished(@NotNull final SRunningBuild build) {
+  private void onBuildFinished(@NotNull final SRunningBuild build) {
     final SBuildType buildType = build.getBuildType();
     if (buildType == null) return;
 
@@ -69,35 +83,29 @@ public class SwabraCleanCheckoutWatcherImpl extends BuildServerAdapter implement
     return buildType.getCustomDataStorage(CLEAN_CHECKOUT_BUILDS_STORAGE);
   }
 
-  @Override
-  public void serverStartup() {
-    cleanOldValues();
-  }
+  private void cleanOldValues(@NotNull final CleanupProcessState cleanupState) {
 
-  private void cleanOldValues() {
-    myExecutor.execute(new Runnable() {
-      @Override
-      public void run() {
+    final long now = System.currentTimeMillis();
 
-        final long now = System.currentTimeMillis();
+    for (SBuildType bt : myProjectManager.getActiveBuildTypes()) {
+      if (cleanupState.isInterrupted())
+        return;
 
-        for (SBuildType bt : myProjectManager.getActiveBuildTypes()) {
+      synchronized (LOCK) {
+        final CustomDataStorage storage = getDataStorage(bt);
+        final Map<String, String> values = storage.getValues();
+        if (values == null) continue;
 
-          synchronized (LOCK) {
-            final CustomDataStorage storage = getDataStorage(bt);
-            final Map<String, String> values = storage.getValues();
-            if (values == null) continue;
-
-            for (Map.Entry<String, String> e : values.entrySet()) {
-              if (isOldOrBad(e.getValue(), now) || myProjectManager.findBuildTypeById(e.getKey()) == null) {
-                storage.putValue(e.getKey(), null);
-              }
-            }
+        for (Map.Entry<String, String> e : values.entrySet()) {
+          if (cleanupState.isInterrupted())
+            return;
+          if (isOldOrBad(e.getValue(), now) || myProjectManager.findBuildTypeById(e.getKey()) == null) {
+            storage.putValue(e.getKey(), null);
           }
-
         }
       }
-    });
+
+    }
   }
 
   private static boolean isOldOrBad(@Nullable String timestamp, long now) {
