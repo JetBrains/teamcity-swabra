@@ -16,17 +16,13 @@
 
 package jetbrains.buildServer.swabra.serverHealth;
 
-import java.io.File;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Map;
-import java.util.concurrent.ExecutorService;
 import jetbrains.buildServer.serverSide.*;
 import jetbrains.buildServer.serverSide.cleanup.CleanupExtension;
 import jetbrains.buildServer.serverSide.cleanup.CleanupExtensionAdapter;
 import jetbrains.buildServer.serverSide.cleanup.CleanupProcessState;
-import jetbrains.buildServer.serverSide.executors.ExecutorServices;
-import jetbrains.buildServer.serverSide.impl.cleanup.FileCleanListener;
 import jetbrains.buildServer.swabra.SwabraUtil;
 import jetbrains.buildServer.util.EventDispatcher;
 import jetbrains.buildServer.util.StringUtil;
@@ -70,7 +66,7 @@ public class SwabraCleanCheckoutWatcherImpl implements SwabraCleanCheckoutWatche
 
 
   private void onBuildFinished(@NotNull final SRunningBuild build) {
-    if (!myServerResponsibility.canManageProjectsConfigs())
+    if (!myServerResponsibility.isMainServer())
       return;
 
     final SBuildType buildType = build.getBuildType();
