@@ -19,7 +19,9 @@ package jetbrains.buildServer.swabra.snapshots.iteration;
 import java.io.File;
 import java.io.IOException;
 import java.util.*;
+import jetbrains.buildServer.serverSide.TeamCityProperties;
 import jetbrains.buildServer.swabra.snapshots.SwabraRules;
+import org.apache.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -29,17 +31,20 @@ import org.jetbrains.annotations.Nullable;
  * Time: 14:27:18
  */
 public class FileSystemFilesIterator implements FilesIterator {
-  private static final int MAX_DEPTH = 258;
+  private static final Logger LOG = Logger.getLogger(FileSystemFilesIterator.class);
+  private static final int MAX_DEPTH = 130;
   @NotNull
   private final File myRootFolder;
   @NotNull private final SwabraRules myRules;
   private Stack<Iterator<File>> myIterators;
   private final boolean myRequiresListing;
+  private final boolean myVerboseLogging;
 
   public FileSystemFilesIterator(@NotNull File rootFolder,@NotNull final SwabraRules rules) {
     myRootFolder = rootFolder;
     myRules = rules;
     myRequiresListing = myRules.requiresListingForDir(rootFolder);
+    myVerboseLogging = TeamCityProperties.getBoolean("teamcity.swabra.snapshot.verbose.logging");
   }
 
   @Nullable
@@ -50,6 +55,18 @@ public class FileSystemFilesIterator implements FilesIterator {
         return processFolder(myRootFolder, myRules.shouldInclude(myRootFolder.getPath()));
       }
       if (myIterators.size() > MAX_DEPTH) {
+        final StringBuilder builder = new StringBuilder();
+        int iteratorsCount = myIterators.size();
+        for (int i=0; i<iteratorsCount; i++){
+          final Iterator<File> iterator = myIterators.get(i);
+          if (iterator.hasNext()) {
+            builder.append(iterator.next().getAbsolutePath());
+          } else {
+            builder.append("<Empty iterator>");
+          }
+          builder.append("\n");
+        }
+        LOG.warn("Too many entries in depth (" + iteratorsCount + "). Printing the list: \n" + builder.toString());
         throw new IOException("Too many entries in depth. Is there a loop. Current folder depth is more than " + MAX_DEPTH);
       }
       if (myIterators.isEmpty()) {
@@ -66,6 +83,9 @@ public class FileSystemFilesIterator implements FilesIterator {
             FileInfo processResult = processFolder(next, shouldInclude);
             if (processResult != null)
               return processResult;
+            else {
+              return getNext();
+            }
           } else {
             throw new IOException("Failed to read " + next);
           }
@@ -107,6 +127,9 @@ public class FileSystemFilesIterator implements FilesIterator {
       }
     });
     myIterators.push(filesList.iterator());
+    if (myVerboseLogging){
+      LOG.info(String.format("Processing '%s'. It has %d files and folders", folder.getAbsolutePath(), files.length));
+    }
     if (createFileInfo)
       return createFileInfo(folder);
     else

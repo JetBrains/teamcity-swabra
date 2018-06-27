@@ -18,16 +18,19 @@ package jetbrains.buildServer.swabra;
 
 import java.io.File;
 import java.io.FileWriter;
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 import jetbrains.buildServer.TempFiles;
+import jetbrains.buildServer.swabra.snapshots.SnapshotGenerator;
 import jetbrains.buildServer.swabra.snapshots.SwabraRules;
 import jetbrains.buildServer.swabra.snapshots.iteration.FileInfo;
 import jetbrains.buildServer.swabra.snapshots.iteration.FileSystemFilesIterator;
 import jetbrains.buildServer.swabra.snapshots.iteration.FilesTraversal;
 import jetbrains.buildServer.util.FileUtil;
 import jetbrains.buildServer.util.StringUtil;
+import jetbrains.buildServer.util.TestFor;
 import junit.framework.TestCase;
 
 import static jetbrains.buildServer.swabra.TestUtil.getTestData;
@@ -128,4 +131,46 @@ public class FileSystemFilesTraversalTest extends TestCase {
     assertTrue(expectedDirs.isEmpty());
   }
 
+  @TestFor(issues = "TW-55694")
+  public void test_many_dirs_excluded2() throws Exception {
+    final TempFiles tempFiles = new TempFiles();
+    final File root = tempFiles.createTempDir();
+    final File srcDir = new File(root, "src");
+    srcDir.mkdir();
+    final File svnDir = new File(srcDir, ".svn");
+    svnDir.mkdir();
+    final File otherDir = new File(srcDir, "other");
+    otherDir.mkdir();
+    for (int i=0; i<360; i++) {
+      File dirIncI = new File(svnDir, "dir" + i);
+      assertTrue(dirIncI.mkdir());
+      File file = new File(dirIncI, "file.txt");
+      file.createNewFile();
+    }
+
+    final File file1 = new File(srcDir, "srcFile.java");
+    file1.createNewFile();
+    final File file2 = new File(otherDir, "otherFile.java");
+    file2.createNewFile();
+    final Set<String> allowedPaths = new HashSet<>();
+    allowedPaths.add(file1.getPath());
+    allowedPaths.add(file2.getPath());
+
+    final SwabraRules rules = new SwabraRules(root, Arrays.asList(SwabraSettings.DEFAULT_RULES));
+    final FilesTraversal traversal = new FilesTraversal();
+    final StringBuilder result = new StringBuilder();
+    traversal.traverse(new FileSystemFilesIterator(root, rules), new FilesTraversal.SimpleProcessor() {
+      @Override
+      public void process(final FileInfo file) throws Exception {
+        result.append(file.getPath().replace(root.getPath(), "")).append("\n");
+      }
+    });
+    System.out.println(result.toString());
+     String expected = "\n" +
+                            "/src\n" +
+                     "/src/srcFile.java\n" +
+                     "/src/other\n" +
+                     "/src/other/otherFile.java\n";
+    assertEquals(expected.replaceAll("/", File.separator), result.toString());
+  }
 }

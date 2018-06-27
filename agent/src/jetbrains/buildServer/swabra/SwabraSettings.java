@@ -38,7 +38,7 @@ public class SwabraSettings {
   private static final String DEFAULT_RULES_CONFIG_PARAM = "swabra.default.rules";
   private static final String IGNORED_PPRCESSES_CONFIG_PARAM = "swabra.ignored.processes";
 
-  private static final String[] DEFAULT_RULES = {"-:**/.svn", "-:**/.git", "-:**/.hg", "-:**/CVS", "-:.svn", "-:.git", "-:.hg", "-:CVS"};
+  static final String[] DEFAULT_RULES = {"-:**/.svn", "-:**/.git", "-:**/.hg", "-:**/CVS", "-:.svn", "-:.git", "-:.hg", "-:CVS"};
 
 
   private boolean myCleanupEnabled;
