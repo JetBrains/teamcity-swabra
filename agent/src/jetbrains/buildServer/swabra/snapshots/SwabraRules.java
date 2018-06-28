@@ -85,7 +85,7 @@ public class SwabraRules {
     }
 
     @Override
-    protected void doPostInitProcess(final List<SwabraFileRule> includeRules, final List<SwabraFileRule> excludeRules) {
+    protected void doPostInitProcess(@NotNull final List<SwabraFileRule> includeRules, final List<SwabraFileRule> excludeRules) {
       sortByFrom(includeRules, false);
       sortByFrom(excludeRules, true);
       initRootIncludePaths();
