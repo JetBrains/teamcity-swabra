@@ -24,6 +24,7 @@ import java.util.Collections;
 import jetbrains.buildServer.tools.*;
 import jetbrains.buildServer.tools.utils.URLDownloader;
 import jetbrains.buildServer.util.FileUtil;
+import jetbrains.buildServer.util.ssl.SSLTrustStoreProvider;
 import org.apache.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
 
@@ -37,6 +38,8 @@ import static jetbrains.buildServer.swabra.HandleToolType.HANDLE_TOOL;
  */
 public class HandleProvider extends ServerToolProviderAdapter {
   private static final Logger LOG = org.apache.log4j.Logger.getLogger(HandleProvider.class.getName());
+
+  private final SSLTrustStoreProvider mySSLTrustStoreProvider;
 
   @NotNull private final HandleToolType myHandleToolType = new HandleToolType();
   @NotNull private final ToolVersion mySingleToolVersion = new ToolVersion() {
@@ -84,6 +87,10 @@ public class HandleProvider extends ServerToolProviderAdapter {
     }
   };
 
+  public HandleProvider(@NotNull final SSLTrustStoreProvider sslTrustStoreProvider) {
+    mySSLTrustStoreProvider = sslTrustStoreProvider;
+  }
+
   @NotNull
   @Override
   public ToolType getType() {
@@ -101,7 +108,7 @@ public class HandleProvider extends ServerToolProviderAdapter {
   public File fetchToolPackage(@NotNull final ToolVersion toolVersion, @NotNull final File targetDirectory) throws ToolException {
     final File location = new File(targetDirectory, HANDLE_EXE);
     try {
-      URLDownloader.download(HandleToolType.HTTPS_LIVE_SYSINTERNALS_COM_HANDLE_EXE, location);
+      URLDownloader.download(HandleToolType.HTTPS_LIVE_SYSINTERNALS_COM_HANDLE_EXE, mySSLTrustStoreProvider.getTrustStore(), location);
     } catch (Throwable e) {
       throw new ToolException("Failed to fetch " + HANDLE_TOOL + ": " + e.getMessage(), e);
     }
