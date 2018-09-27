@@ -24,7 +24,6 @@ import javax.servlet.http.HttpServletResponse;
 import jetbrains.buildServer.controllers.BaseController;
 import jetbrains.buildServer.serverSide.BuildFeature;
 import jetbrains.buildServer.tools.installed.ToolsRegistry;
-import jetbrains.buildServer.util.StringUtil;
 import jetbrains.buildServer.web.openapi.PluginDescriptor;
 import jetbrains.buildServer.web.openapi.WebControllerManager;
 import org.jetbrains.annotations.NotNull;
@@ -107,7 +106,7 @@ public class SwabraBuildFeature extends BuildFeature {
     if (SwabraUtil.isCleanupEnabled(params) || SwabraUtil.isLockingProcessesDetectionEnabled(params)) {
       final List<String> rules = SwabraUtil.splitRules(SwabraUtil.getRules(params));
       if (!rules.isEmpty()) {
-        result.append("Paths to monitor are: ").append(StringUtil.escapeHTML(SwabraUtil.getRulesStr(rules, false), true)).append("\n");
+        result.append("Paths to monitor are: ").append(SwabraUtil.getRulesStr(rules, false)).append("\n");
       }
     }
     if (SwabraUtil.isVerbose(params)) {
