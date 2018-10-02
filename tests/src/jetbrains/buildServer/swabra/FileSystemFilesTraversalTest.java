@@ -171,6 +171,6 @@ public class FileSystemFilesTraversalTest extends TestCase {
                      "/src/srcFile.java\n" +
                      "/src/other\n" +
                      "/src/other/otherFile.java\n";
-    assertEquals(expected.replaceAll("/", File.separator), result.toString());
+    assertEquals(expected.replace("/", File.separator), result.toString());
   }
 }
