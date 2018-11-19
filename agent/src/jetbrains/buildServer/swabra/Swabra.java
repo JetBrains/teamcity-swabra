@@ -164,7 +164,7 @@ public final class Swabra extends AgentLifeCycleAdapter implements PositionAware
 
   @Override
   public void beforeBuildFinish(@NotNull AgentRunningBuild build, @NotNull BuildFinishedStatus buildStatus) {
-    if (!mySettings.isLockingProcessesDetectionEnabled()) return;
+    if (mySettings == null || !mySettings.isLockingProcessesDetectionEnabled()) return;
 
     myLogger.activityStarted();
     try {
