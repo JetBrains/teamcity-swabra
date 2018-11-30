@@ -43,7 +43,7 @@ class TestUtil {
     if (file1.exists()) {
       return file1;
     }
-    final File file2 = new File("svnrepo" + File.separator + "swabra" + File.separator + relativeFileName);
+    final File file2 = new File("bundled-plugins" + File.separator + "swabra" + File.separator + relativeFileName);
     if (file2.exists()) {
       return file2;
     }

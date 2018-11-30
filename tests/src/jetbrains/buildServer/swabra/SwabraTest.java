@@ -277,6 +277,7 @@ public class SwabraTest extends BaseTestCase {
   }
 
   public void testEmptyCheckoutDirNonStrict() throws Exception {
+    prepareEmptyCheckoutDir();
     final Map<String, String> firstCallParams = new HashMap<String, String>();
     firstCallParams.put(SwabraUtil.ENABLED, SwabraUtil.BEFORE_BUILD);
     firstCallParams.put(SwabraUtil.VERBOSE, SwabraUtil.TRUE);
@@ -289,6 +290,7 @@ public class SwabraTest extends BaseTestCase {
   }
 
   public void testEmptyCheckoutDirStrict() throws Exception {
+    prepareEmptyCheckoutDir();
     final Map<String, String> firstCallParams = new HashMap<String, String>();
     firstCallParams.put(SwabraUtil.ENABLED, SwabraUtil.BEFORE_BUILD);
     firstCallParams.put(SwabraUtil.STRICT, SwabraUtil.TRUE);
@@ -303,6 +305,7 @@ public class SwabraTest extends BaseTestCase {
   }
 
   public void testEmptyCheckoutDirAfterBuild() throws Exception {
+    prepareEmptyCheckoutDir();
     final Map<String, String> firstCallParams = new HashMap<String, String>();
     firstCallParams.put(SwabraUtil.ENABLED, SwabraUtil.AFTER_BUILD);
     firstCallParams.put(SwabraUtil.VERBOSE, SwabraUtil.TRUE);
@@ -424,6 +427,7 @@ public class SwabraTest extends BaseTestCase {
   }
 
   public void testOneDeletedAfterBuild() throws Exception {
+    prepareOneDeletedDir();
     final Map<String, String> firstCallParams = new HashMap<String, String>();
     firstCallParams.put(SwabraUtil.VERBOSE, SwabraUtil.TRUE);
 
@@ -436,6 +440,7 @@ public class SwabraTest extends BaseTestCase {
   }
 
   public void testOneDeletedNonStrict() throws Exception {
+    prepareOneDeletedDir();
     final Map<String, String> firstCallParams = new HashMap<String, String>();
     firstCallParams.put(SwabraUtil.ENABLED, SwabraUtil.TRUE);
     firstCallParams.put(SwabraUtil.VERBOSE, SwabraUtil.TRUE);
@@ -449,6 +454,7 @@ public class SwabraTest extends BaseTestCase {
   }
 
   public void testOneDeletedStrict() throws Exception {
+    prepareOneDeletedDir();
     final Map<String, String> firstCallParams = new HashMap<String, String>();
     firstCallParams.put(SwabraUtil.ENABLED, SwabraUtil.TRUE);
     firstCallParams.put(SwabraUtil.STRICT, SwabraUtil.TRUE);
@@ -661,6 +667,7 @@ public class SwabraTest extends BaseTestCase {
   // TW-31015
   // Actually inpassing null CollectionResultHandler to jetbrains.buildServer.swabra.snapshots.FilesCollector.collect()
   public void testCleanNonCheckoutDir() throws Exception {
+    prepareEmptyCheckoutDir();
     final Map<String, String> firstCallParams = new HashMap<String, String>();
     firstCallParams.put(SwabraUtil.ENABLED, SwabraUtil.BEFORE_BUILD);
     firstCallParams.put(SwabraUtil.VERBOSE, SwabraUtil.TRUE);
@@ -1232,5 +1239,20 @@ E:\TEMP\test-1307328584\checkoutDir2\dir2=pending
     };
 
     action.apply(new Pair<Swabra, SwabraPropertiesProcessor>(swabra, propertiesProcessor));
+  }
+
+  private void prepareEmptyCheckoutDir() throws Exception {
+    File testData = getTestData(null, null);
+
+    new File(testData + File.separator + "emptyCheckoutDir", BEFORE_BUILD).mkdirs();
+    new File(testData + File.separator + "emptyCheckoutDir", AFTER_BUILD).mkdirs();
+    new File(testData + File.separator + "emptyCheckoutDir", AFTER_CHECKOUT).mkdirs();
+  }
+
+  private void prepareOneDeletedDir() throws Exception {
+    File testData = getTestData(null, null);
+
+    new File(testData + File.separator + "oneDeleted", BEFORE_BUILD).mkdirs();
+    new File(testData + File.separator + "oneDeleted", AFTER_BUILD).mkdirs();
   }
 }
