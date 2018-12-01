@@ -1,2 +1,3 @@
 * text=auto
 *.sh -text
+tests/test-data/** -text
