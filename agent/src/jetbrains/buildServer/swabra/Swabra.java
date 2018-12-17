@@ -186,7 +186,7 @@ public final class Swabra extends AgentLifeCycleAdapter implements PositionAware
 
   @Override
   public void afterAtrifactsPublished(@NotNull final AgentRunningBuild runningBuild, @NotNull final BuildFinishedStatus status) {
-    if (!mySettings.isCleanupAfterBuild()) return;
+    if (mySettings == null || !mySettings.isCleanupAfterBuild()) return;
 
     myLogger.debug("Cleanup is performed after build");
 
