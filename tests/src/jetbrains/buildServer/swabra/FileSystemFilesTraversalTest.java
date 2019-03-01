@@ -22,8 +22,9 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.Stack;
+import java.util.function.Consumer;
 import jetbrains.buildServer.TempFiles;
-import jetbrains.buildServer.swabra.snapshots.SnapshotGenerator;
 import jetbrains.buildServer.swabra.snapshots.SwabraRules;
 import jetbrains.buildServer.swabra.snapshots.iteration.FileInfo;
 import jetbrains.buildServer.swabra.snapshots.iteration.FileSystemFilesIterator;
@@ -172,5 +173,69 @@ public class FileSystemFilesTraversalTest extends TestCase {
                      "/src/other\n" +
                      "/src/other/otherFile.java\n";
     assertEquals(expected.replace("/", File.separator), result.toString());
+  }
+
+
+  @TestFor(issues = "TW-58813")
+  public void test_many_dirs_excluded3() throws Exception {
+    final TempFiles tempFiles = new TempFiles();
+    final File rootDir = tempFiles.createTempDir();
+    final File skipDir = new File(rootDir, ".skip");
+    skipDir.mkdir();
+    for (int i=0; i<10; i++){
+      File skipDirOne = new File(skipDir, "skipDirOne_"+i);
+      skipDirOne.mkdir();
+      createFiles(skipDirOne, "skipOne_", 1);
+      for (int j=0; j<10; j++){
+        File skipDirTwo = new File(skipDirOne, "skipDirTwo_"+j);
+        skipDirTwo.mkdir();
+        createFiles(skipDirTwo, "skipDirTwo_"+j + "_", 1);
+      }
+    }
+    createFiles(rootDir, "myRootDirFile", 1);
+
+    final FilesTraversal traversal = new FilesTraversal();
+    final FileSystemFilesIterator filesIterator = new FileSystemFilesIterator(rootDir, new SwabraRules(rootDir, Arrays.asList("-:.skip", "-:**/.skip"))){
+      @Override
+      public FileInfo getNext() throws IOException {
+        int length = Thread.currentThread().getStackTrace().length;
+        assertTrue("stackTrace depth is less than 75", length <75);
+        return super.getNext();
+      }
+    };
+    final Stack<Consumer<FileInfo>> checks = new Stack<>();
+    checks.push(new Consumer<FileInfo>() {
+      @Override
+      public void accept(final FileInfo info) {
+        assertTrue(info.isFile());
+        final File file = new File(info.getPath());
+        assertEquals("myRootDirFile0", file.getName());
+        assertEquals(rootDir, file.getParentFile());
+      }
+    }); // file
+
+    checks.push(new Consumer<FileInfo>() {
+      @Override
+      public void accept(final FileInfo info) {
+        assertFalse(info.isFile());
+        final File file = new File(info.getPath());
+        assertEquals(rootDir, file);
+      }
+    }); // dir
+    traversal.traverse(filesIterator,
+                       new FilesTraversal.SimpleProcessor() {
+                         @Override
+                         public void process(final FileInfo info) throws Exception {
+                           checks.pop().accept(info);
+                         }
+                       });
+  }
+
+  private void createFiles(File dir, String namePrefix, int cnt){
+    for (int i=0; i<cnt; i++){
+      try {
+        new File(dir, namePrefix + i).createNewFile();
+      } catch (IOException e) {}
+    }
   }
 }
