@@ -49,6 +49,7 @@ public class FileSystemFilesIterator implements FilesIterator {
 
   @Nullable
   public FileInfo getNext() throws IOException {
+    boolean postProcess = true;
     while (true) {
       if (myIterators == null) {
         myIterators = new Stack<Iterator<File>>();
@@ -84,17 +85,22 @@ public class FileSystemFilesIterator implements FilesIterator {
             if (processResult != null)
               return processResult;
             else {
-              return getNext();
+              //return getNext();
+              postProcess = false;
+              break;
             }
           } else {
             throw new IOException("Failed to read " + next);
           }
         }
       }
-      myIterators.pop();
-      if (myIterators.isEmpty()) {
-        return null;
+      if (postProcess) {
+        myIterators.pop();
+        if (myIterators.isEmpty()) {
+          return null;
+        }
       }
+      postProcess = true;
     }
   }
 
