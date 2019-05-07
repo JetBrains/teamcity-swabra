@@ -80,8 +80,8 @@ public class SwabraRules {
   }
 
   private final class SwabraRuleSet extends FileRuleSet<SwabraFileRule, SwabraFileRule> {
-    public SwabraRuleSet(List<String> body) {
-      super(body);
+    public SwabraRuleSet(List<String> lines) {
+      super(lines);
     }
 
     @Override
