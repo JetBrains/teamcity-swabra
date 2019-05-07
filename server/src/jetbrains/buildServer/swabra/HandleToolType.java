@@ -30,6 +30,15 @@ public class HandleToolType extends ToolTypeAdapter {
   public static final String HTTPS_LIVE_SYSINTERNALS_COM_HANDLE_EXE = "https://live.sysinternals.com/handle.exe";
   public static final String HANDLE_TOOL_TYPE_NAME = "handleTool";
 
+  private final static HandleToolType INSTANCE = new HandleToolType();
+
+  public static HandleToolType getInstance() {
+    return INSTANCE;
+  }
+
+  private HandleToolType() {
+  }
+
   @Override
   @NotNull
   public String getType() {

@@ -5,6 +5,7 @@
                            http://www.springframework.org/schema/beans/spring-beans-2.5.xsd"
        default-autowire="constructor">
   <bean class="jetbrains.buildServer.swabra.HandleProvider"/>
+  <bean class="jetbrains.buildServer.swabra.HandleToolUsageProvider"/>
 
   <bean class="jetbrains.buildServer.swabra.SwabraBuildFeature"/>
   <bean class="jetbrains.buildServer.swabra.serverHealth.SwabraCleanCheckoutWatcherImpl"/>

@@ -41,51 +41,8 @@ public class HandleProvider extends ServerToolProviderAdapter {
 
   private final SSLTrustStoreProvider mySSLTrustStoreProvider;
 
-  @NotNull private final HandleToolType myHandleToolType = new HandleToolType();
-  @NotNull private final ToolVersion mySingleToolVersion = new ToolVersion() {
-    @NotNull
-    @Override
-    public ToolType getType() {
-      return myHandleToolType;
-    }
-
-    @NotNull
-    @Override
-    public String getVersion() {
-      return "latest";
-    }
-
-    @NotNull
-    @Override
-    public String getId() {
-      return HANDLE_TOOL;
-    }
-
-    @NotNull
-    @Override
-    public String getDisplayName() {
-      return myHandleToolType.getDisplayName() + " latest version";
-    }
-
-    @Override
-    public boolean equals(final Object o) {
-      if (this == o) return true;
-      if (o == null || getClass() != o.getClass()) return false;
-
-      final ToolVersion that = (ToolVersion)o;
-
-      if (!myHandleToolType.getType().equals(that.getType().getType())) return false;
-      return HANDLE_TOOL.equals(that.getVersion());
-
-    }
-
-    @Override
-    public int hashCode() {
-      int result = myHandleToolType.getType().hashCode();
-      result = 31 * result + HANDLE_TOOL.hashCode();
-      return result;
-    }
-  };
+  @NotNull private final HandleToolType myHandleToolType = HandleToolType.getInstance();
+  @NotNull private final ToolVersion mySingleToolVersion = HandleToolVersion.getInstance();
 
   public HandleProvider(@NotNull final SSLTrustStoreProvider sslTrustStoreProvider) {
     mySSLTrustStoreProvider = sslTrustStoreProvider;
