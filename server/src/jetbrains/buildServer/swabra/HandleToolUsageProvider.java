@@ -21,6 +21,8 @@ import java.util.List;
 import jetbrains.buildServer.serverSide.BuildAgentEx;
 import jetbrains.buildServer.serverSide.SBuildAgent;
 import jetbrains.buildServer.serverSide.SRunningBuild;
+import jetbrains.buildServer.tools.InstalledToolVersionEx;
+import jetbrains.buildServer.tools.ServerToolManager;
 import jetbrains.buildServer.tools.ToolUsagesProvider;
 import jetbrains.buildServer.tools.ToolVersion;
 import org.jetbrains.annotations.NotNull;
@@ -31,9 +33,18 @@ import org.jetbrains.annotations.NotNull;
  */
 public class HandleToolUsageProvider implements ToolUsagesProvider {
 
+  private final ServerToolManager myServerToolManager;
+
+  public HandleToolUsageProvider(final ServerToolManager serverToolManager) {
+    myServerToolManager = serverToolManager;
+  }
+
   @Override
   public List<ToolVersion> getUsingTools(@NotNull final SRunningBuild build) {
     if (!isHandleExeCompatibleWithAgent(build.getAgent())) return Collections.emptyList();
+
+    InstalledToolVersionEx handleTool = myServerToolManager.findInstalledTool(HandleToolVersion.getInstance().getId());
+    if (handleTool == null) return Collections.emptyList();
 
     return Collections.singletonList(HandleToolVersion.getInstance());
   }
