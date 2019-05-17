@@ -40,7 +40,7 @@ public class HandleToolUsageProvider implements ToolUsagesProvider {
   }
 
   @Override
-  public List<ToolVersion> getUsingTools(@NotNull final SRunningBuild build) {
+  public List<ToolVersion> getRequiredTools(@NotNull final SRunningBuild build) {
     if (!isHandleExeCompatibleWithAgent(build.getAgent())) return Collections.emptyList();
 
     InstalledToolVersionEx handleTool = myServerToolManager.findInstalledTool(HandleToolVersion.getInstance().getId());
