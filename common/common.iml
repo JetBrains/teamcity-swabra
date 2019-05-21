@@ -9,5 +9,6 @@
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="library" name="TeamCity-util" level="project" />
     <orderEntry type="library" name="TeamCity-annotations" level="project" />
+    <orderEntry type="library" name="devPackage-common-api" level="project" />
   </component>
 </module>

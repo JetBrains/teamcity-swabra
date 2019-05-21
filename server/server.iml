@@ -22,9 +22,7 @@
     <orderEntry type="library" name="servlet-api" level="project" />
     <orderEntry type="library" name="TeamCity-web" level="project" />
     <orderEntry type="library" name="TeamCity-log4j" level="project" />
-    <orderEntry type="library" name="TeamCity-toolLoader" level="project" />
     <orderEntry type="library" name="TeamCity-server" level="project" />
     <orderEntry type="library" name="devPackage-common-api" level="project" />
   </component>
 </module>
-
