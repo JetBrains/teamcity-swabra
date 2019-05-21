@@ -5,6 +5,7 @@
       <class name="jetbrains.buildServer.swabra.SwabraTest"/>
       <class name="jetbrains.buildServer.swabra.SwabraTest2"/>
       <class name="jetbrains.buildServer.swabra.processes.HandleProcessesProviderTestNG"/>
+      <class name="jetbrains.buildServer.swabra.HandleToolUsageProviderTest"/>
     </classes>
   </test>
 </suite>
