@@ -2,12 +2,12 @@
 <dsl-extension kind="buildFeature" type="swabra" generateDslJar="true">
   <class name="Swabra">
     <description>
-      A [build feature](https://confluence.jetbrains.com/display/TCDL/Build+Files+Cleaner+(Swabra)) cleaning files and processes created during a build
+      A [build feature](https://www.jetbrains.com/help/teamcity/?Build+Files+Cleaner+(Swabra)) cleaning files and processes created during a build
     </description>
   </class>
   <function name="swabra">
     <description>
-      Adds a [build feature](https://confluence.jetbrains.com/display/TCDL/Build+Files+Cleaner+(Swabra)) cleaning files and processes created during a build
+      Adds a [build feature](https://www.jetbrains.com/help/teamcity/?Build+Files+Cleaner+(Swabra)) cleaning files and processes created during a build
       @see Swabra
     </description>
   </function>
@@ -20,7 +20,7 @@
     </param>
     <param name="swabra.strict" dslName="forceCleanCheckout" type="boolean" trueValue="true" falseValue="">
       <description>
-        Force [clean checkout](https://confluence.jetbrains.com/display/TCDL/Clean+Checkout) if cannot restore clean directory state
+        Force [clean checkout](https://www.jetbrains.com/help/teamcity/?Clean+Checkout) if cannot restore clean directory state
       </description>
     </param>
     <param name="swabra.processes" dslName="lockingProcesses" type="LockingProcessPolicy">
