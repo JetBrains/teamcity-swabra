@@ -91,9 +91,11 @@
           <include name="**/*Test.class"/>
           <exclude name="**/SwabraTest.class"/>
           <exclude name="**/Swabra2Test.class"/>
+          <exclude name="**/HandleToolUsageProviderTest.class"/>
         </fileset>
       </batchtest>
     </junit>
+
     <taskdef resource="testngtasks" classpathref="tests.runtime.module.classpath"/>
     <testng outputdir="${tests.testoutput.dir}"
             classpathref="tests.runtime.module.classpath"
@@ -101,8 +103,8 @@
       <xmlfileset dir="${basedir}">
         <include name="testng.xml"/>
       </xmlfileset>
-
     </testng>
+
   </target>
 
 </project>

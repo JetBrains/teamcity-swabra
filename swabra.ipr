@@ -552,6 +552,7 @@
     <library name="devPackage-common-api">
       <CLASSES>
         <root url="jar://$TeamCityDistribution$/devPackage/common-api.jar!/" />
+        <root url="jar://$TeamCityDistribution$/devPackage/serviceMessages.jar!/" />
       </CLASSES>
       <JAVADOC />
       <SOURCES />
@@ -572,8 +573,8 @@
         <root url="jar://$TeamCityDistribution$/devPackage/tests/tests-support.jar!/" />
         <root url="jar://$TeamCityDistribution$/devPackage/tests/jmock-1.2.0.jar!/" />
         <root url="jar://$TeamCityDistribution$/devPackage/tests/junit-3.8.2.jar!/" />
-        <root url="jar://$TeamCityDistribution$/devPackage/tests/junit-4.11.jar!/" />
         <root url="jar://$TeamCityDistribution$/devPackage/tests/tests-integration.jar!/" />
+        <root url="jar://$TeamCityDistribution$/devPackage/tests/junit-4.12.jar!/" />
       </CLASSES>
       <JAVADOC />
       <SOURCES />

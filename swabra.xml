@@ -124,6 +124,7 @@
   
   <path id="library.devpackage-common-api.classpath">
     <pathelement location="${path.variable.teamcitydistribution}/devPackage/common-api.jar"/>
+    <pathelement location="${path.variable.teamcitydistribution}/devPackage/serviceMessages.jar"/>
   </path>
   
   <path id="library.devpackage-server-api.classpath">
@@ -133,7 +134,7 @@
   <path id="library.devpackage-tests-support.classpath">
     <pathelement location="${path.variable.teamcitydistribution}/devPackage/tests/jmock-1.2.0.jar"/>
     <pathelement location="${path.variable.teamcitydistribution}/devPackage/tests/junit-3.8.2.jar"/>
-    <pathelement location="${path.variable.teamcitydistribution}/devPackage/tests/junit-4.11.jar"/>
+    <pathelement location="${path.variable.teamcitydistribution}/devPackage/tests/junit-4.12.jar"/>
     <pathelement location="${path.variable.teamcitydistribution}/devPackage/tests/tests-integration.jar"/>
     <pathelement location="${path.variable.teamcitydistribution}/devPackage/tests/tests-support.jar"/>
   </path>
