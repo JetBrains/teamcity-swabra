@@ -17,10 +17,7 @@
 package jetbrains.buildServer.swabra;
 
 import java.util.*;
-import jetbrains.buildServer.serverSide.BuildAgentEx;
-import jetbrains.buildServer.serverSide.SBuildAgent;
-import jetbrains.buildServer.serverSide.SBuildFeatureDescriptor;
-import jetbrains.buildServer.serverSide.SRunningBuild;
+import jetbrains.buildServer.serverSide.*;
 import jetbrains.buildServer.tools.InstalledToolVersionEx;
 import jetbrains.buildServer.tools.ServerToolManager;
 import jetbrains.buildServer.tools.ToolUsagesProvider;
@@ -33,6 +30,8 @@ import org.jetbrains.annotations.NotNull;
  */
 public class HandleToolUsageProvider implements ToolUsagesProvider {
 
+  private final static String myKey = "teamcity.tools.provideHandleToolToAllAgents";
+
   private final ServerToolManager myServerToolManager;
 
   public HandleToolUsageProvider(final ServerToolManager serverToolManager) {
@@ -41,10 +40,16 @@ public class HandleToolUsageProvider implements ToolUsagesProvider {
 
   @Override
   public List<ToolVersion> getRequiredTools(@NotNull final SRunningBuild build) {
-    if (!isHandleExeCompatibleWithAgent(build.getAgent())) return Collections.emptyList();
 
     InstalledToolVersionEx handleTool = myServerToolManager.findInstalledTool(HandleToolVersion.getInstance().getId());
     if (handleTool == null) return Collections.emptyList();
+
+    if (TeamCityProperties.getBoolean(myKey)) {
+      return Collections.singletonList(handleTool);
+    }
+
+    if (!isHandleExeCompatibleWithAgent(build.getAgent())) return Collections.emptyList();
+
     Collection<SBuildFeatureDescriptor> features = build.getBuildFeaturesOfType(SwabraUtil.FEATURE_TYPE);
     Map<String, String> swabraParams = new HashMap<>();
     if (!features.isEmpty()) {
