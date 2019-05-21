@@ -16,10 +16,10 @@
 
 package jetbrains.buildServer.swabra;
 
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 import jetbrains.buildServer.serverSide.BuildAgentEx;
 import jetbrains.buildServer.serverSide.SBuildAgent;
+import jetbrains.buildServer.serverSide.SBuildFeatureDescriptor;
 import jetbrains.buildServer.serverSide.SRunningBuild;
 import jetbrains.buildServer.tools.InstalledToolVersionEx;
 import jetbrains.buildServer.tools.ServerToolManager;
@@ -45,20 +45,32 @@ public class HandleToolUsageProvider implements ToolUsagesProvider {
 
     InstalledToolVersionEx handleTool = myServerToolManager.findInstalledTool(HandleToolVersion.getInstance().getId());
     if (handleTool == null) return Collections.emptyList();
-
-    return Collections.singletonList(HandleToolVersion.getInstance());
+    Collection<SBuildFeatureDescriptor> features = build.getBuildFeaturesOfType(SwabraUtil.FEATURE_TYPE);
+    Map<String, String> swabraParams = new HashMap<>();
+    if (!features.isEmpty()) {
+      swabraParams.putAll(features.iterator().next().getParameters());
+    }
+    swabraParams.putAll(build.getAgent().getConfigurationParameters());
+    swabraParams.putAll(build.getBuildOwnParameters());
+    boolean isToolRequired =  SwabraUtil.isLockingProcessesDetectionEnabled(swabraParams);
+    return isToolRequired ? Collections.singletonList(handleTool) : Collections.emptyList();
   }
 
   private boolean isHandleExeCompatibleWithAgent(final SBuildAgent agent) {
     String osName = agent.getOperatingSystemName();
-    if ("N/A".equalsIgnoreCase(osName) || "<unknown>".equalsIgnoreCase(osName) || osName.isEmpty()) {
+    if (isUnknownOS(osName)) {
       if (agent instanceof  BuildAgentEx) {
         osName = ((BuildAgentEx)agent).getAgentType().getOperatingSystemName();
-      } else {
-        return true;//in case of unknown os better is to say that handle.exe compatible
       }
+    }
+    if (isUnknownOS(osName)) {
+      return true;//in case of unknown os better is to say that handle.exe compatible
     }
     osName = osName.toLowerCase();
     return osName.startsWith("win") || osName.contains("windows");
+  }
+
+  private boolean isUnknownOS(final String osName) {
+    return "N/A".equalsIgnoreCase(osName) || "<unknown>".equalsIgnoreCase(osName) || osName.isEmpty();
   }
 }
