@@ -74,24 +74,24 @@ public class SwabraCleanCheckoutWatcherImpl implements SwabraCleanCheckoutWatche
 
     final String causeBuildTypeId = build.getParametersProvider().get(SwabraUtil.CLEAN_CHECKOUT_CAUSE_BUILD_TYPE_ID);
     if (StringUtil.isNotEmpty(causeBuildTypeId)) {
-      getDataStorage(buildType).putValue(causeBuildTypeId, String.valueOf(System.currentTimeMillis()));
+      getDataStorage(buildType.getProject()).putValue(causeBuildTypeId, String.valueOf(System.currentTimeMillis()));
     }
   }
 
   @NotNull
-  private CustomDataStorage getDataStorage(final SBuildType buildType) {
-    return buildType.getCustomDataStorage(CLEAN_CHECKOUT_BUILDS_STORAGE);
+  private CustomDataStorage getDataStorage(@NotNull final SProject project) {
+    return project.getCustomDataStorage(CLEAN_CHECKOUT_BUILDS_STORAGE);
   }
 
   private void cleanOldValues(@NotNull final CleanupProcessState cleanupState) {
 
     final long now = System.currentTimeMillis();
 
-    for (SBuildType bt : myProjectManager.getActiveBuildTypes()) {
+    for (SProject project: myProjectManager.getActiveProjects()) {
       if (cleanupState.isInterrupted())
         return;
 
-      final CustomDataStorage storage = getDataStorage(bt);
+      final CustomDataStorage storage = getDataStorage(project);
       final Map<String, String> values = storage.getValues();
       if (values == null) continue;
 
@@ -103,6 +103,9 @@ public class SwabraCleanCheckoutWatcherImpl implements SwabraCleanCheckoutWatche
         }
       }
 
+      if (storage.getValues().isEmpty()) {
+        storage.dispose();
+      }
     }
   }
 
@@ -118,7 +121,7 @@ public class SwabraCleanCheckoutWatcherImpl implements SwabraCleanCheckoutWatche
   // see teamcity.healthStatus.swabra.builds.storage.period property
   @NotNull
   public Collection<String> getRecentCleanCheckoutCauses(@NotNull SBuildType buildType) {
-    final Map<String, String> values = buildType.getCustomDataStorage(CLEAN_CHECKOUT_BUILDS_STORAGE).getValues();
+    final Map<String, String> values = getDataStorage(buildType.getProject()).getValues();
     return values == null ? Collections.emptyList() : values.keySet();
   }
 }
