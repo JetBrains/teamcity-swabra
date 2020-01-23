@@ -87,15 +87,15 @@ public class SwabraBuildFeature extends BuildFeature {
     StringBuilder result = new StringBuilder();
     if (SwabraUtil.isCleanupEnabled(params)) {
       if (SwabraUtil.isAfterBuildCleanup(params)) {
-        result.append("Build files cleanup after build enabled\n");
+        result.append("Build files clean-up after build enabled\n");
       } else {
-        result.append("Build files cleanup before build enabled\n");
+        result.append("Build files clean-up before build enabled\n");
       }
       if (SwabraUtil.isStrict(params)) {
         result.append("Will force clean checkout if cannot restore clean directory state\n");
       }
     } else {
-      result.append("Build files cleanup disabled\n");
+      result.append("Build files clean-up disabled\n");
     }
     if (SwabraUtil.isLockingProcessesReport(params)) {
       result.append("Will report about processes locking checkout directory\n");

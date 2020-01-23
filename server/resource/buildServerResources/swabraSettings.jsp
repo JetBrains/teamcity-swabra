@@ -38,7 +38,7 @@
   </td>
 </tr>
 <tr class="noBorder">
-  <th>Files cleanup:</th>
+  <th>Files clean-up:</th>
   <td>
     <props:selectProperty name="swabra.enabled" onchange="BS.Swabra.onEnabledChange()">
       <props:option value=""

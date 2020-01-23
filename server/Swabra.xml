@@ -14,7 +14,7 @@
   <params>
     <param name="swabra.enabled" dslName="filesCleanup" type="FilesCleanup">
       <description>
-        A files cleanup mode to use
+        A files clean-up mode to use
         @see FilesCleanup
       </description>
     </param>
@@ -43,7 +43,7 @@
   <types>
     <enum name="FilesCleanup">
       <description>
-        Files cleanup mode
+        Files clean-up mode
       </description>
       <option name="DISABLED" value="">
         <description>
