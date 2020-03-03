@@ -55,7 +55,7 @@ public class OldHandleToolConverter extends ServerToolPreProcessorAdapter {
 
   @Override
   public void doBeforeServerStartup() throws ToolException {
-    if (myServerResponsibility.canManageProjectsConfigs()) {
+    if (myServerResponsibility.canManageServerConfig()) {
       final File oldPlugin1 = new File(myServerPaths.getPluginsDir(), "handle-provider");
       if (oldPlugin1.exists()) {
         LOG.debug("Detected old handle-provider plugin " + oldPlugin1);

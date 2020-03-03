@@ -66,7 +66,7 @@ public class SwabraCleanCheckoutWatcherImpl implements SwabraCleanCheckoutWatche
 
 
   private void onBuildFinished(@NotNull final SRunningBuild build) {
-    if (!myServerResponsibility.canManageProjectsConfigs())
+    if (!myServerResponsibility.isResponsibleForBuild(build))
       return;
 
     final SBuildType buildType = build.getBuildType();
