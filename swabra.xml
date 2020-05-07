@@ -57,27 +57,7 @@
   </patternset>
   
   <!-- JDK definitions -->
-  
-  <property name="jdk.bin.1.6" value="${jdk.home.1.6}/bin"/>
-  <path id="jdk.classpath.1.6">
-    <fileset dir="${jdk.home.1.6}">
-      <include name="jre/lib/charsets.jar"/>
-      <include name="jre/lib/deploy.jar"/>
-      <include name="jre/lib/ext/dnsns.jar"/>
-      <include name="jre/lib/ext/localedata.jar"/>
-      <include name="jre/lib/ext/sunjce_provider.jar"/>
-      <include name="jre/lib/ext/sunmscapi.jar"/>
-      <include name="jre/lib/ext/sunpkcs11.jar"/>
-      <include name="jre/lib/javaws.jar"/>
-      <include name="jre/lib/jce.jar"/>
-      <include name="jre/lib/jsse.jar"/>
-      <include name="jre/lib/management-agent.jar"/>
-      <include name="jre/lib/plugin.jar"/>
-      <include name="jre/lib/resources.jar"/>
-      <include name="jre/lib/rt.jar"/>
-    </fileset>
-  </path>
-  
+
   <property name="jdk.bin.1.8" value="${jdk.home.1.8}/bin"/>
   <path id="jdk.classpath.1.8">
     <fileset dir="${jdk.home.1.8}">
@@ -215,11 +195,11 @@
   <dirname property="module.common.basedir" file="${ant.file}"/>
   
   
-  <property name="module.jdk.home.common" value="${jdk.home.1.6}"/>
-  <property name="module.jdk.bin.common" value="${jdk.bin.1.6}"/>
-  <property name="module.jdk.classpath.common" value="jdk.classpath.1.6"/>
+  <property name="module.jdk.home.common" value="${jdk.home.1.8}"/>
+  <property name="module.jdk.bin.common" value="${jdk.bin.1.8}"/>
+  <property name="module.jdk.classpath.common" value="jdk.classpath.1.8"/>
   
-  <property name="compiler.args.common" value="-encoding UTF-8 -source 6 -target 6 ${compiler.args}"/>
+  <property name="compiler.args.common" value="-encoding UTF-8 -source 8 -target 8 ${compiler.args}"/>
   
   <property name="common.output.dir" value="${module.common.basedir}/out/production/common"/>
   <property name="common.testoutput.dir" value="${module.common.basedir}/out/test/common"/>
@@ -307,11 +287,11 @@
   <dirname property="module.agent.basedir" file="${ant.file}"/>
   
   
-  <property name="module.jdk.home.agent" value="${jdk.home.1.6}"/>
-  <property name="module.jdk.bin.agent" value="${jdk.bin.1.6}"/>
-  <property name="module.jdk.classpath.agent" value="jdk.classpath.1.6"/>
+  <property name="module.jdk.home.agent" value="${jdk.home.1.8}"/>
+  <property name="module.jdk.bin.agent" value="${jdk.bin.1.8}"/>
+  <property name="module.jdk.classpath.agent" value="jdk.classpath.1.8"/>
   
-  <property name="compiler.args.agent" value="-encoding UTF-8 -source 6 -target 6 ${compiler.args}"/>
+  <property name="compiler.args.agent" value="-encoding UTF-8 -source 8 -target 8 ${compiler.args}"/>
   
   <property name="agent.output.dir" value="${module.agent.basedir}/out/production/agent"/>
   <property name="agent.testoutput.dir" value="${module.agent.basedir}/out/test/agent"/>
