@@ -66,6 +66,8 @@ public class SwabraClashingConfigurationsDetector {
   private Collection<Collection<SBuildType>> groupClashingBuildTypes(@NotNull Collection<SBuildType> buildTypes) {
     final List<ClashingGroup> groups = new ArrayList<ClashingGroup>();
     for (SBuildType bt : buildTypes) {
+      if (bt.isCompositeBuildType()) continue;
+
       final Collection<String> cleanCheckoutCauses = myWatcher.getRecentCleanCheckoutCauses(bt);
       if (cleanCheckoutCauses.isEmpty()) continue;
 
