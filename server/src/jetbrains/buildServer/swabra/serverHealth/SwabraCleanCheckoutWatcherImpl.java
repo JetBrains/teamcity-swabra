@@ -21,7 +21,7 @@ import java.util.Collections;
 import java.util.Map;
 import jetbrains.buildServer.serverSide.*;
 import jetbrains.buildServer.serverSide.cleanup.CleanupExtension;
-import jetbrains.buildServer.serverSide.cleanup.CleanupExtensionAdapter;
+import jetbrains.buildServer.serverSide.cleanup.CleanupInterruptedException;
 import jetbrains.buildServer.serverSide.cleanup.CleanupProcessState;
 import jetbrains.buildServer.swabra.SwabraUtil;
 import jetbrains.buildServer.util.EventDispatcher;
@@ -56,9 +56,9 @@ public class SwabraCleanCheckoutWatcherImpl implements SwabraCleanCheckoutWatche
       }
     });
 
-    extensionHolder.registerExtension(CleanupExtension.class, SwabraCleanCheckoutWatcherImpl.class.getName(), new CleanupExtensionAdapter() {
+    extensionHolder.registerExtension(CleanupExtension.class, SwabraCleanCheckoutWatcherImpl.class.getName(), new CleanupExtension() {
       @Override
-      public void afterCleanup(@NotNull final CleanupProcessState cleanupState) {
+      public void afterCleanup(@NotNull final CleanupProcessState cleanupState) throws CleanupInterruptedException {
         cleanOldValues(cleanupState);
       }
     });
@@ -83,21 +83,19 @@ public class SwabraCleanCheckoutWatcherImpl implements SwabraCleanCheckoutWatche
     return project.getCustomDataStorage(CLEAN_CHECKOUT_BUILDS_STORAGE);
   }
 
-  private void cleanOldValues(@NotNull final CleanupProcessState cleanupState) {
-
+  private void cleanOldValues(@NotNull final CleanupProcessState cleanupState) throws CleanupInterruptedException {
     final long now = System.currentTimeMillis();
 
     for (SProject project: myProjectManager.getActiveProjects()) {
-      if (cleanupState.isInterrupted())
-        return;
+      cleanupState.throwIfInterrupted();
 
       final CustomDataStorage storage = getDataStorage(project);
       final Map<String, String> values = storage.getValues();
       if (values == null) continue;
 
       for (Map.Entry<String, String> e : values.entrySet()) {
-        if (cleanupState.isInterrupted())
-          return;
+        cleanupState.throwIfInterrupted();
+
         if (isOldOrBad(e.getValue(), now) || myProjectManager.findBuildTypeById(e.getKey()) == null) {
           storage.putValue(e.getKey(), null);
         }
