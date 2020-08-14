@@ -21,6 +21,8 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import jetbrains.buildServer.processes.KillProcessDetails;
+import jetbrains.buildServer.processes.ProcessFilter;
+import jetbrains.buildServer.processes.ProcessNode;
 import jetbrains.buildServer.processes.ProcessTreeTerminator;
 import jetbrains.buildServer.swabra.SwabraSettings;
 import jetbrains.buildServer.util.FileUtil;
@@ -107,7 +109,12 @@ public class LockedFileResolver {
         }
 
         try {
-          if (ProcessTreeTerminator.kill(p.getPid(), KillProcessDetails.KILL_ALL_FORCE)) {
+          if (ProcessTreeTerminator.kill(p.getPid(), new KillProcessDetails(new ProcessFilter() {
+            @Override
+            public boolean accept(@NotNull ProcessNode processNode) {
+              return !isIgnored(processNode.getPid());
+            }
+          }, true))) {
             log("Process killed:\n" + getProcessString(p), false, listener);
           } else {
             logFailedToKill(p, null, listener);
@@ -146,7 +153,15 @@ public class LockedFileResolver {
   }
 
   private boolean isIgnored(@NotNull final ProcessInfo p) {
-    return myIgnoredProcesses.contains(String.valueOf(p.getPid())) || myIgnoredProcesses.contains(p.getName());
+    return isIgnored(p.getPid()) || isIgnored(p.getName());
+  }
+
+  private boolean isIgnored(@Nullable String processName) {
+    return myIgnoredProcesses.contains(processName);
+  }
+
+  private boolean isIgnored(long pid) {
+    return myIgnoredProcesses.contains(String.valueOf(pid));
   }
 
   private void logFailedToKill(@NotNull final ProcessInfo p, @Nullable final String message, @Nullable final Listener listener) {
