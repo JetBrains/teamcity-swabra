@@ -6,6 +6,7 @@
         <webroots>
           <root url="file://$MODULE_DIR$/resource/buildServerResources" relative="/plugins/swabra" />
         </webroots>
+        <sourceRoots />
       </configuration>
     </facet>
     <facet type="Spring" name="Spring">
