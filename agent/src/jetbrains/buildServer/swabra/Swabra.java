@@ -109,11 +109,6 @@ public final class Swabra extends AgentLifeCycleAdapter implements PositionAware
     return "swabra"; // may be referenced in other plugins
   }
 
-  @NotNull
-  public PositionConstraint getConstraint() {
-    return PositionConstraint.UNDEFINED;
-  }
-
   @Override
   public void buildStarted(@NotNull final AgentRunningBuild runningBuild) {
 //    System.setProperty(DEBUG_MODE, "true");
