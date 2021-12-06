@@ -20,7 +20,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Map;
 import jetbrains.buildServer.serverSide.*;
-import jetbrains.buildServer.serverSide.cleanup.CleanupExtension;
+import jetbrains.buildServer.serverSide.cleanup.AfterBuildsCleanupExtension;
 import jetbrains.buildServer.serverSide.cleanup.CleanupInterruptedException;
 import jetbrains.buildServer.serverSide.cleanup.CleanupProcessState;
 import jetbrains.buildServer.swabra.SwabraUtil;
@@ -56,7 +56,7 @@ public class SwabraCleanCheckoutWatcherImpl implements SwabraCleanCheckoutWatche
       }
     });
 
-    extensionHolder.registerExtension(CleanupExtension.class, SwabraCleanCheckoutWatcherImpl.class.getName(), new CleanupExtension() {
+    extensionHolder.registerExtension(AfterBuildsCleanupExtension.class, SwabraCleanCheckoutWatcherImpl.class.getName(), new AfterBuildsCleanupExtension() {
       @Override
       public void afterCleanup(@NotNull final CleanupProcessState cleanupState) throws CleanupInterruptedException {
         cleanOldValues(cleanupState);
