@@ -38,7 +38,6 @@
     <orderEntry type="module" module-name="agent" />
     <orderEntry type="module" module-name="swabra-server-internal" />
     <orderEntry type="module" module-name="server-openapi" />
-    <orderEntry type="module" module-name="processesTerminator" />
     <orderEntry type="module" module-name="agent-test" />
     <orderEntry type="module" module-name="server" />
     <orderEntry type="module" module-name="server-tools" />

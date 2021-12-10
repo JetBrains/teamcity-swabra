@@ -61,21 +61,25 @@ public class ProcessExecutor {
 
   private static ExecResult run(final GeneralCommandLine commandLine) {
     return SimpleCommandLineProcessRunner.runCommand(commandLine, new byte[0], new SimpleCommandLineProcessRunner.ProcessRunCallback() {
-
+      @Override
       public void onProcessStarted(Process ps) {
         LOG.debug("Started " + commandLine.getCommandLineString());
       }
-
+      @Override
       public void onProcessFinished(Process ps) {
         LOG.debug("Finished " + commandLine.getCommandLineString());
       }
-
+      @Override
       public Integer getOutputIdleSecondsTimeout() {
         return TIMEOUT;
       }
-
+      @Override
       public Integer getMaxAcceptedOutputSize() {
         return null;
+      }
+      @Override
+      public boolean isUseProcessTreeTerminator() {
+        return false;
       }
     });
   }

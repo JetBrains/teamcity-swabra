@@ -151,10 +151,6 @@
     <pathelement location="${path.variable.teamcitydistribution}/webapps/ROOT/WEB-INF/lib/openapi.jar"/>
   </path>
   
-  <path id="library.teamcity-processesterminator.classpath">
-    <pathelement location="${path.variable.teamcitydistribution}/webapps/ROOT/WEB-INF/lib/processesTerminator.jar"/>
-  </path>
-  
   <path id="library.teamcity-server.classpath">
     <pathelement location="${path.variable.teamcitydistribution}/webapps/ROOT/WEB-INF/lib/server-tools.jar"/>
     <pathelement location="${path.variable.teamcitydistribution}/webapps/ROOT/WEB-INF/lib/server.jar"/>
@@ -308,7 +304,7 @@
     <path refid="library.teamcity-log4j.classpath"/>
     <path refid="library.teamcity-openapi.classpath"/>
     <path refid="library.teamcity-annotations.classpath"/>
-    <path refid="library.teamcity-processesterminator.classpath"/>
+
     <path refid="library.teamcity-spring.classpath"/>
     <path refid="library.buildagent-agent.classpath"/>
     <path refid="library.devpackage-common-api.classpath"/>
@@ -323,7 +319,6 @@
     <path refid="library.devpackage-common-api.classpath"/>
     <path refid="library.teamcity-log4j.classpath"/>
     <path refid="library.teamcity-openapi.classpath"/>
-    <path refid="library.teamcity-processesterminator.classpath"/>
     <path refid="library.teamcity-spring.classpath"/>
     <path refid="library.buildagent-agent.classpath"/>
   </path>
@@ -338,7 +333,6 @@
     <path refid="library.teamcity-log4j.classpath"/>
     <path refid="library.teamcity-openapi.classpath"/>
     <path refid="library.teamcity-annotations.classpath"/>
-    <path refid="library.teamcity-processesterminator.classpath"/>
     <path refid="library.teamcity-spring.classpath"/>
     <path refid="library.buildagent-agent.classpath"/>
     <path refid="library.devpackage-common-api.classpath"/>
@@ -355,7 +349,6 @@
     <path refid="library.devpackage-common-api.classpath"/>
     <path refid="library.teamcity-log4j.classpath"/>
     <path refid="library.teamcity-openapi.classpath"/>
-    <path refid="library.teamcity-processesterminator.classpath"/>
     <path refid="library.teamcity-spring.classpath"/>
     <path refid="library.buildagent-agent.classpath"/>
   </path>
@@ -563,8 +556,7 @@
     <path refid="library.teamcity-log4j.classpath"/>
     <pathelement location="${common.output.dir}"/>
     <path refid="library.teamcity-annotations.classpath"/>
-    <path refid="library.teamcity-processesterminator.classpath"/>
-    <path refid="library.buildagent-agent.classpath"/>
+\    <path refid="library.buildagent-agent.classpath"/>
     <path refid="library.devpackage-tests-support.classpath"/>
     <path refid="library.devpackage-common-api.classpath"/>
     <pathelement location="${server.output.dir}"/>
@@ -585,7 +577,6 @@
     <path refid="library.devpackage-common-api.classpath"/>
     <path refid="library.teamcity-log4j.classpath"/>
     <path refid="library.teamcity-openapi.classpath"/>
-    <path refid="library.teamcity-processesterminator.classpath"/>
     <path refid="library.teamcity-spring.classpath"/>
     <path refid="library.buildagent-agent.classpath"/>
     <path refid="library.jmock.classpath"/>
@@ -613,7 +604,6 @@
     <pathelement location="${common.testoutput.dir}"/>
     <pathelement location="${common.output.dir}"/>
     <path refid="library.teamcity-annotations.classpath"/>
-    <path refid="library.teamcity-processesterminator.classpath"/>
     <path refid="library.buildagent-agent.classpath"/>
     <path refid="library.devpackage-tests-support.classpath"/>
     <path refid="library.devpackage-common-api.classpath"/>
@@ -639,7 +629,6 @@
     <path refid="library.devpackage-common-api.classpath"/>
     <path refid="library.teamcity-log4j.classpath"/>
     <path refid="library.teamcity-openapi.classpath"/>
-    <path refid="library.teamcity-processesterminator.classpath"/>
     <path refid="library.teamcity-spring.classpath"/>
     <path refid="library.buildagent-agent.classpath"/>
     <path refid="library.jmock.classpath"/>
@@ -735,7 +724,6 @@
     <path refid="library.devpackage-common-api.classpath"/>
     <path refid="library.teamcity-log4j.classpath"/>
     <path refid="library.teamcity-openapi.classpath"/>
-    <path refid="library.teamcity-processesterminator.classpath"/>
     <path refid="library.teamcity-spring.classpath"/>
     <path refid="library.buildagent-agent.classpath"/>
     <pathelement location="${server.output.dir}"/>
@@ -778,7 +766,6 @@
     <path refid="library.devpackage-common-api.classpath"/>
     <path refid="library.teamcity-log4j.classpath"/>
     <path refid="library.teamcity-openapi.classpath"/>
-    <path refid="library.teamcity-processesterminator.classpath"/>
     <path refid="library.teamcity-spring.classpath"/>
     <path refid="library.buildagent-agent.classpath"/>
     <pathelement location="${server.testoutput.dir}"/>

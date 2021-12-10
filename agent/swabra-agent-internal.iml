@@ -14,7 +14,6 @@
     <orderEntry type="module" module-name="swabra-common-internal" />
     <orderEntry type="module" module-name="agent-openapi" />
     <orderEntry type="module" module-name="runtime-util" />
-    <orderEntry type="module" module-name="processesTerminator" />
     <orderEntry type="module" module-name="common-runtime" />
     <orderEntry type="module" module-name="agent" />
   </component>
