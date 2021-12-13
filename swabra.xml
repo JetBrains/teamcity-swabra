@@ -556,7 +556,7 @@
     <path refid="library.teamcity-log4j.classpath"/>
     <pathelement location="${common.output.dir}"/>
     <path refid="library.teamcity-annotations.classpath"/>
-\    <path refid="library.buildagent-agent.classpath"/>
+    <path refid="library.buildagent-agent.classpath"/>
     <path refid="library.devpackage-tests-support.classpath"/>
     <path refid="library.devpackage-common-api.classpath"/>
     <pathelement location="${server.output.dir}"/>
