@@ -78,7 +78,7 @@ public class ProcessExecutor {
         return null;
       }
       @Override
-      public boolean isUseProcessTreeTerminator() {
+      public boolean terminateEntireProcessTree() {
         return false;
       }
     });
