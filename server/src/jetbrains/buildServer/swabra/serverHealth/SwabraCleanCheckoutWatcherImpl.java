@@ -74,7 +74,9 @@ public class SwabraCleanCheckoutWatcherImpl implements SwabraCleanCheckoutWatche
 
     final String causeBuildTypeId = build.getParametersProvider().get(SwabraUtil.CLEAN_CHECKOUT_CAUSE_BUILD_TYPE_ID);
     if (StringUtil.isNotEmpty(causeBuildTypeId)) {
-      getDataStorage(buildType.getProject()).putValue(causeBuildTypeId, String.valueOf(System.currentTimeMillis()));
+      final CustomDataStorage storage = getDataStorage(buildType.getProject());
+      storage.refresh();
+      storage.putValue(causeBuildTypeId, String.valueOf(System.currentTimeMillis()));
     }
   }
 
