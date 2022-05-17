@@ -134,9 +134,7 @@ public class SwabraFrequentCleanCheckoutReport extends HealthStatusReport {
   private List<SBuildType> getBuildTypes(@NotNull List<SwabraSettingsGroup> group) {
     final List<SBuildType> res = new ArrayList<SBuildType>();
     for (SwabraSettingsGroup g : group) {
-      for (SBuildType bt : g.getBuildTypes()) {
-        res.add(bt);
-      }
+      res.addAll(g.getBuildTypes());
     }
     return res;
   }
