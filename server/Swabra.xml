@@ -82,4 +82,19 @@
       </option>
     </enum>
   </types>
+  <examples>
+    <example>
+      <description>
+        Enables cleanup of the build files on the agent before the first build step starts.
+        Also detects all the processes locking the files under the build checkout directory (Windows only), and kills them.
+        If build files cleaning fails for some reason, then forces the agent to perform clean checkout.
+      </description>
+      <code>
+        swabra {
+          forceCleanCheckout = true
+          lockingProcesses = Swabra.LockingProcessPolicy.KILL
+        }
+      </code>
+    </example>
+  </examples>
 </dsl-extension>
