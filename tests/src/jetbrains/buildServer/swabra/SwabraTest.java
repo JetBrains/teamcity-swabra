@@ -536,7 +536,7 @@ public class SwabraTest extends BaseTestCase {
           FileWriter writer  = null;
           File snapshotFile = null;
           try {
-            snapshotFile = File.createTempFile("swabraInterrupter", "snapshot");
+            snapshotFile = createTempFile();
             writer = new FileWriter(snapshotFile);
             writer.write(dir.getAbsolutePath());
           } catch (IOException ignored) {
