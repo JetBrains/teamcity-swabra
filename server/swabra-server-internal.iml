@@ -27,8 +27,10 @@
     <orderEntry type="module" module-name="swabra-common-internal" />
     <orderEntry type="module" module-name="server-openapi" />
     <orderEntry type="module" module-name="server" />
+    <orderEntry type="module" module-name="server-core" />
     <orderEntry type="module" module-name="migration" />
     <orderEntry type="module" module-name="web-openapi" />
     <orderEntry type="module" module-name="server-tools" />
+    <orderEntry type="module" module-name="server-tools-core" />
   </component>
 </module>

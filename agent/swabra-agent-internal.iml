@@ -16,6 +16,7 @@
     <orderEntry type="module" module-name="runtime-util" />
     <orderEntry type="module" module-name="common-runtime" />
     <orderEntry type="module" module-name="agent" />
+    <orderEntry type="module" module-name="agent-core" />
     <orderEntry type="module" module-name="migration" />
   </component>
 </module>
