@@ -1,3 +1,5 @@
+[![official JetBrains project](https://jb.gg/badges/official-flat-square.svg)](https://confluence.jetbrains.com/display/ALL/JetBrains+on+GitHub)
+
 Support for cleaning new files created during the build. Modified or deleted files are reported in the build log
 ___
 This repository was migrated from the svn http://svn.jetbrains.org/teamcity/plugins/swabra. 
