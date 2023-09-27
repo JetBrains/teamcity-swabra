@@ -96,6 +96,7 @@
   
   <path id="library.buildagent-agent.classpath">
     <pathelement location="${path.variable.teamcitydistribution}/buildAgent/lib/agent.jar"/>
+    <pathelement location="${path.variable.teamcitydistribution}/buildAgent/lib/agent-core.jar"/>
   </path>
   
   <path id="library.devpackage-agent-api.classpath">
