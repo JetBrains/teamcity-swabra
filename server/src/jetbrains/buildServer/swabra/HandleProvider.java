@@ -65,7 +65,9 @@ public class HandleProvider extends ServerToolProviderAdapter {
   public File fetchToolPackage(@NotNull final ToolVersion toolVersion, @NotNull final File targetDirectory) throws ToolException {
     final File location = new File(targetDirectory, HANDLE_EXE);
     try {
-      URLDownloader.download(HandleToolType.HTTPS_LIVE_SYSINTERNALS_COM_HANDLE_EXE, mySSLTrustStoreProvider.getTrustStore(), location);
+      final String url = HandleToolType.HTTPS_LIVE_SYSINTERNALS_COM_HANDLE_EXE;
+      LOG.info("Downloading package from '" + url + "'");
+      URLDownloader.download(url, mySSLTrustStoreProvider.getTrustStore(), location);
     } catch (Throwable e) {
       throw new ToolException("Failed to fetch " + HANDLE_TOOL + ": " + e.getMessage(), e);
     }
