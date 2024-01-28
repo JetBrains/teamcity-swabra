@@ -143,7 +143,12 @@
   <path id="library.teamcity-jdom.classpath">
     <pathelement location="${path.variable.teamcitydistribution}/webapps/ROOT/WEB-INF/lib/jdom.jar"/>
   </path>
-  
+
+  <path id="library.teamcity-platform-specific.classpath">
+    <pathelement location="${path.variable.teamcitydistribution}/webapps/ROOT/WEB-INF/lib/platform-specific.jar"/>
+  </path>
+
+
   <path id="library.teamcity-log4j.classpath">
     <pathelement location="${path.variable.teamcitydistribution}/webapps/ROOT/WEB-INF/lib/log4j-1.2-api.jar"/>
     <pathelement location="${path.variable.teamcitydistribution}/webapps/ROOT/WEB-INF/lib/log4j-api.jar"/>
@@ -635,6 +640,7 @@
     <path refid="library.junit.classpath"/>
     <path refid="library.devpackage-agent-api.classpath"/>
     <path refid="library.teamcity-util.classpath"/>
+    <path refid="library.teamcity-platform-specific.classpath"/>
     <pathelement location="${agent.testoutput.dir}"/>
     <pathelement location="${agent.output.dir}"/>
     <pathelement location="${common.testoutput.dir}"/>
