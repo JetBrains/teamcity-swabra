@@ -45,6 +45,11 @@ public class SwabraTest2 extends BaseTestCase {
     public void registerTool(@NotNull final String toolName, @NotNull final BundledTool tool) {
 
     }
+
+    @Override
+    public void unregisterTool(@NotNull String toolId) {
+
+    }
   };
   private EventDispatcher<AgentLifeCycleListener> myAgentDispatcher;
   private SwabraLogger mySwabraLogger;

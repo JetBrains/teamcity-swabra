@@ -184,6 +184,11 @@ public class SwabraTest extends BaseTestCase {
                                        public void registerTool(@NotNull final String toolName, @NotNull final BundledTool tool) {
 
                                        }
+
+                                       @Override
+                                       public void unregisterTool(@NotNull String toolId) {
+
+                                       }
                                      },
                                      new DirectoryMapDirectoriesCleanerImpl(myDispatcher,
                                               directoryCleaner,
@@ -552,6 +557,11 @@ public class SwabraTest extends BaseTestCase {
 
         @Override
         public void registerTool(@NotNull final String toolName, @NotNull final BundledTool tool) {
+
+        }
+
+        @Override
+        public void unregisterTool(@NotNull String toolId) {
 
         }
       }, new DirectoryMapDirectoriesCleanerImpl(myDispatcher,
@@ -1125,6 +1135,11 @@ E:\TEMP\test-1307328584\checkoutDir2\dir2=pending
                                        public void registerTool(@NotNull final String toolName, @NotNull final BundledTool tool) {
 
                                        }
+
+                                       @Override
+                                       public void unregisterTool(@NotNull String toolId) {
+
+                                       }
                                      },
                                      new DirectoryMapDirectoriesCleanerImpl(myDispatcher,
                                                                             directoryCleaner,
@@ -1204,6 +1219,11 @@ E:\TEMP\test-1307328584\checkoutDir2\dir2=pending
 
                                        @Override
                                        public void registerTool(@NotNull final String toolName, @NotNull final BundledTool tool) {
+
+                                       }
+
+                                       @Override
+                                       public void unregisterTool(@NotNull final String toolId) {
 
                                        }
                                      },
