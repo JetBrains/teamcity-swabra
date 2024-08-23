@@ -9,6 +9,11 @@
   <version>${revision}</version>
   <packaging>pom</packaging>
 
+  <properties>
+    <local.repo.path>${TC_LOCAL_REPO}</local.repo.path>
+    <TC_LOCAL_REPO>local-repo</TC_LOCAL_REPO>
+  </properties>
+
   <modules>
     <module>server</module>
     <module>agent</module>
@@ -32,4 +37,12 @@
       </resource>
     </resources>
   </build>
+
+
+  <repositories>
+    <repository>
+      <id>local-teamcity-artifacts</id>
+      <url>file://${local.repo.path}</url>
+    </repository>
+  </repositories>
 </project>
