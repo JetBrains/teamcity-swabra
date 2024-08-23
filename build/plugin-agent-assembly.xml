@@ -27,7 +27,7 @@
                 <dependencySets>
                     <dependencySet>
                         <includes>
-                            <include>*</include>
+                            <include>org.jetbrains.teamcity.plugins:swabra-common</include>
                         </includes>
                     </dependencySet>
                 </dependencySets>

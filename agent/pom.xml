@@ -14,6 +14,10 @@
   <artifactId>swabra-agent</artifactId>
   <version>1.0-SNAPSHOT</version>
 
+  <build>
+    <finalName>swabra-agent</finalName>
+  </build>
+
   <dependencies>
     <dependency>
       <groupId>org.jetbrains.teamcity.internal</groupId>

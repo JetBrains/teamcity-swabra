@@ -8,7 +8,7 @@
     <version>${revision}</version>
   </parent>
 
-  <artifactId>build</artifactId>
+  <artifactId>swabra-build</artifactId>
   <packaging>pom</packaging>
 
   <properties>
@@ -63,7 +63,7 @@
               <goal>single</goal>
             </goals>
             <configuration>
-              <finalName>swabra-agent</finalName>
+              <finalName>swabra</finalName>
               <appendAssemblyId>false</appendAssemblyId>
               <descriptors>
                 <descriptor>plugin-agent-assembly.xml</descriptor>
@@ -77,7 +77,7 @@
               <goal>single</goal>
             </goals>
             <configuration>
-              <finalName>deploy-runner</finalName>
+              <finalName>swabra</finalName>
               <outputDirectory>${project.parent.build.directory}</outputDirectory>
               <appendAssemblyId>false</appendAssemblyId>
               <descriptors>
