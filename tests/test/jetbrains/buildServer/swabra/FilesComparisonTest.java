@@ -3,13 +3,15 @@
 package jetbrains.buildServer.swabra;
 
 import com.intellij.openapi.util.SystemInfo;
-import java.io.*;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.OutputStreamWriter;
+import java.io.Writer;
 import jetbrains.buildServer.swabra.snapshots.iteration.FileInfo;
 import jetbrains.buildServer.swabra.snapshots.iteration.FilesTraversal;
 import jetbrains.buildServer.swabra.snapshots.iteration.SnapshotFilesIterator;
 import jetbrains.buildServer.util.FileUtil;
 import junit.framework.TestCase;
-import org.junit.Assume;
 
 import static jetbrains.buildServer.swabra.TestUtil.getTestData;
 
@@ -27,7 +29,7 @@ public class FilesComparisonTest extends TestCase {
 
       new SnapshotFilesIterator(getTestData(testData + "Before.snapshot", null)),
 
-      new SnapshotFilesIterator(getTestData(testData + "After.snapshot", null)){
+      new SnapshotFilesIterator(getTestData(testData + "After.snapshot", null)) {
         @Override
         public boolean isCurrent() {
           return true;
@@ -79,7 +81,9 @@ public class FilesComparisonTest extends TestCase {
 
   @org.junit.Test
   public void test1() throws Exception {
-    Assume.assumeTrue("For windows only", SystemInfo.isWindows);
+    if (!SystemInfo.isWindows) {
+      return;
+    }
     runTest("filesCompare1");
   }
 
