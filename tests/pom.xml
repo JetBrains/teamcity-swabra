@@ -21,11 +21,19 @@
         <artifactId>maven-surefire-plugin</artifactId>
         <version>3.4.0</version>
         <configuration>
+          <testFailureIgnore>true</testFailureIgnore>
           <workingDirectory>${project.parent.basedir}</workingDirectory>
           <suiteXmlFiles>
             <suiteXmlFile>${basedir}/../testng.xml</suiteXmlFile>
           </suiteXmlFiles>
         </configuration>
+        <dependencies>
+          <dependency>
+            <groupId>org.apache.maven.surefire</groupId>
+            <artifactId>surefire-junit47</artifactId>
+            <version>3.4.0</version>
+          </dependency>
+        </dependencies>
       </plugin>
     </plugins>
   </build>

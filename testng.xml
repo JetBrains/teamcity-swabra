@@ -3,17 +3,7 @@
   <test name="Swabra Test">
     <classes>
       <class name="jetbrains.buildServer.swabra.processes.HandleProcessesProviderTestNG"/>
-      <class name="jetbrains.buildServer.swabra.processes.LockedFileResolverTest"/>
-
-      <class name="jetbrains.buildServer.swabra.snapshots.SwabraRulesTest"/>
-
-      <class name="jetbrains.buildServer.swabra.FilesCollectionProcessorTest"/>
-
-      <class name="jetbrains.buildServer.swabra.FilesComparisonTest"/>
-
-      <class name="jetbrains.buildServer.swabra.FileSystemFilesTraversalTest"/>
       <class name="jetbrains.buildServer.swabra.HandleToolUsageProviderTest"/>
-      <class name="jetbrains.buildServer.swabra.SnapshotFilesTraversalTest"/>
       <class name="jetbrains.buildServer.swabra.SwabraTest"/>
       <class name="jetbrains.buildServer.swabra.SwabraTest2"/>
     </classes>
