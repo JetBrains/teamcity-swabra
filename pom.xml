@@ -6,7 +6,7 @@
 
   <groupId>org.jetbrains.teamcity.plugins</groupId>
   <artifactId>swabra</artifactId>
-  <version>${revision}</version>
+  <version>1.0-SNAPSHOT</version>
   <packaging>pom</packaging>
 
   <properties>
