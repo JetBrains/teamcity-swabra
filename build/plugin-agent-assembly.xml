@@ -16,7 +16,7 @@
                 <include>org.jetbrains.teamcity.plugins:swabra-agent</include>
             </includes>
             <binaries>
-                <outputDirectory>lib</outputDirectory>
+                <outputDirectory>swabra/lib</outputDirectory>
                 <unpack>false</unpack>
                 <dependencySets>
                     <dependencySet>
