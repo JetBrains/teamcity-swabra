@@ -9,6 +9,12 @@
         <format>dir</format>
         <format>zip</format>
     </formats>
+    <files>
+        <file>
+            <source>../agent/teamcity-plugin.xml</source>
+            <outputDirectory>swabra/</outputDirectory>
+        </file>
+    </files>
     <moduleSets>
         <moduleSet>
             <useAllReactorProjects>true</useAllReactorProjects>
