@@ -12,6 +12,8 @@
   <properties>
     <local.repo.path>${TC_LOCAL_REPO}</local.repo.path>
     <TC_LOCAL_REPO>local-repo</TC_LOCAL_REPO>
+    <maven.compiler.target>1.8</maven.compiler.target>
+    <maven.compiler.source>1.8</maven.compiler.source>
   </properties>
 
   <modules>
@@ -36,6 +38,20 @@
         <filtering>true</filtering>
       </resource>
     </resources>
+
+    <pluginManagement>
+      <plugins>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-compiler-plugin</artifactId>
+          <configuration>
+            <source>${maven.compiler.source}</source>
+            <target>${maven.compiler.target}</target>
+          </configuration>
+        </plugin>
+      </plugins>
+    </pluginManagement>
+
   </build>
 
 
