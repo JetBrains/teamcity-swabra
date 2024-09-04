@@ -1,0 +1,12 @@
+<!DOCTYPE suite SYSTEM "http://testng.org/testng-1.0.dtd">
+<!-- Not a part of any run configuration until test doesn't fail -->
+<suite name = "Swabra Integration">
+  <test name = "Swabra Integration">
+    <classes>
+      <class name = "jetbrains.buildServer.swabra.AssemblyInfoPatcherSwabraTest"/>
+      <class name = "jetbrains.buildServer.swabra.FileContentReplacerSwabraTest"/>
+      <class name = "jetbrains.buildServer.swabra.FileContentReplacerSwabraIntegrationTest"/>
+      <class name = "jetbrains.buildServer.swabra.serverHealth.SwabraClashingConfigurationDetectorTest"/>
+    </classes>
+  </test>
+</suite>
