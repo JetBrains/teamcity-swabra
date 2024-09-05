@@ -21,7 +21,6 @@
     <module>agent</module>
     <module>common</module>
     <module>tests</module>
-    <module>swabra-integration-tests</module>
     <module>build</module>
   </modules>
 
