@@ -16,6 +16,7 @@ import jetbrains.buildServer.TeamCityRuntimeException;
 import jetbrains.buildServer.Used;
 import jetbrains.buildServer.agent.*;
 import jetbrains.buildServer.agent.impl.directories.DirectoryMapDirectoriesCleaner;
+import jetbrains.buildServer.agent.impl.operationModes.AgentOperationModeHolder;
 import jetbrains.buildServer.swabra.processes.HandleProcessesProvider;
 import jetbrains.buildServer.swabra.processes.LockedFileResolver;
 import jetbrains.buildServer.swabra.processes.WmicProcessDetailsProvider;
@@ -24,7 +25,6 @@ import jetbrains.buildServer.util.EventDispatcher;
 import jetbrains.buildServer.util.FileUtil;
 import jetbrains.buildServer.util.StringUtil;
 import jetbrains.buildServer.util.positioning.PositionAware;
-import jetbrains.buildServer.util.positioning.PositionConstraint;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -56,13 +56,16 @@ public final class Swabra extends AgentLifeCycleAdapter implements PositionAware
 
   private AgentRunningBuild myRunningBuild;
 
+  private final AgentOperationModeHolder myOperationModeHolder;
+
   private AtomicBoolean myBuildInterrupted = new AtomicBoolean(false);
 
   public Swabra(@NotNull final EventDispatcher<AgentLifeCycleListener> agentDispatcher,
                 @NotNull final SwabraLogger logger,
                 @NotNull final SwabraPropertiesProcessor propertiesProcessor,
                 @NotNull final BundledToolsRegistry toolsRegistry,
-                @NotNull final DirectoryMapDirectoriesCleaner directoriesCleaner) {
+                @NotNull final DirectoryMapDirectoriesCleaner directoriesCleaner,
+                @NotNull final AgentOperationModeHolder operationModeHolder) {
     this(agentDispatcher, logger, propertiesProcessor, toolsRegistry, directoriesCleaner, new LockedFileResolver.LockingProcessesProviderFactory(){
 
       @Nullable
@@ -72,7 +75,7 @@ public final class Swabra extends AgentLifeCycleAdapter implements PositionAware
           return null;
         return new HandleProcessesProvider(swabraSettings.getHandlePath());
       }
-    });
+    }, operationModeHolder);
   }
 
   @Used("tests")
@@ -81,8 +84,10 @@ public final class Swabra extends AgentLifeCycleAdapter implements PositionAware
                 @NotNull final SwabraPropertiesProcessor propertiesProcessor,
                 @NotNull final BundledToolsRegistry toolsRegistry,
                 @NotNull final DirectoryMapDirectoriesCleaner directoriesCleaner,
-                @NotNull final LockedFileResolver.LockingProcessesProviderFactory lockingProcessesProviderFactory) {
+                @NotNull final LockedFileResolver.LockingProcessesProviderFactory lockingProcessesProviderFactory,
+                @NotNull final AgentOperationModeHolder operationModeHolder) {
     myDirectoriesCleaner = directoriesCleaner;
+    myOperationModeHolder = operationModeHolder;
     agentDispatcher.addListener(this);
     myLogger = logger;
     myPropertiesProcessor = propertiesProcessor;
@@ -106,7 +111,7 @@ public final class Swabra extends AgentLifeCycleAdapter implements PositionAware
     }
     myLogger.setBuildLogger(myRunningBuild.getBuildLogger());
 
-    mySettings = new SwabraSettings(myRunningBuild);
+    mySettings = new SwabraSettings(myRunningBuild, myOperationModeHolder);
 
     mySettings.prepareHandle(myLogger, myToolsRegistry);
 

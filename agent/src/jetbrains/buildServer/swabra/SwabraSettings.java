@@ -9,6 +9,7 @@ import jetbrains.buildServer.agent.AgentBuildFeature;
 import jetbrains.buildServer.agent.AgentCheckoutMode;
 import jetbrains.buildServer.agent.AgentRunningBuild;
 import jetbrains.buildServer.agent.BundledToolsRegistry;
+import jetbrains.buildServer.agent.impl.operationModes.AgentOperationModeHolder;
 import jetbrains.buildServer.swabra.processes.HandlePathProvider;
 import jetbrains.buildServer.swabra.snapshots.SwabraRules;
 import jetbrains.buildServer.util.StringUtil;
@@ -45,7 +46,11 @@ public class SwabraSettings {
   private final List<String> myIgnoredProcesses;
 
 
-  public SwabraSettings(AgentRunningBuild runningBuild) {
+  public SwabraSettings(@NotNull AgentRunningBuild runningBuild, @NotNull AgentOperationModeHolder operationModeHolder) {
+    final boolean isServiceMode = operationModeHolder.getOperationMode().isRegistrationOnServerSupported();
+    if (!isServiceMode){
+      runningBuild.getBuildLogger().debug("Swabra is enabled even though it is only supported in service mode.");
+    }
     final Collection<AgentBuildFeature> features = runningBuild.getBuildFeaturesOfType(SwabraUtil.FEATURE_TYPE);
 
     final Map<String, String> params = new HashMap<String, String>();
@@ -54,7 +59,7 @@ public class SwabraSettings {
     }
     params.putAll(runningBuild.getSharedConfigParameters());
 
-    myCleanupEnabled = SwabraUtil.isCleanupEnabled(params);
+    myCleanupEnabled = isServiceMode && SwabraUtil.isCleanupEnabled(params);
     myCleanupMode = SwabraUtil.getCleanupMode(params);
     myStrict = SwabraUtil.isStrict(params);
     myLockingProcessesKill = SystemInfo.isWindows && SwabraUtil.isLockingProcessesKill(params);

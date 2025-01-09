@@ -18,10 +18,10 @@ import java.util.concurrent.atomic.AtomicReference;
 import jetbrains.buildServer.BaseTestCase;
 import jetbrains.buildServer.TempFiles;
 import jetbrains.buildServer.agent.*;
+import jetbrains.buildServer.agent.impl.BuildAgentEx;
 import jetbrains.buildServer.agent.impl.directories.*;
-import jetbrains.buildServer.serverSide.BasePropertiesModel;
-import jetbrains.buildServer.serverSide.TeamCityProperties;
-import jetbrains.buildServer.swabra.processes.GetProcessesException;
+import jetbrains.buildServer.agent.impl.operationModes.AgentOperationModeHolder;
+import jetbrains.buildServer.agent.impl.operationModes.ServiceMode;
 import jetbrains.buildServer.swabra.processes.LockedFileResolver;
 import jetbrains.buildServer.swabra.processes.ProcessInfo;
 import jetbrains.buildServer.swabra.snapshots.iteration.FileInfo;
@@ -29,7 +29,6 @@ import jetbrains.buildServer.util.Action;
 import jetbrains.buildServer.util.EventDispatcher;
 import jetbrains.buildServer.util.FileUtil;
 import jetbrains.buildServer.util.SystemTimeService;
-import junit.framework.TestCase;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jmock.Expectations;
@@ -59,7 +58,8 @@ public class SwabraTest extends BaseTestCase {
   private File myAgentWorkDir;
   private TempFiles myTempFiles;
   private BuildAgentConfigurationEx myAgentConf;
-  private BuildAgent myAgent;
+  private AgentOperationModeHolder myAgentOperationModeHolder;
+  private BuildAgentEx myAgent;
   private Mockery myContext;
   private StringBuilder myResults;
   private EventDispatcher<AgentLifeCycleListener> myDispatcher;
@@ -122,7 +122,9 @@ public class SwabraTest extends BaseTestCase {
     myAgentWorkDir.mkdirs();
     myCheckoutDir = new File(myAgentWorkDir, "checkout_dir");
     myCheckoutDir.mkdirs();
-    myAgent = myContext.mock(BuildAgent.class);
+    myAgent = myContext.mock(BuildAgentEx.class);
+    myAgentOperationModeHolder = new AgentOperationModeHolder();
+    myAgentOperationModeHolder.setOperationMode(new ServiceMode(myAgent));
     myDispatcher = EventDispatcher.create(AgentLifeCycleListener.class);
     myAgentConf = myContext.mock(BuildAgentConfigurationEx.class);
     myContext.checking(new Expectations() {
@@ -193,7 +195,8 @@ public class SwabraTest extends BaseTestCase {
                                      new DirectoryMapDirectoriesCleanerImpl(myDispatcher,
                                               directoryCleaner,
                                               new DirectoryMapPersistanceImpl(myAgentConf, new SystemTimeService()),
-                                              new DirectoryMapDirtyTrackerImpl() )
+                                              new DirectoryMapDirtyTrackerImpl()),
+                                     myAgentOperationModeHolder
     );
 
 //    final File pttTemp = new File(TEST_DATA_PATH, "ptt");
@@ -567,8 +570,8 @@ public class SwabraTest extends BaseTestCase {
       }, new DirectoryMapDirectoriesCleanerImpl(myDispatcher,
                                                 directoryCleaner,
                                                 new DirectoryMapPersistanceImpl(myAgentConf, new SystemTimeService()),
-                                                new DirectoryMapDirtyTrackerImpl()
-      ));
+                                                new DirectoryMapDirtyTrackerImpl()),
+                                       myAgentOperationModeHolder);
 
       final CountDownLatch latch = new CountDownLatch(2);
       final AtomicBoolean interruptedFlag = new AtomicBoolean(false);
@@ -1157,7 +1160,8 @@ E:\TEMP\test-1307328584\checkoutDir2\dir2=pending
                                            }
                                          };
                                        }
-                                     }
+                                     },
+                                     myAgentOperationModeHolder
     );
 
 //    final File pttTemp = new File(TEST_DATA_PATH, "ptt");
@@ -1232,7 +1236,8 @@ E:\TEMP\test-1307328584\checkoutDir2\dir2=pending
                                        directoryCleaner,
                                        persistance,
                                        dirtyTracker
-                                       ));
+                                       ),
+                                     myAgentOperationModeHolder);
 
 
     propertiesProcessor.afterAgentConfigurationLoaded(myAgent);

@@ -8,7 +8,10 @@ import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
 import jetbrains.buildServer.BaseTestCase;
 import jetbrains.buildServer.agent.*;
+import jetbrains.buildServer.agent.impl.BuildAgentEx;
 import jetbrains.buildServer.agent.impl.directories.*;
+import jetbrains.buildServer.agent.impl.operationModes.AgentOperationModeHolder;
+import jetbrains.buildServer.agent.impl.operationModes.ServiceMode;
 import jetbrains.buildServer.util.*;
 import org.hamcrest.Description;
 import org.jetbrains.annotations.NotNull;
@@ -58,10 +61,11 @@ public class SwabraTest2 extends BaseTestCase {
   private BuildProgressLogger myBuildProgressLogger;
   private StringBuilder myBuildLog;
   private Mockery myMockery;
-  private BuildAgent myAgent;
+  private BuildAgentEx myAgent;
   private AtomicReference<AgentCheckoutMode> myResolvedCheckoutMode;
   private AgentRunningBuild myRunningBuild;
-  private BuildAgentConfiguration myAgentConf;
+  private BuildAgentConfigurationEx myAgentConf;
+  private AgentOperationModeHolder myAgentOperationModeHolder;
 
   @Override
   @BeforeMethod
@@ -84,10 +88,15 @@ public class SwabraTest2 extends BaseTestCase {
     };
     mySwabraLogger = new SwabraLogger();
     myMockery = new Mockery();
-    myAgentConf = myMockery.mock(BuildAgentConfiguration.class);
+    myAgentConf = myMockery.mock(BuildAgentConfigurationEx.class);
     myPropertiesProcessor = new SwabraPropertiesProcessor(myAgentDispatcher, mySwabraLogger, new DirectoryMapPersistanceImpl(myAgentConf, new SystemTimeService()));
+
+    myAgent = myMockery.mock(BuildAgentEx.class);
+    myAgentOperationModeHolder = new AgentOperationModeHolder();
+    myAgentOperationModeHolder.setOperationMode(new ServiceMode(myAgent));
+
     mySwabra = new Swabra(myAgentDispatcher, mySwabraLogger, myPropertiesProcessor, emptyToolsRegistry,
-                          new DirectoryMapDirectoriesCleanerImpl(myAgentDispatcher, cleaner, new DirectoryMapPersistanceImpl(myAgentConf, new SystemTimeService()), new DirectoryMapDirtyTrackerImpl()));
+                          new DirectoryMapDirectoriesCleanerImpl(myAgentDispatcher, cleaner, new DirectoryMapPersistanceImpl(myAgentConf, new SystemTimeService()), new DirectoryMapDirtyTrackerImpl()), myAgentOperationModeHolder);
 
     mySwabraParamsRef = new ArrayList<Map<String, String>>();
     myBuildLog = new StringBuilder();
@@ -95,7 +104,6 @@ public class SwabraTest2 extends BaseTestCase {
     mySwabraLogger.setBuildLogger(myBuildProgressLogger);
 
 
-    myAgent = myMockery.mock(BuildAgent.class);
     myRunningBuild = myMockery.mock(AgentRunningBuild.class);
 
     myMockery.checking(new Expectations(){{
@@ -242,6 +250,26 @@ public class SwabraTest2 extends BaseTestCase {
         final String dir2FileDeleteMessage = String.format("MESSAGE: Detected new and deleted %s", dir2_file.getAbsolutePath());
         assertContains(Arrays.asList(lines), dir2DeleteMessage);
         assertNotContains(Arrays.asList(lines), dir2DirDeleteMessage, dir2FileDeleteMessage);
+      }
+    });
+  }
+
+  public void should_not_delete_added_dir_in_executor_mode() throws Exception {
+    final Mockery mockery = new Mockery();
+    // Executor mode doesn't register on the server
+    final AgentOperationModeEx executorMode = mockery.mock(AgentOperationModeEx.class);
+    mockery.checking(new Expectations() {{
+      allowing(executorMode).isRegistrationOnServerSupported(); will(returnValue(false));
+    }});
+    myAgentOperationModeHolder.setOperationMode(executorMode);
+    final File dir2 = new File(myCheckoutDir, "dir2");
+    doTest(null, new ActionThrow<Exception>() {
+      public void apply() {
+        assertTrue(dir2.mkdir());
+      }
+    }, new ActionThrow<Exception>() {
+      public void apply() {
+        assertTrue(dir2.exists());
       }
     });
   }
