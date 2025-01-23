@@ -48,9 +48,6 @@ public class SwabraSettings {
 
   public SwabraSettings(@NotNull AgentRunningBuild runningBuild, @NotNull AgentOperationModeHolder operationModeHolder) {
     final boolean isServiceMode = operationModeHolder.getOperationMode().isRegistrationOnServerSupported();
-    if (!isServiceMode){
-      runningBuild.getBuildLogger().debug("Swabra is enabled even though it is only supported in service mode.");
-    }
     final Collection<AgentBuildFeature> features = runningBuild.getBuildFeaturesOfType(SwabraUtil.FEATURE_TYPE);
 
     final Map<String, String> params = new HashMap<String, String>();
@@ -66,6 +63,10 @@ public class SwabraSettings {
     myLockingProcessesReport = SystemInfo.isWindows && SwabraUtil.isLockingProcessesReport(params);
     myVerbose = SwabraUtil.isVerbose(params);
     myCheckoutDir = runningBuild.getCheckoutDirectory();
+
+    if (!isServiceMode && SwabraUtil.isCleanupEnabled(params)){
+      runningBuild.getBuildLogger().debug("Swabra is functional only when running on local and cloud profile-based agents.");
+    }
 
     final List<String> rules = new ArrayList<String>();
     rules.addAll(SwabraUtil.splitRules(SwabraUtil.getRules(params)));
