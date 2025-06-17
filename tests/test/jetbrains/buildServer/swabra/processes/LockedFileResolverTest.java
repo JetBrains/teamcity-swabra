@@ -20,6 +20,7 @@ import jetbrains.buildServer.processes.ProcessTreeTerminator;
 import jetbrains.buildServer.util.ExceptionUtil;
 import jetbrains.buildServer.util.ThreadUtil;
 import jetbrains.buildServer.util.WaitFor;
+import jetbrains.buildServer.windows.ProcessInfo;
 import org.hamcrest.Matcher;
 import org.jetbrains.annotations.NotNull;
 import org.jmock.Expectations;
@@ -60,16 +61,16 @@ public class LockedFileResolverTest {
   }
 
   @Test
-  public void test_no_locking_processes() throws IOException, GetProcessesException {
+  public void test_no_locking_processes() throws IOException {
     File tempDir = myTempFiles.createTempDir();
 
-    setupLockingProcesses(Collections.<ProcessInfo>emptyList(), tempDir);
+    setupLockingProcesses(Collections.emptyList(), tempDir);
     getLockedFileResolver().resolve(tempDir, false, myListener);
     myListener.assertMessageContains("No processes found locking files in directory");
   }
 
   @Test
-  public void test_locking_process_ignored() throws IOException, GetProcessesException {
+  public void test_locking_process_ignored() throws IOException {
     File tempDir = myTempFiles.createTempDir();
 
     setupLockingProcesses(Collections.singletonList(new ProcessInfo(25L, "java.exe")), tempDir);
@@ -171,7 +172,7 @@ public class LockedFileResolverTest {
   }
 
 
-  private void setupLockingProcesses(@NotNull final List<ProcessInfo> lockingProcesses, @NotNull final File dir) throws GetProcessesException {
+  private void setupLockingProcesses(@NotNull final List<ProcessInfo> lockingProcesses, @NotNull final File dir) throws IOException {
     myMockery.checking(new Expectations() {{
       allowing(myLockingProcessesProvider).getLockingProcesses(dir);
       will(returnValue(lockingProcesses));

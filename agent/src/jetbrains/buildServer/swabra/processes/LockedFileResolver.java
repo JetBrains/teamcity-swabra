@@ -3,6 +3,7 @@
 package jetbrains.buildServer.swabra.processes;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -13,6 +14,7 @@ import jetbrains.buildServer.processes.ProcessTreeTerminator;
 import jetbrains.buildServer.swabra.SwabraSettings;
 import jetbrains.buildServer.util.FileUtil;
 import jetbrains.buildServer.util.StringUtil;
+import jetbrains.buildServer.windows.ProcessInfo;
 import org.apache.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -27,17 +29,17 @@ public class LockedFileResolver {
 
   private static final int DELETION_TRIES = 10;
 
-  public static interface LockingProcessesProvider {
+  public interface LockingProcessesProvider {
     @NotNull
-    Collection<ProcessInfo> getLockingProcesses(@NotNull File f) throws GetProcessesException;
+    Collection<ProcessInfo> getLockingProcesses(@NotNull File f) throws IOException;
   }
-  public static interface LockingProcessesProviderFactory {
+  public interface LockingProcessesProviderFactory {
 
     @Nullable
     LockingProcessesProvider createProvider(SwabraSettings swabraSettings);
   }
 
-  public static interface Listener {
+  public interface Listener {
     void message(String m);
 
     void warning(String w);
@@ -83,7 +85,7 @@ public class LockedFileResolver {
       log(sb.toString(), true, listener);
     }
 
-    List<ProcessInfo> ignored = new ArrayList<ProcessInfo>();
+    List<ProcessInfo> ignored = new ArrayList<>();
 
     if (kill) {
       log("Will try to kill locking processes", false, listener);
@@ -131,7 +133,7 @@ public class LockedFileResolver {
   private Collection<ProcessInfo> getLockingProcesses(@NotNull File f, @Nullable Listener listener) {
     try {
       return myProcessesProvider.getLockingProcesses(f);
-    } catch (GetProcessesException e) {
+    } catch (IOException e) {
       log(e.getMessage(), true, listener);
     }
 
@@ -139,7 +141,7 @@ public class LockedFileResolver {
   }
 
   private boolean isIgnored(@NotNull final ProcessInfo p) {
-    return isIgnored(p.getPid()) || isIgnored(p.getName());
+    return isIgnored(p.getPid()) || isIgnored(p.getDetails());
   }
 
   private boolean isIgnored(@Nullable String processName) {
@@ -170,13 +172,13 @@ public class LockedFileResolver {
 
   private void appendProcessInfos(@NotNull Collection<ProcessInfo> processes, @NotNull StringBuilder sb) {
     for (final ProcessInfo p : processes) {
-      sb.append("\n").append(getProcessString(p.getPid(), p.getName()));
+      sb.append("\n").append(getProcessString(p.getPid(), p.getDetails()));
     }
   }
 
   @NotNull
   private String getProcessString(@NotNull ProcessInfo p) {
-    return getProcessString(p.getPid(), p.getName());
+    return getProcessString(p.getPid(), p.getDetails());
   }
 
   @NotNull

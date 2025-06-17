@@ -23,12 +23,12 @@ import jetbrains.buildServer.agent.impl.directories.*;
 import jetbrains.buildServer.agent.impl.operationModes.AgentOperationModeHolder;
 import jetbrains.buildServer.agent.impl.operationModes.ServiceMode;
 import jetbrains.buildServer.swabra.processes.LockedFileResolver;
-import jetbrains.buildServer.swabra.processes.ProcessInfo;
 import jetbrains.buildServer.swabra.snapshots.iteration.FileInfo;
 import jetbrains.buildServer.util.Action;
 import jetbrains.buildServer.util.EventDispatcher;
 import jetbrains.buildServer.util.FileUtil;
 import jetbrains.buildServer.util.SystemTimeService;
+import jetbrains.buildServer.windows.ProcessInfo;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jmock.Expectations;
@@ -1149,7 +1149,6 @@ E:\TEMP\test-1307328584\checkoutDir2\dir2=pending
                                                                             new DirectoryMapPersistanceImpl(myAgentConf, new SystemTimeService()),
                                                                             new DirectoryMapDirtyTrackerImpl()),
                                      new LockedFileResolver.LockingProcessesProviderFactory() {
-                                       @Nullable
                                        @Override
                                        public LockedFileResolver.LockingProcessesProvider createProvider(final SwabraSettings swabraSettings) {
                                          return new LockedFileResolver.LockingProcessesProvider() {

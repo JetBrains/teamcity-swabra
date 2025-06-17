@@ -17,16 +17,6 @@ public class ProcessExecutor {
   private static final Logger LOG = Logger.getLogger(ProcessExecutor.class);
 
   private static final int TIMEOUT = 1000;
-  private static final String ACCEPT_EULA_KEY = "/accepteula";
-
-  public static ExecResult runHandleAcceptEula(@NotNull final String handleExePath, @NotNull String file) {
-    final GeneralCommandLine commandLine = new GeneralCommandLine();
-    commandLine.setExePath(handleExePath);
-    commandLine.addParameter(ACCEPT_EULA_KEY);
-    commandLine.addParameter(file);
-
-    return run(commandLine);
-  }
 
   public static ExecResult runWmicProcess(@NotNull Long pid) {
     final GeneralCommandLine commandLine = new GeneralCommandLine();
@@ -36,14 +26,6 @@ public class ProcessExecutor {
 
     return run(commandLine);
   }
-
-//  public static ExecResult run(@NotNull String exePath, @NotNull String[] params, SimpleBuildLogger logger) {
-//    final GeneralCommandLine commandLine = new GeneralCommandLine();
-//    commandLine.setExePath(exePath);
-//    commandLine.addParameters(params);
-//
-//    return run(commandLine, logger);
-//  }
 
   private static ExecResult run(final GeneralCommandLine commandLine) {
     return SimpleCommandLineProcessRunner.runCommand(commandLine, new byte[0], new SimpleCommandLineProcessRunner.ProcessRunCallback() {
@@ -70,17 +52,4 @@ public class ProcessExecutor {
     });
   }
 
-//  private static void info(String message, SimpleBuildLogger logger) {
-//    LOG.info(message);
-//    if (logger != null) {
-//      logger.message(message);
-//    }
-//  }
-//
-//  private static void error(String message, SimpleBuildLogger logger) {
-//    LOG.error(message);
-//    if (logger != null) {
-//      logger.error(message);
-//    }
-//  }
 }

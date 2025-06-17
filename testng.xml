@@ -2,7 +2,6 @@
 <suite name="Swabra Suite">
   <test name="Swabra Test">
     <classes>
-      <class name="jetbrains.buildServer.swabra.processes.HandleProcessesProviderTestNG"/>
       <class name="jetbrains.buildServer.swabra.HandleToolUsageProviderTest"/>
       <class name="jetbrains.buildServer.swabra.SwabraTest"/>
       <class name="jetbrains.buildServer.swabra.SwabraTest2"/>

@@ -17,7 +17,6 @@ import jetbrains.buildServer.Used;
 import jetbrains.buildServer.agent.*;
 import jetbrains.buildServer.agent.impl.directories.DirectoryMapDirectoriesCleaner;
 import jetbrains.buildServer.agent.impl.operationModes.AgentOperationModeHolder;
-import jetbrains.buildServer.swabra.processes.HandleProcessesProvider;
 import jetbrains.buildServer.swabra.processes.LockedFileResolver;
 import jetbrains.buildServer.swabra.processes.WmicProcessDetailsProvider;
 import jetbrains.buildServer.swabra.snapshots.*;
@@ -25,6 +24,7 @@ import jetbrains.buildServer.util.EventDispatcher;
 import jetbrains.buildServer.util.FileUtil;
 import jetbrains.buildServer.util.StringUtil;
 import jetbrains.buildServer.util.positioning.PositionAware;
+import jetbrains.buildServer.windows.LockingProcessesFinder;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -66,14 +66,15 @@ public final class Swabra extends AgentLifeCycleAdapter implements PositionAware
                 @NotNull final BundledToolsRegistry toolsRegistry,
                 @NotNull final DirectoryMapDirectoriesCleaner directoriesCleaner,
                 @NotNull final AgentOperationModeHolder operationModeHolder) {
-    this(agentDispatcher, logger, propertiesProcessor, toolsRegistry, directoriesCleaner, new LockedFileResolver.LockingProcessesProviderFactory(){
+    this(agentDispatcher, logger, propertiesProcessor, toolsRegistry, directoriesCleaner, new LockedFileResolver.LockingProcessesProviderFactory() {
 
       @Nullable
       @Override
       public LockedFileResolver.LockingProcessesProvider createProvider(final SwabraSettings swabraSettings) {
         if (swabraSettings.getHandlePath() == null)
           return null;
-        return new HandleProcessesProvider(swabraSettings.getHandlePath());
+        LockingProcessesFinder lockingProcessesFinder = new LockingProcessesFinder(swabraSettings.getHandlePath());
+        return f -> lockingProcessesFinder.getLockingProcesses(f);
       }
     }, operationModeHolder);
   }
