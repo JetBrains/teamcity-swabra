@@ -18,6 +18,10 @@
       <source>../server/Swabra.xml</source>
       <outputDirectory>kotlin-dsl/</outputDirectory>
     </file>
+    <file>
+      <source>../server/swabra-feature-ui-schema.json</source>
+      <outputDirectory>ui-schemas/</outputDirectory>
+    </file>
   </files>
   <moduleSets>
     <moduleSet>

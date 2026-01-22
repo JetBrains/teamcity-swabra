@@ -1,0 +1,37 @@
+{
+  "type": "VerticalLayout",
+  "elements": [
+    {
+      "type": "Control",
+      "label": "Files cleanup",
+      "scope": "#/properties/files-cleanup"
+    },
+    {
+      "type": "Control",
+      "label": "Clean checkout",
+      "scope": "#/properties/force-clean-checkout"
+    },
+    {
+      "type": "Control",
+      "label": "Locking processes",
+      "scope": "#/properties/locking-processes",
+      "options": {
+        "description": "Whether to inspect the checkout directory for processes locking files in this directory, and what to do with such processes."
+      }
+    },
+    {
+      "type": "Control",
+      "label": "Paths to monitor",
+      "scope": "#/properties/paths",
+      "options": {
+        "multi": true,
+        "description": "Newline or comma delimited set of [+|-:path rules](https://www.jetbrains.com/help/teamcity/build-files-cleaner-swabra.html)."
+      }
+    },
+    {
+      "type": "Control",
+      "label": "Verbose output",
+      "scope": "#/properties/verbose"
+    }
+  ]
+}
