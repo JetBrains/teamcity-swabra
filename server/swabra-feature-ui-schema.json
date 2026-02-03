@@ -1,4 +1,6 @@
 {
+  "title": "Build files cleaner (Swabra)",
+  "description": "Cleans files and processes created during the build.",
   "type": "VerticalLayout",
   "elements": [
     {
