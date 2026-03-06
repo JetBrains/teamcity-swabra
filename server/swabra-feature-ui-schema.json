@@ -1,12 +1,15 @@
 {
   "title": "Build files cleaner (Swabra)",
-  "description": "Cleans files and processes created during the build.",
+  "description": "Removes checkout directory files generated during the build.",
   "type": "VerticalLayout",
   "elements": [
     {
       "type": "Control",
       "label": "Files cleanup",
-      "scope": "#/properties/files-cleanup"
+      "scope": "#/properties/files-cleanup",
+      "options": {
+        "description": ""
+      }
     },
     {
       "type": "Control",
@@ -18,7 +21,7 @@
       "label": "Locking processes",
       "scope": "#/properties/locking-processes",
       "options": {
-        "description": "Whether to inspect the checkout directory for processes locking files in this directory, and what to do with such processes. This option is only supported on Windows agents and requires the [handle.exe](https://learn.microsoft.com/en-us/sysinternals/downloads/handle) tool to be installed on the agent."
+        "description": "Allows the build feature to detect and report or kill processes that keep the agent checkout directory locked after the build finishes. Supports only Windows agents with [handle.exe](https://learn.microsoft.com/en-us/sysinternals/downloads/handle) installed."
       }
     },
     {
@@ -27,13 +30,16 @@
       "scope": "#/properties/paths",
       "options": {
         "multi": true,
-        "description": "Newline or comma delimited set of [+|-:path rules](https://www.jetbrains.com/help/teamcity/build-files-cleaner-swabra.html)."
+        "description": "The newline-delimited set of [+|-:path rules](https://www.jetbrains.com/help/teamcity/build-files-cleaner-swabra.html) that specify which folders Swabra should monitor. Supports absolute and relative to the build checkout directory paths. If not specified, Swabra monitors the entire checkout directory."
       }
     },
     {
       "type": "Control",
       "label": "Verbose output",
-      "scope": "#/properties/verbose"
+      "scope": "#/properties/verbose",
+      "options": {
+        "description": ""
+      }
     }
   ]
 }
