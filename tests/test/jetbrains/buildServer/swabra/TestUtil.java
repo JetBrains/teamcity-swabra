@@ -2,13 +2,11 @@
 
 package jetbrains.buildServer.swabra;
 
-import java.io.CharArrayWriter;
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.io.FileReader;
+import java.nio.file.Path;
 import java.util.List;
 import jetbrains.buildServer.util.FileUtil;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 /**
@@ -25,10 +23,16 @@ class TestUtil {
 
   public static File getTestData(@Nullable final String fileName, @Nullable final String folderName) throws Exception {
     final String relativeFileName = TEST_DATA_PATH + (folderName != null ? File.separator + folderName : "") + (fileName != null ? File.separator + fileName : "");
-    final File file1 = new File(relativeFileName);
+    //final File file1 = new File(relativeFileName);
+
+    // /Users/kir/Git/TC/external-repos/swabra/tests/target/test-classes/
+    final Path path = new File(TestUtil.class.getClassLoader().getResource(".").getPath()).toPath();
+    File parentFile = path.getParent().getParent().getParent().toFile(); // ../../../
+    final File file1 = new File(parentFile, relativeFileName);
     if (file1.exists()) {
       return file1;
     }
+
     final File file2 = new File("external-repos" + File.separator + "swabra" + File.separator + relativeFileName);
     if (file2.exists()) {
       return file2;
