@@ -716,6 +716,39 @@ public class SwabraTest2 extends BaseTestCase {
     });
   }
 
+  @Test
+  public void should_not_make_snapshot_for_bootstrap_step() throws Exception {
+    final BuildRunnerContext bootstrapRunner = myMockery.mock(BuildRunnerContext.class, "bootstrapRunner");
+    final BuildRunnerContext regularRunner = myMockery.mock(BuildRunnerContext.class, "regularRunner");
+
+    final Map<String, String> bootstrapParams = new HashMap<String, String>();
+    bootstrapParams.put(ServerProvidedProperties.BUILD_STEP_PHASE_PARAMETER, ServerProvidedProperties.BOOTSTRAP_PHASE);
+
+    final Map<String, String> regularParams = new HashMap<String, String>();
+
+    myMockery.checking(new Expectations() {{
+      allowing(bootstrapRunner).getRunnerParameters(); will(returnValue(bootstrapParams));
+      allowing(regularRunner).getRunnerParameters(); will(returnValue(regularParams));
+    }});
+
+    // 1. Start build
+    mySwabra.buildStarted(myRunningBuild);
+
+    // 2. Before bootstrap runner - should NOT call makeSnapshots
+    mySwabra.beforeRunnerStart(bootstrapRunner);
+
+    // Verify snapshot not created yet (it is normally created by makeSnapshots which is called in sourcesUpdated or beforeRunnerStart)
+    // In Swabra, makeSnapshots sets mySnapshotSaved = true.
+    // If it was NOT called, the next call to beforeRunnerStart (regular) WILL call it.
+
+    File snapshotFile = myPropertiesProcessor.getSnapshotFile(myCheckoutDir);
+    assertFalse("Snapshot file should not be created for bootstrap step", snapshotFile.exists());
+
+    // 3. Before regular runner - should call makeSnapshots
+    mySwabra.beforeRunnerStart(regularRunner);
+    assertTrue("Snapshot file should be created for regular step", snapshotFile.exists());
+  }
+
   private void checkResults(int unchanged, int modified, int added, int deleted){
     if (added == 0) {
       assertContains(myBuildLog.toString(),

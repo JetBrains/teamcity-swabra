@@ -11,6 +11,7 @@ package jetbrains.buildServer.swabra;
 import java.io.File;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
 import jetbrains.buildServer.TeamCityRuntimeException;
 import jetbrains.buildServer.Used;
@@ -29,6 +30,9 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import static jetbrains.buildServer.agent.AgentRuntimeProperties.FAIL_ON_CLEAN_CHECKOUT;
+import static jetbrains.buildServer.agent.ServerProvidedProperties.BOOTSTRAP_PHASE;
+import static jetbrains.buildServer.agent.ServerProvidedProperties.BUILD_STEP_PHASE_PARAMETER;
+import static jetbrains.buildServer.agent.impl.buildStages.startStages.steps.RunAllBuildStepsStage.isBootstrapStep;
 
 
 public final class Swabra extends AgentLifeCycleAdapter implements PositionAware {
@@ -146,7 +150,13 @@ public final class Swabra extends AgentLifeCycleAdapter implements PositionAware
 
   @Override
   public void beforeRunnerStart(@NotNull BuildRunnerContext runner) {
-    makeSnapshots(mySettings.getRules().getPaths());
+    if (!isBootstrapStep(runner.getRunnerParameters())) {
+      makeSnapshots(mySettings.getRules().getPaths());
+    }
+  }
+
+  private static boolean isBootstrapStep(@NotNull Map<String, String> runnerParameters) {
+    return BOOTSTRAP_PHASE.equals(runnerParameters.get(BUILD_STEP_PHASE_PARAMETER));
   }
 
   @Override
